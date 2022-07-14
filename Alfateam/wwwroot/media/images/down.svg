@@ -1,0 +1,32 @@
+<svg width="126" height="126" viewBox="0 0 126 126" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g filter="url(#filter0_d_11_63)">
+<rect x="63" y="33" width="42.5204" height="42.5204" transform="rotate(44.9207 63 33)" fill="url(#paint0_linear_11_63)"/>
+</g>
+<g filter="url(#filter1_b_11_63)">
+<rect x="91.3081" y="15" width="79" height="79" rx="39.5" transform="rotate(75 91.3081 15)" fill="white" fill-opacity="0.1"/>
+</g>
+<path d="M40.0001 55L63.0001 78L86.0001 55" stroke="white" stroke-opacity="0.4" stroke-width="6" stroke-linecap="round"/>
+<defs>
+<filter id="filter0_d_11_63" x="11.9752" y="12" width="102.133" height="102.133" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feMorphology radius="1" operator="dilate" in="SourceAlpha" result="effect1_dropShadow_11_63"/>
+<feOffset/>
+<feGaussianBlur stdDeviation="10"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.25098 0 0 0 0 0.737255 0 0 0 0 0.305882 0 0 0 0.5 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_11_63"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_11_63" result="shape"/>
+</filter>
+<filter id="filter1_b_11_63" x="8.86761" y="8.86761" width="109.02" height="109.02" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feGaussianBlur in="BackgroundImage" stdDeviation="7.5"/>
+<feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur_11_63"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_backgroundBlur_11_63" result="shape"/>
+</filter>
+<linearGradient id="paint0_linear_11_63" x1="63" y1="33" x2="112.339" y2="43.5101" gradientUnits="userSpaceOnUse">
+<stop stop-color="#E5ED8B"/>
+<stop offset="1" stop-color="#10AE3C"/>
+</linearGradient>
+</defs>
+</svg>

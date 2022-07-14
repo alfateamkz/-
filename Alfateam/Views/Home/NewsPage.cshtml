@@ -1,0 +1,27 @@
+﻿@using Alfateam.Database.Models
+@using Alfateam.Helpers
+@using Alfateam.ViewModels
+@{
+    ViewData["Title"] = "Home Page";
+}
+@model Post
+
+@{
+    var currentLang = DBHelper.GetCurrentLanguage(User);
+    var generalTexts = DBHelper.GetGeneralTexts();
+}
+
+<div class="container content-top-page">
+    <div class="pagelist">
+        <div class="pagecontent">
+            <div class="news-full-image" style="background:url('@Model.ImgPath');background-size: 100%;"></div>
+            <div class="news-full-title">@LocalizationHelper.GetLocalizedString(Model.Captions,currentLang.Code)</div>
+            <div class="news-full-date">
+                 @LocalizationHelper.GetLocalizedString(generalTexts.PublishedAt,currentLang.Code) @Model.CreatedAt.ToString("dd MMMM yyyy") в @Model.CreatedAt.ToString("HH:mm")
+            </div>
+            <div class="news-content">
+                 @LocalizationHelper.GetLocalizedString(Model.Contents,currentLang.Code)
+            </div>
+        </div>
+    </div>
+</div>

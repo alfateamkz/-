@@ -1,0 +1,27 @@
+﻿@using Alfateam.Helpers
+@using Alfateam.ViewModels
+@using Alfateam.ViewModels.Home
+@{
+    ViewData["Title"] = "Home Page";
+}
+@model PartnersVM
+
+@{
+    var currentLang = DBHelper.GetCurrentLanguage(User);
+}
+ <div class="container content-top-page">
+    <div class="row">
+
+       @foreach (var item in Model.Partners)
+       {
+            <div class="col-md-3">
+                <div class="partners">
+                    <div class="partner-logotype amazon" style="background: url('@item.ImgPath') center;background-size: 100%;"></div>
+                    <div class="partner-title">@LocalizationHelper.GetLocalizedString(item.Titles,currentLang.Code)</div>
+                    <div class="partner-desc">@LocalizationHelper.GetLocalizedString(item.Descriptions,currentLang.Code)</div>
+                </div>
+            </div>
+       }
+    
+    </div>
+ </div>

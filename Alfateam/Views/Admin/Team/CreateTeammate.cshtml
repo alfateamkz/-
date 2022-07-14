@@ -1,0 +1,51 @@
+﻿@using Alfateam.Database.Models
+@{
+    Layout = "_AdminLayout";
+}
+@model Teammate
+
+<!-- Page Heading -->
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            Создание нового сотрудника
+        </h1>
+    </div>
+</div>
+<!-- /.row -->
+
+<div class="row">
+    <div class="col-lg-12">
+
+        <form asp-action="CreateTeammatePOST" asp-controller="Team" method="post" enctype="multipart/form-data" role="form">
+
+            <div class="form-group">
+                <label>Имя Фамилия</label>
+                <input class="form-control" asp-for="Titles[0].Text" required placeholder="">
+            </div>
+            <input type="hidden" asp-for="Titles[0].LanguageId" value="1" />
+
+
+            <div class="form-group">
+                <label>Изображение</label>
+                <input type="file" name="file" required>
+            </div>
+
+            <div class="form-group">
+                <label>Описание по середине</label>
+                <textarea class="form-control" asp-for="MiddleDescriptions[0].Text" required rows="3"></textarea>
+            </div>
+            <input type="hidden" asp-for="MiddleDescriptions[0].LanguageId" value="1" />
+
+            <div class="form-group">
+                <label>Должность</label>
+                <textarea class="form-control" asp-for="Positions[0].Text" required rows="3"></textarea>
+            </div>
+            <input type="hidden" asp-for="Positions[0].LanguageId" value="1" />
+
+            <button type="submit" class="btn btn-default">Создать</button>
+
+        </form>
+
+    </div>
+</div>

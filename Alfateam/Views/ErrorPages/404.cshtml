@@ -1,0 +1,28 @@
+﻿@using Alfateam.Database.Models.SitePagesTexts
+@using Alfateam.Helpers
+  
+@model ErrorPages
+@{
+    var currentLang = DBHelper.GetCurrentLanguage(User);
+}
+@{
+    ViewData["HideFooter"] = "True";
+}
+
+   <div class="container content-top-page">
+        <div class="row">
+            <div class="col-md-6 colcenter">
+                <div class="content-404">
+                    <div class="peoplebook mobile"></div>
+                    <div class="title">404</div>
+                    <div class="descritpion">
+                        @LocalizationHelper.GetLocalizedString(Model.Texts404,currentLang.Code)
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 center">
+                <div class="peoplebook desktop"></div>
+            </div>
+        </div>
+    </div>

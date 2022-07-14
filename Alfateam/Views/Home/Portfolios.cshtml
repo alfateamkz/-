@@ -1,0 +1,184 @@
+﻿@using Alfateam.Helpers
+@using Alfateam.ViewModels
+@using Alfateam.ViewModels.Home
+@{
+    ViewData["Title"] = "Home Page";
+}
+@model PortfoliosVM
+@{
+    var currentLang = DBHelper.GetCurrentLanguage(User);
+    var generalTexts = DBHelper.GetGeneralTexts();
+}
+
+  <div class="container content-top-page">
+        <div class="content-filter">
+            <div class="right">
+                <div class="dropdown">
+                    <button class="btn btn-secondary alpha-dropdown dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+                        @if(Model.SelectedCategory == null)
+                        {
+                            <span> @LocalizationHelper.GetLocalizedString(generalTexts.Categories,currentLang.Code)</span>
+                        }
+                        else
+                        {
+                            <span>@LocalizationHelper.GetLocalizedString(Model.SelectedCategory.Captions,currentLang.Code)</span>
+                        }
+                </button>
+                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
+                        <li><a class="dropdown-item active" asp-action="Portfolios" asp-controller="Home" asp-route-categoryId="0">@LocalizationHelper.GetLocalizedString(generalTexts.AllPortfolios,currentLang.Code)</a></li>
+                        @foreach (var item in Model.PortfolioCategories)
+                        {
+                             <li><a class="dropdown-item active" asp-action="Portfolios" asp-controller="Home" asp-route-categoryId="@item.Id">@LocalizationHelper.GetLocalizedString(item.Captions,currentLang.Code)</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            @foreach (var item in Model.Portfolios)
+            {
+                 <div class="col-md-4" onclick="setPortfolioModalContent(@item.Id,'@currentLang.Code')" >
+                    <a data-bs-toggle="modal" data-bs-target="#modalportfolio-1" href="#modalportfolio-1" style="background: url('@item.Images.FirstOrDefault()?.ImgPath');background-size: 100%;" class="portfolio-block">
+                       @* <span class="newitem">@LocalizationHelper.GetLocalizedString(generalTexts.NewPortfolioLabel,currentLang.Code)</span>*@
+                    </a>
+                </div>
+            }
+        </div>
+
+
+          <div class="row">
+                <nav aria-label="Pagination">
+                    <ul class="pagination justify-content-center">
+                        @if(Model.CurrentPage>1 && Model.CurrentPage<Model.PagesCount && Model.PagesCount > 0)
+                        {
+                           <li class="page-item">
+                                <a class="page-link"asp-action="News" asp-controller="Home" asp-route-page="@(Model.CurrentPage-1)" aria-label="Previous">
+                                  <span aria-hidden="true">&laquo;</span>
+                                </a>
+                           </li>
+                        }
+                        @for(int i = 1; i < Model.PagesCount + 1; i++)
+                        {
+                           <li class="page-item"><a asp-action="Portfolios" asp-controller="Home" asp-route-page="@i" class="page-link">@i</a></li>
+                        }
+                        @if(Model.CurrentPage < Model.PagesCount && Model.PagesCount > 0)
+                        {
+                           <li class="page-item">
+                                <a class="page-link" asp-action="Portfolios" asp-controller="Home" asp-route-page="@(Model.CurrentPage+1)" aria-label="Next">
+                                  <span aria-hidden="true">&raquo;</span>
+                                </a>
+                           </li>
+                        }
+                    </ul>
+                </nav>
+            </div>
+    </div>
+
+ <!-- MODAL WINDOW -->
+<div class="modal fade" id="modalportfolio-1" tabindex="-1" aria-labelledby="modalportfolio-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+        <div class="modal-header"></div>
+        <div class="modal-body">
+            <div class="row">
+            <div class="col-md-6" id="beforeImagesBlock">
+                <div class="owl-carousel owl-theme owl-modal-id1" id="imagesBlock">
+                    <div class="item">
+                        <div class="photoportfolio"></div>
+                    </div>
+                    <div class="item">
+                        <div class="photoportfolio"></div>
+                    </div>
+                    <div class="item">
+                        <div class="photoportfolio"></div>
+                    </div>
+                    <div class="item">
+                        <div class="photoportfolio"></div>
+                    </div>
+                    <div class="item">
+                        <div class="photoportfolio"></div>
+                    </div>
+                </div>
+
+                <script>
+
+                    function initКарусельку() {
+
+                        $(`#imagesBlock`).owlCarousel({
+                            loop: true,
+                            margin: 10,
+                            nav: true,
+                            responsive: {
+                                0: {
+                                    items: 1
+                                },
+                                600: {
+                                    items: 1
+                                },
+                                1000: {
+                                    items: 1
+                                }
+                            }
+                        }); 
+                    }
+                </script>
+            </div>
+            <div class="col-md-6">
+                <div class="header-window">
+                    <div class="title" id="portfolio_title">Название работы #1</div>
+                    <div class="time">@LocalizationHelper.GetLocalizedString(generalTexts.AddedAt,currentLang.Code): <span id="portfolio_date"></span></div>
+                </div>
+
+                <div class="content-window" id="portfolio_description">
+                    Описание работы.
+                </div>
+            </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="alpha-btn2" data-bs-dismiss="modal">@LocalizationHelper.GetLocalizedString(generalTexts.Close,currentLang.Code)</button>
+        </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+
+
+    async function setPortfolioModalContent(id,langCode) {
+
+       await fetch(`GetPortfolioJSON?id=${id}&langCode=${langCode}`)
+          .then((response) => {
+              return response.json();
+          })
+          .then((data) => {
+              console.log(data);
+              document.getElementById('portfolio_title').innerHTML = data.caption;
+              document.getElementById('portfolio_description').innerHTML = data.description;
+              document.getElementById('portfolio_date').innerHTML = data.createdAt;
+
+              let parentContainer = document.getElementById(`beforeImagesBlock`);
+              parentContainer.innerHTML = "";
+
+              let imgsBlock = document.createElement('div');
+              imgsBlock.className = "owl-carousel owl-theme owl-modal-id1";
+              imgsBlock.id = "imagesBlock";
+
+              parentContainer.appendChild(imgsBlock);
+
+              for (let i = 0; i < data.images.length; i++) {
+
+                  let item = data.images[i];
+
+                  let imageBlock = document.createElement('div');
+                  imageBlock.className = "item";
+                  imageBlock.innerHTML = `<div class="photoportfolio" style="background: url('${item.imgPath}');background-size: 100%;"></div>`;
+
+                  imgsBlock.appendChild(imageBlock);
+              }
+              initКарусельку();
+          });
+    }
+
+</script>

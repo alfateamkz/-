@@ -1,0 +1,609 @@
+﻿@using Alfateam.Database.Models
+@using Alfateam.Database.Models.SitePagesTexts
+@using Alfateam.ViewModels
+@using CRMWeb.Helpers.Html
+@{
+    Layout = "_AdminLayout";
+}
+@model VMWithLanguages<GeneralTexts>
+
+<!-- Page Heading -->
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            Основные текста
+        </h1>
+    </div>
+</div>
+<!-- /.row -->
+
+<div class="row">
+    <div class="col-lg-12">
+
+        <form asp-action="UpdateGeneralTexts" asp-controller="SiteTexts" method="post" enctype="multipart/form-data" id="form" onsubmit="onSubmit(event)" role="form">
+
+           <input type="hidden" asp-for="TargetType.Id" value="@Model.TargetType.Id" />
+
+           <div class="col-lg-6">
+                <h4>Главная</h4><br/>
+                <button type="button" class="btn btn-primary" onclick="addTranslation('TargetType.Main','main_tBody')">Добавить перевод</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Язык</th>
+                                <th>Значение</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="main_tBody" data-index="@(Model.TargetType.Main.Count-1)">
+                            @for (var i = 0; i < Model.TargetType.Main.Count; i++)
+                            {
+                                var translation = Model.TargetType.Main[i];
+                                <tr data-id="@translation.Id">
+                                    <td>
+                                        <select class="form-control" name="TargetType.Main[@i].LanguageId">
+                                            @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control" name="TargetType.Main[@i].Text" value="@translation.Text" required placeholder=""></td>
+                                    <td><button type="button" onclick="deleteTranslation('main_tBody',event)" class="btn btn-danger">Удалить</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+             <div class="col-lg-6">
+                <h4>Стоимость услуг</h4><br/>
+                <button type="button" class="btn btn-primary" onclick="addTranslation('TargetType.ServicesPrice','servicesPrice_tBody')">Добавить перевод</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Язык</th>
+                                <th>Значение</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="servicesPrice_tBody" data-index="@(Model.TargetType.ServicesPrice.Count-1)">
+                            @for (var i = 0; i < Model.TargetType.ServicesPrice.Count; i++)
+                            {
+                                var translation = Model.TargetType.ServicesPrice[i];
+                                <tr data-id="@translation.Id">
+                                    <td>
+                                        <select class="form-control" name="TargetType.ServicesPrice[@i].LanguageId">
+                                            @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control" name="TargetType.ServicesPrice[@i].Text" value="@translation.Text" required placeholder=""></td>
+                                    <td><button type="button" onclick="deleteTranslation('servicesPrice_tBody',event)" class="btn btn-danger">Удалить</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <h4>Наши работы</h4><br/>
+                <button type="button" class="btn btn-primary" onclick="addTranslation('TargetType.OurWorks','OurWorks_tBody')">Добавить перевод</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Язык</th>
+                                <th>Значение</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="OurWorks_tBody" data-index="@(Model.TargetType.OurWorks.Count-1)">
+                            @for (var i = 0; i < Model.TargetType.OurWorks.Count; i++)
+                            {
+                                var translation = Model.TargetType.OurWorks[i];
+                                <tr data-id="@translation.Id">
+                                    <td>
+                                        <select class="form-control" name="TargetType.OurWorks[@i].LanguageId">
+                                            @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control" name="TargetType.OurWorks[@i].Text" value="@translation.Text" required placeholder=""></td>
+                                    <td><button type="button" onclick="deleteTranslation('OurWorks_tBody',event)" class="btn btn-danger">Удалить</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <h4>Партнеры</h4><br/>
+                <button type="button" class="btn btn-primary" onclick="addTranslation('TargetType.Partners','Partners_tBody')">Добавить перевод</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Язык</th>
+                                <th>Значение</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="Partners_tBody" data-index="@(Model.TargetType.Partners.Count-1)">
+                            @for (var i = 0; i < Model.TargetType.Partners.Count; i++)
+                            {
+                                var translation = Model.TargetType.Partners[i];
+                                <tr data-id="@translation.Id">
+                                    <td>
+                                        <select class="form-control" name="TargetType.Partners[@i].LanguageId">
+                                            @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control" name="TargetType.Partners[@i].Text" value="@translation.Text" required placeholder=""></td>
+                                    <td><button type="button" onclick="deleteTranslation('Partners_tBody',event)" class="btn btn-danger">Удалить</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            
+           <div class="col-lg-6">
+                <h4>Команда</h4><br/>
+                <button type="button" class="btn btn-primary" onclick="addTranslation('TargetType.Team','Team_tBody')">Добавить перевод</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Язык</th>
+                                <th>Значение</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="Team_tBody" data-index="@(Model.TargetType.Team.Count-1)">
+                            @for (var i = 0; i < Model.TargetType.Team.Count; i++)
+                            {
+                                var translation = Model.TargetType.Team[i];
+                                <tr data-id="@translation.Id">
+                                    <td>
+                                        <select class="form-control" name="TargetType.Team[@i].LanguageId">
+                                            @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control" name="TargetType.Team[@i].Text" value="@translation.Text" required placeholder=""></td>
+                                    <td><button type="button" onclick="deleteTranslation('Team_tBody',event)" class="btn btn-danger">Удалить</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <div class="col-lg-6">
+                <h4>Навигация</h4><br/>
+                <button type="button" class="btn btn-primary" onclick="addTranslation('TargetType.Navigation','Navigation_tBody')">Добавить перевод</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Язык</th>
+                                <th>Значение</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="Navigation_tBody" data-index="@(Model.TargetType.Navigation.Count-1)">
+                            @for (var i = 0; i < Model.TargetType.Navigation.Count; i++)
+                            {
+                                var translation = Model.TargetType.Navigation[i];
+                                <tr data-id="@translation.Id">
+                                    <td>
+                                        <select class="form-control" name="TargetType.Navigation[@i].LanguageId">
+                                            @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control" name="TargetType.Navigation[@i].Text" value="@translation.Text" required placeholder=""></td>
+                                    <td><button type="button" onclick="deleteTranslation('Navigation_tBody',event)" class="btn btn-danger">Удалить</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <h4>Контакты</h4><br/>
+                <button type="button" class="btn btn-primary" onclick="addTranslation('TargetType.Contacts','Contacts_tBody')">Добавить перевод</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Язык</th>
+                                <th>Значение</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="Contacts_tBody" data-index="@(Model.TargetType.Contacts.Count-1)">
+                            @for (var i = 0; i < Model.TargetType.Contacts.Count; i++)
+                            {
+                                var translation = Model.TargetType.Contacts[i];
+                                <tr data-id="@translation.Id">
+                                    <td>
+                                        <select class="form-control" name="TargetType.Contacts[@i].LanguageId">
+                                            @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control" name="TargetType.Contacts[@i].Text" value="@translation.Text" required placeholder=""></td>
+                                    <td><button type="button" onclick="deleteTranslation('Contacts_tBody',event)" class="btn btn-danger">Удалить</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <h4>Социальные сети</h4><br/>
+                <button type="button" class="btn btn-primary" onclick="addTranslation('TargetType.SocialNetworks','SocialNetworks_tBody')">Добавить перевод</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Язык</th>
+                                <th>Значение</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="SocialNetworks_tBody" data-index="@(Model.TargetType.SocialNetworks.Count-1)">
+                            @for (var i = 0; i < Model.TargetType.SocialNetworks.Count; i++)
+                            {
+                                var translation = Model.TargetType.SocialNetworks[i];
+                                <tr data-id="@translation.Id">
+                                    <td>
+                                        <select class="form-control" name="TargetType.SocialNetworks[@i].LanguageId">
+                                            @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control" name="TargetType.SocialNetworks[@i].Text" value="@translation.Text" required placeholder=""></td>
+                                    <td><button type="button" onclick="deleteTranslation('SocialNetworks_tBody',event)" class="btn btn-danger">Удалить</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+             <div class="col-lg-6">
+                <h4>Все права защищены</h4><br/>
+                <button type="button" class="btn btn-primary" onclick="addTranslation('TargetType.AllRightsReserved','AllRightsReserved_tBody')">Добавить перевод</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Язык</th>
+                                <th>Значение</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="AllRightsReserved_tBody" data-index="@(Model.TargetType.AllRightsReserved.Count-1)">
+                            @for (var i = 0; i < Model.TargetType.AllRightsReserved.Count; i++)
+                            {
+                                var translation = Model.TargetType.AllRightsReserved[i];
+                                <tr data-id="@translation.Id">
+                                    <td>
+                                        <select class="form-control" name="TargetType.AllRightsReserved[@i].LanguageId">
+                                            @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control" name="TargetType.AllRightsReserved[@i].Text" value="@translation.Text" required placeholder=""></td>
+                                    <td><button type="button" onclick="deleteTranslation('AllRightsReserved_tBody',event)" class="btn btn-danger">Удалить</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+             <div class="col-lg-6">
+                <h4>Опубликовано</h4><br/>
+                <button type="button" class="btn btn-primary" onclick="addTranslation('TargetType.PublishedAt','PublishedAt_tBody')">Добавить перевод</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Язык</th>
+                                <th>Значение</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="PublishedAt_tBody" data-index="@(Model.TargetType.PublishedAt.Count-1)">
+                            @for (var i = 0; i < Model.TargetType.PublishedAt.Count; i++)
+                            {
+                                var translation = Model.TargetType.PublishedAt[i];
+                                <tr data-id="@translation.Id">
+                                    <td>
+                                        <select class="form-control" name="TargetType.PublishedAt[@i].LanguageId">
+                                            @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control" name="TargetType.PublishedAt[@i].Text" value="@translation.Text" required placeholder=""></td>
+                                    <td><button type="button" onclick="deleteTranslation('PublishedAt_tBody',event)" class="btn btn-danger">Удалить</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+             <div class="col-lg-6">
+                <h4>Закрыть</h4><br/>
+                <button type="button" class="btn btn-primary" onclick="addTranslation('TargetType.Close','Close_tBody')">Добавить перевод</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Язык</th>
+                                <th>Значение</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="Close_tBody" data-index="@(Model.TargetType.Close.Count-1)">
+                            @for (var i = 0; i < Model.TargetType.Close.Count; i++)
+                            {
+                                var translation = Model.TargetType.Close[i];
+                                <tr data-id="@translation.Id">
+                                    <td>
+                                        <select class="form-control" name="TargetType.Close[@i].LanguageId">
+                                            @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control" name="TargetType.Close[@i].Text" value="@translation.Text" required placeholder=""></td>
+                                    <td><button type="button" onclick="deleteTranslation('Close_tBody',event)" class="btn btn-danger">Удалить</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <h4>Категории</h4><br/>
+                <button type="button" class="btn btn-primary" onclick="addTranslation('TargetType.Categories','Categories_tBody')">Добавить перевод</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Язык</th>
+                                <th>Значение</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="Categories_tBody" data-index="@(Model.TargetType.Categories.Count-1)">
+                            @for (var i = 0; i < Model.TargetType.Categories.Count; i++)
+                            {
+                                var translation = Model.TargetType.Categories[i];
+                                <tr data-id="@translation.Id">
+                                    <td>
+                                        <select class="form-control" name="TargetType.Categories[@i].LanguageId">
+                                            @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control" name="TargetType.Categories[@i].Text" value="@translation.Text" required placeholder=""></td>
+                                    <td><button type="button" onclick="deleteTranslation('Categories_tBody',event)" class="btn btn-danger">Удалить</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+             <div class="col-lg-6">
+                <h4>Дата добавления</h4><br/>
+                <button type="button" class="btn btn-primary" onclick="addTranslation('TargetType.AddedAt','AddedAt_tBody')">Добавить перевод</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Язык</th>
+                                <th>Значение</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="AddedAt_tBody" data-index="@(Model.TargetType.AddedAt.Count-1)">
+                            @for (var i = 0; i < Model.TargetType.AddedAt.Count; i++)
+                            {
+                                var translation = Model.TargetType.AddedAt[i];
+                                <tr data-id="@translation.Id">
+                                    <td>
+                                        <select class="form-control" name="TargetType.AddedAt[@i].LanguageId">
+                                            @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control" name="TargetType.AddedAt[@i].Text" value="@translation.Text" required placeholder=""></td>
+                                    <td><button type="button" onclick="deleteTranslation('AddedAt_tBody',event)" class="btn btn-danger">Удалить</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <h4>просмотров</h4><br/>
+                <button type="button" class="btn btn-primary" onclick="addTranslation('TargetType.Watches','Watches_tBody')">Добавить перевод</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Язык</th>
+                                <th>Значение</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="Watches_tBody" data-index="@(Model.TargetType.Watches.Count-1)">
+                            @for (var i = 0; i < Model.TargetType.Watches.Count; i++)
+                            {
+                                var translation = Model.TargetType.Watches[i];
+                                <tr data-id="@translation.Id">
+                                    <td>
+                                        <select class="form-control" name="TargetType.Watches[@i].LanguageId">
+                                            @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control" name="TargetType.Watches[@i].Text" value="@translation.Text" required placeholder=""></td>
+                                    <td><button type="button" onclick="deleteTranslation('Watches_tBody',event)" class="btn btn-danger">Удалить</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+             <div class="col-lg-6">
+                <h4>Все портфолио</h4><br/>
+                <button type="button" class="btn btn-primary" onclick="addTranslation('TargetType.AllPortfolios','AllPortfolios_tBody')">Добавить перевод</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Язык</th>
+                                <th>Значение</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="AllPortfolios_tBody" data-index="@(Model.TargetType.AllPortfolios.Count-1)">
+                            @for (var i = 0; i < Model.TargetType.AllPortfolios.Count; i++)
+                            {
+                                var translation = Model.TargetType.AllPortfolios[i];
+                                <tr data-id="@translation.Id">
+                                    <td>
+                                        <select class="form-control" name="TargetType.AllPortfolios[@i].LanguageId">
+                                            @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control" name="TargetType.AllPortfolios[@i].Text" value="@translation.Text" required placeholder=""></td>
+                                    <td><button type="button" onclick="deleteTranslation('AllPortfolios_tBody',event)" class="btn btn-danger">Удалить</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <h4>Новости</h4><br/>
+                <button type="button" class="btn btn-primary" onclick="addTranslation('TargetType.News','News_tBody')">Добавить перевод</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Язык</th>
+                                <th>Значение</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="News_tBody" data-index="@(Model.TargetType.News.Count-1)">
+                            @for (var i = 0; i < Model.TargetType.News.Count; i++)
+                            {
+                                var translation = Model.TargetType.News[i];
+                                <tr data-id="@translation.Id">
+                                    <td>
+                                        <select class="form-control" name="TargetType.News[@i].LanguageId">
+                                            @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control" name="TargetType.News[@i].Text" value="@translation.Text" required placeholder=""></td>
+                                    <td><button type="button" onclick="deleteTranslation('News_tBody',event)" class="btn btn-danger">Удалить</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <h4>Значок нового портфолио</h4><br/>
+                <button type="button" class="btn btn-primary" onclick="addTranslation('TargetType.NewPortfolioLabel','NewPortfolioLabel_tBody')">Добавить перевод</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Язык</th>
+                                <th>Значение</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="NewPortfolioLabel_tBody" data-index="@(Model.TargetType.NewPortfolioLabel.Count-1)">
+                            @for (var i = 0; i < Model.TargetType.NewPortfolioLabel.Count; i++)
+                            {
+                                var translation = Model.TargetType.NewPortfolioLabel[i];
+                                <tr data-id="@translation.Id">
+                                    <td>
+                                        <select class="form-control" name="TargetType.NewPortfolioLabel[@i].LanguageId">
+                                            @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
+                                        </select>
+                                    </td>
+                                    <td><input class="form-control" name="TargetType.NewPortfolioLabel[@i].Text" value="@translation.Text" required placeholder=""></td>
+                                    <td><button type="button" onclick="deleteTranslation('NewPortfolioLabel_tBody',event)" class="btn btn-danger">Удалить</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-default">Сохранить</button>
+
+        </form>
+
+    </div>
+</div>
+
+
+@*Переводы*@
+<script>
+    
+    function addTranslation(fieldName,tBodyId){
+
+        let tBody = document.getElementById(tBodyId);
+
+        let index = new Number(tBody.getAttribute('data-index'));
+        index++;
+        tBody.setAttribute('data-index', index);
+
+        let tr = document.createElement("tr");
+        tr.innerHTML = `  <td>
+                              <select class="form-control" name="${fieldName}[${index}].LanguageId">
+                                  @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages))
+                              </select>
+                          </td>
+                          <td><input class="form-control" name="${fieldName}[${index}].Text" required placeholder=""></td>
+                          <td><button type="button" onclick="deleteTranslation(${tBodyId},event)" class="btn btn-danger">Удалить</button></td>`;
+
+        tBody.appendChild(tr);
+
+    }
+
+    function deleteTranslation(tBodyId,event) {
+
+         let tBody = document.getElementById(tBodyId);
+
+         let index = new Number(tBody.getAttribute('data-index'));
+         index--;
+         tBody.setAttribute('data-index', index);
+
+         tBody.removeChild(event.target.parentNode.parentNode);
+    }
+
+</script>
+
+<script>
+
+    async function onSubmit(event){
+        event.preventDefault();
+        await fetch(document.location.origin +"/Admin/ClearGeneralTexts?id="+@Model.TargetType.Id);
+        document.getElementById('form').submit();
+    }
+
+</script>

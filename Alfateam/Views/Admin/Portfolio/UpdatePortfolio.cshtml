@@ -1,0 +1,240 @@
+﻿@using Alfateam.Database.Models
+@using Alfateam.ViewModels.Admin
+@using CRMWeb.Helpers.Html
+@{
+    Layout = "_AdminLayout";
+}
+@model PortfoliosVM
+
+<!-- Page Heading -->
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            Редактирование портфолио
+        </h1>
+    </div>
+</div>
+<!-- /.row -->
+
+<div class="row">
+    <div class="col-lg-12">
+
+        <form asp-action="UpdatePortfolioPOST" asp-controller="Portfolios" method="post" enctype="multipart/form-data"  id="form"  onsubmit="setTranslations(event)" role="form">
+
+            <input type="hidden" asp-for="NewPortfolio.Id" value="@Model.NewPortfolio.Id" />
+            <input type="hidden" asp-for="NewPortfolio.CreatedAt" value="@Model.NewPortfolio.CreatedAt.ToString("yyyy-MM-ddTHH:mm")" />
+
+            <div class="form-group">
+                <label>Название</label>
+                <input class="form-control" name="NewPortfolio.Captions[0].Text" value="@Model.NewPortfolio.Captions[0].Text" required placeholder="">
+            </div>
+            <input type="hidden" name="NewPortfolio.Captions[0].LanguageId" value="1" />
+            <input type="hidden" name="NewPortfolio.Captions[0].Id" value="@Model.NewPortfolio.Captions[0].Id" />
+
+             <div class="form-group">
+                 <label>Категория</label>
+                 <select class="form-control" name="NewPortfolio.CategoryId">
+                     @Html.Raw(ClassesToHtmlHelper<PortfolioCategory>.Convert(Model.PortfolioCategories,Model.NewPortfolio.Category))
+                 </select>
+            </div>
+
+            <div class="form-group">
+                <label>Изображения (макс. 20 штук)</label>
+                <input type="file" name="file" multiple>
+            </div>
+
+            <div class="form-group">
+                <label>Описание</label>
+                <textarea class="form-control" name="NewPortfolio.Descriptions[0].Text" required rows="3">@Model.NewPortfolio.Descriptions[0].Text</textarea>
+            </div>
+            <input type="hidden" name="NewPortfolio.Descriptions[0].LanguageId" value="1" />
+            <input type="hidden" name="NewPortfolio.Descriptions[0].Id" value="@Model.NewPortfolio.Descriptions[0].Id" />
+
+             <div class="col-lg-12">
+                <h2>Переводы на другие языки</h2>
+
+                <div class="col-lg-6">
+                    <div class="table-responsive">
+                        <h4>Название</h4>
+                        <button type="button" class="btn btn-primary" onclick="addTitleTranslation()">Добавить перевод</button>
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Язык</th>
+                                    <th>Значение</th>
+                                    <th style="width:80px"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="titleTranslationsTBody">
+                                @for (var i = 1; i < Model.NewPortfolio.Captions.Count; i++)
+                                {
+                                    var translation = Model.NewPortfolio.Captions[i];
+                                    <tr data-id="@translation.Id">
+                                        <input type="hidden" name="NewPortfolio.Captions[@i].Id" value="@translation.Id">
+                                        <td>
+                                            <select class="form-control" name="NewPortfolio.Captions[@i].LanguageId">
+                                                @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
+                                            </select>
+                                        </td>
+                                        <td><input class="form-control" name="NewPortfolio.Captions[@i].Text" value="@translation.Text" required placeholder=""></td>
+                                        <td><button type="button" onclick="deleteTitleTranslation(event)" class="btn btn-danger">Удалить</button></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                 <div class="col-lg-6">
+                    <div class="table-responsive">
+                        <h4>Описание</h4>
+                        <button type="button" class="btn btn-primary" onclick="addDescTranslation()">Добавить перевод</button>
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Язык</th>
+                                    <th>Значение</th>
+                                    <th style="width:80px"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="descTranslationsTBody">
+                                @for (var i = 1; i < Model.NewPortfolio.Descriptions.Count; i++)
+                                {
+                                    var translation = Model.NewPortfolio.Descriptions[i];
+                                    <tr data-id="@translation.Id">
+                                        <input type="hidden" name="NewPortfolio.Descriptions[@i].Id" value="@translation.Id">
+                                        <td>
+                                            <select class="form-control" name="NewPortfolio.Descriptions[@i].LanguageId">
+                                                @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
+                                            </select>
+                                        </td>
+                                        <td><textarea class="form-control" name="NewPortfolio.Descriptions[@i].Text" required rows="3">@translation.Text</textarea></td>
+                                        <td><button type="button" onclick="deleteDescTranslation(event)" class="btn btn-danger">Удалить</button></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+               
+            </div>
+
+
+            <button type="submit" class="btn btn-default">Сохранить</button>
+        </form>
+
+    </div>
+</div>
+
+
+@*Переводы для заголовка*@
+<script>
+
+    let titleTranslationsIndex = @Model.NewPortfolio.Captions.Count-1;
+    
+    function addTitleTranslation(){
+
+        titleTranslationsIndex++;
+        let tBody = document.getElementById("titleTranslationsTBody");
+
+        let tr = document.createElement("tr");
+        tr.innerHTML = `  <td>
+                              <select class="form-control" name="NewPortfolio.Captions[${titleTranslationsIndex}].LanguageId">
+                                  @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages))
+                              </select>
+                          </td>
+                          <td><input class="form-control" name="NewPortfolio.Captions[${titleTranslationsIndex}].Text" required placeholder=""></td>
+                          <td><button type="button" onclick="deleteTitleTranslation(event)" class="btn btn-danger">Удалить</button></td>`;
+
+        tBody.appendChild(tr);
+
+    }
+
+    function deleteTitleTranslation(event) {
+
+         let tBody = document.getElementById("titleTranslationsTBody");
+         tBody.removeChild(event.target.parentNode.parentNode);
+
+         titleTranslationsIndex--;
+    }
+
+</script>
+
+@*Переводы для описания*@
+<script>
+
+    let descTranslationsIndex = @Model.NewPortfolio.Descriptions.Count-1;
+    
+    function addDescTranslation(){
+
+        descTranslationsIndex++;
+        let tBody = document.getElementById("descTranslationsTBody");
+
+        let tr = document.createElement("tr");
+        tr.innerHTML = `<td>
+                            <select class="form-control" name="NewPortfolio.Descriptions[${descTranslationsIndex}].LanguageId">
+                                @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages))
+                            </select>
+                        </td>
+                        <td><textarea class="form-control" name="NewPortfolio.Descriptions[${descTranslationsIndex}].Text" required rows="3"></textarea></td>
+                        <td><button type="button" onclick="deleteDescTranslation(event)" class="btn btn-danger">Удалить</button></td>`;
+
+        tBody.appendChild(tr);
+
+    }
+
+    function deleteDescTranslation(event) {
+
+         let tBody = document.getElementById("descTranslationsTBody");
+         tBody.removeChild(event.target.parentNode.parentNode);
+
+         descTranslationsIndex--;
+    }
+
+
+</script>
+
+
+
+<script>
+
+
+  async function setTranslations(event){
+      event.preventDefault();
+
+      await setCurrentTranslations('titleTranslationsTBody','/SetPortfolioCaptionTranslations');
+      await setCurrentTranslations('descTranslationsTBody','/SetPortfolioDescriptionTranslations');
+
+      document.getElementById('form').submit();
+  }
+
+  async function setCurrentTranslations(tBodyId,urlRoute){
+        let rows = document.getElementById(tBodyId).children;
+
+        let ids = [];
+
+        for(let i=0;i<rows.length;i++){
+            let tr = rows[i];
+
+            if (tr.hasAttribute("data-id")) {
+                let id = tr.getAttribute("data-id");
+                ids.push(new Number(id));
+            }
+        }
+
+        let data = {
+            Ids : ids,
+            Id : @Model.NewPortfolio.Id
+        }
+
+        await fetch(urlRoute,{
+            method : 'POST',
+            headers: {
+            'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify(data)
+        });
+    }
+    
+
+</script>

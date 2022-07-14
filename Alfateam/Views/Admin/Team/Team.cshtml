@@ -1,0 +1,56 @@
+﻿@using Alfateam.Database.Models
+@using Alfateam.Helpers
+@{
+    Layout = "_AdminLayout";
+}
+@model List<Teammate>
+@{
+    var currentLang = DBHelper.GetCurrentLanguage(User);
+}
+
+<!-- Page Heading -->
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            Члены команды Alfateam
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th style="width:50px"></th>
+                        <th>Id</th>
+                        <th>Имя Фамилия</th>
+                        <th>Описание по середине</th>
+                        <th>Должность</th>
+                        <th style="width:80px"></th>
+                        <th style="width:80px"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <img src="@item.ImgPath" width="50" height="50">
+                            </td>
+                            <td>@item.Id</td>
+                            <td>@LocalizationHelper.GetLocalizedString(item.Titles,"RU")</td>
+                            <td>@LocalizationHelper.GetLocalizedString(item.MiddleDescriptions,"RU")</td>
+                            <td>@LocalizationHelper.GetLocalizedString(item.Positions,"RU")</td>
+                            <td><a asp-action="UpdateTeammate" asp-controller="Team" asp-route-id="@item.Id"><button class="btn btn-warning">Изменить</button></a></td>
+                            <td><a asp-action="DeleteTeammate" asp-controller="Team" asp-route-id="@item.Id"><button class="btn btn-danger">Удалить</button></a></td>
+                        </tr>
+                    }
+                                
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- /.row -->

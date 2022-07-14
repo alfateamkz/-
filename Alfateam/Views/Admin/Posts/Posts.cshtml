@@ -1,0 +1,54 @@
+﻿@using Alfateam.Database.Models
+@using Alfateam.Helpers
+@{
+    Layout = "_AdminLayout";
+}
+@model List<Post>
+
+
+<!-- Page Heading -->
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            Новости
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th style="width:50px"></th>
+                        <th>Id</th>
+                        <th>Заголовок</th>
+                        <th>Описание</th>
+                        <th>Кол-во просмотров</th>
+                        <th style="width:80px"></th>
+                        <th style="width:80px"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <img src="@item.ImgPath" width="50" height="50">
+                            </td>
+                            <td>@item.Id</td>
+                            <td>@LocalizationHelper.GetLocalizedString(item.Captions,"RU")</td>
+                            <td>@LocalizationHelper.GetLocalizedString(item.Contents,"RU")</td>
+                            <td>@item.Watches</td>
+                            <td><a asp-action="UpdatePost" asp-controller="Posts" asp-route-id="@item.Id"><button class="btn btn-warning">Изменить</button></a></td>
+                            <td><a asp-action="DeletePost" asp-controller="Posts" asp-route-id="@item.Id"><button class="btn btn-danger">Удалить</button></a></td>
+                        </tr>
+                    }
+                  
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- /.row -->

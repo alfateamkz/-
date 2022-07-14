@@ -1,0 +1,51 @@
+﻿@using Alfateam.Database.Models.Portfolios
+@using Alfateam.Database.Models.Promotions
+@using Alfateam.Helpers
+@{
+    Layout = "_AdminLayout";
+}
+@model List<Promotion>
+
+<!-- Page Heading -->
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            Тарифные карточки
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th style="width:50px"></th>
+                        <th>Id</th>
+                        <th>Название</th>
+                        <th>Цена</th>
+                        <th style="width:80px"></th>
+                        <th style="width:80px"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <img src="@item.RightImgPath" width="50" height="50">
+                            </td>
+                            <td>@item.Id</td>
+                            <td>@LocalizationHelper.GetLocalizedString(item.Captions,"RU")</td>
+                            <td>@LocalizationHelper.GetLocalizedString(item.Prices,"RU")</td>
+                            <td><a asp-action="UpdatePromotion" asp-controller="Promotions" asp-route-id="@item.Id"><button class="btn btn-warning">Изменить</button></a></td>
+                            <td><a asp-action="DeletePromotion" asp-controller="Promotions" asp-route-id="@item.Id"><button class="btn btn-danger">Удалить</button></a></td>
+                       </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- /.row -->

@@ -1,0 +1,120 @@
+﻿@using Alfateam.Helpers
+@using Alfateam.ViewModels.Home
+@{
+    ViewData["Title"] = "Privacy Policy";
+}
+@model ServicesVM
+@{
+    var currentLang = DBHelper.GetCurrentLanguage(User);
+    var landingTexts = DBHelper.GetLangingTexts();
+}
+
+
+    <div class="container servicemain content-top-page">
+        <div class="row">
+
+            @foreach (var item in Model.Promotions)
+            {
+                 <div class="col-md-4">
+                    <div class="service">
+                        <div class="service-header">
+                            <div class="service-title">
+                                <div class="title">@LocalizationHelper.GetLocalizedString(item.Captions,currentLang.Code)</div>
+                                <div class="cost">@LocalizationHelper.GetLocalizedString(item.Prices,currentLang.Code)</div>
+                            </div>
+
+                            <div class="service-img">
+                                <div class="serviceimg1" style="background: url('@item.RightImgPath') center;background-size: 100%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="service-content">
+                            @foreach (var description in item.Descriptions)
+                            {
+                                 <div class="listc">
+                                    <div class="borderservic">
+                                        <div class="doneservice"></div>
+                                    </div>
+                                    <div class="text">
+                                            @LocalizationHelper.GetLocalizedString(description.Texts,currentLang.Code)
+                                    </div>
+                                </div>
+                            }
+                       </div>
+
+                       <div class="service-footer">
+                            <a href="/" class="alpha-btn2">@LocalizationHelper.GetLocalizedString(landingTexts.OrderNow,currentLang.Code)</a>
+                        </div>
+                  </div>
+               </div>
+            }
+        </div>
+    </div>
+
+    <div class="container servicemainmobile">
+        <div class="row">
+            <div class="owl-carousel owl-theme owl-service">
+
+                @foreach (var item in Model.Promotions)
+                {
+                   <div class="item">
+                        <div class="service">
+
+                            <div class="service-header">
+                                <div class="service-title">
+                                    <div class="title">@LocalizationHelper.GetLocalizedString(item.Captions,currentLang.Code)</div>
+                                    <div class="cost">@LocalizationHelper.GetLocalizedString(item.Prices,currentLang.Code)</div>
+                                </div>
+    
+                                <div class="service-img">
+                                    <div class="serviceimg1"  style="background: url('@item.RightImgPath') center;background-size: 100%;"></div>
+                                </div>
+                            </div>
+    
+                            <div class="service-content">
+                                @foreach (var description in item.Descriptions)
+                                {
+                                     <div class="listc">
+                                        <div class="borderservic">
+                                            <div class="doneservice"></div>
+                                        </div>
+                                        <div class="text">
+                                                @LocalizationHelper.GetLocalizedString(description.Texts,currentLang.Code)
+                                        </div>
+                                    </div>
+                                }
+                          
+                            </div>
+    
+                            <div class="service-footer">
+                                <a href="/" class="alpha-btn2"> @LocalizationHelper.GetLocalizedString(landingTexts.OrderNow,currentLang.Code)</a>
+                            </div>
+                        </div>
+                    </div>
+                
+                }
+
+             
+
+            </div>
+
+            <script>
+                $('.owl-carousel').owlCarousel({
+                    loop:true,
+                    margin:10,
+                    nav:true,
+                    responsive:{
+                        0:{
+                            items:1
+                        },
+                        600:{
+                            items:1
+                        },
+                        1000:{
+                            items:5
+                        }
+                    }
+                })
+            </script>
+        </div>
+   </div>

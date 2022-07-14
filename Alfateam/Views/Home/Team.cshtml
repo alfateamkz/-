@@ -1,0 +1,32 @@
+﻿@using Alfateam.Helpers
+@using Alfateam.ViewModels
+@using Alfateam.ViewModels.Home
+@{
+    ViewData["Title"] = "Home Page";
+}
+@model TeamVM
+@{
+    var currentLang = DBHelper.GetCurrentLanguage(User);
+}
+
+<div class="container teamcont content-top-page">
+    <div class="row">
+        @foreach (var item in Model.Teammates)
+        {
+            <div class="col-md-3">
+                <div class="team">
+                    <div class="team-header">
+                        <div class="avatar" style="background: url('@item.ImgPath') center;background-size: 100%;"></div>
+                    </div>
+                    <div class="contentteam">
+                        <div class="nameanduser">
+                            <div class="time-name">@LocalizationHelper.GetLocalizedString(item.Titles,currentLang.Code)</div>
+                            <div class="username">@LocalizationHelper.GetLocalizedString(item.MiddleDescriptions,currentLang.Code)</div>
+                        </div>
+                        <div class="group">@LocalizationHelper.GetLocalizedString(item.Positions,currentLang.Code)</div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

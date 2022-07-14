@@ -1,0 +1,243 @@
+﻿@using Alfateam.Helpers
+@using Alfateam.ViewModels
+@{
+    ViewData["Title"] = "Home Page";
+}
+@model IndexVM
+
+@{
+    var currentLang = DBHelper.GetCurrentLanguage(User);
+}
+
+
+  <!-- HEADER -->
+    <header class="present">
+        <div class="container">
+            <div class="row">
+                <div class="col-6">
+                    <div class="content-header">
+                        <div class="title"> @LocalizationHelper.GetLocalizedString(Model.LandingTexts.StartBusiness,currentLang.Code)</div>
+                        <div class="description">
+                             @LocalizationHelper.GetLocalizedString(Model.LandingTexts.StartBusinessDescriptions,currentLang.Code)
+                        </div>
+                        <a href="#order" class="alpha-btn">
+                            <div class="text">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.OrderNow,currentLang.Code)</div>
+                            <div class="crcl"><div class="arrowcrcl"></div></div>
+                        </a>
+                    </div>
+
+                    <div class="payment-info">
+                        <div class="title">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.WeAcceptPayments,currentLang.Code)</div>
+                        <div class="content">
+                            <div class="visa"></div>
+                            <div class="mastercard"></div>
+                            <div class="unionpay"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-6">
+                    <div class="peopletwo"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <audio id="sound" src="/media/sounds/tyalet.mp3"></audio>
+    <div class="startpage"><button onclick="document.querySelector('.portfolio').scrollIntoView()" id="musicSpan" href="#" class="down"></button></div>
+
+    <!-- PORTFOLIO SECTION -->
+    <section id="portfolio" class="portfolio">
+        <div class="container">
+            <div class="headline">
+                <div class="title">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.OurPortfolios,currentLang.Code)</div>
+                <div class="description">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.OurLastPortfolios,currentLang.Code)</div>
+            </div>
+
+                @{
+                    var firstPortfolio = Model.Portfolios.FirstOrDefault();
+                    var secondPortfolio = Model.Portfolios.Skip(1).FirstOrDefault();
+                    var thirdPortfolio = Model.Portfolios.Skip(2).FirstOrDefault();
+                    var fourthPortfolio = Model.Portfolios.Skip(3).FirstOrDefault();
+                }
+
+            <div class="row">
+                <div class="col-md-7 width50 toprelative">
+                    <div class="peopleonenw"></div>
+                    <div class="portfolioscreen" style="background: url('@firstPortfolio?.Images?[0]?.ImgPath');background-size: 100%;"></div>
+                </div>
+
+                <div class="col-md-5 width50 toprelative">
+                    <div class="peopletwonw"></div>
+                    <div class="portfolioscreen" style="background: url('@secondPortfolio?.Images?[0]?.ImgPath');background-size: 100%;"></div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-5 width50">
+                    <div class="portfolioscreen" style="background: url('@thirdPortfolio?.Images?[0]?.ImgPath');background-size: 100%;"></div>
+                </div>
+
+                <div class="col-md-7 width50">
+                    <div class="portfolioscreen" style="background: url('@fourthPortfolio?.Images?[0]?.ImgPath');background-size: 100%;"></div>
+                </div>
+            </div>
+
+            <div class="portfolio-more">
+                <a asp-action="Portfolios" asp-controller="Home" class="alpha-btn">
+                    <div class="text">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.MorePortfolios,currentLang.Code)</div>
+                    <div class="crcl"><div class="arrowcrcl"></div></div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEWS SECTION -->
+    <section id="news" class="news">
+        <div class="container">
+            <div class="headline">
+                <div class="title">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.News,currentLang.Code)</div>
+                <div class="description">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.DiscoverNews,currentLang.Code)</div>
+            </div>
+            <div class="row">
+
+
+                @foreach (var item in Model.News.Take(3))
+                {
+                    <div class="col-md-4 width100">
+                        <div class="news-block">
+                            <div class="news-image" style="background:url('@item.ImgPath');background-size: 100%;"></div>
+                            <div class="news-content">
+                                <div class="title-news">
+                                    @LocalizationHelper.GetLocalizedString(item.Captions,currentLang.Code)
+                                </div>
+                                <div class="info">
+                                    <div class="date">
+                                        @item.CreatedAt.ToString("dd MMMM yyyy")
+                                    </div>
+                                    <div class="vrline"></div>
+                                    <div class="views">
+                                        @item.Watches @LocalizationHelper.GetLocalizedString(Model.GeneralTexts.Watches,currentLang.Code)
+                                    </div>
+                                </div>
+                                <div class="news-text">
+                                      @LocalizationHelper.GetLocalizedString(item.Contents,currentLang.Code)
+                                </div>
+
+                                <div class="news-more">
+                                    <a asp-action="NewsPage" asp-controller="Home" asp-route-id="@item.Id" class="alpha-btn">
+                                        <div class="text">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.NewsDetails,currentLang.Code)</div>
+                                        <div class="crcl"><div class="arrowcrcl"></div></div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="news-total">
+                    <a asp-action="News" asp-controller="Home" class="alpha-btn allnews">
+                        <div class="text">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.NewsMore,currentLang.Code)</div>
+                        <div class="crcl"><div class="arrowcrcl"></div></div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ORDER SECTION -->
+    <section id="order" class="order">
+        <div class="container">
+            <div class="headline">
+                <div class="title">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.Order,currentLang.Code)</div>
+                <div class="description">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.MakeOrder,currentLang.Code)</div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 width100">
+                    <form class="orderclass" asp-action="CreateOrder" onsubmit="onOrderSubmitting(event)" asp-controller="Home" id="orderForm" method="post">
+                        <div class="mb-3">
+                            <label class="labelinp">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.YourName,currentLang.Code)</label>
+                            <input class="form-control" asp-for="NewOrder.Name" type="text" required placeholder="Алекс">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="labelinp">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.CompanyName,currentLang.Code)</label>
+                            <input class="form-control" asp-for="NewOrder.CompanyName" type="text" placeholder="ООО “КАНАЛ СВЯЗИ”">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="labelinp">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.DescribeJob,currentLang.Code)</label>
+                            <textarea class="form-control" asp-for="NewOrder.Description" required rows="3" placeholder="@LocalizationHelper.GetLocalizedString(Model.LandingTexts.DescribeJobPlaceholder,currentLang.Code)"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="labelinp">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.YourBudget,currentLang.Code)</label>
+                            <input class="form-control" asp-for="NewOrder.Budget" type="text" required placeholder="1 000 000$">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="labelinp">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.Contacts,currentLang.Code)</label>
+                            <input class="form-control" asp-for="NewOrder.Contacts" type="text" required placeholder="@LocalizationHelper.GetLocalizedString(Model.LandingTexts.ContactsPlaceholder,currentLang.Code)">
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="order-send">
+                                <button href="#" @*data-bs-toggle="modal" data-bs-target="#sendorder"*@ class="alpha-btn send">
+                                    <div class="text">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.Send,currentLang.Code)</div>
+                                    <div class="crcl"><div class="arrowcrcl"></div></div>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                     <!-- MODAL WINDOW -->
+                    <div class="modal fade" id="sendorder" tabindex="-1" aria-labelledby="sendorder" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header"></div>
+                                <div class="modal-body">
+                                    <div class="central">
+                                        <div class="icon-main">
+                                            <i class="fa-solid fa-check"></i>
+                                        </div>
+
+                                        <div class="text">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.OrderCompleted,currentLang.Code)</div>
+
+                                        <div class="close-notif">
+                                            <button type="button" class="alpha-btn2 alpha-modal" data-bs-dismiss="modal">@LocalizationHelper.GetLocalizedString(Model.GeneralTexts.Close,currentLang.Code)</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-6 toprelative">
+                    <div class="orderimage">
+                        <div class="peoplecoffee"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+@section js{
+<script>
+
+    async function onOrderSubmitting(event){
+       event.preventDefault();
+       $('#sendorder').modal('show');
+       await sleep(2000);
+       document.getElementById('orderForm').submit();
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+</script>
+}
