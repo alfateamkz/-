@@ -30,7 +30,10 @@ namespace Alfateam.Controllers
             {
                 GeneralTexts = DBHelper.GetGeneralTexts(),
                 LandingTexts = DBHelper.GetLangingTexts(),
-                News = DB.Posts.ToList(),
+                News = DB.Posts
+                        .Include(o => o.Captions).ThenInclude(o => o.Language)
+                        .Include(o => o.Contents).ThenInclude(o => o.Language)
+                        .ToList(),
                 Portfolios = DB.Portfolios
                                 .Include(o => o.Images)
                                 .ToList()
@@ -58,21 +61,21 @@ namespace Alfateam.Controllers
 
             int pagesCount = (int)Math.Ceiling((double)DB.Posts.Count() / (double)8);
 
-            var vm = new NewsVM
-            {
-                Posts = DB.Posts
+            var allPosts = DB.Posts
                 .Include(o => o.Captions).ThenInclude(o => o.Language)
                 .Include(o => o.Contents).ThenInclude(o => o.Language)
-                .Skip(skipped)
-                .Take(8)
-                .ToList(),
+                .ToList();
+            allPosts.Reverse();
 
+
+            var vm = new NewsVM
+            {
+                Posts =  allPosts.Skip(skipped)
+                                 .Take(8)
+                                 .ToList(),
                 CurrentPage = page,
                 PagesCount = pagesCount
             };
-
-            vm.Posts.Reverse();
-
             return View(vm);
         }
         [Route("NewsPage")]
@@ -98,35 +101,43 @@ namespace Alfateam.Controllers
 
             int pagesCount = (int)Math.Ceiling((double)DB.Portfolios.Count() / (double)9);
 
-            var vm = new PortfoliosVM
-            {
-                Portfolios = DB.Portfolios
+            var allPortfolios = DB.Portfolios
                     .Include(o => o.Images)
                     .Include(o => o.Captions).ThenInclude(o => o.Language)
-                    .Include(o => o.Descriptions).ThenInclude(o => o.Language)
-                    .Skip(skipped)
-                    .Take(9)
-                    .ToList(),
+                    .Include(o => o.Descriptions).ThenInclude(o => o.Language).ToList();
+            allPortfolios.Reverse();
+
+            var vm = new PortfoliosVM
+            {
+                Portfolios = allPortfolios.Skip(skipped)
+                                          .Take(9)
+                                          .ToList(),
 
                 PortfolioCategories = DB.PortfolioCategories
                      .Include(o => o.Captions).ThenInclude(o => o.Language)
                      .ToList(),
 
                 CurrentPage = page,
-                PagesCount = pagesCount
+                PagesCount = pagesCount,
+                CategoryId = categoryId
             };
 
           
 
             if(categoryId != 0)
             {
-                vm.Portfolios = vm.Portfolios.Where(o => o.CategoryId == categoryId).ToList();
+                var filteredPortfolios = allPortfolios.Where(o => o.CategoryId == categoryId);
+
+
+                vm.Portfolios =  filteredPortfolios.Skip(skipped)
+                                                   .Take(9)
+                                                   .ToList();
                 vm.SelectedCategory = DB.PortfolioCategories
                                         .Include(o => o.Captions).ThenInclude(o => o.Language)
                                         .FirstOrDefault(o => o.Id == categoryId);
-            }
 
-            vm.Portfolios.Reverse();
+                vm.PagesCount = (int)Math.Ceiling((double)filteredPortfolios.Count() / (double)9);
+            }
 
             return View(vm);
         }
@@ -187,10 +198,10 @@ namespace Alfateam.Controllers
             var vm = new TeamVM()
             {
                 Teammates = DB.Teammates
-                .Include(o => o.Titles).ThenInclude(o => o.Language)
-                .Include(o => o.MiddleDescriptions).ThenInclude(o => o.Language)
-                .Include(o => o.Positions).ThenInclude(o => o.Language)
-                .ToList()
+                    .Include(o => o.Titles).ThenInclude(o => o.Language)
+                    .Include(o => o.MiddleDescriptions).ThenInclude(o => o.Language)
+                    .Include(o => o.Positions).ThenInclude(o => o.Language)
+                    .ToList()
             };
             return View(vm);
         }

@@ -81,7 +81,7 @@ namespace Alfateam.Helpers
         {
             using (DatabaseContext db = new DatabaseContext())
             {
-                 return db.Languages.ToList();
+                 return db.Languages.Where(o => o.IsShown).ToList();
             }
         }
         public static Language GetCurrentLanguage(ClaimsPrincipal user)

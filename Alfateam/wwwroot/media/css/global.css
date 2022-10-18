@@ -327,10 +327,23 @@ header.present {
     font-weight: 900;
     font-size: 24px;
     line-height: 20px;
-    background-image: linear-gradient(145deg, #E5ED8B 0%, #10AE3C 100%);
-    color: transparent !important;
-    background-clip: text;
-    -webkit-background-clip: text;
+    background: url(/media/images/logotype-web.svg);
+    background-size: 80%;
+    background-repeat: no-repeat;
+    height: 38px;
+    width: 116px;
+    color: transparent;
+}
+
+.logotype:hover {
+    opacity: 1;
+    color: transparent;
+    filter: drop-shadow(0 0 20px #10AE3C);
+    transition: 1s;
+}
+
+.logotype:not(:hover) {
+    transition: 1s;
 }
 
 ul.nav.col-12.col-md-auto.mb-2.justify-content-center.mb-md-0 {
@@ -736,15 +749,31 @@ label.labelinp {
     margin-top: auto;
 }
 
-a.logotype-footer {
+.logotype-footer {
+    display: flex;
     font-family: 'Gilroy';
     font-style: normal;
     font-weight: 900;
-    font-size: 48px;
-    background-image: linear-gradient(145deg, #E5ED8B 0%, #10AE3C 100%);
-    color: transparent !important;
-    background-clip: text;
-    -webkit-background-clip: text;
+    font-size: 24px;
+    line-height: 20px;
+    background: url(/media/images/logotype-web.svg);
+    background-size: 80%;
+    background-repeat: no-repeat;
+    height: 70px;
+    width: 160px;
+    color: transparent;
+    opacity: 0.7;
+}
+
+.logotype-footer:hover {
+    opacity: 1;
+    color: transparent;
+    filter: drop-shadow(0 0 20px #10AE3C);
+    transition: 1s;
+}
+
+.logotype-footer:not(:hover) {
+    transition: 1s;
 }
 
 .copyright {
@@ -880,6 +909,7 @@ a.logotype-footer {
     background: #0E0E0F;
     border-radius: 16px;
     padding: 24px;
+    margin-bottom: 25px;
 }
 
 .service-title > .title {
@@ -980,21 +1010,24 @@ a.logotype-footer {
 
 .serviceimg1 {
     background: url(/media/images/service/1.svg);
-    background-repeat: no-repeat;
+    background-repeat: no-repeat !important;
+    background-size: 80% !important;
     height: 117px;
     width: 97px;
 }
 
 .serviceimg2 {
     background: url(/media/images/service/2.svg);
-    background-repeat: no-repeat;
+    background-repeat: no-repeat !important;
+    background-size: 80% !important;
     height: 117px;
     width: 88px;
 }
 
 .serviceimg3 {
     background: url(/media/images/service/3.svg);
-    background-repeat: no-repeat;
+    background-repeat: no-repeat !important;
+    background-size: 80% !important;
     height: 117px;
     width: 104px;
 }
@@ -1011,6 +1044,8 @@ a.logotype-footer {
     width: 100%;
     margin-bottom: 20px;
     border-radius: 12px;
+    background-size: 100% !important;
+    background-repeat: no-repeat !important;
 }
 
 .modal {
@@ -1240,6 +1275,7 @@ span.newitem {
     color: rgb(255 255 255 / 85%);
     font-size: 12px;
     font-weight: 200;
+    text-align: center;
 }
 
 .contentteam > .group {
@@ -1303,13 +1339,16 @@ span.newitem {
 }
 
 .partner-logotype {
-    background-repeat: no-repeat;
+    background-size: 90% auto !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
 }
 
 .partner-logotype.amazon {
     background: url(/media/images/partners/amazon.svg);
-    background-size: 90% auto;
-    background-repeat: no-repeat;
+    background-size: 90% auto !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
     height: 256px;
     width: 256px;
 }
@@ -1537,6 +1576,7 @@ button.alpha-btn2.alpha-modal {
         line-height: 40px;
         color: #FFFFFF;
     }
+    
     .content-hui > .description {
         font-family: 'Gilroy';
         font-style: normal;
@@ -1548,6 +1588,10 @@ button.alpha-btn2.alpha-modal {
 
     .container.servicemain {
         display: none;
+    }
+
+    .container.servicemainmobile {
+        margin-top: 50px;
     }
 
     .news-bl-title {
@@ -1654,10 +1698,6 @@ button.alpha-btn2.alpha-modal {
         border-right: none;
         border-top: none;
         border-bottom: 0;
-    }
-
-    .dropdown.text-end.navtransform {
-        display: none;
     }
 
     /* --- PORTFOLIO --- */

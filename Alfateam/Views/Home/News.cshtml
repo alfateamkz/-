@@ -18,7 +18,7 @@
             {
                 <div class="col-md-6">
                     <div class="news-bl">
-                        <div class="news-bl-img" style="background:url('@item.ImgPath');background-size: 100%;"></div>
+                        <div class="news-bl-img" style="background:url('@item.ImgPath');background-size: 100% 101%;"></div>
                         <div class="news-bl-content">
                             <div class="news-bl-title">@LocalizationHelper.GetLocalizedString(item.Captions,currentLang.Code)</div>
                             <div class="news-bl-text">
@@ -38,7 +38,7 @@
         <div class="row">
             <nav aria-label="Pagination">
                 <ul class="pagination justify-content-center">
-                    @if(Model.CurrentPage>1 && Model.CurrentPage<Model.PagesCount && Model.PagesCount > 0)
+                    @if(Model.CurrentPage>1)
                     {
                        <li class="page-item">
                             <a class="page-link"asp-action="News" asp-controller="Home" asp-route-page="@(Model.CurrentPage-1)" aria-label="Previous">

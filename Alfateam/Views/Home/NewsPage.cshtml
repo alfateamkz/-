@@ -14,7 +14,7 @@
 <div class="container content-top-page">
     <div class="pagelist">
         <div class="pagecontent">
-            <div class="news-full-image" style="background:url('@Model.ImgPath');background-size: 100%;"></div>
+            <div class="news-full-image" style="background:url('@Model.ImgPath');background-size: 100% 100%;"></div>
             <div class="news-full-title">@LocalizationHelper.GetLocalizedString(Model.Captions,currentLang.Code)</div>
             <div class="news-full-date">
                  @LocalizationHelper.GetLocalizedString(generalTexts.PublishedAt,currentLang.Code) @Model.CreatedAt.ToString("dd MMMM yyyy") в @Model.CreatedAt.ToString("HH:mm")

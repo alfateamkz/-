@@ -11,6 +11,7 @@ namespace Alfateam.Controllers
         {
         }
 
+
         [HttpGet,Route("SetLocale")]
         public async Task SetLocale(int langId)
         {

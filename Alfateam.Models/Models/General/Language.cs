@@ -15,6 +15,8 @@ namespace Alfateam.Database.Models
         public string Code { get; set; }
         public string? IconPath { get; set; }
 
+        public bool IsShown { get; set; } = true;
+
         public override string ToString()
         {
             return Title;

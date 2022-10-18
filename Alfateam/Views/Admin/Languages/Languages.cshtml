@@ -23,6 +23,7 @@
                         <th>Id</th>
                         <th>Название</th>
                         <th>Код языка</th>
+                        <th>Статус</th>
                         <th style="width:80px"></th>
                         <th style="width:80px"></th>
                     </tr>
@@ -37,6 +38,15 @@
                             <td>@item.Id</td>
                             <td>@item.Title</td>
                             <td>@item.Code</td>
+                            <td>
+                                @if(item.IsShown)
+                                {
+                                    @("Отображается")
+                                }
+                                else{
+                                    @("Скрыт")
+                                }
+                            </td>
                             <td><a asp-action="UpdateLanguage" asp-controller="Languages" asp-route-id="@item.Id"><button @if(item.Code == "RU"){@("disabled")} class="btn btn-warning">Изменить</button></a></td>
                             <td><a asp-action="DeleteLanguage" asp-controller="Languages" asp-route-id="@item.Id"><button @if(item.Code == "RU"){@("disabled")} class="btn btn-danger">Удалить</button></a></td>
                         </tr>
