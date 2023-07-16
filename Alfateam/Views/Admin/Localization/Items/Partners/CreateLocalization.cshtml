@@ -1,0 +1,34 @@
+﻿@using Alfateam.Database.Models.Localizations;
+@using CRMWeb.Helpers.Html
+@using Triggero.Web.ViewModels.Localization
+@{
+    Layout = "_AdminLayoutV2";
+    ViewData["Title"] = "СОЗДАНИЕ ПЕРЕВОДА ПАРТНЕРА";
+    ViewData["ShowLang"] = true;
+}
+@model LocalizationVM<PartnerLocalization>
+
+ <!-- CONTENT -->
+<form asp-action="CreatePartnerLocalizationPOST" asp-controller="PartnersLocalizations" method="post" enctype="multipart/form-data" class="content">
+
+    <input type="hidden" asp-for="Id" value="@Model.Id" />
+
+    <div class="row">
+        <div class="page">
+            
+            <div class="mb-3">
+                <label for="" class="formlabel">Название</label>
+                <input type="text" asp-for="Localization.Title" required class="form-control" placeholder="">
+            </div>
+
+            <div class="mb-3">
+                <label for="" class="formlabel">Текст</label>
+                <textarea class="form-control" required asp-for="Localization.Description" rows="3" placeholder=""></textarea>
+            </div>
+
+            <div class="mb-3 position-right">
+                <button type="submit" class="button-classic">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</form>

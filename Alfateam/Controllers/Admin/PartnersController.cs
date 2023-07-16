@@ -20,8 +20,7 @@ namespace Alfateam.Controllers.Admin
         public IActionResult Partners()
         {
             var partners = DB.Partners
-                .Include(o => o.Titles).ThenInclude(o => o.Language)
-                .Include(o => o.Descriptions).ThenInclude(o => o.Language)
+                .Include(o => o.Localizations)
                 .ToList();
             return View(@"Views\Admin\Partners\Partners.cshtml", partners);
         }
@@ -50,8 +49,7 @@ namespace Alfateam.Controllers.Admin
         public IActionResult UpdatePartner(int id)
         {
             var partner = DB.Partners
-                .Include(o => o.Titles).ThenInclude(o => o.Language)
-                .Include(o => o.Descriptions).ThenInclude(o => o.Language)
+                .Include(o => o.Localizations)
                 .FirstOrDefault(o => o.Id == id);
             var vm = new VMWithLanguages<Partner>()
             {
@@ -71,41 +69,6 @@ namespace Alfateam.Controllers.Admin
         }
 
 
-        #region Удаляем удаленные на фронте переводы и добавляем выбранные
-        [HttpPost, Route("SetPartnerTitleTranslations")]
-        public async Task SetPartnerTitleTranslations([FromBody] IdsModel ids)
-        {
-            Partner obj = DB.Partners.Include(o => o.Titles).ThenInclude(o => o.Language).FirstOrDefault(o => o.Id == ids.Id);
-            foreach(var translation in obj.Titles.Where(o => o.Language.Code != "RU").ToList())
-            {
-                obj.Titles.Remove(translation);
-            }
-
-            foreach (var id in ids.Ids)
-            {
-                var translation = DB.TranslationItems.FirstOrDefault(o => o.Id == id);
-                obj.Titles.Add(translation);
-            }
-            DB.SaveChanges();
-        }
-        [HttpPost, Route("SetPartnerDescriptionTranslations")]
-        public async Task SetPartnerDescriptionTranslations([FromBody] IdsModel ids)
-        {
-            Partner obj = DB.Partners.Include(o => o.Descriptions).ThenInclude(o => o.Language).FirstOrDefault(o => o.Id == ids.Id);
-            foreach (var translation in obj.Descriptions.Where(o => o.Language.Code != "RU").ToList())
-            {
-                obj.Descriptions.Remove(translation);
-            }
-
-            foreach (var id in ids.Ids)
-            {
-                var translation = DB.TranslationItems.FirstOrDefault(o => o.Id == id);
-                obj.Descriptions.Add(translation);
-            }
-            DB.SaveChanges();
-        }
-        #endregion
-
 
         #endregion
 
@@ -114,12 +77,8 @@ namespace Alfateam.Controllers.Admin
         public IActionResult DeletePartner(int id)
         {
             var partner = DB.Partners
-                .Include(o => o.Titles)
-                .Include(o => o.Descriptions)
                 .FirstOrDefault(o => o.Id == id);
 
-            DB.TranslationItems.RemoveRange(partner.Titles);
-            DB.TranslationItems.RemoveRange(partner.Descriptions);
 
             DB.Partners.Remove(partner);
             DB.SaveChanges();

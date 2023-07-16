@@ -1,0 +1,26 @@
+﻿@using GamblingFactory.Admin.Helpers.Html.Special;
+@using GamblingFactory.Admin.ViewModels.Localization;
+@{
+    ViewData["Title"] = "СОЗДАНИЕ ПЕРЕВОДА";
+    ViewData["ShowLang"] = true;
+}
+@{
+    Layout = "_AdminLayoutV2";
+}
+@model LocalizationPageTranslationVM
+
+ <!-- CONTENT -->
+<form asp-action="@Model.AspSaveAction" asp-route-type="@Convert.ChangeType(Model.EnumInterfaceTextType,Model.EnumInterfaceTextType.GetTypeCode())" asp-controller="CreateUpdInterface" method="post" enctype="multipart/form-data" class="content">
+
+   
+    <div class="row">
+        <div class="page">
+            
+            @Html.Raw(LocalizationObjectReflectionHelper.GenerateHTML(Model.Model))
+
+            <div class="mb-3 position-right">
+                <button type="submit" class="button-classic">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</form>

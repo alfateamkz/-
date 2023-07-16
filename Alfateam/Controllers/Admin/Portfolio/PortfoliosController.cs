@@ -21,9 +21,8 @@ namespace Alfateam.Controllers.Admin
         public IActionResult Portfolios()
         {
             var portfolios = DB.Portfolios
-                .Include(o => o.Category).ThenInclude(o => o.Captions).ThenInclude(o => o.Language)
-                .Include(o => o.Captions).ThenInclude(o => o.Language)
-                .Include(o => o.Descriptions).ThenInclude(o => o.Language)
+                .Include(o => o.Category).ThenInclude(o => o.Localizations)
+                .Include(o => o.Localizations)
                 .ToList();
             return View(@"Views\Admin\Portfolio\Portfolios.cshtml", portfolios);
         }
@@ -36,7 +35,7 @@ namespace Alfateam.Controllers.Admin
             var vm = new PortfoliosVM
             {
                 PortfolioCategories = DB.PortfolioCategories
-                                    .Include(o => o.Captions).ThenInclude(o => o.Language)
+                                    .Include(o => o.Localizations)
                                     .ToList()
             };
             return View(@"Views\Admin\Portfolio\CreatePortfolio.cshtml", vm);
@@ -66,12 +65,11 @@ namespace Alfateam.Controllers.Admin
             var vm = new PortfoliosVM
             {
                 PortfolioCategories = DB.PortfolioCategories
-                                    .Include(o => o.Captions).ThenInclude(o => o.Language)
+                                    .Include(o => o.Localizations)
                                     .ToList(),
                 NewPortfolio = DB.Portfolios
-                                    .Include(o => o.Captions).ThenInclude(o => o.Language)
-                                    .Include(o => o.Descriptions).ThenInclude(o => o.Language)
-                                    .Include(o => o.Category).ThenInclude(o => o.Captions).ThenInclude(o => o.Language)
+                                    .Include(o => o.Localizations)
+                                    .Include(o => o.Category).ThenInclude(o => o.Localizations)
                                     .Include(o => o.Images)
                                     .FirstOrDefault(o => o.Id == id),
                 Languages = GetOtherLanguages()
@@ -81,21 +79,32 @@ namespace Alfateam.Controllers.Admin
         [HttpPost, Route("Admin/UpdatePortfolioPOST")]
         public async Task<IActionResult> UpdatePortfolioPOST(PortfoliosVM vm)
         {
-            if(Request.Form.Files.Count > 0)
+            if(Request.Form.Files.Where(o => o.Length > 0).Count() > 0)
             {
+
                 var oldPhotos = DB.Portfolios
                     .Include(o => o.Images)
                     .FirstOrDefault(o => o.Id == vm.NewPortfolio.Id)
                     .Images;
                 DB.PortfolioImages.RemoveRange(oldPhotos);
+                DB.SaveChanges();
 
-                foreach (var formFile in Request.Form.Files)
-                    vm.NewPortfolio.Images.Add(new PortfolioImage { });
+                DB.ChangeTracker.Clear();
 
-                for (int i = 0; i < vm.NewPortfolio.Images.Count; i++)
+
+                var files = Request.Form.Files.Where(o => o.Length > 0).ToList();
+                for(int i = 0; i < files.Count; i++)
                 {
-                    vm.NewPortfolio.Images[i].ImgPath = await SetAttachmentIfHas(vm.NewPortfolio.Images[i].ImgPath, i);
+                    vm.NewPortfolio.Images.Add(new PortfolioImage
+                    {
+                        ImgPath = await SetAttachmentIfHas("", files[i])
+                    });
                 }
+            }
+
+            if(vm.NewPortfolio.URL is null)
+            {
+                vm.NewPortfolio.URL = "";
             }
 
             DB.Portfolios.Update(vm.NewPortfolio);
@@ -105,54 +114,35 @@ namespace Alfateam.Controllers.Admin
         }
 
 
-        #region Удаляем удаленные на фронте переводы и добавляем выбранные
-        [HttpPost, Route("SetPortfolioCaptionTranslations")]
-        public async Task SetPortfolioCaptionTranslations([FromBody] IdsModel ids)
-        {
-            var obj = DB.Portfolios.Include(o => o.Captions).ThenInclude(o => o.Language).FirstOrDefault(o => o.Id == ids.Id);
-            foreach (var translation in obj.Captions.Where(o => o.Language.Code != "RU").ToList())
-            {
-                obj.Captions.Remove(translation);
-            }
 
-            foreach (var id in ids.Ids)
-            {
-                var translation = DB.TranslationItems.FirstOrDefault(o => o.Id == id);
-                obj.Captions.Add(translation);
-            }
-            DB.SaveChanges();
-        }
-        [HttpPost, Route("SetPortfolioDescriptionTranslations")]
-        public async Task SetPortfolioDescriptionTranslations([FromBody] IdsModel ids)
-        {
-            var obj = DB.Portfolios.Include(o => o.Descriptions).ThenInclude(o => o.Language).FirstOrDefault(o => o.Id == ids.Id);
-            foreach (var translation in obj.Descriptions.Where(o => o.Language.Code != "RU").ToList())
-            {
-                obj.Descriptions.Remove(translation);
-            }
-
-            foreach (var id in ids.Ids)
-            {
-                var translation = DB.TranslationItems.FirstOrDefault(o => o.Id == id);
-                obj.Descriptions.Add(translation);
-            }
-            DB.SaveChanges();
-        }
-        #endregion
 
 
         #endregion
+
+
+
+        [HttpGet, Route("Admin/TogglePortfilioVisibility")]
+        public IActionResult TogglePortfilioVisibility(int id)
+        {
+            var portfolio = DB.Portfolios
+                .Include(o => o.Localizations)
+                .FirstOrDefault(o => o.Id == id);
+
+            portfolio.IsHidden = !portfolio.IsHidden;
+
+
+            DB.Portfolios.Update(portfolio);
+            DB.SaveChanges();
+            return RedirectToAction("Portfolios", "Portfolios");
+        }
+
 
         [HttpGet, Route("Admin/DeletePortfolio")]
         public IActionResult DeletePortfolio(int id)
         {
             var portfolio = DB.Portfolios
-                .Include(o => o.Captions)
-                .Include(o => o.Descriptions)
+                .Include(o => o.Localizations)
                 .FirstOrDefault(o => o.Id == id);
-
-            DB.TranslationItems.RemoveRange(portfolio.Captions);
-            DB.TranslationItems.RemoveRange(portfolio.Descriptions);
 
             DB.Portfolios.Remove(portfolio);
             DB.SaveChanges();

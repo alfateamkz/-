@@ -25,6 +25,26 @@ namespace CRMWeb.Helpers.Html
             return html;
         }
 
+        public static string Convert(IEnumerable<T> list, int itemId)
+        {
+            string html = "";
+
+            foreach (var value in list)
+            {
+                int id = (int)value.GetType().GetProperty("Id").GetValue(value);
+
+                if (id == itemId)
+                {
+                    html += $"<option selected value=\"{id}\">{value}</option>\r\n";
+                }
+                else
+                {
+                    html += $"<option value=\"{id}\">{value}</option>\r\n";
+                }
+            }
+            return html;
+        }
+
         public static string Convert(IEnumerable<T> list)
         {
             string html = "";

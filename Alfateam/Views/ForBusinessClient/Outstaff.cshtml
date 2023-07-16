@@ -1,0 +1,67 @@
+﻿@using Alfateam.Database.Models.ForBusiness;
+@model List<OutstaffEmployeeInfo>
+
+<style>
+    th,td{
+        color: white;
+    }
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="static-page-header">
+                <div class="title-static">Аутстафф</div>
+            </div>
+
+            <div class="static-content content-over">
+                <!-- SELECT CAT -->
+                <div class="row">
+                    <table class="table" id="tablemanager">
+                        <thead class="tableheader">
+                            <tr>
+                                <th>№</th>
+                                <th>ФИО</th>
+                                <th>Должность</th>
+                                <th>Рейт</th>
+                               @* <th>Адрес</th>*@
+                                <th>Резюме</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int counter = 1;
+                            }
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@counter</td>
+                                    <td>@item.FIO</td>
+                                    <td>@item.Position</td>
+                                    <td>@item.HourlyRate</td>
+                                 @*   <td>@item.Address</td>*@
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.CVPath))
+                                        {
+                                            <a asp-action="DownloadFile" asp-controller="Home" asp-route-path="@item.CVPath">Резюме</a>
+                                        }
+                                        else
+                                        {
+                                            @("Отсутствует")
+                                        }
+                                    </td>
+                                </tr>
+
+                                counter++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+              
+            </div>
+        </div>
+    </div>
+</div>
+
+

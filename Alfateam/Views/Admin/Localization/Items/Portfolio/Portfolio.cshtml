@@ -1,0 +1,60 @@
+﻿@using Alfateam.Database.Models.Portfolios;
+@using Triggero.Web.ViewModels.Localization;
+@{
+    Layout = "_AdminLayoutV2";
+    ViewData["Title"] = "ПОРТФОЛИО";
+    ViewData["ShowLang"] = true; 
+}
+@model LocalizationListVM<Portfolio>
+<!-- CONTENT -->
+<div class="content">
+    <div class="row">
+        <div class="page">
+            <table class="table" id="tablemanager">
+                <thead class="tableheader">
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Название</th>
+                        <th scope="col">Описание</th>
+                        <th scope="col">Языки</th>
+                        <th scope="col">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var item in Model.Items)
+                    {
+                         <tr>
+                            <th scope="row">#@item.Id</th>
+                            <td>@item.Caption</td>
+                            <td>@item.Description</td>
+                            <td>Русский @string.Join(' ',item.Localizations.Select(o => o.Language).Select(o => o.Title))</td>
+                            <td>
+                                <div class="interect">
+                                    @if(item.Localizations.Any(o => o.LanguageId == Model.CurrentLanguage.Id))
+                                    {
+                                        <a asp-action="UpdatePortfolioLocalization" asp-controller="PortfolioLocalizations" asp-route-id="@item.Id" class="edit"><i class="fa-solid fa-pencil"></i></a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-action="CreatePortfolioLocalization" asp-controller="PortfolioLocalizations" asp-route-id="@item.Id" class="edit"><i class="fa-solid fa-pencil"></i></a>
+                                    } 
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+@*            <div class="mb-3 position-right">
+                <a asp-action="CreatePost" asp-controller="Posts" class="button-classic">Добавить</a>
+            </div>*@
+
+            <script>
+                $(document).ready( function () {
+                    $('#tablemanager').DataTable();
+                } );
+            </script>
+        </div>
+    </div>
+</div>

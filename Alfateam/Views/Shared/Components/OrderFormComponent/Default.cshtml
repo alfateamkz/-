@@ -1,0 +1,50 @@
+﻿@using Alfateam.Services;
+
+
+@inject LocalizationService localization
+@{
+    var mainLocalization = localization.GetMainPageLocalization();
+}
+
+
+<!-- SECTION: Contacts -->
+<div class="container">
+    <section id="contacts" class="contacts">
+        <div class="title-section">@Html.Raw(mainLocalization.GetMakeOrderMainHTML())</div>
+        <div class="contactsimage"></div>
+        <form asp-action="CreateOrder" onsubmit="onOrderSubmitting(event)" asp-controller="Home" id="orderForm" class="contactform">
+            <div class="contact-content">
+                <div class="mb-3">
+                    <input name="NewOrder.Name" type="text" class="form-control" placeholder="@mainLocalization.MakeOrderNamePlaceholder">
+                </div>
+
+                <div class="mb-3">
+                    <input name="NewOrder.CompanyName" type="text" class="form-control" placeholder="@mainLocalization.MakeOrderCompanyPlaceholder">
+                </div>
+
+                <div class="mb-3">
+                    <textarea class="form-control" name="NewOrder.Description" rows="2" placeholder="@mainLocalization.MakeOrderDescribeTaskPlaceholder"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <input class="form-control" name="NewOrder.Budget" type="text" placeholder="@mainLocalization.MakeOrderYourBudgetPlaceholder">
+                </div>
+
+                <div class="mb-3">
+                    <input class="form-control" name="NewOrder.Contacts" type="text" placeholder="@mainLocalization.MakeOrderContactsPlaceholder">
+                </div>
+
+                <div class="sendcontact">
+                    <button type="submit" class="clickform ques-btn">@mainLocalization.MakeOrderBtn</>
+                </div>
+
+                <div class="info-contact">
+                    <div class="lister-text">
+                        @mainLocalization.PolicyTextMain
+                    </div>
+                    <a asp-action="Privacy" asp-controller="Home" class="lister-link"> @mainLocalization.PolicyTextLink</a>
+                </div>
+            </div>
+        </form>
+    </section>
+</div>

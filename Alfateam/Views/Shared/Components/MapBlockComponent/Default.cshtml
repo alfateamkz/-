@@ -1,0 +1,38 @@
+﻿@using Alfateam.Services;
+
+@inject LocalizationService localization
+@{
+    var mapLocalization = localization.GetMapBlockLocalization();
+}
+<!-- SECTION: Maps -->
+<section class="map revealator-slideup revealator-within">
+    <iframe class="map-frame" src="https://yandex.ru/map-widget/v1/?um=constructor%3A5dd884118cb3035a57cbd5ecd21ffc15e4256f84a36069ba97b8b597e393df51&amp;source=constructor" height="100%" frameborder="0"></iframe>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 offset-md-9">
+                <div class="map-info">
+                    <div class="title-map">@mapLocalization.MapContacts</div>
+                    <div class="params-list">
+                        <div class="params-info">
+                            <div class="name-params"><i class="fa-sharp fa-solid fa-location-dot"></i> @mapLocalization.MapOurAddress</div>
+                            <div class="li-params">@mapLocalization.MapOffice1Address</div>
+                            <div class="li-params">@mapLocalization.MapOffice2Address</div>
+                        </div>
+
+                        <div class="params-info">
+                            <div class="name-params"><i class="fa-solid fa-envelope"></i> @mapLocalization.MapOurEmail</div>
+                            <div class="li-params">alfateamkz@yandex.kz</div>
+                        </div>
+
+                        <div class="params-info">
+                            <div class="name-params"><i class="fa-solid fa-phone"></i>@mapLocalization.MapOurPhone</div>
+                            <div class="li-params">+79518549717</div>
+                        </div>
+
+                        <a data-bs-toggle="modal" data-bs-target="#callget" class="clickcall">@mapLocalization.MapRequestCall</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

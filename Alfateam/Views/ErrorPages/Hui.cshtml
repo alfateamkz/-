@@ -1,21 +1,23 @@
 ﻿@using Alfateam.Database.Models.SitePagesTexts
 @using Alfateam.Helpers
+@using Alfateam.Services;
   
 @model ErrorPages
 @{
-    var currentLang = DBHelper.GetCurrentLanguage(User);
-}
-@{
     ViewData["HideFooter"] = "True";
+}
+@inject LocalizationService localization
+@{
+    var errorLocalization = localization.GetErrorPagesLocalization();
 }
 
 <div class="container content-top-page">
     <div class="row">
         <div class="content-hui">
             <div class="dickimg"></div>
-            <div class="title"> @LocalizationHelper.GetLocalizedString(Model.TextsNuhuyaTitle,currentLang.Code)</div>
+            <div class="title">@errorLocalization.NuhuyaTitle</div>
             <div class="description">
-                @LocalizationHelper.GetLocalizedString(Model.TextsNuhuyaDescription,currentLang.Code)
+                @errorLocalization.NuhuyaDescription
             </div>
         </div>
     </div>

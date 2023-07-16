@@ -20,9 +20,7 @@ namespace Alfateam.Controllers.Admin
         public IActionResult Team()
         {
             var teammates = DB.Teammates
-                .Include(o => o.Titles).ThenInclude(o => o.Language)
-                .Include(o => o.MiddleDescriptions).ThenInclude(o => o.Language)
-                .Include(o => o.Positions).ThenInclude(o => o.Language)
+                .Include(o => o.Localizations)
                 .ToList();
             return View(@"Views\Admin\Team\Team.cshtml", teammates);
         }
@@ -50,9 +48,7 @@ namespace Alfateam.Controllers.Admin
         public IActionResult UpdateTeammate(int id)
         {
             var teammate = DB.Teammates
-              .Include(o => o.Titles).ThenInclude(o => o.Language)
-              .Include(o => o.MiddleDescriptions).ThenInclude(o => o.Language)
-              .Include(o => o.Positions).ThenInclude(o => o.Language)
+              .Include(o => o.Localizations)
               .FirstOrDefault(o => o.Id == id);
             var vm = new VMWithLanguages<Teammate>()
             {
@@ -71,56 +67,7 @@ namespace Alfateam.Controllers.Admin
             return RedirectToAction("Team", "Team");
         }
 
-        #region Удаляем удаленные на фронте переводы и добавляем выбранные
-        [HttpPost, Route("SetTeammateTitlesTranslations")]
-        public async Task SetTeammateTitlesTranslations([FromBody] IdsModel ids)
-        {
-            var obj = DB.Teammates.Include(o => o.Titles).ThenInclude(o => o.Language).FirstOrDefault(o => o.Id == ids.Id);
-            foreach (var translation in obj.Titles.Where(o => o.Language.Code != "RU").ToList())
-            {
-                obj.Titles.Remove(translation);
-            }
 
-            foreach (var id in ids.Ids)
-            {
-                var translation = DB.TranslationItems.FirstOrDefault(o => o.Id == id);
-                obj.Titles.Add(translation);
-            }
-            DB.SaveChanges();
-        }
-        [HttpPost, Route("SetTeammateMiddleDescriptionsTranslations")]
-        public async Task SetTeammateMiddleDescriptionsTranslations([FromBody] IdsModel ids)
-        {
-            var obj = DB.Teammates.Include(o => o.MiddleDescriptions).ThenInclude(o => o.Language).FirstOrDefault(o => o.Id == ids.Id);
-            foreach (var translation in obj.MiddleDescriptions.Where(o => o.Language.Code != "RU").ToList())
-            {
-                obj.MiddleDescriptions.Remove(translation);
-            }
-
-            foreach (var id in ids.Ids)
-            {
-                var translation = DB.TranslationItems.FirstOrDefault(o => o.Id == id);
-                obj.MiddleDescriptions.Add(translation);
-            }
-            DB.SaveChanges();
-        }
-        [HttpPost, Route("SetTeammatePositionTranslations")]
-        public async Task SetTeammatePositionTranslations([FromBody] IdsModel ids)
-        {
-            var obj = DB.Teammates.Include(o => o.Positions).ThenInclude(o => o.Language).FirstOrDefault(o => o.Id == ids.Id);
-            foreach (var translation in obj.Positions.Where(o => o.Language.Code != "RU").ToList())
-            {
-                obj.Positions.Remove(translation);
-            }
-
-            foreach (var id in ids.Ids)
-            {
-                var translation = DB.TranslationItems.FirstOrDefault(o => o.Id == id);
-                obj.Positions.Add(translation);
-            }
-            DB.SaveChanges();
-        }
-        #endregion
 
         #endregion
 
@@ -129,14 +76,9 @@ namespace Alfateam.Controllers.Admin
         public IActionResult DeleteTeammate(int id)
         {
             var teammate = DB.Teammates
-                .Include(o => o.Titles)
-                .Include(o => o.MiddleDescriptions)
-                .Include(o => o.Positions)
+                .Include(o => o.Localizations)
                 .FirstOrDefault(o => o.Id == id);
 
-            DB.TranslationItems.RemoveRange(teammate.Titles);
-            DB.TranslationItems.RemoveRange(teammate.MiddleDescriptions);
-            DB.TranslationItems.RemoveRange(teammate.Positions);
 
             DB.Teammates.Remove(teammate);
             DB.SaveChanges();

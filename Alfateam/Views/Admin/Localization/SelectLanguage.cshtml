@@ -1,0 +1,29 @@
+﻿@using Alfateam.Database.Models;
+@{
+    Layout = "_AdminLayoutV2";
+    ViewData["Title"] = "ЛОКАЛИЗАЦИЯ";
+}
+@model List<Language>
+<!-- CONTENT -->
+<div class="content">
+    <div class="row">
+
+
+        @foreach (var item in Model)
+        {
+             <div class="col-md-2">
+                <a asp-action="LocalizationMainPage" asp-controller="AdminLocalization" asp-route-langId="@item.Id" class="lang">
+                    <div class="content">
+                        <div class="flag" style="background: url('@item.IconPath'); background-size: 100% 100%;"></div>
+                        <div class="name">@item.Title</div>
+                    </div>
+                </a>
+            </div>
+        }
+
+    </div>
+</div>
+
+<script>
+
+</script>

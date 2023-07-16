@@ -1,0 +1,39 @@
+﻿@using Alfateam.Database.Models.Localizations;
+@using CRMWeb.Helpers.Html
+@using Triggero.Web.ViewModels.Localization
+@{
+    Layout = "_AdminLayoutV2";
+    ViewData["Title"] = "СОЗДАНИЕ ПЕРЕВОДА ЧЛЕНА КОМАНДЫ";
+    ViewData["ShowLang"] = true;
+}
+@model LocalizationVM<TeammateLocalization>
+
+ <!-- CONTENT -->
+<form asp-action="CreateTeammateLocalizationPOST" asp-controller="TeammatesLocalizations" method="post" enctype="multipart/form-data" class="content">
+
+    <input type="hidden" asp-for="Id" value="@Model.Id" />
+
+    <div class="row">
+        <div class="page">
+            
+            <div class="mb-3">
+                <label for="" class="formlabel">ФИО</label>
+                <input type="text" asp-for="Localization.Title" required class="form-control" placeholder="">
+            </div>
+
+            <div class="mb-3">
+                <label for="" class="formlabel">Описание</label>
+                <textarea class="form-control" required asp-for="Localization.MiddleDescription" rows="3" placeholder=""></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="" class="formlabel">Должность</label>
+                <textarea class="form-control" required asp-for="Localization.Position" rows="3" placeholder=""></textarea>
+            </div>
+
+            <div class="mb-3 position-right">
+                <button type="submit" class="button-classic">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</form>

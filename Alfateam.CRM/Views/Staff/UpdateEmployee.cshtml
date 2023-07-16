@@ -1,0 +1,232 @@
+﻿@using Alfateam.CRM.ViewModels.Sales;
+@using Alfateam.Database.Enums.CRM.Staff;
+@using Alfateam.Database.Enums.CRM;
+@using CRMWeb.Helpers;
+@{
+    Layout = "_AdminLayoutV2";
+}
+@model EmployeePageVM
+
+<!-- Page Heading -->
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            Редактировние сведений о работнике
+        </h1>
+    </div>
+</div>
+<!-- /.row -->
+
+<div class="row">
+    <div class="col-lg-12">
+
+        <form asp-action="UpdateEmployeePOST" asp-controller="Staff" onsubmit="onSubmit(event)" method="post" enctype="multipart/form-data" role="form">
+
+            <input type="hidden" asp-for="Employee.Id" />
+            <input type="hidden" asp-for="Employee.PhotoPath" />
+            <input type="hidden" asp-for="Employee.Documents.CVPath" />
+            <input type="hidden" asp-for="Employee.Documents.MainDocumentPath" />
+            <input type="hidden" asp-for="Employee.Documents.MilitaryIDPath" />
+            <input type="hidden" asp-for="Employee.Documents.DiplomaPath" />
+
+            <div class="form-group">
+                <label>Фамилия*</label>
+                <input class="form-control" asp-for="Employee.Surname" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Имя*</label>
+                <input class="form-control" asp-for="Employee.Name" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Отчество</label>
+                <input class="form-control" asp-for="Employee.Patronymic" placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Дата рождения*</label>
+                <input type="date" class="form-control" asp-for="Employee.BirthDate" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Должность*</label>
+                <input class="form-control" asp-for="Employee.Position" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Вид занятости</label>
+                <select class="form-control" asp-for="Employee.EmployeeType">
+                    @Html.Raw(EnumToHtmlHelper<EmployeeType>.Convert(Model.Employee.EmployeeType))
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Режим выплаты ЗП</label>
+                <select class="form-control" asp-for="Employee.PaymentTerm">
+                    @Html.Raw(EnumToHtmlHelper<PaymentTerm>.Convert(Model.Employee.PaymentTerm))
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Статус</label>
+                <select class="form-control" asp-for="Employee.Status">
+                    @Html.Raw(EnumToHtmlHelper<EmployeeStatus>.Convert(Model.Employee.Status))
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>ЗП (Для попроектных работников ставим ориетировочный гонорар за месяц)*</label>
+                <input type="number" class="form-control" asp-for="Employee.Salary" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Адрес проживания*</label>
+                <textarea class="form-control" asp-for="Employee.Address" required rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Платежные данные*</label>
+                <textarea class="form-control" asp-for="Employee.PaymentInfo" required rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Описание</label>
+                <textarea class="form-control" asp-for="Employee.Description" rows="3"></textarea>
+            </div>
+
+
+
+            <div class="mb-3">
+                <label for="" class="formlabel">Фото сотрудника</label>
+                <div class="content-load" style="">
+                    <div class="close-file" id="close_file"><i class="fa-solid fa-xmark"></i></div>
+                    <label class="loadfile1" id="upload-image" for="pct" style="height: 6em;background: url('@Model.Employee.PhotoPath');background-size: cover;">
+                        <div class="text-fileupload">
+                            @if (string.IsNullOrEmpty(Model.Employee.PhotoPath)) {
+                                @("Загрузите файл")
+                            }
+                        </div>
+                    </label>
+                    <input class="pctfile" type="file" name="file" id="pct">
+                </div>
+            </div>
+
+            <div class="accordion" id="accordionExample">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            Контактные данные
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+
+                            <div class="form-group">
+                                <label>Телефон*</label>
+                                <input class="form-control" asp-for="Employee.Contacts.Phone" required placeholder="">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Email*</label>
+                                <input class="form-control" asp-for="Employee.Contacts.Email" required placeholder="">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Telegram*</label>
+                                <input class="form-control" asp-for="Employee.Contacts.Telegram" required placeholder="">
+                            </div>
+
+                            <div class="form-group">
+                                <label>WhatsApp</label>
+                                <input class="form-control" asp-for="Employee.Contacts.WhatsApp" placeholder="">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Страница ВКонтакте</label>
+                                <input class="form-control" asp-for="Employee.Contacts.Vkontakte" placeholder="">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Страница Instagram</label>
+                                <input class="form-control" asp-for="Employee.Contacts.Instagram" placeholder="">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Web-сайт</label>
+                                <input class="form-control" asp-for="Employee.Contacts.Website" placeholder="">
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingTwo">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            Документы
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+
+                            <div class="form-group">
+                                <label>Резюме</label>
+                                @if (!string.IsNullOrEmpty(Model.Employee.Documents.CVPath)) {
+                                    <a asp-action="DownloadFile" asp-controller="Home" asp-route-path="@Model.Employee.Documents.CVPath" class="link-primary">Текущий документ</a>
+                                }
+                                <input type="file" class="form-control" name="cv" placeholder="">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Основноый документ(паспорт, ID карта и т.д.)</label>  
+                                @if (!string.IsNullOrEmpty(Model.Employee.Documents.MainDocumentPath)) {
+                                    <a asp-action="DownloadFile" asp-controller="Home" asp-route-path="@Model.Employee.Documents.MainDocumentPath" class="link-primary">Текущий документ</a>
+                                }
+                                <input type="file" class="form-control" name="mainDocument" placeholder="">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Военный документ(билет, приписное и т.д.)</label>
+                                @if (!string.IsNullOrEmpty(Model.Employee.Documents.MilitaryIDPath)) {
+                                    <a asp-action="DownloadFile" asp-controller="Home" asp-route-path="@Model.Employee.Documents.MilitaryIDPath" class="link-primary">Текущий документ</a>
+                                }
+                                <input type="file" class="form-control" name="militaryId" placeholder="">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Документ об образовании</label>
+                                @if (!string.IsNullOrEmpty(Model.Employee.Documents.DiplomaPath)) {
+                                    <a asp-action="DownloadFile" asp-controller="Home" asp-route-path="@Model.Employee.Documents.DiplomaPath" class="link-primary">Текущий документ</a>
+                                }
+                                <input type="file" class="form-control" name="diploma" placeholder="">
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="mb-3 mt-3 position-right">
+                <button type="submit" class="button-classic">Сохранить</button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<script>
+
+    async function onSubmit(event) {
+        event.preventDefault();
+        await cropFinal('pct', 'upload-image');
+        event.target.submit();
+    }
+
+    $(document).ready(function () {
+        initImageCroppie('upload-image', 'pct', 'close_file');
+    });
+
+
+</script>

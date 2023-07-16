@@ -1,243 +1,1398 @@
-﻿@using Alfateam.Helpers
+﻿@using Alfateam.Extensions;
+@using Alfateam.Helpers
+@using Alfateam.Services;
 @using Alfateam.ViewModels
 @{
     ViewData["Title"] = "Home Page";
+    ViewData["IsLanding"] = true;
 }
 @model IndexVM
 
+
+@inject LocalizationService localization
 @{
-    var currentLang = DBHelper.GetCurrentLanguage(User);
+    var currentLang = localization.GetCurrentLanguage();
+
+    var mainLocalization = localization.GetMainPageLocalization();
+    var mapLocalization = localization.GetMapBlockLocalization();
+    var calcLocalization = localization.GetCalculatorLocalization();
 }
 
+@section in_header{
+    <a data-bs-toggle="modal" data-bs-target="#calcapp" class="calculator"><div class="linesvg"></div> <div class="nameabs">@mainLocalization.CalculatorFixed</div></a>
 
-  <!-- HEADER -->
-    <header class="present">
+
+     <div class="light-animate"></div>
+
+      <!-- CONTENT HEADER -->
         <div class="container">
             <div class="row">
-                <div class="col-6">
+                <div class="col-md-6 col-md-mobile mobile-adapt">
+                    <div class="imagelending desktop-none"></div>
                     <div class="content-header">
-                        <div class="title"> @LocalizationHelper.GetLocalizedString(Model.LandingTexts.StartBusiness,currentLang.Code)</div>
-                        <div class="description">
-                             @LocalizationHelper.GetLocalizedString(Model.LandingTexts.StartBusinessDescriptions,currentLang.Code)
+                    <h1 class="title-header">@Html.Raw(mainLocalization.GetStartYourBusinessHTML())</h1>
+                        <div class="desc-header">
+                        @Html.Raw(mainLocalization.GetAndGetYourClientsHTML())
                         </div>
-                        <a href="#order" class="alpha-btn">
-                            <div class="text">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.OrderNow,currentLang.Code)</div>
-                            <div class="crcl"><div class="arrowcrcl"></div></div>
-                        </a>
-                    </div>
-
-                    <div class="payment-info">
-                        <div class="title">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.WeAcceptPayments,currentLang.Code)</div>
-                        <div class="content">
-                            <div class="visa"></div>
-                            <div class="mastercard"></div>
-                            <div class="unionpay"></div>
-                        </div>
+                        <a href="#contacts" class="clickform">@mainLocalization.MakeOrderBtn</a>
                     </div>
                 </div>
 
-                <div class="col-6">
-                    <div class="peopletwo"></div>
+                <div class="col-md-6">
+                    <div class="imagelending d-none d-sm-block"></div>
                 </div>
             </div>
         </div>
-    </header>
 
-    <audio id="sound" src="/media/sounds/tyalet.mp3"></audio>
-    <div class="startpage"><button onclick="document.querySelector('.portfolio').scrollIntoView()" id="musicSpan" href="#" class="down"></button></div>
+     <div class="content-central mobile-platform">
+            <nav class="nav-header">
+                <ul class="nav-mini">
+                    <li>
+                        <a href="#main" class="nav-mini-link">@mainLocalization.FixedNavMain</a>
+                    </li>
+                    <li>
+                        <a href="#portfolio" class="nav-mini-link">@mainLocalization.FixedNavOurWorks</a>
+                    </li>
+                    <li>
+                        <a href="#steps" class="nav-mini-link">@mainLocalization.FixedNavCost</a>
+                    </li>
+                    <li>
+                        <a href="#service" class="nav-mini-link">@mainLocalization.FixedNavServices</a>
+                    </li>
+                    <li>
+                        <a href="#news" class="nav-mini-link">@mainLocalization.FixedNavNews</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
 
-    <!-- PORTFOLIO SECTION -->
-    <section id="portfolio" class="portfolio">
-        <div class="container">
-            <div class="headline">
-                <div class="title">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.OurPortfolios,currentLang.Code)</div>
-                <div class="description">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.OurLastPortfolios,currentLang.Code)</div>
-            </div>
+    <div class="roller"><div class="linesvg"><div class="status-scroll" id="scroll-fixed"></div></div> <div class="nameabs">@mainLocalization.ScrollFixed</div></div>
+}
+   
 
-                @{
-                    var firstPortfolio = Model.Portfolios.FirstOrDefault();
-                    var secondPortfolio = Model.Portfolios.Skip(1).FirstOrDefault();
-                    var thirdPortfolio = Model.Portfolios.Skip(2).FirstOrDefault();
-                    var fourthPortfolio = Model.Portfolios.Skip(3).FirstOrDefault();
-                }
 
+
+
+<!-- SECTIONS -->
+
+<!-- SECTION: Ques -->
+<section class="ques">
+    <div class="svg-c"></div>
+    <div class="container ques-container">
+        <h1 class="ques-title revealator-slideup revealator-within">@Html.Raw(mainLocalization.GetAnswerOnCoupleOfQuestionsHTML())</h1>
+        <p class="ques-desc revealator-slideup revealator-within">@mainLocalization.AnswerOnCoupleOfQuestionsLine2</p>
+        <a data-bs-toggle="modal" data-bs-target="#calcapp" class="clickform ques-btn revealator-slideup revealator-within">@mainLocalization.PassPolling</a>
+    </div>
+</section>
+
+<div class="container">
+    <!-- SECTION: Benefits -->
+    <section class="benefits">
+        <div class="title-section">@Html.Raw(mainLocalization.GetWhyPeopleSelectUsHTML())</div>
+        <div class="content-section content-section-pc">
             <div class="row">
-                <div class="col-md-7 width50 toprelative">
-                    <div class="peopleonenw"></div>
-                    <div class="portfolioscreen" style="background: url('@firstPortfolio?.Images?[0]?.ImgPath');background-size: 100% 101%;"></div>
+                <div class="col-md-4">
+                    <div class="bnf-container bnf-standart">
+                        <div class="bnf-mk revealator-slideup revealator-within">
+                            <div class="bnf-number">01</div>
+                            <div class="bnf-text">
+                                @mainLocalization.Adv_01_Terms
+                            </div>
+                        </div>
+
+                        <div class="bnf-mk revealator-slideup revealator-within">
+                            <div class="bnf-number">02</div>
+                            <div class="bnf-text">
+                                 @mainLocalization.Adv_02_Cost
+                            </div>
+                        </div>
+
+                        <div class="bnf-mk revealator-slideup revealator-within">
+                            <div class="bnf-number">03</div>
+                            <div class="bnf-text">
+                                 @mainLocalization.Adv_03_Scalability
+                            </div>
+                        </div>
+
+                        <div class="bnf-mk revealator-slideup revealator-within">
+                            <div class="bnf-number">04</div>
+                            <div class="bnf-text">
+                                @mainLocalization.Adv_04_Support
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="col-md-5 width50 toprelative">
-                    <div class="peopletwonw"></div>
-                    <div class="portfolioscreen" style="background: url('@secondPortfolio?.Images?[0]?.ImgPath');background-size: 100% 101%;"></div>
+                <div class="col-md-4">
+                    <div class="bnf-container bnf-trans revealator-slideup revealator-within">
+                        <div class="bnf-title">
+                            @mainLocalization.OtherAgency
+                        </div>
+
+                        <div class="bnf-lists">
+                            <div class="bnf-list">
+                                  @mainLocalization.OtherAgencyText1
+                            </div>
+
+                            <div class="bnf-list">
+                                  @mainLocalization.OtherAgencyText2
+                            </div>
+
+                            <div class="bnf-list">
+                                  @mainLocalization.OtherAgencyText3
+                            </div>
+
+                            <div class="bnf-list">
+                                  @mainLocalization.OtherAgencyText4
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="bnf-container bnf-orange revealator-slideup revealator-within">
+                        <div class="bnf-title-orange">
+                            @mainLocalization.AlfaTeamAgency
+                        </div>
+
+                        <div class="bnf-lists-orange">
+                            <div class="bnf-list-orange">
+                                @Html.Raw(mainLocalization.GetAlfaTeamAgencyText1HTML())
+                            </div>
+
+                            <div class="bnf-list-orange">
+                                 @Html.Raw(mainLocalization.GetAlfaTeamAgencyText2HTML())
+                            </div>
+
+                            <div class="bnf-list-orange">
+                                 @mainLocalization.AlfaTeamAgencyText3
+                            </div>
+
+                            <div class="bnf-list-orange">
+                                @Html.Raw(mainLocalization.GetAlfaTeamAgencyText4HTML())
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-section content-section-mobile">
+            <div class="info-studios">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="other-studio">
+                            <div class="none">
+                                <i class="fa-solid fa-xmark"></i>
+                            </div>
+                            <div class="name">
+                               @mainLocalization.OtherAgency
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="alfateam-studio">
+                            <div class="allow">
+                                <i class="fa-solid fa-check"></i>
+                            </div>
+                            <div class="name">
+                                 @mainLocalization.AlfaTeamAgency
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-5 width50">
-                    <div class="portfolioscreen" style="background: url('@thirdPortfolio?.Images?[0]?.ImgPath');background-size: 100% 101%;"></div>
-                </div>
+            <div class="accordion accordion-flush" id="benefits">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="flush-headingOne">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                            <div class="orange-color">01</div> @mainLocalization.Adv_01_Terms
+                        </button>
+                    </h2>
+                    <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#benefits">
+                        <div class="accordion-body">
+                            <div class="acc-text">
+                                <div class="none"><i class="fa-solid fa-xmark"></i></div>
+                                <div class="text">
+                                     @mainLocalization.OtherAgencyText1
+                                </div>
+                            </div>
 
-                <div class="col-md-7 width50">
-                    <div class="portfolioscreen" style="background: url('@fourthPortfolio?.Images?[0]?.ImgPath');background-size: 100% 101%;"></div>
+                            <div class="acc-text">
+                                <div class="allow"><i class="fa-solid fa-check"></i></div>
+                                <div class="text">
+                                    @Html.Raw(mainLocalization.GetAlfaTeamAgencyText1HTML())
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="flush-headingTwo">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
+                            <div class="orange-color">02</div> @mainLocalization.Adv_02_Cost
+                        </button>
+                    </h2>
+                    <div id="flush-collapseTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo" data-bs-parent="#benefits">
+                        <div class="accordion-body">
+                            <div class="acc-text">
+                                <div class="none"><i class="fa-solid fa-xmark"></i></div>
+                                <div class="text">
+                                     @mainLocalization.OtherAgencyText2
+                                </div>
+                            </div>
 
-            <div class="portfolio-more">
-                <a asp-action="Portfolios" asp-controller="Home" class="alpha-btn">
-                    <div class="text">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.MorePortfolios,currentLang.Code)</div>
-                    <div class="crcl"><div class="arrowcrcl"></div></div>
-                </a>
+                            <div class="acc-text">
+                                <div class="allow"><i class="fa-solid fa-check"></i></div>
+                                <div class="text">
+                                    @Html.Raw(mainLocalization.GetAlfaTeamAgencyText2HTML())
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="flush-headingThree">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree" aria-expanded="false" aria-controls="flush-collapseThree">
+                            <div class="orange-color">03</div> @mainLocalization.Adv_03_Scalability
+                        </button>
+                    </h2>
+                    <div id="flush-collapseThree" class="accordion-collapse collapse" aria-labelledby="flush-headingThree" data-bs-parent="#benefits">
+                        <div class="accordion-body">
+                            <div class="acc-text">
+                                <div class="none"><i class="fa-solid fa-xmark"></i></div>
+                                <div class="text">
+                                     @mainLocalization.OtherAgencyText3
+                                </div>
+                            </div>
+
+                            <div class="acc-text">
+                                <div class="allow"><i class="fa-solid fa-check"></i></div>
+                                <div class="text">
+                                    @mainLocalization.AlfaTeamAgencyText3
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="flush-headingFour">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseFour" aria-expanded="false" aria-controls="flush-collapseThree">
+                            <div class="orange-color">04</div>  @mainLocalization.Adv_04_Support
+                        </button>
+                    </h2>
+                    <div id="flush-collapseFour" class="accordion-collapse collapse" aria-labelledby="flush-headingFour" data-bs-parent="#benefits">
+                        <div class="accordion-body">
+                            <div class="acc-text">
+                                <div class="none"><i class="fa-solid fa-xmark"></i></div>
+                                <div class="text">
+                                     @mainLocalization.OtherAgencyText4
+                                </div>
+                            </div>
+
+                            <div class="acc-text">
+                                <div class="allow"><i class="fa-solid fa-check"></i></div>
+                                <div class="text">
+                                    @Html.Raw(mainLocalization.GetAlfaTeamAgencyText4HTML())
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- NEWS SECTION -->
-    <section id="news" class="news">
-        <div class="container">
-            <div class="headline">
-                <div class="title">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.News,currentLang.Code)</div>
-                <div class="description">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.DiscoverNews,currentLang.Code)</div>
-            </div>
+    <!-- SECTION: Portfolio -->
+    <section class="portfolio" id="portfolio">
+        <div class="title-section">@Html.Raw(mainLocalization.GetOurWorksHTML())</div>
+        <div class="content-section portfolio-section">
             <div class="row">
 
+                @foreach(var portfolio in Model.Portfolios)
+                {
+                    <div class="col-md-6 revealator-slideup revealator-within" onclick="setPortfolioModalContent(@portfolio.Id,'@currentLang.Id')">
+                        <a class="portfolio-content" data-bs-toggle="modal" data-bs-target="#modalportfolio-1">
+                            <div class="portfolio-img" style="background:url('@portfolio.Images.FirstOrDefault()?.ImgPath'); background-size: 100% 100%;"></div>
+                            <div class="portfolio-title">
+                                @portfolio.GetLocalizedCaption(currentLang.Id)
+                            </div>
+                        </a>
+                    </div>
+                }
+
+            </div>
+
+
+        </div>
+
+        <div class="content-btn">
+            <a href="/" class="clickform">@mainLocalization.WatchAll</a>
+        </div>
+    </section>
+</div>
+
+
+
+
+
+
+
+<!-- SECTION: Team -->
+<section class="team">
+    <div class="container">
+        <div class="title-section"><div class="orange-color">@mainLocalization.Team</div></div>
+        <div class="content-section team-section">
+            <div class="row">
+
+                @foreach(var teammate in Model.Teammates)
+                {
+                     <div class="col-md-3 col-6 mt-3 revealator-slideup revealator-within">
+                        <div class="team-avatar" style="background: url('@teammate.ImgPath'); background-size: 100% 100%"></div>
+                        <div class="team-company">
+                            <div class="team-name">@teammate.GetLocalizedTitle(currentLang.Id)</div>
+                            <div class="team-info">@teammate.GetLocalizedPosition(currentLang.Id)</div>
+                        </div>
+                    </div>
+                }
+
+            </div>
+
+
+        </div>
+    </div>
+</section>
+
+
+<!-- SECTION: Steps -->
+<div class="container">
+    <section id="steps" class="steps content-section-pc revealator-slideup revealator-delay">
+        <div class="title-section">@Html.Raw(mainLocalization.GetWorkStagesHTML())</div>
+        <div class="steps-images">
+            <div class="right-col">
+                <div class="right-steps">
+                    <div class="right-steps-title">
+                        <div class="rst-text">@mainLocalization.WorkStage_01_Header</div>
+                        <div class="rst-number">01</div>
+                    </div>
+                    <div class="right-steps-desc">
+                        Целей и задач вашего бизнеса
+                    </div>
+                </div>
+
+                <div class="right-col-mg">
+                    <div class="right-steps">
+                        <div class="right-steps-title">
+                            <div class="rst-text">@mainLocalization.WorkStage_02_Header</div>
+                            <div class="rst-number">02</div>
+                        </div>
+                        <div class="right-steps-desc">
+                           @mainLocalization.WorkStage_02_Text
+                        </div>
+                    </div>
+
+                    <div class="right-steps">
+                        <div class="right-steps-title">
+                            <div class="rst-text">@mainLocalization.WorkStage_03_Header</div>
+                            <div class="rst-number">03</div>
+                        </div>
+                        <div class="right-steps-desc">
+                            @mainLocalization.WorkStage_03_Text
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right-steps">
+                    <div class="right-steps-title">
+                        <div class="rst-text">@mainLocalization.WorkStage_04_Header</div>
+                        <div class="rst-number">04</div>
+                    </div>
+                    <div class="right-steps-desc">
+                      @mainLocalization.WorkStage_04_Text
+                    </div>
+                </div>
+            </div>
+
+            <div class="left-col">
+                <div class="left-steps">
+                    <div class="left-steps-title">
+                        <div class="rst-number">05</div>
+                        <div class="rst-text">@mainLocalization.WorkStage_05_Header</div>
+                    </div>
+                    <div class="left-steps-desc">
+                        @mainLocalization.WorkStage_05_Text
+                    </div>
+                </div>
+
+                <div class="left-col-mg">
+                    <div class="left-steps">
+                        <div class="left-steps-title">
+                            <div class="rst-number">06</div>
+                            <div class="rst-text">@mainLocalization.WorkStage_06_Header</div>
+                        </div>
+                        <div class="left-steps-desc">
+                           @mainLocalization.WorkStage_06_Text
+                        </div>
+                    </div>
+
+                    <div class="left-steps">
+                        <div class="left-steps-title">
+                            <div class="rst-number">07</div>
+                            <div class="rst-text">@mainLocalization.WorkStage_07_Header</div>
+                        </div>
+                        <div class="left-steps-desc">
+                            @mainLocalization.WorkStage_07_Text
+                        </div>
+                    </div>
+                </div>
+
+                <div class="left-steps">
+                    <div class="left-steps-title">
+                        <div class="rst-number">08</div>
+                        <div class="rst-text">@mainLocalization.WorkStage_08_Header</div>
+                    </div>
+                    <div class="left-steps-desc">
+                       @mainLocalization.WorkStage_08_Text
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<section class="steps content-section-mobile">
+    <div class="title-section">@Html.Raw(mainLocalization.GetWorkStagesHTML())</div>
+    <div class="steps-right-images">
+        <div class="right-col-mobile">
+            <div class="right-steps">
+                <div class="right-steps-title">
+                    <div class="rst-text">@mainLocalization.WorkStage_01_Header</div>
+                    <div class="rst-number">01</div>
+                </div>
+                <div class="right-steps-desc">
+                    @mainLocalization.WorkStage_01_Text
+                </div>
+            </div>
+
+            <div class="right-col-mg-mobile">
+                <div class="right-steps">
+                    <div class="right-steps-title">
+                        <div class="rst-text">@mainLocalization.WorkStage_02_Header</div>
+                        <div class="rst-number">02</div>
+                    </div>
+                    <div class="right-steps-desc">
+                        @mainLocalization.WorkStage_02_Text
+                    </div>
+                </div>
+
+                <div class="right-steps">
+                    <div class="right-steps-title">
+                        <div class="rst-text">@mainLocalization.WorkStage_03_Header</div>
+                        <div class="rst-number">03</div>
+                    </div>
+                    <div class="right-steps-desc">
+                        @mainLocalization.WorkStage_03_Text
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-steps">
+                <div class="right-steps-title">
+                    <div class="rst-text">@mainLocalization.WorkStage_04_Header</div>
+                    <div class="rst-number">04</div>
+                </div>
+                <div class="right-steps-desc">
+                   @mainLocalization.WorkStage_04_Text
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="steps-left-images">
+        <div class="left-col-mobile">
+            <div class="left-steps">
+                <div class="left-steps-title">
+                    <div class="rst-number">05</div>
+                    <div class="rst-text">@mainLocalization.WorkStage_05_Header</div>
+                </div>
+                <div class="left-steps-desc">
+                    @mainLocalization.WorkStage_05_Text
+                </div>
+            </div>
+
+            <div class="left-col-mg-mobile">
+                <div class="left-steps">
+                    <div class="left-steps-title">
+                        <div class="rst-number">06</div>
+                        <div class="rst-text">@mainLocalization.WorkStage_06_Header</div>
+                    </div>
+                    <div class="left-steps-desc">
+                        @mainLocalization.WorkStage_06_Text
+                    </div>
+                </div>
+
+                <div class="left-steps">
+                    <div class="left-steps-title">
+                        <div class="rst-number">07</div>
+                        <div class="rst-text">@mainLocalization.WorkStage_07_Header</div>
+                    </div>
+                    <div class="left-steps-desc">
+                        @mainLocalization.WorkStage_07_Text
+                    </div>
+                </div>
+            </div>
+
+            <div class="left-steps">
+                <div class="left-steps-title">
+                    <div class="rst-number">08</div>
+                    <div class="rst-text">@mainLocalization.WorkStage_08_Header</div>
+                </div>
+                <div class="left-steps-desc">
+                    @mainLocalization.WorkStage_08_Text
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- SECTION: Partners -->
+<section class="partners revealator-slideup revealator-within">
+    <div class="container">
+        <div class="title-section"><div class="orange-color">@mainLocalization.OurPartners</div></div>
+
+        <div class="desc-section">@mainLocalization.CompaniesThatTrustUs</div>
+    </div>
+    <div class="owl-carousel owl-theme">
+
+        @foreach(var partner in Model.Partners)
+        {
+            <div class="item">
+                <div style="background:url('@partner.ImgPath');background-size: 100% 100%;" class="partner-link">
+                </div>
+            </div>
+        }
+
+    </div>
+    <script>
+        $('.owl-carousel').owlCarousel({
+            center: false,
+            stagePadding: 100,
+            margin: 10,
+            loop: true,
+            autoplay: true,
+            autoplayTimeout: 2500,
+            responsive: {
+                1920: {
+                    items: 7,
+                },
+                1600: {
+                    items: 7,
+                },
+                1440: {
+                    items: 6,
+                },
+                600: {
+                    items: 4,
+                    stagePadding: 49,
+                },
+                320: {
+                    items: 3,
+                    stagePadding: 49,
+                }
+            }
+        });
+    </script>
+</section>
+
+<!-- SECTION: Other -->
+<div class="other" id="service">
+
+    <div class="container">
+        <div class="row">
+            <div class="mobile-nav-sliders">
+                <ul class="nav nav-pills mb-3 nav-sliders borders-steps" id="pills-tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="pills-section1-tab" data-bs-toggle="pill" data-bs-target="#pills-section1" type="button" role="tab" aria-controls="pills-section1" aria-selected="true"><div class="border-step">1</div></button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-section2-tab" data-bs-toggle="pill" data-bs-target="#pills-section2" type="button" role="tab" aria-controls="pills-section2" aria-selected="false"><div class="border-step">2</div></button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-section3-tab" data-bs-toggle="pill" data-bs-target="#pills-section3" type="button" role="tab" aria-controls="pills-section3" aria-selected="false"><div class="border-step">3</div></button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-section4-tab" data-bs-toggle="pill" data-bs-target="#pills-section4" type="button" role="tab" aria-controls="pills-section4" aria-selected="false"><div class="border-step">4</div></button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-section5-tab" data-bs-toggle="pill" data-bs-target="#pills-section5" type="button" role="tab" aria-controls="pills-section5" aria-selected="false"><div class="border-step">5</div></button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-md-11">
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-section1" role="tabpanel" aria-labelledby="pills-section1-tab" tabindex="0">
+                        <!-- 1 -->
+                        <section id="section">
+                            <div class="container">
+                                <div class="row other-container">
+                                    <div class="col-md-6">
+                                        <div class="macbook-image"></div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="total-other">
+                                            <div class="title-other">
+                                                @mainLocalization.Presentation1Header
+                                            </div>
+
+                                            <div class="desc-other">
+                                                @mainLocalization.Presentation1Text
+                                            </div>
+
+                                            <div class="cost-other">
+                                                @Html.Raw(mainLocalization.GetPresentation1PriceHTML())
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="tab-pane fade" id="pills-section2" role="tabpanel" aria-labelledby="pills-section2-tab" tabindex="0">
+                        <!-- 2 -->
+                        <section id="section">
+                            <div class="content-dark">
+                                <div class="container">
+                                    <div class="row other-container">
+                                        <div class="col-md-6">
+                                            <div class="phones-image"></div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="total-other">
+                                                <div class="title-other">
+                                                     @mainLocalization.Presentation2Header
+                                                </div>
+
+                                                <div class="desc-other">
+                                                    @mainLocalization.Presentation2Text1</br>
+                                                    </br>
+                                                    @mainLocalization.Presentation2Text2
+                                                </div>
+
+                                                <div class="cost-other">
+                                                    @Html.Raw(mainLocalization.GetPresentation2PriceHTML())
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="tab-pane fade" id="pills-section3" role="tabpanel" aria-labelledby="pills-section3-tab" tabindex="0">
+                        <!-- 3 -->
+                        <section id="section">
+                            <div class="container">
+                                <div class="row other-container">
+                                    <div class="col-md-6">
+                                        <div class="ipad-image"></div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="total-other">
+                                            <div class="title-other">
+                                                @mainLocalization.Presentation3Header
+                                            </div>
+
+                                            <div class="desc-other">
+                                                @mainLocalization.Presentation3Text1</br>
+                                                </br>
+                                                @mainLocalization.Presentation3Text2
+                                            </div>
+
+                                            <div class="cost-other">
+                                                @Html.Raw(mainLocalization.GetPresentation3PriceHTML())
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="tab-pane fade" id="pills-section4" role="tabpanel" aria-labelledby="pills-section4-tab" tabindex="0">
+                        <!-- 4 -->
+                        <section id="section">
+                            <div class="content-dark">
+                                <div class="container">
+                                    <div class="row other-container">
+                                        <div class="col-md-6">
+                                            <div class="ipadplus-image"></div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="total-other">
+                                                <div class="title-other">
+                                                    @mainLocalization.Presentation4Header
+                                                </div>
+
+                                                <div class="desc-other">
+                                                    @mainLocalization.Presentation4Text1</br>
+                                                    </br>
+                                                    @mainLocalization.Presentation4Text2
+                                                </div>
+
+                                                <div class="cost-other">
+                                                    @Html.Raw(mainLocalization.GetPresentation4PriceHTML())
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="tab-pane fade" id="pills-section5" role="tabpanel" aria-labelledby="pills-section5-tab" tabindex="0">
+                        <!-- 5 -->
+                        <section id="section">
+                            <div class="container">
+                                <div class="row other-container">
+                                    <div class="col-md-6">
+                                        <div class="imac-image"></div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="total-other">
+                                            <div class="title-other">
+                                                @mainLocalization.Presentation5Header
+                                            </div>
+
+                                            <div class="desc-other">
+                                                @mainLocalization.Presentation5Text1</br>
+                                                </br>
+                                                @mainLocalization.Presentation5Text2
+                                            </div>
+
+                                            <div class="cost-other">
+                                                @Html.Raw(mainLocalization.GetPresentation5PriceHTML())
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-1 d-none d-sm-block">
+                <ul class="nav nav-pills mb-3 nav-sliders borders-steps" id="pills-tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="pills-section1-tab" data-bs-toggle="pill" data-bs-target="#pills-section1" type="button" role="tab" aria-controls="pills-section1" aria-selected="true"><div class="border-step">1</div></button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-section2-tab" data-bs-toggle="pill" data-bs-target="#pills-section2" type="button" role="tab" aria-controls="pills-section2" aria-selected="false"><div class="border-step">2</div></button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-section3-tab" data-bs-toggle="pill" data-bs-target="#pills-section3" type="button" role="tab" aria-controls="pills-section3" aria-selected="false"><div class="border-step">3</div></button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-section4-tab" data-bs-toggle="pill" data-bs-target="#pills-section4" type="button" role="tab" aria-controls="pills-section4" aria-selected="false"><div class="border-step">4</div></button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-section5-tab" data-bs-toggle="pill" data-bs-target="#pills-section5" type="button" role="tab" aria-controls="pills-section5" aria-selected="false"><div class="border-step">5</div></button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW ALL -->
+    <div class="container">
+        <div class="content-btn">
+            <a href="/costs.html" class="clickform">@mainLocalization.WatchAll</a>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $('.orders').on('click', function () {
+            var dataType = $(this).data('type');
+            $('.order-view[type="' + dataType + '"]').toggle();
+        });
+    </script>
+</div>
+
+<!-- SECTION: News -->
+<section class="newslend" id="news">
+    <div class="container">
+        <div class="title-section">@Html.Raw(mainLocalization.GetOurNewsHTML())</div>
+        <div class="content-section news-section">
+            <div class="row">
 
                 @foreach (var item in Model.News.Take(3))
                 {
-                    <div class="col-md-4 width100">
-                        <div class="news-block">
-                            <div class="news-image" style="background:url('@item.ImgPath');background-size: 100% 100%;"></div>
-                            <div class="news-content">
-                                <div class="title-news">
-                                    @LocalizationHelper.GetLocalizedString(item.Captions,currentLang.Code)
-                                </div>
-                                <div class="info">
-                                    <div class="date">
-                                        @item.CreatedAt.ToString("dd MMMM yyyy")
-                                    </div>
-                                    <div class="vrline"></div>
-                                    <div class="views">
-                                        @item.Watches @LocalizationHelper.GetLocalizedString(Model.GeneralTexts.Watches,currentLang.Code)
-                                    </div>
-                                </div>
-                                <div class="news-text">
-                                      @LocalizationHelper.GetLocalizedString(item.Contents,currentLang.Code)
-                                </div>
-
-                                <div class="news-more">
-                                    <a asp-action="NewsPage" asp-controller="Home" asp-route-id="@item.Id" class="alpha-btn">
-                                        <div class="text">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.NewsDetails,currentLang.Code)</div>
-                                        <div class="crcl"><div class="arrowcrcl"></div></div>
-                                    </a>
-                                </div>
+                    <div class="col-md-4">
+                        <div class="news-element-lend">
+                            <div class="news-image-lend" style="background:url('@item.Images.FirstOrDefault()?.ImgPath');background-size: 100% 100%;"></div>
+                            <div class="news-content-lend">
+                                <div class="news-title-lend">@item.Headings.FirstOrDefault()?.Text</div>
+                                <div class="news-text-lend">@item.Paragraphs.FirstOrDefault()?.Text?.MakeShortText()</div>
+                                <div class="news-date-lend">Опубликовано @item.CreatedAt.ToString("dd MMMM yyyy")</div>
                             </div>
                         </div>
                     </div>
                 }
+  
 
-                <div class="news-total">
-                    <a asp-action="News" asp-controller="Home" class="alpha-btn allnews">
-                        <div class="text">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.NewsMore,currentLang.Code)</div>
-                        <div class="crcl"><div class="arrowcrcl"></div></div>
-                    </a>
+            <!-- VIEW ALL -->
+            <div class="container revealator-slideup revealator-within">
+                <div class="content-btn">
+                     <a asp-action="News" asp-controller="Home" class="clickform">@mainLocalization.MoreNews</a>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- ORDER SECTION -->
-    <section id="order" class="order">
-        <div class="container">
-            <div class="headline">
-                <div class="title">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.Order,currentLang.Code)</div>
-                <div class="description">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.MakeOrder,currentLang.Code)</div>
-            </div>
-            <div class="row">
-                <div class="col-md-6 width100">
-                    <form class="orderclass" asp-action="CreateOrder" onsubmit="onOrderSubmitting(event)" asp-controller="Home" id="orderForm" method="post">
-                        <div class="mb-3">
-                            <label class="labelinp">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.YourName,currentLang.Code)</label>
-                            <input class="form-control" asp-for="NewOrder.Name" type="text" required placeholder="Алекс">
-                        </div>
 
-                        <div class="mb-3">
-                            <label class="labelinp">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.CompanyName,currentLang.Code)</label>
-                            <input class="form-control" asp-for="NewOrder.CompanyName" type="text" placeholder="ООО “КАНАЛ СВЯЗИ”">
-                        </div>
 
-                        <div class="mb-3">
-                            <label class="labelinp">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.DescribeJob,currentLang.Code)</label>
-                            <textarea class="form-control" asp-for="NewOrder.Description" required rows="3" placeholder="@LocalizationHelper.GetLocalizedString(Model.LandingTexts.DescribeJobPlaceholder,currentLang.Code)"></textarea>
-                        </div>
 
-                        <div class="mb-3">
-                            <label class="labelinp">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.YourBudget,currentLang.Code)</label>
-                            <input class="form-control" asp-for="NewOrder.Budget" type="text" required placeholder="1 000 000$">
-                        </div>
+<!-- SECTION: Contacts -->
+@await Component.InvokeAsync("OrderFormComponent")
 
-                        <div class="mb-3">
-                            <label class="labelinp">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.Contacts,currentLang.Code)</label>
-                            <input class="form-control" asp-for="NewOrder.Contacts" type="text" required placeholder="@LocalizationHelper.GetLocalizedString(Model.LandingTexts.ContactsPlaceholder,currentLang.Code)">
-                        </div>
+<!-- SECTION: Maps -->
+@await Component.InvokeAsync("MapBlockComponent")
 
-                        <div class="mb-3">
-                            <div class="order-send">
-                                <button href="#" @*data-bs-toggle="modal" data-bs-target="#sendorder"*@ class="alpha-btn send">
-                                    <div class="text">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.Send,currentLang.Code)</div>
-                                    <div class="crcl"><div class="arrowcrcl"></div></div>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
 
-                     <!-- MODAL WINDOW -->
-                    <div class="modal fade" id="sendorder" tabindex="-1" aria-labelledby="sendorder" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header"></div>
-                                <div class="modal-body">
-                                    <div class="central">
-                                        <div class="icon-main">
-                                            <i class="fa-solid fa-check"></i>
-                                        </div>
 
-                                        <div class="text">@LocalizationHelper.GetLocalizedString(Model.LandingTexts.OrderCompleted,currentLang.Code)</div>
 
-                                        <div class="close-notif">
-                                            <button type="button" class="alpha-btn2 alpha-modal" data-bs-dismiss="modal">@LocalizationHelper.GetLocalizedString(Model.GeneralTexts.Close,currentLang.Code)</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
+
+
+<!-- CALC -->
+<div class="modal fade" id="calcapp" tabindex="-1" aria-labelledby="calcapp" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content modal-padding">
+            <!-- СТАРТОВАЯ -->
+            <div id="step-0" class="container calc-content">
+                <h1 class="calc-title">@calcLocalization.GetProjectPrice</h1>
+
+                <div class="line-status">
+                    <div class="crl-orange active"></div>
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange"></div>
+                </div>
+
+                <h2 class="calc-title-mini">@calcLocalization.SelectTypeOfService</h2>
+
+                <div class="row content-select">
+                    <div class="col-md-4">
+                        <div class="content-calc">
+                            <div class="radiobox-content">
+                                <div class="title-radiobox">@calcLocalization.TypeOfService_Mobile</div>
+                                <div class="form-check">
+                                    <input class="form-check-input radiobox-check rd-check-start" type="radio" name="start-type-2" id="start-1" value="step-1">
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                </div>
+                    <div class="col-md-4">
+                        <div class="radiobox-content">
+                            <div class="title-radiobox">
+                                @calcLocalization.TypeOfService_Software1</br>
+                                @calcLocalization.TypeOfService_Software2
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input radiobox-check rd-check-start" type="radio" name="start-type-2" id="start-2" value="step-2">
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="col-6 toprelative">
-                    <div class="orderimage">
-                        <div class="peoplecoffee"></div>
+                    <div class="col-md-4">
+                        <div class="radiobox-content">
+                            <div class="title-radiobox">@calcLocalization.TypeOfService_Website</div>
+                            <div class="form-check">
+                                <input class="form-check-input radiobox-check rd-check-start" type="radio" name="start-type-2" id="start-3" value="step-3">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- ВАРИАНТ 1 -->
+            <div id="step-1" class="container calc-content" style="display: none;">
+                <h1 class="calc-title">@calcLocalization.GetProjectPrice</h1>
+
+                <div class="line-status">
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange active"></div>
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange"></div>
+                </div>
+
+                <h2 class="calc-title-mini">@calcLocalization.TypeOfService_Mobile</h2>
+
+                <div class="row content-select">
+                    <div class="col-md-3">
+                        <div class="content-calc">
+                            <div class="radiobox-content">
+                                <div class="title-radiobox">@calcLocalization.MobileBranch_Phone</div>
+                                <div class="form-check">
+                                    <input class="form-check-input radiobox-check rd-check-mobile" type="radio" name="mobile-type-2" id="mobile-type-1" value="mobile-select-1">
+                                </div>
+                            </div>
+
+                            <div id="mobile-select-1" class="content-selector" style="display: none;">
+                                <select id="mobdev-1" class="form-select">
+                                    <option selected>@calcLocalization.OperatingSystem</option>
+                                    <option value="1">Android</option>
+                                    <option value="2">iOS</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="radiobox-content">
+                            <div class="title-radiobox">@calcLocalization.MobileBranch_Tablet</div>
+                            <div class="form-check">
+                                <input class="form-check-input radiobox-check rd-check-mobile" type="radio" name="mobile-type-2" id="mobile-type-2" value="mobile-select-2">
+                            </div>
+                        </div>
+
+                        <div id="mobile-select-2" class="content-selector" style="display: none;">
+                            <select id="mobdev-2" class="form-select">
+                                <option selected>@calcLocalization.OperatingSystem</option>
+                                <option value="1">Android</option>
+                                <option value="2">iOS</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="radiobox-content">
+                            <div class="title-radiobox">@calcLocalization.MobileBranch_Watch</div>
+                            <div class="form-check">
+                                <input class="form-check-input radiobox-check rd-check-mobile" type="radio" name="mobile-type-2" id="mobile-type-3" value="mobile-select-3">
+                            </div>
+                        </div>
+
+                        <div id="mobile-select-3" class="content-selector" style="display: none;">
+                            <select class="form-select">
+                                <option id="mobdev-3" selected>@calcLocalization.OperatingSystem</option>
+                                <option value="1">WearOS</option>
+                                <option value="2">watchOS</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="radiobox-content">
+                            <div class="title-radiobox">@calcLocalization.MobileBranch_TV</div>
+                            <div class="form-check">
+                                <input class="form-check-input radiobox-check rd-check-mobile" type="radio" name="mobile-type-2" id="mobile-type-4" value="mobile-select-4">
+                            </div>
+                        </div>
+
+                        <div id="mobile-select-4" class="content-selector" style="display: none;">
+                            <select id="mobdev-4" class="form-select">
+                                <option selected>@calcLocalization.OperatingSystem</option>
+                                <option value="1">Tizen</option>
+                                <option value="2">tvOS</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ВАРИАНТ 1: ШАГ 2 -->
+            <div id="step1-1" class="container calc-content" style="display: none;">
+                <h1 class="calc-title">@calcLocalization.GetProjectPrice</h1>
+
+                <div class="line-status">
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange active"></div>
+                    <div class="crl-orange"></div>
+                </div>
+
+                <h2 class="calc-title-mini">@calcLocalization.TypeOfService_Mobile</h2>
+
+                <div class="row content-select">
+                    <div class="col-md-6">
+                        <div class="content-calc">
+                            <div class="radiobox-content">
+                                <div class="title-radiobox">@calcLocalization.MobileBranch_HasDesign</div>
+                                <div class="form-check">
+                                    <input class="form-check-input radiobox-check rd-check-mobile1" type="radio" name="mobile1-type-2" id="mobile1-type-1" value="mobile1-select-1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="radiobox-content">
+                            <div class="title-radiobox">@calcLocalization.MobileBranch_DesignRequired</div>
+                            <div class="form-check">
+                                <input class="form-check-input radiobox-check rd-check-mobile1" type="radio" name="mobile1-type-2" id="mobile1-type-2" value="mobile1-select-2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ВАРИАНТ 1: ШАГ 3 -->
+            <div id="step1-2" class="container calc-content" style="display: none;">
+                <h1 class="calc-title">@calcLocalization.GetProjectPrice</h1>
+
+                <div class="line-status">
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange active"></div>
+                    <div class="crl-orange"></div>
+                </div>
+
+                <h2 class="calc-title-mini">@calcLocalization.TypeOfService_Mobile</h2>
+
+                <div class="row content-select">
+                    <div class="col-md-6">
+                        <div class="content-calc">
+                            <div class="radiobox-content">
+                                <div class="title-radiobox">@calcLocalization.MobileBranch_Crossplatform</div>
+                                <div class="form-check">
+                                    <input class="form-check-input radiobox-check rd-check-mobile2" type="radio" name="mobile2-type-2" id="mobile2-type-1" value="mobile2-select-1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="radiobox-content">
+                            <div class="title-radiobox">@calcLocalization.MobileBranch_Native</div>
+                            <div class="form-check">
+                                <input class="form-check-input radiobox-check rd-check-mobile2" type="radio" name="mobile2-type-2" id="mobile2-type-2" value="mobile2-select-2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ВАРИАНТ 1: ИТОГ -->
+            <div id="step1-3" class="container calc-content2" style="display: none;">
+                <h1 class="calc-title">@calcLocalization.Total</h1>
+
+                <div class="line-status">
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange active"></div>
+                </div>
+
+                <div class="row content-select">
+                    <div class="icon-modal">
+                        <i class="fa-solid fa-ruble-sign"></i>
+                    </div>
+
+                    <h2 class="calc-title-mini">@calcLocalization.TotalFrom <div id="cost-1-end"></div></h2>
+                </div>
+
+                <div class="content-center-btn">
+                    <a href="/" class="clickform">@calcLocalization.MakeOrder</a>
+                </div>
+            </div>
+
+            <!-- ВАРИАНТ 2 -->
+            <div id="step-2" class="container calc-content" style="display: none;">
+                <h1 class="calc-title">@calcLocalization.GetProjectPrice</h1>
+
+                <div class="line-status">
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange active"></div>
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange"></div>
+                </div>
+
+                <h2 class="calc-title-mini">@calcLocalization.SoftwareBranch_Platform</h2>
+
+                <div class="row content-select">
+                    <div class="col-md-3">
+                        <div class="content-calc">
+                            <div class="radiobox-content">
+                                <div class="title-radiobox">Windows</div>
+                                <div class="form-check">
+                                    <input class="form-check-input radiobox-check rd-check-po" type="radio" name="po-type-2" id="po-type-1" value="po-select-1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="radiobox-content">
+                            <div class="title-radiobox">Linux</div>
+                            <div class="form-check">
+                                <input class="form-check-input radiobox-check rd-check-po" type="radio" name="po-type-2" id="po-type-2" value="po-select-2">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="radiobox-content">
+                            <div class="title-radiobox">Mac</div>
+                            <div class="form-check">
+                                <input class="form-check-input radiobox-check rd-check-po" type="radio" name="po-type-2" id="po-type-3" value="po-select-3">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="radiobox-content">
+                            <div class="title-radiobox">@calcLocalization.SoftwareBranch_PlatformOther</div>
+                            <div class="form-check">
+                                <input class="form-check-input radiobox-check rd-check-po" type="radio" name="po-type-2" id="po-type-4" value="po-select-4">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ВАРИАНТ 2: ШАГ 2 -->
+            <div id="step2-1" class="container calc-content2" style="display: none;">
+                <h1 class="calc-title">@calcLocalization.GetProjectPrice</h1>
+
+                <div class="line-status">
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange active"></div>
+                    <div class="crl-orange"></div>
+                </div>
+
+                <h2 class="calc-title-mini">@calcLocalization.SoftwareBranch_Design</h2>
+
+                <div class="row content-select">
+                    <div class="col-md-6">
+                        <div class="content-calc">
+                            <div class="radiobox-content">
+                                <div class="title-radiobox">@calcLocalization.SoftwareBranch_HasDesign</div>
+                                <div class="form-check">
+                                    <input class="form-check-input radiobox-check rd-check-po3" type="radio" name="po3-type-2" id="po3-type-1" value="po3-select-1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="radiobox-content">
+                            <div class="title-radiobox">@calcLocalization.SoftwareBranch_DesignRequired</div>
+                            <div class="form-check">
+                                <input class="form-check-input radiobox-check rd-check-po3" type="radio" name="po3-type-2" id="po3-type-2" value="po3-select-2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ВАРИАНТ 2: ИТОГ -->
+            <div id="step2-2" class="container calc-content2" style="display: none;">
+                <h1 class="calc-title">@calcLocalization.Total</h1>
+
+                <div class="line-status">
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange active"></div>
+                </div>
+
+                <div class="row content-select">
+                    <div class="icon-modal">
+                        <i class="fa-solid fa-ruble-sign"></i>
+                    </div>
+
+                    <h2 class="calc-title-mini">@calcLocalization.TotalFrom <div id="cost-2-end"></div></h2>
+                </div>
+
+                <div class="content-center-btn">
+                    <a href="/" class="clickform">@calcLocalization.MakeOrder</a>
+                </div>
+            </div>
+
+            <!-- ВАРИАНТ 3 -->
+            <div id="step-3" class="container calc-content" style="display: none;">
+                <h1 class="calc-title">@calcLocalization.GetProjectPrice</h1>
+
+                <div class="line-status">
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange active"></div>
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange"></div>
+                </div>
+
+                <div class="row content-select">
+                    <div class="col-md-3">
+                        <div class="content-calc">
+                            <div class="radiobox-content">
+                                <div class="title-radiobox">@calcLocalization.WebsiteBranch_EShop</div>
+                                <div class="form-check">
+                                    <input class="form-check-input radiobox-check rd-check-web" type="radio" name="web-type-2" id="web-type-1" value="web-select-1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="radiobox-content">
+                            <div class="title-radiobox">@calcLocalization.WebsiteBranch_Website</div>
+                            <div class="form-check">
+                                <input class="form-check-input radiobox-check rd-check-web" type="radio" name="web-type-2" id="web-type-2" value="web-select-2">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="radiobox-content">
+                            <div class="title-radiobox">@calcLocalization.WebsiteBranch_Landing</div>
+                            <div class="form-check">
+                                <input class="form-check-input radiobox-check rd-check-web" type="radio" name="web-type-2" id="web-type-3" value="web-select-3">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="radiobox-content">
+                            <div class="title-radiobox">@calcLocalization.WebsiteBranch_Other</div>
+                            <div class="form-check">
+                                <input class="form-check-input radiobox-check rd-check-web" type="radio" name="web-type-2" id="web-type-4" value="web-select-4">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ВАРИАНТ 3: ШАГ 2 -->
+            <div id="step3-1" class="container calc-content3" style="display: none;">
+                <h1 class="calc-title">@calcLocalization.GetProjectPrice</h1>
+
+                <div class="line-status">
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange active"></div>
+                    <div class="crl-orange"></div>
+                </div>
+
+                <div class="row content-select">
+                    <div class="col-md-4">
+                        <div class="content-calc">
+                            <div class="radiobox-content">
+                                <div class="title-radiobox">@calcLocalization.WebsiteBranch_ServiceTurnkey</div>
+                                <div class="form-check">
+                                    <input class="form-check-input radiobox-check rd-check-web1" type="radio" name="web1-type-2" id="web1-type-1" value="web1-select-1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="radiobox-content">
+                            <div class="title-radiobox">@calcLocalization.WebsiteBranch_ServiceHasContent</div>
+                            <div class="form-check">
+                                <input class="form-check-input radiobox-check rd-check-web1" type="radio" name="web1-type-2" id="web1-type-2" value="web1-select-2">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="radiobox-content">
+                            <div class="title-radiobox">@calcLocalization.WebsiteBranch_ServiceHasPartContent</div>
+                            <div class="form-check">
+                                <input class="form-check-input radiobox-check rd-check-web1" type="radio" name="web1-type-2" id="web1-type-3" value="web1-select-3">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ВАРИАНТ 3: ШАГ 3 -->
+            <div id="step3-2" class="container calc-content3" style="display: none;">
+                <h1 class="calc-title">@calcLocalization.GetProjectPrice</h1>
+
+                <div class="line-status">
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange active"></div>
+                </div>
+
+                <div class="row content-select">
+                    <div class="col-md-6">
+                        <div class="content-calc">
+                            <div class="radiobox-content">
+                                <div class="title-radiobox">@calcLocalization.WebsiteBranch_StackFramework</div>
+                                <div class="form-check">
+                                    <input class="form-check-input radiobox-check rd-check-web2" type="radio" name="web2-type-2" id="web2-type-1" value="web2-select-1">
+                                </div>
+                            </div>
+
+                            <div id="web2-select-1" class="content-selector" style="display: none;">
+                                <select id="web2-val1" class="form-select">
+                                    <option selected>@calcLocalization.ProgrammingLanguage</option>
+                                    <option value="1">PHP</option>
+                                    <option value="2">C#</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="radiobox-content">
+                            <div class="title-radiobox">@calcLocalization.WebsiteBranch_StackCMS</div>
+                            <div class="form-check">
+                                <input class="form-check-input radiobox-check rd-check-web2" type="radio" name="web2-type-2" id="web2-type-2" value="web2-select-2">
+                            </div>
+
+                            <div id="web2-select-2" class="content-selector" style="display: none;">
+                                <select id="web2-val2" class="form-select">
+                                    <option selected>@calcLocalization.WebsiteBranch_StackCMSForWebsite</option>
+                                    <option value="1">WordPress</option>
+                                    <option value="2">OpenCart</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ВАРИАНТ 3: ИТОГ-->
+            <div id="step3-3" class="container calc-content3" style="display: none;">
+                <h1 class="calc-title">@calcLocalization.TotalFrom</h1>
+
+                <div class="line-status">
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange"></div>
+                    <div class="crl-orange active"></div>
+                </div>
+
+                <div class="row content-select">
+                    <div class="icon-modal">
+                        <i class="fa-solid fa-ruble-sign"></i>
+                    </div>
+
+                    <h2 class="calc-title-mini">@calcLocalization.TotalFrom <div id="cost-3-end"></div></h2>
+                </div>
+
+                <div class="content-center-btn">
+                    <a href="/" class="clickform">@calcLocalization.MakeOrder</a>
+                </div>
+            </div>
         </div>
-    </section>
+    </div>
+</div>
 
-@section js{
-<script>
 
-    async function onOrderSubmitting(event){
-       event.preventDefault();
-       $('#sendorder').modal('show');
-       await sleep(2000);
-       document.getElementById('orderForm').submit();
-    }
-
-    function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-</script>
-}

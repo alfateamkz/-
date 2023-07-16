@@ -5,7 +5,7 @@
     ViewData["Title"] = "Home Page";
 }
 @model TeamVM
-@{
+@*@{
     var currentLang = DBHelper.GetCurrentLanguage(User);
 }
 
@@ -20,13 +20,13 @@
                     </div>
                     <div class="contentteam">
                         <div class="nameanduser">
-                            <div class="time-name">@LocalizationHelper.GetLocalizedString(item.Titles,currentLang.Code)</div>
-                            <div class="username">@LocalizationHelper.GetLocalizedString(item.MiddleDescriptions,currentLang.Code)</div>
+                            <div class="time-name">@item.GetLocalizedTitle(currentLang.Id)</div>
+                            <div class="username">@item.GetLocalizedMiddleDescription(currentLang.Id)</div>
                         </div>
-                        <div class="group">@LocalizationHelper.GetLocalizedString(item.Positions,currentLang.Code)</div>
+                        <div class="group">@item.GetLocalizedPosition(currentLang.Id)</div>
                     </div>
                 </div>
             </div>
         }
     </div>
-</div>
+</div>*@

@@ -1,120 +1,99 @@
 ﻿@using Alfateam.Helpers
+@using Alfateam.Services;
 @using Alfateam.ViewModels.Home
 @{
     ViewData["Title"] = "Privacy Policy";
 }
 @model ServicesVM
+@inject LocalizationService localization
 @{
-    var currentLang = DBHelper.GetCurrentLanguage(User);
-    var landingTexts = DBHelper.GetLangingTexts();
+    var currentLang = localization.GetCurrentLanguage();
+    var pageLocalization = localization.GetServicesPageLocalization();
+    var mainLocalization = localization.GetMainPageLocalization();
 }
 
-
-    <div class="container servicemain content-top-page">
+@section in_header{
+    <!-- CONTENT HEADER -->
+    <div class="container">
         <div class="row">
+            <div class="col-md-12">
+                <div class="static-page-header">
+                    <div class="title-static">@pageLocalization.Header</div>
+                </div>
 
-            @foreach (var item in Model.Promotions)
-            {
-                 <div class="col-md-4">
-                    <div class="service">
-                        <div class="service-header">
-                            <div class="service-title">
-                                <div class="title">@LocalizationHelper.GetLocalizedString(item.Captions,currentLang.Code)</div>
-                                <div class="cost">@LocalizationHelper.GetLocalizedString(item.Prices,currentLang.Code)</div>
+                <div class="static-content static-cost">
+                    <div class="row">
+
+
+                        @foreach(var service in Model.Promotions)
+                        {
+                            <div class="col-md-3 mt-3">
+                                <div class="element-costs">
+                                    <div class="icon-costs">
+                                        @switch (service.PromotionPuzzleType)
+                                        {
+                                            case Alfateam.Database.Enums.PromotionPuzzleType.Puzzle1:
+                                                <div class="pazzle-1"></div>
+                                                break;
+                                            case Alfateam.Database.Enums.PromotionPuzzleType.Puzzle2:
+                                                <div class="pazzle-2"></div>
+                                                break;
+                                            case Alfateam.Database.Enums.PromotionPuzzleType.Puzzle3:
+                                                <div class="pazzle-3"></div>
+                                                break;
+                                            case Alfateam.Database.Enums.PromotionPuzzleType.Puzzle4:
+                                                <div class="pazzle-4"></div>
+                                                break;
+                                        }
+                                    </div>
+                                    <div class="info-costs">
+                                        <div class="name">@service.GetLocalizedCaption(currentLang.Id)</div>
+                                        <div class="cost">@service.GetLocalizedPrice(currentLang.Id)</div>
+                                    </div>
+                                </div>
                             </div>
+                        }
 
-                            <div class="service-img">
-                                <div class="serviceimg1" style="background: url('@item.RightImgPath');background-size: 100% 100% ; "></div>
+                     
+
+               
+
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="cost-desc-opt">
+                                @pageLocalization.Col1Text
                             </div>
                         </div>
 
-                        <div class="service-content">
-                            @foreach (var description in item.Descriptions)
-                            {
-                                 <div class="listc">
-                                    <div class="borderservic">
-                                        <div class="doneservice"></div>
-                                    </div>
-                                    <div class="text">
-                                            @LocalizationHelper.GetLocalizedString(description.Texts,currentLang.Code)
-                                    </div>
-                                </div>
-                            }
-                       </div>
-
-                       <div class="service-footer">
-                            <a href="/" class="alpha-btn2">@LocalizationHelper.GetLocalizedString(landingTexts.OrderNow,currentLang.Code)</a>
+                        <div class="col-md-3">
+                            <div class="cost-desc-opt">
+                                @pageLocalization.Col2Text
+                            </div>
                         </div>
-                  </div>
-               </div>
-            }
-        </div>
-    </div>
 
-    <div class="container servicemainmobile">
-        <div class="row">
-            <div class="owl-carousel owl-theme owl-service">
-
-                @foreach (var item in Model.Promotions)
-                {
-                   <div class="item">
-                        <div class="service">
-
-                            <div class="service-header">
-                                <div class="service-title">
-                                    <div class="title">@LocalizationHelper.GetLocalizedString(item.Captions,currentLang.Code)</div>
-                                    <div class="cost">@LocalizationHelper.GetLocalizedString(item.Prices,currentLang.Code)</div>
-                                </div>
-    
-                                <div class="service-img">
-                                    <div class="serviceimg1"  style="background: url('@item.RightImgPath') center;background-size: 100%;"></div>
-                                </div>
+                        <div class="col-md-3">
+                            <div class="cost-desc-opt">
+                                @pageLocalization.Col3Text
                             </div>
-    
-                            <div class="service-content">
-                                @foreach (var description in item.Descriptions)
-                                {
-                                     <div class="listc">
-                                        <div class="borderservic">
-                                            <div class="doneservice"></div>
-                                        </div>
-                                        <div class="text">
-                                                @LocalizationHelper.GetLocalizedString(description.Texts,currentLang.Code)
-                                        </div>
-                                    </div>
-                                }
-                          
-                            </div>
-    
-                            <div class="service-footer">
-                                <a href="/" class="alpha-btn2"> @LocalizationHelper.GetLocalizedString(landingTexts.OrderNow,currentLang.Code)</a>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="cost-desc-opt">
+                                @pageLocalization.Col4Text
                             </div>
                         </div>
                     </div>
-                
-                }
-
-             
-
+                </div>
             </div>
-
-            <script>
-                $('.owl-carousel').owlCarousel({
-                    loop:true,
-                    margin:10,
-                    nav:true,
-                    responsive:{
-                        0:{
-                            items:1
-                        },
-                        600:{
-                            items:1
-                        },
-                        1000:{
-                            items:5
-                        }
-                    }
-                })
-            </script>
         </div>
-   </div>
+    </div>
+}
+
+<!-- SECTION: Contacts -->
+@await Component.InvokeAsync("OrderFormComponent")
+
+<!-- SECTION: Maps -->
+@await Component.InvokeAsync("MapBlockComponent")

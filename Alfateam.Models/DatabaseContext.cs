@@ -1,6 +1,18 @@
 ﻿using Alfateam.Database.Helpers;
 using Alfateam.Database.Models;
+using Alfateam.Database.Models.Abstractions;
+using Alfateam.Database.Models.CRM;
+using Alfateam.Database.Models.CRM.Accounting;
+using Alfateam.Database.Models.CRM.Orders;
+using Alfateam.Database.Models.CRM.Sales;
+using Alfateam.Database.Models.CRM.Staff;
+using Alfateam.Database.Models.ForBusiness;
 using Alfateam.Database.Models.General;
+using Alfateam.Database.Models.Localizations;
+using Alfateam.Database.Models.Localizations.Texts;
+using Alfateam.Database.Models.Localizations.Texts.OtherPages;
+using Alfateam.Database.Models.Localizations.Texts.Popups;
+using Alfateam.Database.Models.NewPosts;
 using Alfateam.Database.Models.Portfolios;
 using Alfateam.Database.Models.Promotions;
 using Alfateam.Database.Models.SitePagesTexts;
@@ -13,8 +25,20 @@ namespace Alfateam.Database
         public DbSet<SiteFrontend> SiteFrontends { get; set; }
 
         public DbSet<Post> Posts { get; set; }
+
+        #region NewPosts
+        public DbSet<NewPost> NewPosts { get; set; }
+        public DbSet<PostHeading> PostHeadings { get; set; }
+        public DbSet<PostImage> PostImages { get; set; }
+        public DbSet<PostParagraph> PostParagraphs { get; set; }
+        public DbSet<PostSlider> PostSliders { get; set; }
+        public DbSet<PostVideo> PostVideos { get; set; }
+
+        #endregion
+
         public DbSet<Partner> Partners { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<CallRequest> CallRequests { get; set; }
         public DbSet<PortfolioCategory> PortfolioCategories { get; set; }
         public DbSet<Teammate> Teammates { get; set; }
 
@@ -34,17 +58,55 @@ namespace Alfateam.Database
         #region Portfolios
         public DbSet<Portfolio> Portfolios { get; set; }
         public DbSet<PortfolioImage> PortfolioImages { get; set; }
-        #endregion
+		#endregion
 
-        #region General
-        public DbSet<Language> Languages { get; set; }
+		#region ForBusiness
+		public DbSet<OutstaffEmployeeInfo> OutstaffEmployeeInfos { get; set; }
+		#endregion
+
+		#region General
+		public DbSet<Language> Languages { get; set; }
         public DbSet<TranslationItem> TranslationItems { get; set; }
         public DbSet<UserModel> Users { get; set; }
         #endregion
 
+
+        #region Localizations
+
+        #region Texts
+
+        #region Other pages
+        public DbSet<NewsPageLocalization> NewsPageLocalizations { get; set; }
+        public DbSet<PortfolioPageLocalization> PortfolioPageLocalizations { get; set; }
+        public DbSet<PrivacyPageLocalization> PrivacyPageLocalizations { get; set; }
+        public DbSet<ServicesPageLocalization> ServicesPageLocalizations { get; set; }
+        #endregion
+
+        #region Popups
+        public DbSet<AcceptOrderPopupLocalization> AcceptOrderPopupLocalizations { get; set; }
+        public DbSet<CallPopupLocalization> CallPopupLocalizations { get; set; }
+        public DbSet<ContactsPopupLocalization> ContactsPopupLocalizations { get; set; }
+        public DbSet<PortfolioPopupLocalization> PortfolioPopupLocalizations { get; set; }
+        #endregion
+
+        public DbSet<CalculatorLocalization> CalculatorLocalizations { get; set; }
+        public DbSet<ErrorPagesLocalization> ErrorPagesLocalizations { get; set; }
+        public DbSet<MainPageLocalization> MainPageLocalizations { get; set; }
+        public DbSet<MapBlockLocalization> MapBlockLocalizations { get; set; }
+        public DbSet<SharedLocalization> SharedLocalizations { get; set; }
+        #endregion
+
+        public DbSet<PartnerLocalization> PartnerLocalizations { get; set; }
+        public DbSet<PortfolioCategoryLocalization> PortfolioCategoryLocalizations { get; set; }
+        public DbSet<PortfolioLocalization> PortfolioLocalizations { get; set; }
+        public DbSet<PromotionDescriptionItemLocalization> PromotionDescriptionItemLocalizations { get; set; }
+        public DbSet<PromotionLocalization> PromotionLocalizations { get; set; }
+        public DbSet<TeammateLocalization> TeammateLocalizations { get; set; }
+        #endregion
+
         public DatabaseContext() : base()
         {
-            Database.EnsureCreated();
+            Database.Migrate();
 
             if (SiteFrontends.Count() == 0)
             {
@@ -55,11 +117,20 @@ namespace Alfateam.Database
                 FillSiteTexts();
                 SaveChanges();
             }
+
+            if (!SharedLocalizations.Any())
+            {
+                FillRussianLocalization();
+                SaveChanges();
+            }
         }
 
         public DatabaseContext(DbContextOptions<DatabaseContext> options)
         {
-            Database.EnsureCreated();
+            Database.Migrate();
+
+
+
             if (SiteFrontends.Count() == 0)
             {
                 FillUsers();
@@ -70,6 +141,21 @@ namespace Alfateam.Database
 
                 FillSiteTexts();
                 SaveChanges();
+            }
+
+
+
+            if (!SharedLocalizations.Any())
+            {
+                try
+                {
+                    FillRussianLocalization();
+                    SaveChanges();
+                }
+                catch (Exception ex)
+                {
+
+                }
             }
         }
 
@@ -189,9 +275,31 @@ namespace Alfateam.Database
                 UserRole = Enums.UserRole.Admin
             });
         }
+
+        private void FillRussianLocalization()
+        {
+            //Текста по умолчанию заданы
+            //LanguageId = 1  - русский язык
+
+            NewsPageLocalizations.Add(new NewsPageLocalization { LanguageId = 1 });
+            PortfolioPageLocalizations.Add(new PortfolioPageLocalization { LanguageId = 1 });
+            PrivacyPageLocalizations.Add(new PrivacyPageLocalization { LanguageId = 1 });
+            ServicesPageLocalizations.Add(new ServicesPageLocalization { LanguageId = 1 });
+
+            AcceptOrderPopupLocalizations.Add(new AcceptOrderPopupLocalization { LanguageId = 1 });
+            CallPopupLocalizations.Add(new CallPopupLocalization { LanguageId = 1 });
+            ContactsPopupLocalizations.Add(new ContactsPopupLocalization { LanguageId = 1 });
+            PortfolioPopupLocalizations.Add(new PortfolioPopupLocalization { LanguageId = 1 });
+
+            CalculatorLocalizations.Add(new CalculatorLocalization { LanguageId = 1 });
+            ErrorPagesLocalizations.Add(new ErrorPagesLocalization { LanguageId = 1 });
+            MainPageLocalizations.Add(new MainPageLocalization { LanguageId = 1 });
+            MapBlockLocalizations.Add(new MapBlockLocalization { LanguageId = 1 });
+            SharedLocalizations.Add(new SharedLocalization { LanguageId = 1 });
+        }
         #endregion
 
-
+   
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -202,8 +310,6 @@ namespace Alfateam.Database
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
-            modelBuilder.Entity<Partner>().HasMany(o => o.Titles);
-            modelBuilder.Entity<Partner>().HasMany(o => o.Descriptions);
         }
     }
 }

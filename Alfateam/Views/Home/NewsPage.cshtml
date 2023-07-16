@@ -1,27 +1,105 @@
 ﻿@using Alfateam.Database.Models
+@using Alfateam.Database.Models.NewPosts;
 @using Alfateam.Helpers
 @using Alfateam.ViewModels
 @{
     ViewData["Title"] = "Home Page";
-}
-@model Post
+    ViewData["HideMakeOrderBtn"] = true;
 
-@{
-    var currentLang = DBHelper.GetCurrentLanguage(User);
-    var generalTexts = DBHelper.GetGeneralTexts();
+    int slidersCounter = 0;
 }
+@model NewPost
 
-<div class="container content-top-page">
-    <div class="pagelist">
-        <div class="pagecontent">
-            <div class="news-full-image" style="background:url('@Model.ImgPath');background-size: 100% 100%;"></div>
-            <div class="news-full-title">@LocalizationHelper.GetLocalizedString(Model.Captions,currentLang.Code)</div>
-            <div class="news-full-date">
-                 @LocalizationHelper.GetLocalizedString(generalTexts.PublishedAt,currentLang.Code) @Model.CreatedAt.ToString("dd MMMM yyyy") в @Model.CreatedAt.ToString("HH:mm")
-            </div>
-            <div class="news-content">
-                 @LocalizationHelper.GetLocalizedString(Model.Contents,currentLang.Code)
+
+@section in_header{
+
+    <!-- CONTENT HEADER -->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="static-content news-full">
+
+                    @foreach (var item in Model.OrderedItems)
+                    {
+                        if (item is PostHeading heading)
+                        {
+                            <div class="news-title-full">
+                                @heading.Text
+                            </div>
+                        }
+                        else if (item is PostParagraph paragraph)
+                        {
+                            <div class="news-text-full">
+                                @paragraph.Text
+                            </div>
+                        }
+                        else if (item is PostImage img)
+                        {
+
+                            <div class="news-image-full" style="background:url('@img.ImgPath');background-size: 103% 103%;"></div>
+                        }
+                        else if (item is PostVideo video)
+                        {
+
+                            <div class="news-image-full">
+                                <video controls style="width:100%" src="@video.ImgPath"></video>
+                            </div>
+                        }
+                        else if (item is PostSlider slider)
+                        {
+                            <div class="news-image-full">
+                                <div id="beforeImagesBlock-@slidersCounter">
+                                    <div class="owl-carousel owl-theme owl-modal-id1" id="imagesBlock-@slidersCounter">
+                                        @foreach (var photo in slider.Images)
+                                        {
+                                            <div class="item">
+                                                <div class="photoportfolio" style="background:url('@photo.ImgPath'); background-size: 103% 102%;"></div>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <script>
+                                        $(`#imagesBlock-@slidersCounter`).owlCarousel({
+                                            loop: true,
+                                            margin: 10,
+                                            nav: true,
+                                            responsive: {
+                                                0: {
+                                                    items: 1
+                                                },
+                                                600: {
+                                                    items: 1
+                                                },
+                                                1000: {
+                                                    items: 1
+                                                }
+                                            }
+                                        });
+                                    </script>
+                                </div>
+                            </div>
+
+                            slidersCounter++;
+                        }
+                    }
+
+
+                  
+
+              
+
+
+                    <div class="news-date-full">
+                        Опубликовано @Model.CreatedAt.ToString("dd MMMM yyyy") в @Model.CreatedAt.ToString("HH:mm")
+                    </div>
+
+                    <a asp-action="News" asp-controller="Home" class="clickback"></a>
+                </div>
             </div>
         </div>
     </div>
-</div>
+}
+
+
+<!-- SECTION: Maps -->
+@await Component.InvokeAsync("MapBlockComponent")

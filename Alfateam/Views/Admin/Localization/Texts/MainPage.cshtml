@@ -1,0 +1,73 @@
+﻿@using MarkupCreator.Helpers.Converters;
+@using Triggero.Web.ViewModels.Localization;
+
+@{
+    ViewData["Title"] = "ЛОКАЛИЗАЦИЯ";
+    ViewData["ShowLang"] = Model.LanguageId != null;
+}
+@{
+    Layout = "_AdminLayoutV2";
+}
+@model LocalizationInterfaceAllPagesVM
+
+
+ <!-- CONTENT -->
+<div class="content">
+    <div class="row">
+
+        <div class="page">
+            <div class="accordion" id="accordionPanelsStayOpenExample">
+
+                @foreach (var item in Model.Groups)
+                {
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="panelsStayOpen-headingOne-@item.Id">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne-@item.Id" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne-@item.Id">
+                               @item.Title
+                            </button>
+                        </h2>
+                        <div id="panelsStayOpen-collapseOne-@item.Id" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingOne-@item.Id">
+                            <div class="accordion-body">
+                                <table class="table">
+                                    <thead class="tableheader">
+                                        <tr>
+                                            <th scope="col">Название</th>
+                                            <th scope="col">Языки</th>
+                                            <th scope="col">Действия</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var pageModel in item.Pages)
+                                        {
+                                            <tr>
+                                                <td>@EnumDescriptionHelper.GetDescription(pageModel.Type)</td>
+                                                <td>@pageModel.LanguagesStr</td>
+                                                <td>
+                                                    <div class="interect">
+                                                        <a asp-action="@item.AspAction" asp-controller="AllPagesInterface" asp-route-type="@Convert.ChangeType(pageModel.Type,pageModel.Type.GetTypeCode())" asp-route-langId="@Model.LanguageId" class="edit"><i class="fa-solid fa-pencil"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+
+            </div>
+
+            @*            <div class="mb-3 position-right">
+            <a asp-action="CreatePost" asp-controller="Posts" class="button-classic">Добавить</a>
+            </div>*@
+
+            <script>
+                $(document).ready(function () {
+                    $('#tablemanager').DataTable();
+                });
+            </script>
+        </div>
+    </div>
+</div>

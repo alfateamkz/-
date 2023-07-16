@@ -1,0 +1,74 @@
+﻿@using Alfateam.Database.Models
+@using Alfateam.Database.Models.ForBusiness;
+@using Alfateam.ViewModels
+@using CRMWeb.Helpers.Html
+@{
+    Layout = "_AdminLayoutV2";
+}
+@model OutstaffEmployeeInfo
+
+
+<!-- Page Heading -->
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            Редактирование аутстафф сотрудника
+        </h1>
+    </div>
+</div>
+<!-- /.row -->
+
+<div class="row">
+    <div class="col-lg-12">
+
+        <form asp-action="UpdateOutstaffPOST" asp-controller="Outstaff" onsubmit="onSubmit(event)" method="post" enctype="multipart/form-data" id="form" role="form">
+
+            <input type="hidden" asp-for="Id" value="@Model.Id" />
+            <input type="hidden" asp-for="CVPath" value="@Model.CVPath" />
+
+            <div class="form-group">
+                <label>ФИО*</label>
+                <input class="form-control" asp-for="FIO" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Должность*</label>
+                <input class="form-control" asp-for="Position" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Часовой рейт компании*</label>
+                <input type="number" class="form-control" asp-for="HourlyRate" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Часовой рейт работника*</label>
+                <input type="number" class="form-control" asp-for="HourlyRateInternal" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Адрес*</label>
+                <input class="form-control" asp-for="Address" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Комментарий</label>
+                <textarea class="form-control" asp-for="Comment" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="" class="">Файл резюме</label>
+                <input type="file" name="file" class="form-control" placeholder="">
+            </div>
+
+
+            <div class="mb-3 mt-3 position-right">
+                <button type="submit" class="button-classic">Сохранить</button>
+            </div>
+
+
+        </form>
+
+    </div>
+</div>
+

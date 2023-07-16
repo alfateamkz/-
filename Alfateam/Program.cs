@@ -1,4 +1,5 @@
 using Alfateam.Database;
+using Alfateam.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,7 @@ namespace Alfateam
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddHttpContextAccessor();
 
             // Add services to the container.
             builder.Services.AddDbContext<DatabaseContext>(options =>
@@ -19,6 +21,8 @@ namespace Alfateam
                     o.EnableRetryOnFailure();
                 });
             });
+
+            builder.Services.AddScoped<LocalizationService>();
 
             // установка конфигурации подключени
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

@@ -1,0 +1,114 @@
+﻿@using Alfateam.CRM.ViewModels.Resources;
+@using Alfateam.CRM.ViewModels.Sales;
+@using Alfateam.Database.Enums.CRM.Staff;
+@using Alfateam.Database.Models
+@using MarkupCreator.Helpers.Converters;
+@{
+    Layout = "_AdminLayoutV2";
+}
+@model ResourcesPageVM
+
+<!-- Page Heading -->
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            Ресурсы
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+
+
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Команды Alfateam</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Клиента/прочее</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+
+                <div class="table-responsive mt-4">
+                    <table class="table table-hover" id="tablemanager">
+                        <thead class="tableheader">
+                            <tr>
+                                <th>Id</th>
+                                <th>Название</th>
+                                <th>Статус</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.OurResources) {
+                                <tr>
+                                    <td>@item.Id</td>
+                                    <td>@item.Title</td>
+                                    <td>@EnumDescriptionHelper.GetDescription(item.Status)</td>
+                                    <td>
+                                        <div class="interect">
+                                            <a asp-action="UpdateEmployee" asp-controller="Staff" asp-route-id="@item.Id" class="edit"><i class="fa-solid fa-eye"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+
+                <div class="table-responsive mt-4">
+                    <table class="table table-hover" id="tablemanager">
+                        <thead class="tableheader">
+                            <tr>
+                                <th>Id</th>
+                                <th>Название</th>
+                                <th>Статус</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.OtherResources) {
+                                <tr>
+                                    <td>@item.Id</td>
+                                    <td>@item.Title</td>
+                                    <td>@EnumDescriptionHelper.GetDescription(item.Status)</td>
+                                    <td>
+                                        <div class="interect">
+                                            <a asp-action="UpdateResource" asp-controller="Resources" asp-route-id="@item.Id" class="edit"><i class="fa-solid fa-eye"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+
+
+            </div>
+        </div>
+
+        <div class="mb-3 position-right">
+        <a asp-action="CreateResource" asp-controller="Resources" class="button-classic">Добавить</a>
+        </div>
+
+    @*    <script>
+            $(document).ready(function () {
+                $('#tablemanager').DataTable();
+            });
+        </script>*@
+
+
+        
+    </div>
+</div>
+<!-- /.row -->

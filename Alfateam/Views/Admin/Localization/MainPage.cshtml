@@ -1,0 +1,94 @@
+﻿@using Alfateam.Database.Models;
+@{
+    Layout = "_AdminLayoutV2";
+    ViewData["Title"] = "ЛОКАЛИЗАЦИЯ";
+    ViewData["ShowLang"] = true;
+}
+@model Language
+
+ <!-- CONTENT -->
+<div class="content">
+
+    <div class="row">
+
+        <div class="col-md-2">
+            <a asp-controller="AllPagesInterface" asp-action="AllPagesByLang" class="lang">
+                <div class="content">
+                    <div class="iconlang">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div class="name">Текста интерфейсов</div>
+                </div>
+            </a>
+        </div>
+
+
+        @if(Model.Id != 1)
+        {
+            <div class="col-md-2">
+                <a asp-controller="PromotionsLocalizations" asp-action="Promotions" class="lang">
+                    <div class="content">
+                        <div class="iconlang">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <div class="name">Тарифные карточки</div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-2">
+                <a asp-controller="PortfolioLocalizations" asp-action="Portfolio" class="lang">
+                    <div class="content">
+                        <div class="iconlang">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <div class="name">Портфолио</div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-2">
+                <a asp-controller="PortfolioCategoriesLocalizations" asp-action="PortfolioCategories" class="lang">
+                    <div class="content">
+                        <div class="iconlang">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <div class="name">Категории портфолио</div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-2">
+                <a asp-controller="PartnersLocalizations" asp-action="Partners" class="lang">
+                    <div class="content">
+                        <div class="iconlang">
+                            <i class="fa-solid fa-meteor"></i>
+                        </div>
+                        <div class="name">Партнеры</div>
+                    </div>
+                </a>
+            </div>
+
+
+            <div class="col-md-2">
+                <a asp-controller="TeammatesLocalizations" asp-action="Teammates" class="lang">
+                    <div class="content">
+                        <div class="iconlang">
+                            <i class="fa-solid fa-meteor"></i>
+                        </div>
+                        <div class="name">Команда</div>
+                    </div>
+                </a>
+            </div>
+        }
+        else
+        {
+            <h1>В русском языке можно менять только текста интерфейса. Локализации контетна для русского языка можно отредактировать в формах самого контента</h1>
+        }
+
+
+
+     
+
+    </div>
+</div>

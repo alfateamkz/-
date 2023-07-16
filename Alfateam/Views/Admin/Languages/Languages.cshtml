@@ -1,6 +1,6 @@
 ﻿@using Alfateam.Database.Models
 @{
-    Layout = "_AdminLayout";
+    Layout = "_AdminLayoutV2";
 }
 @model List<Language>
 
@@ -16,8 +16,8 @@
 <div class="row">
     <div class="col-lg-12">
         <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
+            <table class="table table-hover" id="tablemanager">
+                <thead class="tableheader">
                     <tr>
                         <th style="width:50px"></th>
                         <th>Id</th>
@@ -53,6 +53,17 @@
                     }               
                 </tbody>
             </table>
+
+            <div class="mb-3 position-right">
+                <a asp-action="CreateLanguage" asp-controller="Languages" class="button-classic">Добавить</a>
+            </div>
+
+            <script>
+                $(document).ready(function () {
+                    $('#tablemanager').DataTable();
+                });
+            </script>
+
         </div>
     </div>
 </div>

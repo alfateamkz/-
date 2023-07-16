@@ -1,5 +1,6 @@
 ﻿using Alfateam.Abstractions;
 using Alfateam.Database;
+using Alfateam.Database.Models;
 using Alfateam.Database.Models.Portfolios;
 using Alfateam.Helpers;
 using Alfateam.Models;
@@ -28,14 +29,23 @@ namespace Alfateam.Controllers
         {
             var vm = new IndexVM
             {
-                GeneralTexts = DBHelper.GetGeneralTexts(),
-                LandingTexts = DBHelper.GetLangingTexts(),
-                News = DB.Posts
-                        .Include(o => o.Captions).ThenInclude(o => o.Language)
-                        .Include(o => o.Contents).ThenInclude(o => o.Language)
+                News = DB.NewPosts
+                        .Include(o => o.Language)
+                        .Include(o => o.Headings)
+                        .Include(o => o.Paragraphs)
+                        .Include(o => o.Images)
+                        .Where(o => o.LanguageId == GetCurrentLanguage().Id && !o.IsDeleted)
                         .ToList(),
+                Partners = DB.Partners
+                            .Include(o => o.Localizations)
+                            .ToList(),
+                Teammates = DB.Teammates
+                            .Include(o => o.Localizations)
+                            .ToList(),
                 Portfolios = DB.Portfolios
                                 .Include(o => o.Images)
+                                .Where(o => !o.IsHidden)
+                                .Take(6)
                                 .ToList()
             };
             vm.Portfolios.Reverse();
@@ -43,34 +53,74 @@ namespace Alfateam.Controllers
             return View(vm);
         }
 
-        [HttpPost]
-        public IActionResult CreateOrder([FromForm]IndexVM vm)
-        {
-            DB.Orders.Add(vm.NewOrder);
-            DB.SaveChanges();
-            return RedirectToAction("Index", "Home");
-        }
+        
 
      
 
 
+        //[Route("News")]
+        //public IActionResult News(int page=1)
+        //{
+        //    int skipped = (page - 1) * 8;
+
+        //    int pagesCount = (int)Math.Ceiling((double)DB.Posts.Count() / (double)8);
+
+        //    var allPosts = DB.Posts
+        //        .Include(o => o.Captions).ThenInclude(o => o.Language)
+        //        .Include(o => o.Contents).ThenInclude(o => o.Language)
+        //        .ToList();
+        //    allPosts.Reverse();
+
+
+        //    var vm = new NewsVM
+        //    {
+        //        Posts =  allPosts.Skip(skipped)
+        //                         .Take(8)
+        //                         .ToList(),
+        //        CurrentPage = page,
+        //        PagesCount = pagesCount
+        //    };
+        //    return View(vm);
+        //}
+        //[Route("NewsPage")]
+        //public IActionResult NewsPage(int id)
+        //{
+        //    var post = DB.Posts
+        //        .Include(o => o.Captions).ThenInclude(o => o.Language)
+        //        .Include(o => o.Contents).ThenInclude(o => o.Language)
+        //        .FirstOrDefault(o => o.Id == id);
+
+        //    post.Watches++;
+        //    DB.Posts.Update(post);
+        //    DB.SaveChanges();
+        //    return View(post);
+        //}
+
         [Route("News")]
-        public IActionResult News(int page=1)
+        public IActionResult News(int page = 1)
         {
             int skipped = (page - 1) * 8;
 
-            int pagesCount = (int)Math.Ceiling((double)DB.Posts.Count() / (double)8);
+    
 
-            var allPosts = DB.Posts
-                .Include(o => o.Captions).ThenInclude(o => o.Language)
-                .Include(o => o.Contents).ThenInclude(o => o.Language)
+            var allPosts = DB.NewPosts
+                .Include(o => o.Language)
+                .Include(o => o.Headings)
+                .Include(o => o.Images)
+                .Include(o => o.Paragraphs)
+                .Where(o => o.LanguageId == this.GetCurrentLanguage().Id && !o.IsDeleted)
                 .ToList();
             allPosts.Reverse();
 
+            int pagesCount = (int)Math.Ceiling((double)allPosts.Count() / (double)8);
+
+            
+
+            
 
             var vm = new NewsVM
             {
-                Posts =  allPosts.Skip(skipped)
+                Posts = allPosts.Skip(skipped)
                                  .Take(8)
                                  .ToList(),
                 CurrentPage = page,
@@ -81,17 +131,20 @@ namespace Alfateam.Controllers
         [Route("NewsPage")]
         public IActionResult NewsPage(int id)
         {
-            var post = DB.Posts
-                .Include(o => o.Captions).ThenInclude(o => o.Language)
-                .Include(o => o.Contents).ThenInclude(o => o.Language)
+            var post = DB.NewPosts
+                .Include(o => o.Language)
+                .Include(o => o.Headings)
+                .Include(o => o.Images)
+                .Include(o => o.Paragraphs)
+                .Include(o => o.Videos)
+                .Include(o => o.Sliders).ThenInclude(o => o.Images)
                 .FirstOrDefault(o => o.Id == id);
 
             post.Watches++;
-            DB.Posts.Update(post);
+            DB.NewPosts.Update(post);
             DB.SaveChanges();
             return View(post);
         }
-
 
 
         [Route("Portfolios")]
@@ -103,8 +156,9 @@ namespace Alfateam.Controllers
 
             var allPortfolios = DB.Portfolios
                     .Include(o => o.Images)
-                    .Include(o => o.Captions).ThenInclude(o => o.Language)
-                    .Include(o => o.Descriptions).ThenInclude(o => o.Language).ToList();
+                    .Include(o => o.Localizations)
+                    .Where(o => !o.IsHidden)
+                    .ToList();
             allPortfolios.Reverse();
 
             var vm = new PortfoliosVM
@@ -114,7 +168,7 @@ namespace Alfateam.Controllers
                                           .ToList(),
 
                 PortfolioCategories = DB.PortfolioCategories
-                     .Include(o => o.Captions).ThenInclude(o => o.Language)
+                     .Include(o => o.Localizations)
                      .ToList(),
 
                 CurrentPage = page,
@@ -133,7 +187,7 @@ namespace Alfateam.Controllers
                                                    .Take(9)
                                                    .ToList();
                 vm.SelectedCategory = DB.PortfolioCategories
-                                        .Include(o => o.Captions).ThenInclude(o => o.Language)
+                                        .Include(o => o.Localizations)
                                         .FirstOrDefault(o => o.Id == categoryId);
 
                 vm.PagesCount = (int)Math.Ceiling((double)filteredPortfolios.Count() / (double)9);
@@ -143,20 +197,20 @@ namespace Alfateam.Controllers
         }
 
         [Route("GetPortfolioJSON")]
-        public IActionResult GetPortfolioJSON(int id,string langCode)
+        public IActionResult GetPortfolioJSON(int id,int langId)
         {
             var portfolio = DB.Portfolios
                     .Include(o => o.Images)
-                    .Include(o => o.Captions).ThenInclude(o => o.Language)
-                    .Include(o => o.Descriptions).ThenInclude(o => o.Language)
+                    .Include(o => o.Localizations)
                     .FirstOrDefault(o => o.Id == id);
             var portfilioJson = new PortfolioJson()
             {
                 Id = portfolio.Id,
                 Images = portfolio.Images,
                 CreatedAt = portfolio.CreatedAt,
-                Description = LocalizationHelper.GetLocalizedString(portfolio.Descriptions, langCode),
-                Caption = LocalizationHelper.GetLocalizedString(portfolio.Captions, langCode)
+                Description = portfolio.GetLocalizedDescription(langId),
+                Caption = portfolio.GetLocalizedCaption(langId),
+                URL = portfolio.URL
             };
 
             return new JsonResult(portfilioJson);
@@ -172,10 +226,8 @@ namespace Alfateam.Controllers
             var vm = new PartnersVM()
             {
                 Partners = DB.Partners
-                .Include(o => o.Titles).ThenInclude(o => o.Language)
-                .Include(o => o.Descriptions).ThenInclude(o => o.Language)
-                .ToList()
-
+                                .Include(o => o.Localizations)
+                                .ToList()
             };
             return View(vm);
         }
@@ -185,10 +237,9 @@ namespace Alfateam.Controllers
             var vm = new ServicesVM()
             {
                 Promotions = DB.Promotions
-                .Include(o => o.Captions).ThenInclude(o => o.Language)
-                .Include(o => o.Prices).ThenInclude(o => o.Language)
-                .Include(o => o.Descriptions).ThenInclude(o => o.Texts).ThenInclude(o => o.Language)
-                .ToList()
+                                    .Include(o => o.Localizations)
+                                    .Include(o => o.Descriptions).ThenInclude(o => o.Localizations)
+                                    .ToList(),
             };
             return View(vm);
         }
@@ -198,10 +249,8 @@ namespace Alfateam.Controllers
             var vm = new TeamVM()
             {
                 Teammates = DB.Teammates
-                    .Include(o => o.Titles).ThenInclude(o => o.Language)
-                    .Include(o => o.MiddleDescriptions).ThenInclude(o => o.Language)
-                    .Include(o => o.Positions).ThenInclude(o => o.Language)
-                    .ToList()
+                                .Include(o => o.Localizations)
+                                .ToList()
             };
             return View(vm);
         }
@@ -213,11 +262,47 @@ namespace Alfateam.Controllers
         {
             return View();
         }
+        [Route("Privacy_en")]
+        public IActionResult Privacy_en()
+        {
+            return View();
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+
+        #region Обратная связя
+
+        [HttpPost]
+        public IActionResult CreateOrder([FromForm] IndexVM vm)
+        {
+            DB.Orders.Add(vm.NewOrder);
+            DB.SaveChanges();
+            return RedirectToAction("Index", "Home");
+        }
+        [HttpPost]
+        public IActionResult CreateCallRequest([FromForm] CallRequest req)
+        {
+            DB.CallRequests.Add(req);
+            DB.SaveChanges();
+            return RedirectToAction("Index", "Home");
+        }
+
+
+        #endregion
+
+
+        [Route("DownloadFile")]
+        public IActionResult DownloadFile(string path)
+        {
+
+            byte[] fileBytes = System.IO.File.ReadAllBytes(AppEnvironment.WebRootPath + path);
+            string fileName = Path.GetFileName(path);
+            return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
         }
     }
 }

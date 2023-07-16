@@ -20,9 +20,8 @@ namespace Alfateam.Controllers.Admin
         public IActionResult Promotions()
         {
             var promotions = DB.Promotions
-                .Include(o => o.Captions).ThenInclude(o => o.Language)
-                .Include(o => o.Prices).ThenInclude(o => o.Language)
-                .Include(o => o.Descriptions).ThenInclude(o => o.Texts).ThenInclude(o => o.Language)
+                .Include(o => o.Localizations)
+                .Include(o => o.Descriptions).ThenInclude(o => o.Localizations)
                 .ToList();
             return View(@"Views\Admin\Promotions\Promotions.cshtml", promotions);
         }
@@ -52,11 +51,10 @@ namespace Alfateam.Controllers.Admin
             var vm = new VMWithLanguages<Promotion>()
             {
                 TargetType = DB.Promotions
-                                .Include(o => o.Captions).ThenInclude(o => o.Language)
-                                .Include(o => o.Prices).ThenInclude(o => o.Language)
-                                .Include(o => o.Descriptions).ThenInclude(o => o.Texts).ThenInclude(o => o.Language)
+                                .Include(o => o.Localizations)
+                                .Include(o => o.Descriptions).ThenInclude(o => o.Localizations)
                                 .FirstOrDefault(o => o.Id == id),
-                Languages = DBHelper.GetLanguages()
+                Languages = DB.Languages.ToList()
             };
             return View(@"Views\Admin\Promotions\UpdatePromotion.cshtml", vm);
         }
@@ -70,42 +68,7 @@ namespace Alfateam.Controllers.Admin
             DB.SaveChanges();
             return RedirectToAction("Promotions", "Promotions");
         }
-        #region Удаляем удаленные на фронте переводы и добавляем выбранные
-        [HttpGet, Route("Admin/ClearPromotion")]
-        public async Task ClearPromotion(int id)
-        {
-            try
-            {
-                var promotion = DB.Promotions
-                              .Include(o => o.Captions).ThenInclude(o => o.Language)
-                              .Include(o => o.Prices).ThenInclude(o => o.Language)
-                              .Include(o => o.Descriptions).ThenInclude(o => o.Texts).ThenInclude(o => o.Language)
-                              .FirstOrDefault(o => o.Id == id);
 
-
-                DB.TranslationItems.RemoveRange(promotion.Captions);
-                DB.TranslationItems.RemoveRange(promotion.Prices);
-                DB.TranslationItems.RemoveRange(promotion.Descriptions.SelectMany(o => o.Texts));
-
-                promotion.Descriptions.ForEach(o => o.Texts.Clear());
-                DB.PromotionDescriptionItems.RemoveRange(promotion.Descriptions);
-
-
-                promotion.Captions.Clear();
-                promotion.Prices.Clear();
-                promotion.Descriptions.Clear();
-
-                DB.Promotions.Update(promotion);
-
-                DB.SaveChanges();
-            }
-            catch (Exception ex)
-            {
-
-            }
-        }
-
-        #endregion
 
         #endregion
 
@@ -113,13 +76,9 @@ namespace Alfateam.Controllers.Admin
         public IActionResult DeletePromotion(int id)
         {
             var promotion = DB.Promotions
-                .Include(o => o.Captions)
-                .Include(o => o.Prices)
-                .Include(o => o.Descriptions)
+                .Include(o => o.Localizations)
                 .FirstOrDefault(o => o.Id == id);
 
-            DB.TranslationItems.RemoveRange(promotion.Captions);
-            DB.TranslationItems.RemoveRange(promotion.Prices);
 
             DB.PromotionDescriptionItems.RemoveRange(promotion.Descriptions);
 

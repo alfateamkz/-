@@ -1,7 +1,7 @@
 ﻿@using Alfateam.Database.Models.Portfolios
 @using Alfateam.Helpers
 @{
-    Layout = "_AdminLayout";
+    Layout = "_AdminLayoutV2";
 }
 @model List<Portfolio>
 
@@ -17,13 +17,14 @@
 <div class="row">
     <div class="col-lg-12">
         <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
+            <table class="table table-hover" id="tablemanager">
+                <thead class="tableheader">
                     <tr>
                         <th>Id</th>
                         <th>Название</th>
                         <th>Категория</th>
                         <th>Описание</th>
+                        <th style="width:80px"></th>
                         <th style="width:80px"></th>
                         <th style="width:80px"></th>
                     </tr>
@@ -33,15 +34,39 @@
                     {
                         <tr>
                             <td>@item.Id</td>
-                            <td>@LocalizationHelper.GetLocalizedString(item.Captions,"RU")</td>
-                            <td>@LocalizationHelper.GetLocalizedString(item.Category.Captions,"RU")</td>
-                            <td>@LocalizationHelper.GetLocalizedString(item.Descriptions,"RU")</td>
+                            <td>@item.Caption</td>
+                            <td>@item.Category.Caption</td>
+                            <td>@item.Description</td>
                             <td><a asp-action="UpdatePortfolio" asp-controller="Portfolios" asp-route-id="@item.Id"><button class="btn btn-warning">Изменить</button></a></td>
                             <td><a asp-action="DeletePortfolio" asp-controller="Portfolios" asp-route-id="@item.Id"><button class="btn btn-danger">Удалить</button></a></td>
+                            <td>
+                                <a asp-action="TogglePortfilioVisibility" asp-controller="Portfolios" asp-route-id="@item.Id">
+                                    @if (item.IsHidden)
+                                    {
+                                        <button class="btn btn-danger">Открыть</button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-danger">Скрыть</button>
+                                    }
+                                </a>
+                            </td>
                        </tr>
                     }
                 </tbody>
             </table>
+
+            <div class="mb-3 position-right">
+                <a asp-action="CreatePortfolio" asp-controller="Portfolios" class="button-classic">Добавить</a>
+            </div>
+
+            <script>
+                $(document).ready(function () {
+                    $('#tablemanager').DataTable();
+                });
+            </script>
+
+
         </div>
     </div>
 </div>

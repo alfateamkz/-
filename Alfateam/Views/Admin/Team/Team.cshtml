@@ -1,12 +1,10 @@
 ﻿@using Alfateam.Database.Models
 @using Alfateam.Helpers
 @{
-    Layout = "_AdminLayout";
+    Layout = "_AdminLayoutV2";
 }
 @model List<Teammate>
-@{
-    var currentLang = DBHelper.GetCurrentLanguage(User);
-}
+
 
 <!-- Page Heading -->
 <div class="row">
@@ -20,8 +18,8 @@
 <div class="row">
     <div class="col-lg-12">
         <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
+            <table class="table table-hover" id="tablemanager">
+                <thead class="tableheader">
                     <tr>
                         <th style="width:50px"></th>
                         <th>Id</th>
@@ -40,9 +38,9 @@
                                 <img src="@item.ImgPath" width="50" height="50">
                             </td>
                             <td>@item.Id</td>
-                            <td>@LocalizationHelper.GetLocalizedString(item.Titles,"RU")</td>
-                            <td>@LocalizationHelper.GetLocalizedString(item.MiddleDescriptions,"RU")</td>
-                            <td>@LocalizationHelper.GetLocalizedString(item.Positions,"RU")</td>
+                            <td>@item.Title</td>
+                            <td>@item.MiddleDescription</td>
+                            <td>@item.Position</td>
                             <td><a asp-action="UpdateTeammate" asp-controller="Team" asp-route-id="@item.Id"><button class="btn btn-warning">Изменить</button></a></td>
                             <td><a asp-action="DeleteTeammate" asp-controller="Team" asp-route-id="@item.Id"><button class="btn btn-danger">Удалить</button></a></td>
                         </tr>
@@ -50,6 +48,16 @@
                                 
                 </tbody>
             </table>
+
+            <div class="mb-3 position-right">
+                <a asp-action="CreateTeammate" asp-controller="Team" class="button-classic">Добавить</a>
+            </div>
+
+            <script>
+                $(document).ready(function () {
+                    $('#tablemanager').DataTable();
+                });
+            </script>
         </div>
     </div>
 </div>

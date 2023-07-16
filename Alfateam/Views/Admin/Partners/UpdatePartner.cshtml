@@ -2,7 +2,7 @@
 @using Alfateam.ViewModels
 @using CRMWeb.Helpers.Html
 @{
-    Layout = "_AdminLayout";
+    Layout = "_AdminLayoutV2";
 }
 @model VMWithLanguages<Partner>
 
@@ -20,219 +20,60 @@
 <div class="row">
     <div class="col-lg-12">
 
-        <form asp-action="UpdatePartnerPOST" asp-controller="Partners" method="post" enctype="multipart/form-data" onsubmit="setTranslations(event)" id="form" role="form">
+        <form asp-action="UpdatePartnerPOST" asp-controller="Partners" onsubmit="onSubmit(event)" method="post" enctype="multipart/form-data" id="form" role="form">
 
             <input type="hidden" asp-for="TargetType.Id" value="@Model.TargetType.Id" />
             <input type="hidden" asp-for="TargetType.ImgPath" value="@Model.TargetType.ImgPath" />
 
             <div class="form-group">
                 <label>Название</label>
-                <input class="form-control" asp-for="TargetType.Titles[0].Text" required placeholder="">
+                <input class="form-control" asp-for="TargetType.Title" required placeholder="">
             </div>
-            <input type="hidden" asp-for="TargetType.Titles[0].LanguageId" value="1" />
-            <input type="hidden" asp-for="TargetType.Titles[0].Id" value="@Model.TargetType.Titles[0].Id" />
 
-            <div class="form-group">
-                <label>Изображение</label>
-                <input type="file" name="file">
+            <div class="mb-3">
+                <label for="" class="formlabel">Загрузить изображение</label>
+                <div class="content-load" style="">
+                    <div class="close-file" id="close_file"><i class="fa-solid fa-xmark"></i></div>
+                    <label class="loadfile1" id="upload-image" for="pct" style="height: 6em;background: url('@Model.TargetType.ImgPath');background-size: 100% 100%;">
+                        <div class="text-fileupload">
+                            @if (string.IsNullOrEmpty(Model.TargetType.ImgPath))
+                            {
+                                @("Загрузите файл")
+                            }
+                        </div>
+                    </label>
+                    <input class="pctfile" type="file" name="file" id="pct">
+                </div>
             </div>
 
             <div class="form-group">
                 <label>Описание</label>
-                <textarea class="form-control"  asp-for="TargetType.Descriptions[0].Text" required rows="3"></textarea>
-            </div>
-            <input type="hidden" asp-for="TargetType.Descriptions[0].LanguageId" value="1" />
-            <input type="hidden" asp-for="TargetType.Descriptions[0].Id" value="@Model.TargetType.Descriptions[0].Id" />
-
-            <div class="col-lg-12">
-                <h2>Переводы на другие языки</h2>
-
-                <div class="col-lg-6">
-                    <div class="table-responsive">
-                        <h4>Заголовок</h4>
-                        <button type="button" class="btn btn-primary" onclick="addTitleTranslation()">Добавить перевод</button>
-                        <table class="table table-bordered table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Язык</th>
-                                    <th>Значение</th>
-                                    <th style="width:80px"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="titleTranslationsTBody">
-                                @for (var i = 1; i < Model.TargetType.Titles.Count; i++)
-                                {
-                                    var translation = Model.TargetType.Titles[i];
-                                    <tr data-id="@translation.Id">
-                                        <input type="hidden" name="TargetType.Titles[@i].Id" value="@translation.Id">
-                                        <td>
-                                            <select class="form-control" name="TargetType.Titles[@i].LanguageId">
-                                                @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
-                                            </select>
-                                        </td>
-                                        <td><input class="form-control" name="TargetType.Titles[@i].Text" value="@translation.Text" required placeholder=""></td>
-                                        <td><button type="button" onclick="deleteTitleTranslation(event)" class="btn btn-danger">Удалить</button></td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                 <div class="col-lg-6">
-                    <div class="table-responsive">
-                        <h4>Описание</h4>
-                        <button type="button" class="btn btn-primary" onclick="addDescTranslation()">Добавить перевод</button>
-                        <table class="table table-bordered table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Язык</th>
-                                    <th>Значение</th>
-                                    <th style="width:80px"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="descTranslationsTBody">
-                                @for (var i = 1; i < Model.TargetType.Descriptions.Count; i++)
-                                {
-                                    var translation = Model.TargetType.Descriptions[i];
-                                    <tr data-id="@translation.Id">
-                                        <input type="hidden" name="TargetType.Descriptions[@i].Id" value="@translation.Id">
-                                        <td>
-                                            <select class="form-control" name="TargetType.Descriptions[@i].LanguageId">
-                                                @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
-                                            </select>
-                                        </td>
-                                        <td><input class="form-control" name="TargetType.Descriptions[@i].Text" value="@translation.Text" required placeholder=""></td>
-                                        <td><button type="button" onclick="deleteDescTranslation(event)" class="btn btn-danger">Удалить</button></td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-               
+                <textarea class="form-control"  asp-for="TargetType.Description" required rows="3"></textarea>
             </div>
 
 
-            <button type="submit" class="btn btn-default">Сохранить</button>
+
+
+            <div class="mb-3 mt-3 position-right">
+                <button type="submit" class="button-classic">Сохранить</button>
+            </div>
 
         </form>
 
     </div>
 </div>
 
-
-@*Переводы для заголовка*@
 <script>
 
-    let titleTranslationsIndex = @Model.TargetType.Titles.Count-1;
-    
-    function addTitleTranslation(){
-
-        titleTranslationsIndex++;
-        let tBody = document.getElementById("titleTranslationsTBody");
-
-        let tr = document.createElement("tr");
-        tr.innerHTML = `  <td>
-                              <select class="form-control" name="TargetType.Titles[${titleTranslationsIndex}].LanguageId">
-                                  @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages))
-                              </select>
-                          </td>
-                          <td><input class="form-control" name="TargetType.Titles[${titleTranslationsIndex}].Text" required placeholder=""></td>
-                          <td><button type="button" onclick="deleteTitleTranslation(event)" class="btn btn-danger">Удалить</button></td>`;
-
-        tBody.appendChild(tr);
-
+    async function onSubmit(event) {
+        event.preventDefault();
+        await cropFinal('pct', 'upload-image');
+        event.target.submit();
     }
 
-    function deleteTitleTranslation(event) {
+    $(document).ready(function () {
+        initImageCroppie('upload-image', 'pct', 'close_file');
+    });
 
-         let tBody = document.getElementById("titleTranslationsTBody");
-         tBody.removeChild(event.target.parentNode.parentNode);
-
-         titleTranslationsIndex--;
-    }
-
-</script>
-
-@*Переводы для описания*@
-<script>
-
-    let descTranslationsIndex = @Model.TargetType.Descriptions.Count-1;
-    
-    function addDescTranslation(){
-
-        descTranslationsIndex++;
-        let tBody = document.getElementById("descTranslationsTBody");
-
-        let tr = document.createElement("tr");
-        tr.innerHTML = `<td>
-                            <select class="form-control" name="TargetType.Descriptions[${descTranslationsIndex}].LanguageId">
-                                @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages))
-                            </select>
-                        </td>
-                        <td><input class="form-control" name="TargetType.Descriptions[${descTranslationsIndex}].Text" required placeholder=""></td>
-                        <td><button type="button" onclick="deleteDescTranslation(event)" class="btn btn-danger">Удалить</button></td>`;
-
-        tBody.appendChild(tr);
-
-    }
-
-    function deleteDescTranslation(event) {
-
-         let tBody = document.getElementById("descTranslationsTBody");
-         tBody.removeChild(event.target.parentNode.parentNode);
-
-         descTranslationsIndex--;
-    }
-
-
-</script>
-
-<script>
-
-
-  async function setTranslations(event){
-     event.preventDefault();
-
-      await setCurrentTranslations('titleTranslationsTBody','/SetPartnerTitleTranslations');
-      await setCurrentTranslations('descTranslationsTBody','/SetPartnerDescriptionTranslations');
-
-      document.getElementById('form').submit();
-
-  }
-
-  async function set() {
-    
-  }
-
-  async function setCurrentTranslations(tBodyId,urlRoute){
-        let rows = document.getElementById(tBodyId).children;
-
-        let ids = [];
-
-        for(let i=0;i<rows.length;i++){
-            let tr = rows[i];
-
-            if (tr.hasAttribute("data-id")) {
-                let id = tr.getAttribute("data-id");
-                ids.push(new Number(id));
-            }
-        }
-
-        let data = {
-            Ids : ids,
-            Id : @Model.TargetType.Id
-        }
-
-        await fetch(urlRoute,{
-            method : 'POST',
-            headers: {
-            'Content-Type': 'application/json;charset=utf-8'
-            },
-            body: JSON.stringify(data)
-        });
-    }
-    
 
 </script>

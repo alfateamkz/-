@@ -2,7 +2,7 @@
 @using Alfateam.Database.Models.Promotions
 @using Alfateam.Helpers
 @{
-    Layout = "_AdminLayout";
+    Layout = "_AdminLayoutV2";
 }
 @model List<Promotion>
 
@@ -18,10 +18,10 @@
 <div class="row">
     <div class="col-lg-12">
         <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
+            <table class="table table-hover" id="tablemanager">
+                <thead class="tableheader">
                     <tr>
-                        <th style="width:50px"></th>
+                      @*  <th style="width:50px"></th>*@
                         <th>Id</th>
                         <th>Название</th>
                         <th>Цена</th>
@@ -33,18 +33,28 @@
                     @foreach (var item in Model)
                     {
                         <tr>
-                            <td>
+                          @*  <td>
                                 <img src="@item.RightImgPath" width="50" height="50">
-                            </td>
+                            </td>*@
                             <td>@item.Id</td>
-                            <td>@LocalizationHelper.GetLocalizedString(item.Captions,"RU")</td>
-                            <td>@LocalizationHelper.GetLocalizedString(item.Prices,"RU")</td>
+                            <td>@item.Caption</td>
+                            <td>@item.Price</td>
                             <td><a asp-action="UpdatePromotion" asp-controller="Promotions" asp-route-id="@item.Id"><button class="btn btn-warning">Изменить</button></a></td>
                             <td><a asp-action="DeletePromotion" asp-controller="Promotions" asp-route-id="@item.Id"><button class="btn btn-danger">Удалить</button></a></td>
                        </tr>
                     }
                 </tbody>
             </table>
+
+            <div class="mb-3 position-right">
+                <a asp-action="CreatePromotion" asp-controller="Promotions" class="button-classic">Добавить</a>
+            </div>
+
+            <script>
+                $(document).ready(function () {
+                    $('#tablemanager').DataTable();
+                });
+            </script>
         </div>
     </div>
 </div>

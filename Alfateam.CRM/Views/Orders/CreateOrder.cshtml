@@ -1,0 +1,82 @@
+﻿@using Alfateam.CRM.ViewModels.Orders;
+@using Alfateam.CRM.ViewModels.Sales;
+@using Alfateam.Database.Enums.CRM.Staff;
+@using Alfateam.Database.Enums.CRM;
+@using Alfateam.Database.Models.CRM.Sales;
+@using CRMWeb.Helpers;
+@using CRMWeb.Helpers.Html;
+@{
+    Layout = "_AdminLayoutV2";
+}
+@model OrderPageVM
+
+<!-- Page Heading -->
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            Добавление заказа
+        </h1>
+    </div>
+</div>
+<!-- /.row -->
+
+<div class="row">
+    <div class="col-lg-12">
+
+        <form asp-action="CreateOrderPOST" asp-controller="Orders" method="post" enctype="multipart/form-data" role="form">
+
+            <div class="form-group">
+                <label>Название заказа*</label>
+                <input class="form-control" asp-for="Order.Title" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Стоимость*</label>
+                <input type="number" class="form-control" asp-for="Order.Price" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Дата старта*</label>
+                <input type="date" class="form-control" asp-for="Order.StartDate" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Дедлайн*</label>
+                <input type="date" class="form-control" asp-for="Order.Deadline" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Статус заказа</label>
+                <select class="form-control" asp-for="Order.Status">
+                    @Html.Raw(EnumToHtmlHelper<OrderStatus>.Convert(Model.Order.Status))
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Клиент</label>
+                <select class="form-control" asp-for="Order.ClientId">
+                    <option>Не выбран</option>
+                    @Html.Raw(ClassesToHtmlHelper<Client>.Convert(Model.Clients,Model.Order.ClientId))
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Описание*</label>
+                <textarea class="form-control" asp-for="Order.Description" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Техническое задание (при наличии)</label>
+                <input type="file" class="form-control" name="ts" placeholder="">
+            </div>
+          
+
+            <div class="mb-3 mt-3 position-right">
+                <button type="submit" class="button-classic">Сохранить</button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+

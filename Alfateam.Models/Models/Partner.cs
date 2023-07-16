@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Alfateam.Database.Abstraction;
+using Alfateam.Database.Models.Localizations;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -7,30 +9,36 @@ using System.Threading.Tasks;
 
 namespace Alfateam.Database.Models
 {
-    public class Partner
-    {
-        [Key]
-        public int Id { get; set; }
-        public List<TranslationItem> Titles { get; set; } = new List<TranslationItem>();
-        public List<TranslationItem> Descriptions { get; set; } = new List<TranslationItem>();
+    public class Partner : BaseModel {
+
         public string? ImgPath { get; set; }
 
 
-        public string GetLocalizedTitle(string langCode)
-        {
-            var found = Titles.FirstOrDefault(o => o.Language.Code == langCode);
 
-            if(found == null)
-                found = Titles.FirstOrDefault(o => o.Language.Code == "RU");
-            return found.Text;
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+        public List<PartnerLocalization> Localizations { get; set; } = new List<PartnerLocalization>();
+
+
+
+
+        public string GetLocalizedTitle(int langId)
+        {
+            string str = Localizations.FirstOrDefault(o => o.LanguageId == langId)?.Title;
+            if (string.IsNullOrEmpty(str))
+            {
+                str = Title;
+            }
+            return str;
         }
-        public string GetLocalizedDescription(string langCode)
+        public string GetLocalizedDescription(int langId)
         {
-            var found = Descriptions.FirstOrDefault(o => o.Language.Code == langCode);
-
-            if (found == null)
-                found = Descriptions.FirstOrDefault(o => o.Language.Code == "RU");
-            return found.Text;
+            string str = Localizations.FirstOrDefault(o => o.LanguageId == langId)?.Description;
+            if (string.IsNullOrEmpty(str))
+            {
+                str = Description;
+            }
+            return str;
         }
     }
 }

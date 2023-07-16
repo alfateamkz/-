@@ -3,9 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32602.215
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam", "Alfateam\Alfateam.csproj", "{247B5478-353A-4AE7-B13B-12C83BB89891}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam", "Alfateam\Alfateam.csproj", "{247B5478-353A-4AE7-B13B-12C83BB89891}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.Database", "Alfateam.Models\Alfateam.Database.csproj", "{6FA28072-D55E-4259-BCB9-2C117F52511F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.Database", "Alfateam.Models\Alfateam.Database.csproj", "{6FA28072-D55E-4259-BCB9-2C117F52511F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.CRM", "Alfateam.CRM\Alfateam.CRM.csproj", "{7F05CB6F-CA3C-476D-B025-F74F6168DE53}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.CRM2_0.Models", "Alfateam.CRM2_0.Models\Alfateam.CRM2_0.Models.csproj", "{1D950189-28EE-49FB-82F3-959ED7802047}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{6FA28072-D55E-4259-BCB9-2C117F52511F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6FA28072-D55E-4259-BCB9-2C117F52511F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6FA28072-D55E-4259-BCB9-2C117F52511F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F05CB6F-CA3C-476D-B025-F74F6168DE53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F05CB6F-CA3C-476D-B025-F74F6168DE53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F05CB6F-CA3C-476D-B025-F74F6168DE53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F05CB6F-CA3C-476D-B025-F74F6168DE53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D950189-28EE-49FB-82F3-959ED7802047}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D950189-28EE-49FB-82F3-959ED7802047}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D950189-28EE-49FB-82F3-959ED7802047}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D950189-28EE-49FB-82F3-959ED7802047}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

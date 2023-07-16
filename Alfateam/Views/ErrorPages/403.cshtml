@@ -1,28 +1,67 @@
 ﻿@using Alfateam.Database.Models.SitePagesTexts
 @using Alfateam.Helpers
+@using Alfateam.Services;
   
 @model ErrorPages
 @{
-    var currentLang = DBHelper.GetCurrentLanguage(User);
+    ViewData["IsLanding"] = true;
 }
+@inject LocalizationService localization
 @{
-    ViewData["HideFooter"] = "True";
+    var errorLocalization = localization.GetErrorPagesLocalization();
 }
 
- <div class="container content-top-page">
-        <div class="row">
-            <div class="col-md-6 colcenter">
-                <div class="content-404">
-                    <div class="catcosmos mobile"></div>
-                    <div class="title">403</div>
-                    <div class="descritpion">
-                          @LocalizationHelper.GetLocalizedString(Model.Texts403,currentLang.Code)
-                    </div>
-                </div>
-            </div>
 
-            <div class="col-md-6 center">
-                <div class="catcosmos desktop"></div>
+@{
+    //ViewData["HideFooter"] = "True";
+}
+
+@section in_header
+{
+    <!-- CONTENT HEADER -->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="errors-header">
+                    <div class="title-errors">403</div>
+                    <div class="desc-errors">
+                        @errorLocalization.Text403
+                    </div>
+                    <a href="/" class="clickmain">На главную</a>
+                </div>
             </div>
         </div>
     </div>
+}
+
+<section class="map">
+    <iframe class="map-frame" src="https://yandex.ru/map-widget/v1/?um=constructor%3A5dd884118cb3035a57cbd5ecd21ffc15e4256f84a36069ba97b8b597e393df51&amp;source=constructor" height="100%" frameborder="0"></iframe>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 offset-md-9">
+                <div class="map-info">
+                    <div class="title-map">КОНТАКТЫ</div>
+                    <div class="params-list">
+                        <div class="params-info">
+                            <div class="name-params"><i class="fa-sharp fa-solid fa-location-dot"></i> Наш адрес:</div>
+                            <div class="li-params">Офис 1: РК, г.Астана, ул. Александра Затаевича, д.10, кв.24</div>
+                            <div class="li-params">Офис 2: РФ, Воронежская обл., г.Борисоглебск, ул. Терешковой, д.11</div>
+                        </div>
+
+                        <div class="params-info">
+                            <div class="name-params"><i class="fa-solid fa-envelope"></i> Наша почта:</div>
+                            <div class="li-params">alfateamkz@yandex.kz</div>
+                        </div>
+
+                        <div class="params-info">
+                            <div class="name-params"><i class="fa-solid fa-phone"></i> Телефон:</div>
+                            <div class="li-params">+79518549717</div>
+                        </div>
+
+                        <a data-bs-toggle="modal" data-bs-target="#callget" class="clickcall">заказать звонок</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

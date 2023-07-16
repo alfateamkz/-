@@ -1,4 +1,5 @@
-﻿using Alfateam.Database.Models.SitePagesTexts;
+﻿using Alfateam.Database.Abstraction;
+using Alfateam.Database.Models.SitePagesTexts;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -8,10 +9,7 @@ using System.Threading.Tasks;
 
 namespace Alfateam.Database.Models
 {
-    public class SiteFrontend
-    {
-        [Key]
-        public int Id { get; set; }
+    public class SiteFrontend : BaseModel {
 
 
         public ErrorPages ErrorPages { get; set; } = new ErrorPages();

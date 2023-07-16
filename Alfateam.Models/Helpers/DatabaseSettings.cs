@@ -13,5 +13,10 @@ namespace Alfateam.Database.Helpers
                        "password=H2c7V7p6;" +
                        "port=3306;" +
                        "database=alfateam;";
+        public static string CRMConnectionString { get; set; } = "server=localhost;" +
+                       "user=root;" +
+                       "password=H2c7V7p6;" +
+                       "port=3306;" +
+                       "database=alfateam_crm;";
     }
 }

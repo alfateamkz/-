@@ -1,0 +1,395 @@
+﻿<html>
+<head>
+    <title>ADMIN - @ViewData["Title"]</title>
+
+    <!-- META -->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="~/admin/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/admin/css/main.css">
+    <link rel="stylesheet" href="~/admin/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="~/admin/css/trumbowyg.min.css">
+    <link rel="stylesheet" href="~/admin/css/style.css">
+    <link rel="stylesheet" href="~/admin/css/croppie.css">
+
+    <!-- JS -->
+    <script src="~/admin/js/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@@popperjs/core@2.11.5/dist/umd/popper.min.js" integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk" crossorigin="anonymous"></script>
+    <script src="~/admin/js/bootstrap.min.js"></script>
+    <script src="~/admin/js/jquery.dataTables.js"></script>
+    <script src="~/admin/js/trumbowyg.min.js"></script>
+    <script src="~/admin/js/plugins/noembed/trumbowyg.noembed.min.js"></script>
+    <script src="~/admin/js/croppie.js"></script>
+   @* <script src="~/admin/js/main.js"></script>*@
+
+
+    <!-- FONT AWESOME 6 -->
+    <link rel="stylesheet" href="~/admin/fontawesome/css/all.min.css">
+    <script src="~/admin/fontawesome/js/all.min.js"></script>
+
+    @RenderSection("css",false)
+
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- SIDEBAR -->
+            <div class="col-md-3 col-lg-2 sidebar flex-shrink-0 p-3 bg-white">
+                <a href="/" class="logotype-panel">ПАНЕЛЬ УПРАВЛЕНИЯ СЕРВИСОМ</a>
+                <ul class="nav nav-pills flex-column mb-auto nav-center">
+                    <li class="nav-item">
+                        <a asp-action="Orders" asp-controller="Orders" class="nav-link link-dark" aria-current="page">
+                            <i class="fa-solid fa-house-chimney mnright-10"></i>
+                            Заказы через форму
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="CallRequests" asp-controller="Orders" class="nav-link active" aria-current="page">
+                            <i class="fa-solid fa-comments mnright-10"></i>
+                            Заказы звонков
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="Portfolios" asp-controller="Portfolios" class="nav-link active" aria-current="page">
+                            <i class="fa-solid fa-comments mnright-10"></i>
+                            Портфолио
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="Categories" asp-controller="PortfolioCategories" class="nav-link active" aria-current="page">
+                            <i class="fa-solid fa-comments mnright-10"></i>
+                            Категории портфолио
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="NewPosts" asp-controller="NewPosts" class="nav-link active" aria-current="page">
+                            <i class="fa-solid fa-comments mnright-10"></i>
+                            Новости
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="Promotions" asp-controller="Promotions" class="nav-link active" aria-current="page">
+                            <i class="fa-solid fa-comments mnright-10"></i>
+                            Тарифные карточки
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="Team" asp-controller="Team" class="nav-link active" aria-current="page">
+                            <i class="fa-solid fa-comments mnright-10"></i>
+                            Команда
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="Partners" asp-controller="Partners" class="nav-link active" aria-current="page">
+                            <i class="fa-solid fa-comments mnright-10"></i>
+                            Партнеры
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="Languages" asp-controller="Languages" class="nav-link active" aria-current="page">
+                            <i class="fa-solid fa-comments mnright-10"></i>
+                            Языки
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="SelectLanguage" asp-controller="AdminLocalization" class="nav-link active" aria-current="page">
+                            <i class="fa-solid fa-comments mnright-10"></i>
+                            Локализация и интерфейс
+                        </a>
+                    </li>
+
+                </ul>
+
+                @* <div class="sidebar-button">
+                <div class="mb-3">
+                <button class="button-classic button-white button-width"><i class="fa-solid fa-gears"></i> Настройки</button>
+                </div>
+                </div>*@
+            </div>
+
+            <!-- CONTENT -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-5">
+                <!-- NAVIGATION -->
+                <nav class="navbar navbar-expand-lg">
+                    <div class="container-fluid content-margin">
+                        <h4 class="navbar-brand">@ViewData["Title"]</h4>
+                        <div class="collapse navbar-collapse" id="navbarText">
+                            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            </ul>
+                            <span class="navbar-text">
+                                <a asp-action="Logout" asp-controller="Auth" class="button-exit">Выход</a>
+                            </span>
+                        </div>
+                    </div>
+
+                </nav>
+                @if (ViewData.ContainsKey("ShowLang"))
+                {
+                    <h6>Текущий язык: <span id="lang_name_span"></span></h6>
+                }
+
+                @RenderBody()
+
+            </main>
+        </div>
+    </div>
+
+
+    <!-- Удаление элемента -->
+    <div class="modal fade" id="close" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    Удаление записи
+                </div>
+                <div class="modal-body">
+                    <div class="content">
+                        <div class="icon-content">
+                            <i class="fa-solid fa-trash"></i>
+                        </div>
+                        <div class="text-content" id="delete_msg">
+                            Вы действительно хотите удалить запись?
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="button-classic" id="delete_item_yes_btn">Да</button>
+                    <button class="button-classic" data-bs-dismiss="modal" aria-label="Close">Нет</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*Модальное окно подверждения удаления*@
+    <script>
+
+        async function confirmDeleting(deleteFunction) {
+            $("#close").modal('show');
+            //document.getElementById('deleting_main_block').removeAttribute('hidden');
+            //document.getElementById('deleting_success_block').style.setProperty('display', 'none');
+            //document.getElementById('deleting_error_block').style.setProperty('display', 'none');
+
+            document.getElementById('delete_item_yes_btn').setAttribute('onclick', `deleteDirectly(${deleteFunction})`);
+        }
+        async function confirmDeletingWithRedirect(deleteFunction, message, redirectTo) {
+            $("#close").modal('show');
+            //document.getElementById('deleting_main_block').removeAttribute('hidden');
+            //document.getElementById('deleting_success_block').style.setProperty('display', 'none');
+            //document.getElementById('deleting_error_block').style.setProperty('display', 'none');
+
+            document.getElementById('delete_item_yes_btn').setAttribute('onclick', `deleteDirectlyWithRedirect(${deleteFunction},'${redirectTo}')`);
+            document.getElementById('delete_msg').innerHTML = message;
+        }
+
+
+
+
+        async function deleteDirectly(deleteFunction) {
+            await deleteFunction;
+
+            await new Promise(r => setTimeout(r, 750));
+            document.location.reload();
+        }
+
+        async function deleteDirectlyWithRedirect(deleteFunction, redirectTo) {
+            await deleteFunction;
+            await new Promise(r => setTimeout(r, 750));
+
+            document.location.href = document.location.origin + redirectTo;
+        }
+
+
+    </script>
+
+
+    <script>
+        function getCurrentLocalizationLang() {
+            fetch(document.location.origin + `/GetLanguageCookie`)
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data) {
+                        document.getElementById('lang_name_span').innerHTML = data.title;
+                    }
+                });
+        }
+
+        @if (ViewData.ContainsKey("ShowLang"))
+        {
+            @("getCurrentLocalizationLang();")
+        }
+
+
+    </script>
+
+    @RenderSection("js",false)
+
+    @*Вырезал очка*@
+    <script>
+
+            //Croppie
+
+            let croppies = new Map();
+
+
+        function initImageCroppie(cropId, inputFileId, closeFileId) {
+
+
+            let image_crop = $(`#${cropId}`).croppie({
+                enableExif: true,
+                viewport: {
+                    width: document.getElementById(cropId).clientWidth - 20,
+                    height: 370,
+                    type: 'square'
+                },
+                boundary: {
+                    width: 100000,
+                    height: 100000,
+                },
+                enforceBoundary: false,
+                showZoomer: false,
+                enableResize: true,
+                enableOrientation: true,
+                mouseWheelZoom: 'ctrl'
+            });
+
+            $(`#${inputFileId}`).change(function (ev) {
+                //    $(`#${cropId}`).css('pointer-events', 'none');
+
+                $(`#${closeFileId}`).css('display', 'inline-flex');
+
+                $(`#${cropId} > .cr-boundary`).css('display', 'flex');
+                $(`#${cropId} > .text-fileupload`).css('display', 'none');
+            });
+
+
+            document.querySelector(`#${inputFileId}`).addEventListener("change", function () {
+                if (this.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        bindCrop(cropId, e.target.result);
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                    $(`#${cropId}`).attr('type', 'text');
+                }
+            });
+
+
+            $(`#${closeFileId}`).on('click', function () {
+                $(`#${inputFileId}`).val('');
+                $(`#${cropId}`).css('pointer-events', 'auto');
+                $(`#${cropId} > .text-fileupload`).css('display', 'flex');
+
+                $(`#${cropId}`).attr('type', 'file');
+
+                $(`#${cropId}`).croppie('destroy');
+                image_crop = $(`#${cropId}`).croppie({
+                    enableExif: true,
+                    viewport: {
+                        width: document.getElementById(cropId).clientWidth - 20,
+                        height: 370,
+                        type: 'square'
+                    },
+                    boundary: {
+                        width: 3300,
+                        height: 3300
+                    },
+                    enforceBoundary: true,
+                    showZoomer: true,
+                    enableResize: true,
+                    enableOrientation: true,
+                    mouseWheelZoom: 'ctrl'
+                });
+            });
+
+            croppies[cropId] = image_crop;
+        }
+
+        function bindCrop(cropId, url) {
+
+            console.log(url);
+            croppies[cropId].croppie('bind', {
+                url: url
+            }).then(function () {
+
+                $(`#${cropId}`).css('background', 'url()');
+
+                console.log('jQuery bind complete');
+            });
+        }
+
+        async function bindCropStart(cropId, url) {
+
+
+            let base64 = await suckDickAndGetBase64(url);
+
+            console.log(base64);
+            croppies[cropId].croppie('bind', {
+                url: base64
+            }).then(function () {
+
+                console.log($(`#${cropId}`).croppie('get'));
+
+                $(`#${cropId}`).css('background', 'url()');
+
+                console.log('jQuery bind complete');
+            });
+        }
+
+        async function suckDickAndGetBase64(url) {
+            const data = await fetch(url);
+            const blob = await data.blob();
+            const reader = new FileReader();
+
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = () => {
+                    const base64data = reader.result;
+                    resolve(base64data);
+                };
+            });
+        }
+
+
+        async function cropFinal(inputFileId, cropId) {
+
+            let result = await croppies[cropId].croppie('result',
+                {
+                    type: 'base64',
+                    size: 'viewport',
+                    format: 'png',
+                    quality: 1,
+                    circle: false
+                });
+            console.log(result);
+
+            let file = await urltoFile(result, 'hui.png', 'image/png');
+            console.log(file);
+
+            // Создаем коллекцию файлов:
+            var dt = new DataTransfer();
+            dt.items.add(file);
+            var file_list = dt.files;
+
+            document.getElementById(inputFileId).files = file_list;
+        }
+
+        function urltoFile(url, filename, mimeType) {
+            return (fetch(url)
+                .then(function (res) { return res.arrayBuffer(); })
+                .then(function (buf) { return new File([buf], filename, { type: mimeType }); })
+            );
+        }
+
+
+
+    </script>
+
+   
+ 
+
+</body>
+</html>

@@ -1,0 +1,62 @@
+﻿@using Alfateam.Database.Models
+@using Alfateam.Database.Models.NewPosts;
+@using Alfateam.Helpers
+@{
+    Layout = "_AdminLayoutV2";
+}
+@model List<NewPost>
+
+
+<!-- Page Heading -->
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            Новости
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="table-responsive">
+            <table class="table table-hover" id="tablemanager">
+                <thead class="tableheader">
+                    <tr>
+                        <th>Язык</th>
+                        <th>Заголовок</th>
+                        <th>Описание</th>
+                        <th>Кол-во просмотров</th>
+                        <th style="width:80px"></th>
+                        <th style="width:80px"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Language.Title</td>
+                            <td>@item.Headings.FirstOrDefault()?.Text</td>
+                            <td>@item.Paragraphs.FirstOrDefault()?.Text</td>
+                            <td>@item.Watches</td>
+                            <td><a asp-action="CreateNewPost" asp-controller="NewPosts" asp-route-id="@item.Id"><button class="btn btn-warning">Изменить</button></a></td>
+                            <td><a asp-action="DeleteNewPost" asp-controller="NewPosts" asp-route-id="@item.Id"><button class="btn btn-danger">Удалить</button></a></td>
+                        </tr>
+                    }
+                  
+                </tbody>
+            </table>
+
+            <div class="mb-3 mt-3 position-right">
+                <a asp-action="CreateNewPost" asp-controller="NewPosts" class="button-classic">Добавить</a>
+            </div>
+
+            <script>
+                $(document).ready(function () {
+                    $('#tablemanager').DataTable();
+                });
+            </script>
+
+        </div>
+    </div>
+</div>
+<!-- /.row -->

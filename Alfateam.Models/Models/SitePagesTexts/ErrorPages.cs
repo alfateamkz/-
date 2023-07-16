@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Alfateam.Database.Abstraction;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -7,10 +8,7 @@ using System.Threading.Tasks;
 
 namespace Alfateam.Database.Models.SitePagesTexts
 {
-    public class ErrorPages
-    {
-        [Key]
-        public int Id { get; set; }
+    public class ErrorPages : BaseModel {
 
 
         public List<TranslationItem> Texts403 { get; set; } = new List<TranslationItem>();

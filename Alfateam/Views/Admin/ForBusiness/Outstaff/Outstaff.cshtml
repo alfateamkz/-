@@ -1,0 +1,67 @@
+﻿@using Alfateam.Database.Models
+@using Alfateam.Database.Models.ForBusiness;
+@{
+    Layout = "_AdminLayoutV2";
+}
+@model List<OutstaffEmployeeInfo>
+
+<!-- Page Heading -->
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            Аутстафф
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="table-responsive">
+            <table class="table table-hover" id="tablemanager">
+                <thead class="tableheader">
+                    <tr>
+                        <th>Id</th>
+                        <th>ФИО</th>
+                        <th>Должность</th>
+                        <th>Рейт компании</th>
+                        <th>Рейт рабочего</th>
+                        <th>Адрес</th>
+                        <th>Коммент</th>
+                        <th>Резюме</th>
+                        <th style="width:80px"></th>
+                        <th style="width:80px"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                   @foreach (var item in Model)
+                   {
+                        <tr>
+                            <td>@item.Id</td>
+                            <td>@item.FIO</td>
+                            <td>@item.Position</td>
+                            <td>@item.HourlyRate</td>
+                            <td>@item.HourlyRateInternal</td>
+                            <td>@item.Address</td>
+                            <td>@item.Comment</td>
+                            <td></td>
+                            <td><a asp-action="UpdateOutstaff" asp-controller="Outstaff" asp-route-id="@item.Id"><button class="btn btn-warning">Изменить</button></a></td>
+                            <td><a asp-action="DeleteOutstaff" asp-controller="Outstaff" asp-route-id="@item.Id"><button class="btn btn-danger">Удалить</button></a></td>
+                        </tr>
+                   }
+                </tbody>
+            </table>
+
+            <div class="mb-3 position-right">
+                <a asp-action="CreateOutstaff" asp-controller="Outstaff" class="button-classic">Добавить</a>
+            </div>
+
+            <script>
+                $(document).ready(function () {
+                    $('#tablemanager').DataTable();
+                });
+            </script>
+
+        </div>
+    </div>
+</div>
+<!-- /.row -->

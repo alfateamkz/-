@@ -1,0 +1,667 @@
+﻿@using Alfateam.CRM.ViewModels.Orders;
+@using Alfateam.CRM.ViewModels.Sales;
+@using Alfateam.Database.Enums.CRM.Staff;
+@using Alfateam.Database.Enums.CRM;
+@using Alfateam.Database.Models.CRM.Sales;
+@using Alfateam.Database.Models.CRM;
+@using CRMWeb.Helpers;
+@using CRMWeb.Helpers.Html;
+@using MarkupCreator.Helpers.Converters;
+@{
+    Layout = "_AdminLayoutV2";
+}
+@model OrderStagePageVM
+
+<!-- Page Heading -->
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            Редактирование заказа
+        </h1>
+    </div>
+</div>
+<!-- /.row -->
+
+<div class="row">
+    <div class="col-lg-12">
+
+        <form asp-action="UpdateOrderPOST" asp-controller="Orders" method="post" enctype="multipart/form-data" role="form">
+            
+            <input type="hidden" asp-for="Stage.Id" />
+
+            <div class="form-group">
+                <label>Название*</label>
+                <input asp-for="Stage.Title" class="form-control" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Сумма*</label>
+                <input asp-for="Stage.Price" type="number" class="form-control" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Статус этапа</label>
+                <select class="form-control" asp-for="Stage.Status">
+                    @Html.Raw(EnumToHtmlHelper<OrderStageStatus>.Convert(Model.Stage.Status))
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Дата старта*</label>
+                <input asp-for="Stage.StartDate" type="date" class="form-control" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Дедлайн*</label>
+                <input asp-for="Stage.Deadline" type="date" class="form-control" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Перенесеный дедлайн в случае, если завален основный дедлайн</label>
+                <input asp-for="Stage.ActualDeadline" type="date" class="form-control" placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Описание</label>
+                <textarea asp-for="Stage.Description" class="form-control" rows="3"></textarea>
+            </div>
+
+
+            <div class="table-responsive mt-4">
+                <label>Бюджет на расходы</label>
+                <table class="table table-hover" id="tablemanager">
+                    <thead class="tableheader">
+                        <tr>
+                            <th>Название</th>
+                            <th>Описание</th>
+                            <th>Сумма</th>
+                            <th>
+                                <button type="button" onclick="addOrderStageBudgetItem()" style="background: transparent"><i class="fa-solid fa-plus"></i></button>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="budgetTable">
+
+                        @foreach (var item in Model.Stage.BudgetItems) {
+
+                            <tr data-id="@item.Id">
+                                <td>@item.Title</td>
+                                <td>@item.Description</td>
+                                <td>@item.Sum</td>
+                                <td>
+                                    <div class="interect">
+                                        <button type="button" onclick="setUpdateOrderStageBudgetItemModalId(@item.Id)" data-bs-toggle="modal" data-bs-target="#editOrderBudgetModal" style="background: transparent" class="edit"><i class="fa-sharp fa-solid fa-eye"></i></button>
+                                        <button type="button" onclick="deleteOrderStageBudgetItem(@item.Id)" class="edit"><i class="fa-solid fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-responsive mt-4">
+                <label>Люди, задействованные на проекте</label>
+                <table class="table table-hover" id="tablemanager">
+                    <thead class="tableheader">
+                        <tr>
+                            <th>Сотрудник</th>
+                            <th>Должность</th>
+                            <th>Описание</th>
+                            <th>
+                                <button type="button" data-bs-toggle="modal" data-bs-target="#addHumanModal" style="background: transparent"><i class="fa-solid fa-plus"></i></button>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="humansTable">
+
+                        @foreach (var item in Model.Stage.HumanResources) {
+
+                            <tr data-id="@item.Id">
+                                <td>@item.Employee.Surname @item.Employee.Name @item.Employee.Patronymic</td>
+                                <td>@item.Employee.Position</td>
+                                <td>@item.Description</td>
+                                <td>
+                                    <div class="interect">
+                                        <button type="button" onclick="setUpdateHumanResourceModalContent(@item.Id)" data-bs-toggle="modal" data-bs-target="#editHumanModal" style="background: transparent" class="edit"><i class="fa-sharp fa-solid fa-eye"></i></button>
+                                        <button type="button" onclick="deleteHumanResource(@item.Id)" class="edit"><i class="fa-solid fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-responsive mt-4">
+                <label>Ресурсы, задействованные на проекте</label>
+                <table class="table table-hover" id="tablemanager">
+                    <thead class="tableheader">
+                        <tr>
+                            <th>Ресурс</th>
+                            <th>Описание</th>
+                            <th>
+                                <button type="button" data-bs-toggle="modal" data-bs-target="#addResourceModal" style="background: transparent"><i class="fa-solid fa-plus"></i></button>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="resourcesTable">
+
+                        @foreach (var item in Model.Stage.MaterialResources) {
+
+                            <tr data-id="@item.Id">
+                                <td>@item.Resource?.Title</td>
+                                <td>@item.Description</td>
+                                <td>
+                                    <div class="interect">
+                                        <button type="button" onclick="setUpdateResourceModalContent(@item.Id)" data-bs-toggle="modal" data-bs-target="#editResourceModal" style="background: transparent" class="edit"><i class="fa-sharp fa-solid fa-eye"></i></button>
+                                        <button type="button" onclick="deleteResource(@item.Id)" class="edit"><i class="fa-solid fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </form>
+
+        <!-- Редактирование статьи бюджета для заказа -->
+        <div class="modal fade" id="editOrderBudgetModal" data-id="0" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Редактирование статьи бюджета для заказа</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="form-group">
+                            <label>Название*</label>
+                            <input id="editOrderBudget_title" class="form-control" required placeholder="">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Сумма*</label>
+                            <input id="editOrderBudget_sum" type="number" class="form-control" required placeholder="">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Описание</label>
+                            <textarea id="editOrderBudget_description" class="form-control" rows="3"></textarea>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="button" onclick="updateOrderStageBudgetItem()" data-bs-dismiss="modal" class="btn btn-primary">Сохранить изменения</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Добавление человеческого ресурса для этапа -->
+        <div class="modal fade" id="addHumanModal" data-id="0" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Добавление человеческого ресурса для этапа</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="form-group">
+                            <label>Сотрудник*</label>
+                            <select id="addHuman_employeeId" class="form-control">
+                                @Html.Raw(ClassesToHtmlHelper<Employee>.Convert(Model.Employees))
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Описание</label>
+                            <textarea id="addHuman_description" class="form-control" rows="3"></textarea>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="button" onclick="addHumanResource()" data-bs-dismiss="modal" class="btn btn-primary">Сохранить изменения</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Редактирование человеческого ресурса для этапа -->
+        <div class="modal fade" id="editHumanModal" data-id="0" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Редактирование человеческого ресурса для этапа</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="form-group">
+                            <label>Сотрудник*</label>
+                            <select id="editHuman_employeeId" class="form-control">
+                                @Html.Raw(ClassesToHtmlHelper<Employee>.Convert(Model.Employees))
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Описание</label>
+                            <textarea id="editHuman_description" class="form-control" rows="3"></textarea>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="button" onclick="updateHumanResource()" data-bs-dismiss="modal" class="btn btn-primary">Сохранить изменения</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Добавление ресурса для этапа -->
+        <div class="modal fade" id="addResourceModal" data-id="0" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Добавление ресурса для этапа</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="form-group">
+                            <label>Ресурс*</label>
+                            <select id="addResource_resourceId" class="form-control">
+                                @Html.Raw(ClassesToHtmlHelper<Resource>.Convert(Model.Resources))
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Описание</label>
+                            <textarea id="addResource_description" class="form-control" rows="3"></textarea>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="button" onclick="addResource()" data-bs-dismiss="modal" class="btn btn-primary">Сохранить изменения</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Редактирование ресурса для этапа -->
+        <div class="modal fade" id="editResourceModal" data-id="0" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Редактирование ресурса для этапа</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="form-group">
+                            <label>Ресурс*</label>
+                            <select id="editResource_resourceId" class="form-control">
+                                @Html.Raw(ClassesToHtmlHelper<Resource>.Convert(Model.Resources))
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Описание</label>
+                            <textarea id="editResource_description" class="form-control" rows="3"></textarea>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="button" onclick="updateResource()" data-bs-dismiss="modal" class="btn btn-primary">Сохранить изменения</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+       @* Бюджет этапа*@
+        <script>
+
+            async function addOrderStageBudgetItem() {
+                await fetch(document.location.origin + `/AddOrderStageBudgetItem?stageId=@Model.Stage.Id`)
+                    .then((response) => {
+                        return response.json();
+                    })
+                    .then((data) => {
+                        console.log(data);
+
+                        let row = document.createElement('tr');
+                        row.setAttribute('data-id', data.id);
+
+                        row.innerHTML = `<td>${data.title}</td>
+                                                     <td>${data.description}</td>
+                                                     <td>${data.sum}</td>
+                                                     <td>
+                                                         <div class="interect">
+                                                             <button type="button" onclick="setUpdateOrderStageBudgetItemModalId(${data.id})" data-bs-toggle="modal" data-bs-target="#editOrderBudgetModal" style="background: transparent" class="edit"><i class="fa-sharp fa-solid fa-eye"></i></button>
+                                                             <button type="button" onclick="deleteOrderStageBudgetItem(${data.id})" style="background: transparent" class="edit"><i class="fa-sharp fa-solid fa-trash"></i></button>
+                                                         </div>
+                                                     </td>`;
+                        document.getElementById('budgetTable').appendChild(row);
+
+                    });
+            }
+
+            async function deleteOrderStageBudgetItem(id) {
+
+                let table = document.getElementById('budgetTable');
+
+                let row = table.querySelector(`[data-id='${id}']`);
+                table.removeChild(row);
+
+                await fetch(document.location.origin + `/DeleteOrderStageBudgetItem?budgetItemId=${id}`, {
+                    method: 'DELETE'
+                });
+
+            }
+
+            async function setUpdateOrderStageBudgetItemModalId(id) {
+                document.getElementById('editOrderBudgetModal').setAttribute('data-id', id);
+
+                await fetch(document.location.origin + `/GetOrderStageBudgetItem?budgetItemId=${id}`)
+                    .then((response) => {
+                        return response.json();
+                    })
+                    .then((data) => {
+                        console.log(data);
+
+                        document.getElementById('editOrderBudget_title').value = data.title;
+                        document.getElementById('editOrderBudget_sum').value = data.sum;
+                        document.getElementById('editOrderBudget_description').value = data.description;
+
+                    });
+            }
+
+            async function updateOrderStageBudgetItem() {
+
+                let item = {
+                    Id: new Number(document.getElementById('editOrderBudgetModal').getAttribute('data-id')),
+                    Title: document.getElementById('editOrderBudget_title').value,
+                    Sum: new Number(document.getElementById('editOrderBudget_sum').value),
+                    Description: document.getElementById('editOrderBudget_description').value,
+                };
+
+                console.log(item);
+
+                await fetch(document.location.origin + `/EditOrderStageBudgetItem`, {
+                    method: 'POST',
+                    body: JSON.stringify(item),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                });
+
+                let table = document.getElementById('budgetTable');
+                let row = table.querySelector(`[data-id='${item.Id}']`);
+                row.innerHTML = `<td>${item.Title}</td>
+                                             <td>${item.Description}</td>
+                                             <td>${item.Sum}</td>
+                                             <td>
+                                                 <div class="interect">
+                                                     <button type="button" onclick="setUpdateOrderStageBudgetItemModalId(${item.Id})" data-bs-toggle="modal" data-bs-target="#editOrderBudgetModal" style="background: transparent" class="edit"><i class="fa-sharp fa-solid fa-eye"></i></button>
+                                                     <button type="button" onclick="deleteOrderStageBudgetItem(${item.Id})" style="background: transparent" class="edit"><i class="fa-sharp fa-solid fa-trash"></i></button>
+                                                 </div>
+                                             </td>`;
+            }
+
+        </script>
+ 
+       @* Человеческий ресурс*@
+       <script>
+           async function addHumanResource(){
+
+               let obj = {
+                    EmployeeId : new Number(document.getElementById('addHuman_employeeId').selectedOptions[0].value),
+                    Description: document.getElementById('addHuman_description').value
+               };
+               
+                await fetch(document.location.origin + `/AddStageHumanResource?stageId=@Model.Stage.Id`, {
+                    method: 'POST',
+                    body: JSON.stringify(obj),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }})
+                    .then((response) => {
+                        return response.json();
+                    })
+                    .then((data) => {
+                        console.log(data);
+
+                        if (data.success === true) {
+                            let row = document.createElement('tr');
+                            row.setAttribute('data-id', data.id);
+
+                            row.innerHTML = `<td>${data.resource.employee.surname} ${data.resource.employee.name} ${data.resource.employee.patronymic}</td>
+                                                         <td>${data.resource.employee.position}</td>
+                                                         <td>${data.resource.description}</td>
+                                                         <td>
+                                                             <div class="interect">
+                                                                 <button type="button" onclick="setUpdateHumanResourceModalContent(${data.resource.id})" data-bs-toggle="modal" data-bs-target="#editHumanModal" style="background: transparent" class="edit"><i class="fa-sharp fa-solid fa-eye"></i></button>
+                                                                 <button type="button" onclick="deleteHumanResource(${data.resource.id})" class="edit"><i class="fa-solid fa-trash"></i></button>
+                                                             </div>
+                                                         </td>`;
+                            document.getElementById('humansTable').appendChild(row);
+                        }
+                        else {
+                            alert(data.errorText);
+                        }
+                    });
+              
+           }
+
+
+           async function setUpdateHumanResourceModalContent(id) {
+                document.getElementById('editHumanModal').setAttribute('data-id', id);
+
+                await fetch(document.location.origin + `/GetStageHumanResource?id=${id}`)
+                    .then((response) => {
+                        return response.json();
+                    })
+                    .then((data) => {
+                        console.log(data);
+
+                        document.getElementById('editHuman_employeeId').value = data.employeeId;
+                        document.getElementById('editHuman_description').value = data.description;
+
+                    });
+            }
+
+            async function updateHumanResource() {
+
+                let obj = {
+                    Id: new Number(document.getElementById('editHumanModal').getAttribute('data-id')),
+                    EmployeeId: new Number(document.getElementById('editHuman_employeeId').selectedOptions[0].value),
+                    Description: document.getElementById('editHuman_description').value
+                };
+
+                await fetch(document.location.origin + `/UpdateStageHumanResource?stageId=@Model.Stage.Id`, {
+                    method: 'POST',
+                    body: JSON.stringify(obj),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then((response) => {
+                        return response.json();
+                    })
+                    .then((data) => {
+                        console.log(data);
+
+                        if (data.success === true) {
+
+                            let table = document.getElementById('humansTable');
+                            let row = table.querySelector(`[data-id='${obj.Id}']`);
+                            row.innerHTML = `<td>${data.resource.employee.surname} ${data.resource.employee.name} ${data.resource.employee.patronymic}</td>
+                                                                                 <td>${data.resource.employee.position}</td>
+                                                                                 <td>${data.resource.description}</td>
+                                                                                 <td>
+                                                                                     <div class="interect">
+                                                                                         <button type="button" onclick="setUpdateHumanResourceModalContent(${data.resource.id})" data-bs-toggle="modal" data-bs-target="#editHumanModal" style="background: transparent" class="edit"><i class="fa-sharp fa-solid fa-eye"></i></button>
+                                                                                         <button type="button" onclick="deleteHumanResource(${data.resource.id})" class="edit"><i class="fa-solid fa-trash"></i></button>
+                                                                                     </div>
+                                                                                 </td>`;
+                           
+                        }
+                        else {
+                            alert(data.errorText);
+                        }
+                    });
+
+            }
+
+
+
+           async function deleteHumanResource(id) {
+
+                let table = document.getElementById('humansTable');
+
+                let row = table.querySelector(`[data-id='${id}']`);
+                table.removeChild(row);
+
+                await fetch(document.location.origin + `/DeleteStageHumanResource?resourceId=${id}`, {
+                    method: 'DELETE'
+                });
+
+            }
+
+       </script>
+
+        @* Прочий ресурс*@
+        <script>
+            async function addResource() {
+
+                let obj = {
+                    ResourceId: new Number(document.getElementById('addResource_resourceId').selectedOptions[0].value),
+                    Description: document.getElementById('addResource_description').value
+                };
+
+                await fetch(document.location.origin + `/AddStageResource?stageId=@Model.Stage.Id`, {
+                    method: 'POST',
+                    body: JSON.stringify(obj),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then((response) => {
+                        return response.json();
+                    })
+                    .then((data) => {
+                        console.log(data);
+
+                        if (data.success === true) {
+                            let row = document.createElement('tr');
+                            row.setAttribute('data-id', data.id);
+
+                            row.innerHTML = `<td>${data.resource.resource.title}</td>
+                                             <td>${data.resource.description}</td>
+                                             <td>
+                                                 <div class="interect">
+                                                     <button type="button" onclick="setUpdateResourceModalContent(${data.resource.id})" data-bs-toggle="modal" data-bs-target="#editResourceModal" style="background: transparent" class="edit"><i class="fa-sharp fa-solid fa-eye"></i></button>
+                                                     <button type="button" onclick="deleteResource(${data.resource.id})" class="edit"><i class="fa-solid fa-trash"></i></button>
+                                                 </div>
+                                             </td>`;
+                            document.getElementById('resourcesTable').appendChild(row);
+                        }
+                        else {
+                            alert(data.errorText);
+                        }
+                    });
+
+            }
+
+
+            async function setUpdateResourceModalContent(id) {
+                document.getElementById('editResourceModal').setAttribute('data-id', id);
+
+                await fetch(document.location.origin + `/GetStageResource?id=${id}`)
+                    .then((response) => {
+                        return response.json();
+                    })
+                    .then((data) => {
+                        console.log(data);
+
+                        document.getElementById('editResource_resourceId').value = data.resourceId;
+                        document.getElementById('editResource_description').value = data.description;
+
+                    });
+            }
+
+            async function updateResource() {
+
+                let obj = {
+                    Id: new Number(document.getElementById('editResourceModal').getAttribute('data-id')),
+                    ResourceId: new Number(document.getElementById('editResource_resourceId').selectedOptions[0].value),
+                    Description: document.getElementById('editResource_description').value
+                };
+
+                await fetch(document.location.origin + `/UpdateStageResource?stageId=@Model.Stage.Id`, {
+                    method: 'POST',
+                    body: JSON.stringify(obj),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then((response) => {
+                        return response.json();
+                    })
+                    .then((data) => {
+                        console.log(data);
+
+                        if (data.success === true) {
+
+                            let table = document.getElementById('resourcesTable');
+                            let row = table.querySelector(`[data-id='${obj.Id}']`);
+
+                            row.innerHTML = `<td>${data.resource.resource.title}</td>
+                                                         <td>${data.resource.description}</td>
+                                                         <td>
+                                                             <div class="interect">
+                                                                 <button type="button" onclick="setUpdateResourceModalContent(${data.resource.id})" data-bs-toggle="modal" data-bs-target="#editResourceModal" style="background: transparent" class="edit"><i class="fa-sharp fa-solid fa-eye"></i></button>
+                                                                 <button type="button" onclick="deleteResource(${data.resource.id})" class="edit"><i class="fa-solid fa-trash"></i></button>
+                                                             </div>
+                                                         </td>`;
+                            document.getElementById('resourcesTable').appendChild(row);
+                        }
+                        else {
+                            alert(data.errorText);
+                        }
+                    });
+
+            }
+
+
+
+            async function deleteResource(id) {
+
+                let table = document.getElementById('resourcesTable');
+
+                let row = table.querySelector(`[data-id='${id}']`);
+                table.removeChild(row);
+
+                await fetch(document.location.origin + `/DeleteStageResource?resourceId=${id}`, {
+                    method: 'DELETE'
+                });
+
+            }
+
+        </script>
+
+    </div>
+</div>
+

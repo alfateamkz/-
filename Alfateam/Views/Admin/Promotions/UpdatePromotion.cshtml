@@ -1,9 +1,11 @@
-﻿@using Alfateam.Database.Models
+﻿@using Alfateam.Database.Enums;
+@using Alfateam.Database.Models
 @using Alfateam.Database.Models.Promotions
 @using Alfateam.ViewModels
 @using CRMWeb.Helpers.Html
+@using CRMWeb.Helpers;
 @{
-    Layout = "_AdminLayout";
+    Layout = "_AdminLayoutV2";
 }
 @model VMWithLanguages<Promotion>
 
@@ -20,7 +22,7 @@
 <div class="row">
     <div class="col-lg-12">
 
-        <form asp-action="UpdatePromotionPOST" asp-controller="Promotions" method="post" enctype="multipart/form-data"  id="form"  onsubmit="onSubmit(event)" role="form">
+        <form asp-action="UpdatePromotionPOST" asp-controller="Promotions" method="post" enctype="multipart/form-data"  id="form"  role="form">
 
            <input type="hidden" asp-for="TargetType.Id" value="@Model.TargetType.Id" />
            <input type="hidden" asp-for="TargetType.RightImgPath" value="@Model.TargetType.RightImgPath" />
@@ -28,147 +30,36 @@
 
             <div class="form-group">
                 <label>Заголовок</label>
-                <input class="form-control" asp-for="TargetType.Captions[0].Text" required placeholder="">
+                <input class="form-control" asp-for="TargetType.Caption" required placeholder="">
             </div>
-            <input type="hidden" asp-for="TargetType.Captions[0].LanguageId" value="1" />
-          @*  <input type="hidden" asp-for="TargetType.Captions[0].Id" value="@Model.TargetType.Captions[0].Id" />*@
 
+
+
+          @*  <div class="form-group">
+                <label for="" class="">Изображение</label>
+                <input type="file" name="file" class="form-control" placeholder="">
+            </div>*@
 
             <div class="form-group">
-                <label>Изображение</label>
-                <input type="file" name="file">
+                <label>Пазл</label>
+                <select class="form-control" asp-for="TargetType.PromotionPuzzleType">
+                    @Html.Raw(EnumToHtmlHelper<PromotionPuzzleType>.Convert(Model.TargetType.PromotionPuzzleType))
+                </select>
             </div>
+
 
             <div class="form-group">
                 <label>Описание цены</label>
-                <input class="form-control"  asp-for="TargetType.Prices[0].Text" required placeholder="">
-            </div>
-            <input type="hidden" asp-for="TargetType.Prices[0].LanguageId" value="1" />
-      @*      <input type="hidden" asp-for="TargetType.Prices[0].Id" value="@Model.TargetType.Prices[0].Id" />*@
-
-            <h2>Описания тарифа</h2>
-            <button type="button" class="btn btn-primary" onclick="addDescription()">Добавить описание</button>
-            <div id="descriptions_block">
-                @for(int t = 0; t < Model.TargetType.Descriptions.Count;t++)
-                {
-                    var description = Model.TargetType.Descriptions[t];
-                    @*<input type="hidden" name="TargetType.Descriptions[@t].Id" value="@description.Id" />*@
-
-                    <div id="description_@t" class="col-lg-12">
-                        <h2></h2>
-                        <div class="table-responsive">
-                            <button type="button" class="btn btn-primary" onclick="addDescriptionTranslation(@t)">Добавить перевод</button>
-                            <button type="button" class="btn btn-danger" onclick="removeDescription(@t)">Удалить описание</button>
-                            <table class="table table-bordered table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Язык</th>
-                                        <th>Значение</th>
-                                        <th style="width:80px"></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="descTbody_@t">
-                                    @for(int i = 0; i < description.Texts.Count; i++)
-                                    {
-                                        var translation = description.Texts[i];
-                                        <tr>
-                                           @* <input type="hidden" name="TargetType.Descriptions[@t].Texts[@i].Id" value="@translation.Id" />*@
-                                            <td>
-                                                <select class="form-control" name="TargetType.Descriptions[@t].Texts[@i].LanguageId">
-                                                    @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages,translation.Language))
-                                                </select>
-                                            </td>
-                                            <td><input class="form-control" name="TargetType.Descriptions[@t].Texts[@i].Text" value="@translation.Text" required placeholder=""></td>
-                                            <td><button type="button" onclick="removeDescriptionTranslation(@t,event)" class="btn btn-danger">Удалить</button></td>
-                                        </tr>
-                                    } 
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                }
-            </div>
-
-             <h2>Переводы на другие языки</h2>
-             <div class="form-group">
-
-                <div class="col-lg-6">
-                    <div class="table-responsive">
-                        <h4>Заголовок</h4>
-                        <button type="button" class="btn btn-primary" onclick="addTitleTranslation()">Добавить пункт</button>
-                        <table class="table table-bordered table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Язык</th>
-                                    <th>Значение</th>
-                                    <th style="width:80px"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="titleTranslationsTBody">
-                                @{
-                                    int captionsLangCounter = 0;
-                                }
-                                @foreach (var translation in Model.TargetType.Captions)
-                                {
-                                    if(captionsLangCounter == 0)
-                                    {
-                                        captionsLangCounter++; continue;
-                                    }
-
-                                    <tr data-id="@translation.Id">
-                                      @*  <input type="hidden" name="TargetType.Captions[@captionsLangCounter].Id" value="@translation.Id">*@
-                                        <td>
-                                            <select class="form-control" name="TargetType.Captions[@captionsLangCounter].LanguageId">
-                                                @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages.Where(o =>o.Code != "RU"),translation.Language))
-                                            </select>
-                                        </td>
-                                        <td><textarea class="form-control" name="TargetType.Captions[@captionsLangCounter].Text" required rows="3">@translation.Text</textarea></td>
-                                        <td><button type="button" onclick="deleteTitleTranslation(event)" class="btn btn-danger">Удалить</button></td>
-                                    </tr>
-
-                                    captionsLangCounter++;
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                 <div class="col-lg-6">
-                    <div class="table-responsive">
-                        <h4>Описание цены</h4>
-                        <button type="button" class="btn btn-primary" onclick="addDescTranslation()">Добавить перевод</button>
-                        <table class="table table-bordered table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Язык</th>
-                                    <th>Значение</th>
-                                    <th style="width:80px"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="descTranslationsTBody">
-                                @for (var i = 1; i < Model.TargetType.Prices.Count; i++)
-                                {
-                                    var translation = Model.TargetType.Prices[i];
-                                    <tr data-id="@translation.Id">
-                                @*        <input type="hidden" name="TargetType.Prices[@i].Id" value="@translation.Id">*@
-                                        <td>
-                                            <select class="form-control" name="TargetType.Prices[@i].LanguageId">
-                                                @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages.Where(o =>o.Code != "RU"),translation.Language))
-                                            </select>
-                                        </td>
-                                        <td><textarea class="form-control" name="TargetType.Prices[@i].Text" required rows="3">@translation.Text</textarea></td>
-                                        <td><button type="button" onclick="deleteDescTranslation(event)" class="btn btn-danger">Удалить</button></td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
+                <input class="form-control"  asp-for="TargetType.Price" required placeholder="">
             </div>
 
 
-            <button type="submit" class="btn btn-default">Сохранить</button>
+     
+
+
+            <div class="mb-3 mt-3 position-right">
+                <button type="submit" class="button-classic">Сохранить</button>
+            </div>
 
         </form>
 
@@ -177,85 +68,10 @@
 
 
 
-@*Переводы для заголовка*@
-<script>
-
-    let titleTranslationsIndex = @Model.TargetType.Captions.Count-1;
-    
-    function addTitleTranslation(){
-
-        titleTranslationsIndex++;
-        let tBody = document.getElementById("titleTranslationsTBody");
-
-        let tr = document.createElement("tr");
-        tr.innerHTML = `  <td>
-                              <select class="form-control" name="TargetType.Captions[${titleTranslationsIndex}].LanguageId">
-                                  @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages.Where(o =>o.Code != "RU")))
-                              </select>
-                          </td>
-                          <td><input class="form-control" name="TargetType.Captions[${titleTranslationsIndex}].Text" required placeholder=""></td>
-                          <td><button type="button" onclick="deleteTitleTranslation(event)" class="btn btn-danger">Удалить</button></td>`;
-
-        tBody.appendChild(tr);
-
-    }
-
-    function deleteTitleTranslation(event) {
-
-         let tBody = document.getElementById("titleTranslationsTBody");
-         tBody.removeChild(event.target.parentNode.parentNode);
-
-         titleTranslationsIndex--;
-    }
-
-</script>
-
-@*Переводы для цены*@
-<script>
-
-    let descTranslationsIndex = @Model.TargetType.Prices.Count-1;
-    
-    function addDescTranslation(){
-
-        descTranslationsIndex++;
-        let tBody = document.getElementById("descTranslationsTBody");
-
-        let tr = document.createElement("tr");
-        tr.innerHTML = `<td>
-                            <select class="form-control" name="TargetType.Prices[${descTranslationsIndex}].LanguageId">
-                                @Html.Raw(ClassesToHtmlHelper<Language>.Convert(Model.Languages.Where(o =>o.Code != "RU")))
-                            </select>
-                        </td>
-                        <td><textarea class="form-control" name="TargetType.Prices[${descTranslationsIndex}].Text" required rows="3"></textarea></td>
-                        <td><button type="button" onclick="deleteDescTranslation(event)" class="btn btn-danger">Удалить</button></td>`;
-
-        tBody.appendChild(tr);
-
-    }
-
-    function deleteDescTranslation(event) {
-
-         let tBody = document.getElementById("descTranslationsTBody");
-         tBody.removeChild(event.target.parentNode.parentNode);
-
-         descTranslationsIndex--;
-    }
-
-
-</script>
 
 
 
 
-
-@*Описания тарифа*@
-<script>
-
-    let descTranslationIndeces = [@string.Join(',',Model.TargetType.Descriptions.Select(o => (o.Texts.Count-1).ToString()))];
-
-    let descIndex = @Model.TargetType.Descriptions.Count-1;
-
-</script>
 
 @*Пункты описания*@
 <script>

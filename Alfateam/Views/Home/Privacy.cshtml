@@ -1,14 +1,37 @@
-﻿@{
+﻿@using Alfateam.Services;
+@{
     ViewData["Title"] = "Privacy Policy";
+    ViewData["HideMakeOrderBtn"] = true;
 }
-   <div class="container content-top-page">
-        <div class="pagelist">
-            <div class="pageheader">
-                <div class="title">Политика конфиденциальности</div>
+
+@inject LocalizationService localization
+@{
+    var currentLang = localization.GetCurrentLanguage();
+    var pageLocalization = localization.GetPrivacyPageLocalization();
+
+}
+
+
+@section in_header{
+
+
+<!-- CONTENT HEADER -->
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="static-page-header">
+                <div class="title-static">@pageLocalization.Header</div>
             </div>
-            <div class="pagecontent">
-                Обещаю не брать в рот
+
+            <div class="static-content">
+                    @Html.Raw(pageLocalization.Content)
             </div>
         </div>
     </div>
-    
+</div>
+
+
+}
+
+<!-- SECTION: Maps -->
+@await Component.InvokeAsync("MapBlockComponent")

@@ -1,0 +1,126 @@
+﻿@using Alfateam.CRM.ViewModels.Sales.Clients;
+@using Alfateam.Database.Enums.CRM;
+@using CRMWeb.Helpers;
+@{
+    Layout = "_AdminLayoutV2";
+}
+@model ClientPageVM
+
+<!-- Page Heading -->
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            Создание нового клиента
+        </h1>
+    </div>
+</div>
+<!-- /.row -->
+
+<div class="row">
+    <div class="col-lg-12">
+
+        <form asp-action="CreateClientPOST" asp-controller="Sales" method="post" enctype="multipart/form-data" role="form">
+
+            <div class="form-group">
+                <label>Фамилия*</label>
+                <input class="form-control" asp-for="Client.Surname" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Имя*</label>
+                <input class="form-control" asp-for="Client.Name" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Отчество</label>
+                <input class="form-control" asp-for="Client.Patronymic" placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Дата рождения</label>
+                <input type="date" class="form-control" asp-for="Client.BirthDate" placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Тип клиента*</label>
+                <select class="form-control" asp-for="Client.ClientType">
+                    @Html.Raw(EnumToHtmlHelper<ClientType>.Convert(Model.Client.ClientType))
+                </select>
+            </div>
+
+             <div class="form-group">
+                <label>Название компании (для юр.лиц)</label>
+                <input class="form-control" asp-for="Client.CompanyName" placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Адрес</label>
+                <textarea class="form-control" asp-for="Client.Address" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Описание</label>
+                <textarea class="form-control" asp-for="Client.Description" rows="3"></textarea>
+            </div>
+
+
+            <div class="accordion mt-4" id="accordionExample">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                            Контактные данные
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+
+                            <div class="form-group">
+                                <label>Телефон*</label>
+                                <input class="form-control" asp-for="Client.Contacts.Phone" required placeholder="">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Email*</label>
+                                <input class="form-control" asp-for="Client.Contacts.Email" required placeholder="">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Telegram*</label>
+                                <input class="form-control" asp-for="Client.Contacts.Telegram" required placeholder="">
+                            </div>
+
+                            <div class="form-group">
+                                <label>WhatsApp</label>
+                                <input class="form-control" asp-for="Client.Contacts.WhatsApp" placeholder="">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Страница ВКонтакте</label>
+                                <input class="form-control" asp-for="Client.Contacts.Vkontakte" placeholder="">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Страница Instagram</label>
+                                <input class="form-control" asp-for="Client.Contacts.Instagram" placeholder="">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Web-сайт</label>
+                                <input class="form-control" asp-for="Client.Contacts.Website" placeholder="">
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="mb-3 mt-3 position-right">
+                <button type="submit" class="button-classic">Сохранить</button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+

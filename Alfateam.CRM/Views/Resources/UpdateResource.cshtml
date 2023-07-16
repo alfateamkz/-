@@ -1,0 +1,60 @@
+﻿@using Alfateam.CRM.ViewModels.Sales;
+@using Alfateam.Database.Enums.CRM.Staff;
+@using Alfateam.Database.Enums.CRM;
+@using CRMWeb.Helpers;
+@{
+    Layout = "_AdminLayoutV2";
+}
+@model ResourcePageVM
+
+<!-- Page Heading -->
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            Редактирование сведений о ресурсе
+        </h1>
+    </div>
+</div>
+<!-- /.row -->
+
+<div class="row">
+    <div class="col-lg-12">
+
+        <form asp-action="UpdateResourcePOST" asp-controller="Resources" method="post" enctype="multipart/form-data" role="form">
+
+            <input type="hidden" asp-for="Resource.Id" />
+
+            <div class="form-group">
+                <label>Название*</label>
+                <input class="form-control" asp-for="Resource.Title" required placeholder="">
+            </div>
+
+            <div class="form-group">
+                <label>Описание</label>
+                <textarea class="form-control" asp-for="Resource.Description" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Кому принадлежит</label>
+                <select class="form-control" asp-for="Resource.ResourceOwnership">
+                    @Html.Raw(EnumToHtmlHelper<ResourceOwnership>.Convert(Model.Resource.ResourceOwnership))
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Статус</label>
+                <select class="form-control" asp-for="Resource.Status">
+                    @Html.Raw(EnumToHtmlHelper<ResourceStatus>.Convert(Model.Resource.Status))
+                </select>
+            </div>
+
+
+            <div class="mb-3 mt-3 position-right">
+                <button type="submit" class="button-classic">Сохранить</button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
