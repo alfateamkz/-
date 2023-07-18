@@ -26,6 +26,5 @@ namespace Alfateam.CRM2_0.Models.Content.Tests
             return Title;
         }
 
-        //TODO: доделать образовательные разделы в целом
     }
 }

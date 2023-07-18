@@ -1,4 +1,5 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
+using Alfateam.CRM2_0.Models.General;
 using Alfateam.CRM2_0.Models.Roles.SecurityService.Checking.Data;
 using System;
 using System.Collections.Generic;

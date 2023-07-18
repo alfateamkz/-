@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Alfateam.CRM2_0.Models.Departments
 {
-    public class SecurityServiceDepartment : AbsModel
+    public class SecurityServiceDepartment : Department
     {
 
         #region Checking

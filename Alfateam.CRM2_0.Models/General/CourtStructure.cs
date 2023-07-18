@@ -13,10 +13,9 @@ namespace Alfateam.CRM2_0.Models.General
     public class CourtStructure : AbsModel
     {
         public Country Country { get; set; } 
-
         public string Title { get; set; }
 
 
-        //TODO : доделать систему судов и исков
+        public List<CourtStructure> SubStructures { get; set; } = new List<CourtStructure>();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
 using Alfateam.CRM2_0.Models.Enums.Roles.Sales;
+using Alfateam.CRM2_0.Models.General;
 using Alfateam.CRM2_0.Models.Roles.Sales.Orders;
 using System;
 using System.Collections.Generic;

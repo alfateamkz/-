@@ -22,5 +22,8 @@ namespace Alfateam.CRM2_0.Models.Gamification.Contests
 
         public DateTime StartDate { get; set; } = DateTime.Now;
         public DateTime EndDate { get; set; } = DateTime.Now.AddDays(30);
+
+
+        public ContestResult? Result { get; set; }
     }
 }

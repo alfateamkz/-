@@ -13,6 +13,6 @@ namespace Alfateam.CRM2_0.Models.Gamification.General
     public class LevelReward : AbsModel
     {
         public double Rating { get; set; }
-        public double Reward { get; set; }
+        public double Coins { get; set; }
     }
 }

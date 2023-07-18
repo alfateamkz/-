@@ -13,7 +13,7 @@ namespace Alfateam.CRM2_0.Models.Departments
     /// <summary>
     /// Юридический отдел
     /// </summary>
-    public class LawDepartment : AbsModel
+    public class LawDepartment : Department
     {
 
         #region Documents
@@ -27,6 +27,6 @@ namespace Alfateam.CRM2_0.Models.Departments
 
         public List<LawyerTask> LawyerTasks { get; set; } = new List<LawyerTask>();
 
-        //TODO: доработать суды, мб что-то еще
+        
     }
 }

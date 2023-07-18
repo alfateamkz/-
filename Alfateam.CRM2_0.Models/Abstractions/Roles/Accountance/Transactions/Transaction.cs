@@ -1,5 +1,6 @@
 ﻿using Alfateam.CRM2_0.Models.Enums.Roles.Accountance;
 using Alfateam.CRM2_0.Models.General;
+using Alfateam.CRM2_0.Models.Roles.Accountance;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,10 +15,7 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Roles.Accountance.Transactions
     /// </summary>
     public abstract class Transaction : AbsModel
     {
-
-
-
-
+         
 
 
         public string Title { get; set; }
@@ -42,6 +40,12 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Roles.Accountance.Transactions
         /// </summary>
         public bool IsPlanned { get; set; }
         public DateTime? PlannedDate { get; set; }
+
+
+        /// <summary>
+        /// История изменений свойств транзакции
+        /// </summary>
+        public List<TransactionChanges> OldTransactionVersions { get; set; } = new List<TransactionChanges>();
 
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
+using Alfateam.CRM2_0.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,11 @@ namespace Alfateam.CRM2_0.Models.General
     /// </summary>
     public class Business : AbsModel
     {
+        /// <summary>
+        /// Владельцы бизнеса
+        /// </summary>
+        public List<User> Owners { get; set; } = new List<User>();
+        public BusinessType Type { get; set; } = BusinessType.Our;
         public List<Organization> Organizations { get; set; } = new List<Organization>();
     }
 }

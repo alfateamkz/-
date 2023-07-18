@@ -1,4 +1,5 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions.Roles.Accountance.Transactions;
+using Alfateam.CRM2_0.Models.Roles.Marketing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,8 @@ namespace Alfateam.CRM2_0.Models.Roles.Accountance.Transactions
     /// </summary>
     public class MarketingTransaction : Transaction
     {
-        //TODO: сделать MarketingTransaction
+        public AdCampaign Campaign { get; set; }
+        public AdCampaignItem CampaignItem { get; set; }
+        public AdCampaignBudgetItem? BudgetItem { get; set; }
     }
 }

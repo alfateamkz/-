@@ -17,7 +17,9 @@ namespace Alfateam.CRM2_0.Models.General
 
 
         public string LegalName { get; set; }
-        public string LegalAddress { get; set; }
-        public string? ActualAddress { get; set; }
+        public string LegalInfo { get; set; }
+
+        public Address LegalAddress { get; set; }
+        public Address? ActualAddress { get; set; }
     }
 }

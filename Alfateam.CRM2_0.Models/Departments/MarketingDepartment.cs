@@ -12,7 +12,7 @@ namespace Alfateam.CRM2_0.Models.Departments
     /// <summary>
     /// Отдел маркетинга
     /// </summary>
-    public class MarketingDepartment : AbsModel
+    public class MarketingDepartment : Department
     {
 
         #region Referral

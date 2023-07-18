@@ -1,5 +1,5 @@
-﻿using Alfateam.CRM2_0.Models.Abstractions;
-using Alfateam.CRM2_0.Models.Abstractions.Communication.Messenger;
+﻿using Alfateam.CRM2_0.Models.Abstractions.Communication.Messenger;
+using Alfateam.CRM2_0.Models.General;
 using System;
 using System.Collections.Generic;
 using System.Linq;

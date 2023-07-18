@@ -1,4 +1,7 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
+using Alfateam.CRM2_0.Models.General.Assessment.Risks;
+using Alfateam.CRM2_0.Models.General.Services;
+using Alfateam.CRM2_0.Models.Roles.Financier;
 using Alfateam.CRM2_0.Models.Roles.Financier.Investments;
 using Alfateam.CRM2_0.Models.Roles.Financier.Planning;
 using Alfateam.CRM2_0.Models.Roles.Financier.Pricing;
@@ -13,7 +16,7 @@ namespace Alfateam.CRM2_0.Models.Departments
     /// <summary>
     /// Отдел финансов
     /// </summary>
-    public class FinanceDepartment : AbsModel
+    public class FinanceDepartment : Department
     {
 
         #region Investments
@@ -32,6 +35,7 @@ namespace Alfateam.CRM2_0.Models.Departments
 
         #endregion
 
-        ///TODO: проверить и доработать финансовый отдел и роль
+        public RisksModel FinancialRisks { get; set; }
+        public List<Foundation> Foundations { get; set; } = new List<Foundation>(); 
     }
 }

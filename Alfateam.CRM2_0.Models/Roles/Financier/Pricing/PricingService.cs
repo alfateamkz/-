@@ -1,4 +1,6 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
+using Alfateam.CRM2_0.Models.General;
+using Alfateam.CRM2_0.Models.General.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +15,8 @@ namespace Alfateam.CRM2_0.Models.Roles.Financier.Pricing
     public class PricingService : AbsModel
     {
         public Service Service { get; set; }
-        public double Price { get; set; }
+        public List<PricingItem> PriceByCountries { get; set; } = new List<PricingItem>();
+
+        public double AllowedMaxDiscountPercent { get; set; }
     }
 }

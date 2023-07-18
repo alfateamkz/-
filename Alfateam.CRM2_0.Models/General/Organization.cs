@@ -1,4 +1,5 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
+using Alfateam.CRM2_0.Models.Departments;
 using Alfateam.CRM2_0.Models.Roles.Accountance;
 using System;
 using System.Collections.Generic;
@@ -33,6 +34,13 @@ namespace Alfateam.CRM2_0.Models.General
         /// </summary>
         public List<Account> Accounts { get; set; } = new List<Account>();
         public List<OrganizationOffice> Offices { get; set; } = new List<OrganizationOffice>();
+
+
+        /// <summary>
+        /// Отделы организации
+        /// </summary>
+        public DepartmentsGrouping Departments { get; set; }
+
 
 
     }

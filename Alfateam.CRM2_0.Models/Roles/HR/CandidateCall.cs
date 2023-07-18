@@ -1,4 +1,5 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
+using Alfateam.CRM2_0.Models.Abstractions.Roles.HR;
 using Alfateam.CRM2_0.Models.Enums.Roles.HR;
 using System;
 using System.Collections.Generic;
@@ -19,13 +20,15 @@ namespace Alfateam.CRM2_0.Models.Roles.HR
         public DateTime InitialPlannedTime { get; set; }
         public DateTime? PostponedPlannedTime { get; set; }
 
-        //TODO: история переноса созвонов
-
         public DateTime? StartedAt { get; set; }
         public DateTime? EndedAt { get; set; }
 
-
-
         public string? CallRecordPath { get; set; }
+
+
+        /// <summary>
+        /// История переноса созвонов
+        /// </summary>
+        public List<CandidateCallRescheduling> Reschedulings { get; set; } = new List<CandidateCallRescheduling>();
     }
 }

@@ -32,6 +32,17 @@ namespace Alfateam.CRM2_0.Models.Roles.Financier.Investments
         public InvestmentCondition InvestmentCondition { get; set; }
 
 
+        
+        /// <summary>
+        /// Вложения к инвест проекту
+        /// </summary>
+        public List<InvestProjectAttachment> Attachments { get; set; } = new List<InvestProjectAttachment>();
+
+
+
+
+
+
         /// <summary>
         /// Счет инвест проекта
         /// Значение может быть равно null, если проект еще не начат
@@ -40,10 +51,9 @@ namespace Alfateam.CRM2_0.Models.Roles.Financier.Investments
         /// </summary>
         public Account? Account { get; set; }
 
-
         /// <summary>
-        /// Вложения к инвест проекту
+        /// Учет инвестиций в нас
         /// </summary>
-        public List<InvestProjectAttachment> Attachments { get; set; } = new List<InvestProjectAttachment>();
+        public List<InvestProjectDeposit> Deposits { get; set; } = new List<InvestProjectDeposit>();
     }
 }

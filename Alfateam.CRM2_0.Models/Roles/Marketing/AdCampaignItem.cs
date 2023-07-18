@@ -1,5 +1,6 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
 using Alfateam.CRM2_0.Models.Abstractions.Roles.Marketing;
+using Alfateam.CRM2_0.Models.Abstractions.Roles.Staff;
 using Alfateam.CRM2_0.Models.Enums.Roles.Marketing;
 using Alfateam.CRM2_0.Models.General;
 using Alfateam.CRM2_0.Models.Roles.Staff;
@@ -35,7 +36,7 @@ namespace Alfateam.CRM2_0.Models.Roles.Marketing
 
 
 
-        public List<Employee> Employees { get; set; } = new List<Employee>();
+        public List<Worker> Employees { get; set; } = new List<Worker>();
         public List<AdCampaignItemReport> Reports { get; set; } = new List<AdCampaignItemReport>();
 
 

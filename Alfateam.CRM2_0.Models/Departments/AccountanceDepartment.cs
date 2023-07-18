@@ -11,7 +11,7 @@ namespace Alfateam.CRM2_0.Models.Departments
     /// <summary>
     /// Отдел бухгалтерии 
     /// </summary>
-    public class AccountanceDepartment : AbsModel
+    public class AccountanceDepartment : Department
     {
         public List<LoanObligation> LoanObligations { get; set; } = new List<LoanObligation>();
     }

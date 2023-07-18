@@ -18,5 +18,6 @@ namespace Alfateam.CRM2_0.Models.Gamification.Contests
 
 
         public double Rating { get; set; }
+        public double Coins { get; set; }
     }
 }

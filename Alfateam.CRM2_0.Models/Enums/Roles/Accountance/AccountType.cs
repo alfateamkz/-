@@ -12,6 +12,7 @@ namespace Alfateam.CRM2_0.Models.Enums.Roles.Accountance
     public enum AccountType
     {
         Regular = 1, //Обычный счет
-        InvestProject = 2 //Счет инвест проекта
+        InvestProject = 2, //Счет инвест проекта
+        FoundationAccount = 3, //Счет какого-либо фонда
     }
 }

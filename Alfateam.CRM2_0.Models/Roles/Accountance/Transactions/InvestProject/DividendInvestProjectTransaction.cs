@@ -1,6 +1,7 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
 using Alfateam.CRM2_0.Models.Abstractions.Roles.Accountance.Transactions;
 using Alfateam.CRM2_0.Models.Enums.Roles.Accountance;
+using Alfateam.CRM2_0.Models.Roles.Financier.Investments;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,13 +15,7 @@ namespace Alfateam.CRM2_0.Models.Roles.Accountance.Transactions.InvestProject
     /// </summary>
     public class DividendInvestProjectTransaction : InvestProjectTransaction
     {
-        /// <summary>
-        /// Транзакция пополнения 
-        /// TODO: доработать
-        /// </summary>
-        public AdmissionInvestProjectTransaction AdmissionTransaction { get; set; }
-
+        public InvestProjectDeposit From { get; set; }
         public DividendInvestProjectTransactionType Type { get; set; } = DividendInvestProjectTransactionType.DepositWithdrawal;
-        public User ToInvestor { get; set; }
     }
 }

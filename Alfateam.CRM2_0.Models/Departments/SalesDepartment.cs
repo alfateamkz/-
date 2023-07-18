@@ -15,7 +15,7 @@ namespace Alfateam.CRM2_0.Models.Departments
     /// <summary>
     /// Отдел продаж
     /// </summary>
-    public class SalesDepartment : AbsModel
+    public class SalesDepartment : Department
     {
 
         #region Funnel

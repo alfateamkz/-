@@ -7,13 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Content\Education\" />
-    <Folder Include="Enums\Roles\Financier\" />
-    <Folder Include="Roles\Compliance\Fraud\" />
-    <Folder Include="Roles\Lawyer\Trial\" />
     <Folder Include="Roles\Management\" />
     <Folder Include="Roles\Management\Kanban\" />
-    <Folder Include="Roles\Financier\" />
   </ItemGroup>
 
   <ItemGroup>

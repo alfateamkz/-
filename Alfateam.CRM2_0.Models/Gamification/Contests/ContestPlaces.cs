@@ -21,8 +21,8 @@ namespace Alfateam.CRM2_0.Models.Gamification.Contests
 
 
         public ContestPrize Prize { get; set; }
-
-
+        public double Coins { get; set; }
+        public double Rating { get; set; }
 
     }
 }

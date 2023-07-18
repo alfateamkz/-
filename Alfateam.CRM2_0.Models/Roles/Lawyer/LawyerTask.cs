@@ -1,5 +1,7 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
 using Alfateam.CRM2_0.Models.Enums.Roles.Lawyer;
+using Alfateam.CRM2_0.Models.General;
+using Alfateam.CRM2_0.Models.Roles.Sales.Orders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,8 +35,11 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer
         public User SecondSide { get; set; }
 
 
-        //TODO: добавить сюда заказ, если работаем с клиентом/контрагентов, рабочим??
-
+        /// <summary>
+        /// Заказ, с каким связано дело
+        /// Может быть пустым
+        /// </summary>
+        public Order? Order { get; set; }
 
 
 

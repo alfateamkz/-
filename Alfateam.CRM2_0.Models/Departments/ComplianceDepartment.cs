@@ -1,4 +1,5 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
+using Alfateam.CRM2_0.Models.General.Assessment.Risks;
 using Alfateam.CRM2_0.Models.Roles.Compliance;
 using Alfateam.CRM2_0.Models.Roles.Compliance.Appeals;
 using Alfateam.CRM2_0.Models.Roles.Compliance.Conflicts;
@@ -6,7 +7,6 @@ using Alfateam.CRM2_0.Models.Roles.Compliance.Conflicts.Resolutions;
 using Alfateam.CRM2_0.Models.Roles.Compliance.Corruption;
 using Alfateam.CRM2_0.Models.Roles.Compliance.Fraud;
 using Alfateam.CRM2_0.Models.Roles.Compliance.Law;
-using Alfateam.CRM2_0.Models.Roles.Compliance.Risks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +18,7 @@ namespace Alfateam.CRM2_0.Models.Departments
     /// <summary>
     /// Отдел комплаенса 
     /// </summary>
-    public class ComplianceDepartment : AbsModel
+    public class ComplianceDepartment : Department
     {
 
         #region Appeals

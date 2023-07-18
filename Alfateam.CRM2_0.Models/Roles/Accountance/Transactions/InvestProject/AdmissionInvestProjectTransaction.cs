@@ -1,5 +1,6 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
 using Alfateam.CRM2_0.Models.Abstractions.Roles.Accountance.Transactions;
+using Alfateam.CRM2_0.Models.Roles.Financier.Investments;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,6 @@ namespace Alfateam.CRM2_0.Models.Roles.Accountance.Transactions.InvestProject
     /// </summary>
     public class AdmissionInvestProjectTransaction : InvestProjectTransaction
     {
-        public User FromInvestor { get; set; }
+        public InvestProjectDeposit To { get; set; }
     }
 }

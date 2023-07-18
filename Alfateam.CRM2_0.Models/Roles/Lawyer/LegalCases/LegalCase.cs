@@ -1,6 +1,9 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
-using Alfateam.CRM2_0.Models.Enums.Roles.Lawyer;
+using Alfateam.CRM2_0.Models.Abstractions.Roles.Lawyer;
+using Alfateam.CRM2_0.Models.Enums.Roles.Lawyer.LegalCases;
+using Alfateam.CRM2_0.Models.General;
 using Alfateam.CRM2_0.Models.Roles.Lawyer.Documents;
+using Alfateam.CRM2_0.Models.Roles.Lawyer.Trial;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +36,11 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.LegalCases
         /// Порядок ведения дела
         /// </summary>
         public LegalCaseProcedure Procedure { get; set; } = LegalCaseProcedure.PreTrial;
+
+        /// <summary>
+        /// Судебный процесс (если инициирован)
+        /// </summary>
+        public Litigation? Litigation { get; set; }
 
 
 

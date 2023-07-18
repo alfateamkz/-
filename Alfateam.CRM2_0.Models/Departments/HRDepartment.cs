@@ -1,4 +1,5 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
+using Alfateam.CRM2_0.Models.Abstractions.Roles.HR;
 using Alfateam.CRM2_0.Models.Roles.HR;
 using Alfateam.CRM2_0.Models.Roles.HR.Manuals;
 using Alfateam.CRM2_0.Models.Roles.HR.Questionnaires;
@@ -13,7 +14,7 @@ namespace Alfateam.CRM2_0.Models.Departments
     /// <summary>
     /// Отдел рекрутинга 
     /// </summary>
-    public class HRDepartment : AbsModel
+    public class HRDepartment : Department
     {
         #region Manuals
         public List<HRManual> HRManuals { get; set; } = new List<HRManual>();

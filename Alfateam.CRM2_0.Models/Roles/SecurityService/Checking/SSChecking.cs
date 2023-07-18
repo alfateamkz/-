@@ -1,5 +1,6 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
 using Alfateam.CRM2_0.Models.Enums.Roles.SecurityService;
+using Alfateam.CRM2_0.Models.General;
 using Alfateam.CRM2_0.Models.Roles.SecurityService.Checking.Data;
 using Alfateam.CRM2_0.Models.Roles.SecurityService.Checking.Scoring;
 using System;

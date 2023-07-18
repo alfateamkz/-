@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Alfateam.CRM2_0.Models.General;
 
 namespace Alfateam.CRM2_0.Models.Abstractions.Communication.Messenger
 {

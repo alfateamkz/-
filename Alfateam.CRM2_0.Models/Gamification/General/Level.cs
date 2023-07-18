@@ -20,7 +20,5 @@ namespace Alfateam.CRM2_0.Models.Gamification.General
         public List<LevelCriteria> Criterias { get; set; } = new List<LevelCriteria>();
         public LevelReward Reward { get; set; }
 
-
-        //TODO: Доделать геймификацию в целом
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions.Roles.Accountance.Transactions;
+using Alfateam.CRM2_0.Models.Roles.Sales.Orders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,6 @@ namespace Alfateam.CRM2_0.Models.Roles.Accountance.Transactions
     /// </summary>
     public class OrderTransaction : Transaction
     {
-        //TODO: сделать заказы)))
+        public Order Order { get; set; }
     }
 }

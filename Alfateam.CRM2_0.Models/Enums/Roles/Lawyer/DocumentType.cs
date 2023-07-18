@@ -22,6 +22,7 @@ namespace Alfateam.CRM2_0.Models.Enums.Roles.Lawyer
         ClaimLetterReply = 9, //Ответ на претензионное письмо
         StatementOfClaim = 10, //Исковое заявление
 
+
         Other = 999, //Прочее
 
     }

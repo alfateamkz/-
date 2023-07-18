@@ -1,4 +1,6 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
+using Alfateam.CRM2_0.Models.Abstractions.Roles.Staff;
+using Alfateam.CRM2_0.Models.Departments;
 using Alfateam.CRM2_0.Models.Enums;
 using Alfateam.CRM2_0.Models.Roles.Accountance;
 using Alfateam.CRM2_0.Models.Roles.Staff;
@@ -27,8 +29,6 @@ namespace Alfateam.CRM2_0.Models.General
         public TimeZone TimeZone { get; set; }
 
 
-        public List<Employee> Employees { get; set; } = new List<Employee>();
-
 
         /// <summary>
         /// Офисы, находящиеся в подчинении у данного офиса
@@ -45,6 +45,20 @@ namespace Alfateam.CRM2_0.Models.General
         public List<Account> Accounts { get; set; } = new List<Account>();
 
 
+
+        /// <summary>
+        /// Отделы офиса/филиала. 
+        /// Значение обязательно не должно быть равным null, 
+        /// но если в офисе/филиале нет отдельных отделов(используются вышестоящие), 
+        /// то все отделы внутри могут быть равны null
+        /// </summary>
+        public DepartmentsGrouping Departments { get; set; }
+
+
+        /// <summary>
+        /// Сотрудники офиса/филиала
+        /// </summary>
+        public OrganizationOfficeStaff Staff { get; set; }
 
 
     }

@@ -1,5 +1,5 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
-using Alfateam.CRM2_0.Models.Enums.Roles.Lawyer;
+using Alfateam.CRM2_0.Models.Enums.Roles.Lawyer.LegalCases;
 using Alfateam.CRM2_0.Models.Enums.Roles.SecurityService;
 using Alfateam.CRM2_0.Models.Roles.SecurityService.Checking;
 using System;
