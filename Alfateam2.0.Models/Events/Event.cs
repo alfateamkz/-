@@ -1,0 +1,39 @@
+﻿using Alfateam2._0.Models.Abstractions;
+using Alfateam2._0.Models.Localization.Items.Events;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Alfateam2._0.Models.Events
+{
+    /// <summary>
+    /// Модель мероприятия
+    /// </summary>
+    public class Event : AvailabilityModel
+    {
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string ImgPath { get; set; }  
+        
+
+        public string? EventOrganizer { get; set; }
+        public string? EventMembers { get; set; }
+
+
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public General.TimeZone TimeZone { get; set; }
+
+
+
+
+
+        public EventCategory Category { get; set; }
+        public EventFormat Format { get; set; }
+
+
+        public List<EventLocalization> Localizations { get; set; } = new List<EventLocalization>();
+    }
+}

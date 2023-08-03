@@ -13,10 +13,15 @@ namespace Alfateam.Controllers
         [HttpGet, Route("Outstaff")]
         public IActionResult Outstaff()
         {
+            return NotFound();
             var emloyees = DB.OutstaffEmployeeInfos.ToList();
             return View(@"Views\ForBusinessClient\Outstaff.cshtml", emloyees);
         }
 
-
+        [HttpGet, Route("ChurchApp")]
+        public IActionResult ChurchApp()
+        {
+            return File("/файлы/church.apk", "application/octet-stream","church.apk");
+        }
     }
 }

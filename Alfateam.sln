@@ -9,7 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.Database", "Alfate
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.CRM", "Alfateam.CRM\Alfateam.CRM.csproj", "{7F05CB6F-CA3C-476D-B025-F74F6168DE53}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.CRM2_0.Models", "Alfateam.CRM2_0.Models\Alfateam.CRM2_0.Models.csproj", "{1D950189-28EE-49FB-82F3-959ED7802047}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.CRM2_0.Models", "Alfateam.CRM2_0.Models\Alfateam.CRM2_0.Models.csproj", "{1D950189-28EE-49FB-82F3-959ED7802047}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam2.0.Models", "Alfateam2.0.Models\Alfateam2.0.Models.csproj", "{27AB9DA3-27F9-4554-A030-E784E28A414C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.DB", "Alfateam.DB\Alfateam.DB.csproj", "{47A52048-B1CE-4C70-93EA-0990B1C6DFCF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,14 @@ Global
 		{1D950189-28EE-49FB-82F3-959ED7802047}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D950189-28EE-49FB-82F3-959ED7802047}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D950189-28EE-49FB-82F3-959ED7802047}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27AB9DA3-27F9-4554-A030-E784E28A414C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27AB9DA3-27F9-4554-A030-E784E28A414C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27AB9DA3-27F9-4554-A030-E784E28A414C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27AB9DA3-27F9-4554-A030-E784E28A414C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47A52048-B1CE-4C70-93EA-0990B1C6DFCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47A52048-B1CE-4C70-93EA-0990B1C6DFCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47A52048-B1CE-4C70-93EA-0990B1C6DFCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47A52048-B1CE-4C70-93EA-0990B1C6DFCF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
