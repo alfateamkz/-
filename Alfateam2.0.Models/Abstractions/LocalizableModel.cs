@@ -13,5 +13,6 @@ namespace Alfateam2._0.Models.Abstractions
     public abstract class LocalizableModel : AbsModel
     {
         public Language Language { get; set; }
+        public int LanguageId { get; set; }
     }
 }

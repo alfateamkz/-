@@ -1,8 +1,10 @@
 ﻿using Alfateam2._0.Models.General;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Alfateam2._0.Models.Abstractions
@@ -17,6 +19,11 @@ namespace Alfateam2._0.Models.Abstractions
 
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+
+
+        [JsonIgnore, NotMapped]
+        public bool IsExpired => DateTime.UtcNow >= EndDate;
+
         public bool IsReusable { get; set; }
 
 
@@ -28,5 +35,14 @@ namespace Alfateam2._0.Models.Abstractions
         /// До какой стоимости начинает действовать промокод
         /// </summary>
         public PricingMatrix? PriceTo { get; set; }
+
+
+
+        public bool IsCostInRange(Cost cost)
+        {
+            //TODO: реализовать логику
+            return true;
+        }
+
     }
 }

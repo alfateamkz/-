@@ -13,7 +13,7 @@ namespace Alfateam2._0.Models.Shop
     /// <summary>
     /// Сущность товара в магазине
     /// </summary>
-    public class ShopProduct : AbsModel
+    public class ShopProduct : AvailabilityModel
     {
         public string Title { get; set; }
         public string Description { get; set; }
@@ -35,6 +35,8 @@ namespace Alfateam2._0.Models.Shop
 
 
 
+        public Language MainLanguage { get; set; }
+        public int MainLanguageId { get; set; }
         public List<ShopProductLocalization> Localizations { get; set; } = new List<ShopProductLocalization>();
     }
 }

@@ -15,7 +15,7 @@ namespace Alfateam2._0.Models.HR
     /// Сущность вакансии
     /// Если SalaryFrom и SalaryTo равны null, то ЗП договорная
     /// </summary>
-    public class JobVacancy : AbsModel
+    public class JobVacancy : AvailabilityModel
     {
         public string Title { get; set; }
         public Currency Currency { get; set; }
@@ -33,6 +33,9 @@ namespace Alfateam2._0.Models.HR
         public List<Watch> WatchesList { get; set; } = new List<Watch>();
 
 
+
+        public Language MainLanguage { get; set; }
+        public int MainLanguageId { get; set; }
         public List<JobVacancyLocalization> Localizations { get; set; } = new List<JobVacancyLocalization>();
 
     }

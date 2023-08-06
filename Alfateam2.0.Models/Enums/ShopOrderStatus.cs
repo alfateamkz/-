@@ -12,15 +12,16 @@ namespace Alfateam2._0.Models.Enums
     public enum ShopOrderStatus
     {
         Basket = 1, //Заказ как "корзина"
-        Paid = 2, //Оплачен
-        InDelivery = 3, //В доставке
-        Delivered = 4, //Доставлен
-        Completed = 5, //Получен, заказ закрыт
-        TakenByClient = 6, //Получен, но еще заказ не закрыт
+        Unpaid = 2, //Оплачен
+        Paid = 3, //Оплачен
+        InDelivery = 4, //В доставке
+        Delivered = 5, //Доставлен
+        Completed = 6, //Получен, заказ закрыт
+        TakenByClient = 7, //Получен, но еще заказ не закрыт
 
 
-        Canceled = 7, //Заказ отменен
-        ReturnedByCustomer = 8, //Заказ возвращен клиентом
-        ReturnedByDeliveryService = 9, //Заказ возвращен службой доставки(клиент не забрал)
+        Canceled = 8, //Заказ отменен
+        ReturnedByCustomer = 9, //Заказ возвращен клиентом
+        ReturnedByDeliveryService = 10, //Заказ возвращен службой доставки(клиент не забрал)
     }
 }

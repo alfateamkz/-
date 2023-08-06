@@ -1,5 +1,6 @@
 ﻿using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.Enums;
+using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Localization.Items.Shop;
 using Alfateam2._0.Models.Localization.Items.Shop.Modifiers;
 using System;
@@ -28,7 +29,8 @@ namespace Alfateam2._0.Models.Shop.Modifiers
 
 
 
-
+        public Language MainLanguage { get; set; }
+        public int MainLanguageId { get; set; }
         public List<ProductModifierLocalization> Localizations { get; set; } = new List<ProductModifierLocalization>();
     }
 }

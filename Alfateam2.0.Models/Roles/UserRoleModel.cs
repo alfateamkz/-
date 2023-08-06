@@ -1,6 +1,7 @@
 ﻿using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
+using Alfateam2._0.Models.Roles.Access;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace Alfateam2._0.Models.Roles
 
 
         /// <summary>
-        ///  Имеет ли пользователь админки доступ ко всем странам 
+        ///  Имеет ли пользователь админки доступ ко всем странам, кроме ForbiddenCountries
         ///  Если false, то имеет доступ только к странам из списка AvailableCountries
         /// </summary>
         public bool IsAllCountriesAccess { get; set; }  
@@ -29,6 +30,13 @@ namespace Alfateam2._0.Models.Roles
         /// К каким странам пользователь админки имеет доступ
         /// </summary>
         public List<Country> AvailableCountries { get; set; } = new List<Country>();
+        /// <summary>
+        /// К каким странам пользователь админки не имеет доступ
+        /// </summary>
+        public List<Country> ForbiddenCountries { get; set; } = new List<Country>();
+
+
+
 
 
         /// <summary>
@@ -37,7 +45,9 @@ namespace Alfateam2._0.Models.Roles
         /// </summary>
         public AllContentAccessType AllContentAccess { get; set; } = AllContentAccessType.None;
         public PortfolioAccessType PortfolioAccess { get; set; } = PortfolioAccessType.None;
-        public PostsAccessType PostsAccess { get; set; } = PostsAccessType.None;
+
+
+        public PostsAccessModel PostsAccess { get; set; }
         public MassMediaPostsAccessType MassMediaPostsAccess { get; set; } = MassMediaPostsAccessType.None;
 
 

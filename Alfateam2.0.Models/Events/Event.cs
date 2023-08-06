@@ -1,4 +1,5 @@
 ﻿using Alfateam2._0.Models.Abstractions;
+using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Localization.Items.Events;
 using System;
 using System.Collections.Generic;
@@ -34,6 +35,10 @@ namespace Alfateam2._0.Models.Events
         public EventFormat Format { get; set; }
 
 
+
+
+        public Language MainLanguage { get; set; }
+        public int MainLanguageId { get; set; }
         public List<EventLocalization> Localizations { get; set; } = new List<EventLocalization>();
     }
 }

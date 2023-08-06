@@ -19,6 +19,9 @@ namespace Alfateam2._0.Models.Outstaff
         public List<OutstaffItemGradeColumn> Prices { get; set; } = new List<OutstaffItemGradeColumn>();
 
 
+
+        public Language MainLanguage { get; set; }
+        public int MainLanguageId { get; set; }
         public List<OutstaffItemGradeLocalization> Localizations { get; set; } = new List<OutstaffItemGradeLocalization>();
     }
 }

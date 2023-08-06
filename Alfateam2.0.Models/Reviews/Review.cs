@@ -20,12 +20,19 @@ namespace Alfateam2._0.Models.Reviews
         /// </summary>
         public int Rate { get; set; }
 
+
         /// <summary>
         /// Страна, из которой был оставлен отзыв
         /// </summary>
         public Country Country { get; set; }
+        public int CountryId { get; set; }
+
+
 
         public User User { get; set; }
+        public int UserId { get; set; }
+
+
 
         public string Title { get; set; }
         public string Text { get; set; }

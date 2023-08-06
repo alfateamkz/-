@@ -19,5 +19,28 @@ namespace Alfateam2._0.Models.General
         public List<Country> AllowedCountries { get; set; } = new List<Country>();
         public List<Country> DisallowedCountries { get; set; } = new List<Country>();
 
+
+        public bool IsAvailable(int? countryId)
+        {
+            if (AvailableInAllCountries)
+            {
+                return !DisallowedCountries.Any(o => o.Id == countryId);
+            }
+            else
+            {
+                return AllowedCountries.Any(o => o.Id == countryId);
+            }
+
+        }
+        public bool IsAvailable(List<Country> countries)
+        {
+            foreach(var country in countries)
+            {
+                if(IsAvailable(country.Id)) 
+                    return true;
+            }
+            return false;
+        }
+
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Alfateam2._0.Models.Abstractions;
+using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Localization.Items;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace Alfateam2._0.Models
     /// <summary>
     /// Сущность документа на странице комплаенс
     /// </summary>
-    public class ComplianceDocument : AbsModel
+    public class ComplianceDocument : AvailabilityModel
     {
         /// <summary>
         /// Размер в килобайтах. 
@@ -23,6 +24,9 @@ namespace Alfateam2._0.Models
         public string DocumentPath { get; set; }
 
 
+
+        public Language MainLanguage { get; set; }
+        public int MainLanguageId { get; set; }
         public List<ComplianceDocumentLocalization> Localizations { get; set; } = new List<ComplianceDocumentLocalization>();
     }
 }

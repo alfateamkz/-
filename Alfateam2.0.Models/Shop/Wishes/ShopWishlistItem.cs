@@ -13,6 +13,9 @@ namespace Alfateam2._0.Models.Shop.Wishes
     public class ShopWishlistItem : AbsModel
     {
         public ShopProduct Product { get; set; }
-        public DateTime AddedAt { get; set; }
+        public int ProductId { get; set; }
+
+
+        public DateTime AddedAt { get; set; } = DateTime.UtcNow;
     }
 }

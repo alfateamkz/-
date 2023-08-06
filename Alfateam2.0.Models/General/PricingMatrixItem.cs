@@ -17,6 +17,8 @@ namespace Alfateam2._0.Models.General
         /// Если Country == null, то эти стоимости применяются для прочих стран(которые не указаны в матрице цен)
         /// </summary>
         public Country? Country { get; set; }
+        public int? CountryId { get; set; }
+
 
         /// <summary>
         /// Стоимости. Например, в Польше может быть две цены(в евро и в злотых)

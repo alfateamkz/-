@@ -3,6 +3,15 @@ using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.Events;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.HR;
+using Alfateam2._0.Models.Localization.Items;
+using Alfateam2._0.Models.Localization.Items.Events;
+using Alfateam2._0.Models.Localization.Items.HR;
+using Alfateam2._0.Models.Localization.Items.Portfolios;
+using Alfateam2._0.Models.Localization.Items.Posts;
+using Alfateam2._0.Models.Localization.Items.Shop;
+using Alfateam2._0.Models.Localization.Items.Shop.Modifiers;
+using Alfateam2._0.Models.Localization.Items.Team;
+using Alfateam2._0.Models.Localization.Outstaff;
 using Alfateam2._0.Models.Outstaff;
 using Alfateam2._0.Models.Portfolios;
 using Alfateam2._0.Models.Posts;
@@ -51,6 +60,7 @@ namespace Alfateam.DB
         public DbSet<PricingMatrix> PricingMatrices { get; set; }
         public DbSet<PricingMatrixItem> PricingMatrixItems { get; set; }
         public DbSet<RateVote> RateVotes { get; set; }
+        public DbSet<Session> Sessions { get; set; }
         public DbSet<Alfateam2._0.Models.General.TimeZone> TimeZones { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Watch> Watches { get; set; }
@@ -59,6 +69,61 @@ namespace Alfateam.DB
         #region HR
         public DbSet<JobVacancy> JobVacancies { get; set; }
         public DbSet<JobVacancyExpierence> JobVacancyExpierences { get; set; }
+        #endregion
+
+        #region Localization
+
+        #region Items
+
+        #region Events
+        public DbSet<EventCategoryLocalization> EventCategoryLocalizations { get; set; }
+        public DbSet<EventFormatLocalization> EventFormatLocalizations { get; set; }
+        public DbSet<EventLocalization> EventLocalizations { get; set; }
+        #endregion
+
+        #region HR
+        public DbSet<JobVacancyLocalization> JobVacancyLocalizations { get; set; }
+        #endregion
+
+        #region Portfolios
+        public DbSet<PortfolioCategoryLocalization> PortfolioCategoryLocalizations { get; set; }
+        public DbSet<PortfolioIndustryLocalization> PortfolioIndustryLocalizations { get; set; }
+        public DbSet<PortfolioLocalization> PortfolioLocalizations { get; set; }
+        #endregion
+
+        #region Posts
+        public DbSet<PostCategoryLocalization> PostCategoryLocalizations { get; set; }
+        public DbSet<PostIndustryLocalization> PostIndustryLocalizations { get; set; }
+        public DbSet<PostLocalization> PostLocalizations { get; set; }
+        #endregion
+
+        #region Shop
+
+        #region Modifiers
+        public DbSet<ProductModifierItemLocalization> ProductModifierItemLocalizations { get; set; }
+        public DbSet<ProductModifierLocalization> ProductModifierLocalizations { get; set; }
+        #endregion
+
+        public DbSet<ShopProductCategoryLocalization> ShopProductCategoryLocalizations { get; set; }
+        public DbSet<ShopProductLocalization> ShopProductLocalizations { get; set; }
+        #endregion
+
+        #region Team
+        public DbSet<TeamGroupLocalization> TeamGroupLocalizations { get; set; }
+        public DbSet<TeamMemberLocalization> TeamMemberLocalizations { get; set; }
+        #endregion
+
+        public DbSet<ComplianceDocumentLocalization> ComplianceDocumentLocalizations { get; set; }
+        public DbSet<MassMediaPostLocalization> MassMediaPostLocalizations { get; set; }
+        public DbSet<PartnerLocalization> PartnerLocalizations { get; set; }
+        #endregion
+
+        #region Outstaff
+        public DbSet<OutstaffColumnLocalization> OutstaffColumnLocalizations { get; set; }
+        public DbSet<OutstaffItemGradeLocalization> OutstaffItemGradeLocalizations { get; set; }
+        public DbSet<OutstaffItemLocalization> OutstaffItemLocalizations { get; set; }
+        #endregion
+
         #endregion
 
         #region Outstaff
@@ -98,6 +163,9 @@ namespace Alfateam.DB
         #region Orders
         public DbSet<ShopOrder> ShopOrders { get; set; }
         public DbSet<ShopOrderItem> ShopOrderItems { get; set; }
+        public DbSet<ShopOrderItemModifier> ShopOrderItemModifiers { get; set; }
+        public DbSet<ShopOrderItemModifierOption> ShopOrderItemModifierOptions { get; set; }
+        public DbSet<ShopOrderPayment> ShopOrderPayments { get; set; }
         public DbSet<ShopOrderReturn> ShopOrderReturns { get; set; }
         #endregion
 

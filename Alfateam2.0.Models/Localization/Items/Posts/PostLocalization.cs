@@ -10,9 +10,16 @@ namespace Alfateam2._0.Models.Localization.Items.Posts
 {
     public class PostLocalization : LocalizableModel
     {
+
         public string Title { get; set; }
         public string ImgPath { get; set; }
         public string ShortDescription { get; set; }
         public Content Content { get; set; }
+
+
+        /// <summary>
+        /// Автоматическое поле. Id новости 
+        /// </summary>
+        public int PostId { get; set; }
     }
 }

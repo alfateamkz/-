@@ -12,13 +12,17 @@ namespace Alfateam2._0.Models.General
     /// </summary>
     public class Watch : AbsModel
     {
-        public DateTime WatchedAt { get; set; }
+        public DateTime WatchedAt { get; set; } = DateTime.UtcNow;
 
         /// <summary>
         /// Пользователь, который просмотрел
         /// Если WatchedBy == null, то просмотрел неавторизованный пользователь
         /// </summary>
         public User? WatchedBy { get; set; }
+        public int? WatchedById { get; set; }
+
+
+
         /// <summary>
         /// Отпечаток браузера
         /// </summary>

@@ -12,7 +12,22 @@ namespace Alfateam2._0.Models.General
     /// </summary>
     public class Cost : AbsModel
     {
+
+        public Cost() 
+        { 
+        
+        }
+
+        public Cost(Currency currency,double value)
+        {
+            Currency = currency;
+            Value = value;
+        }
+
         public Currency Currency { get; set; }
+        public int CurrencyId { get; set; }
+
+
         public double Value { get; set; }
     }
 }

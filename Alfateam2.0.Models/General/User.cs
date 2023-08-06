@@ -18,7 +18,7 @@ namespace Alfateam2._0.Models.General
     {
         public string Name { get; set; }    
         public string Surname { get; set; }
-        public string Patronymic { get; set; }
+        public string? Patronymic { get; set; }
         public string? AvatarPath { get; set; }
 
 
@@ -30,14 +30,16 @@ namespace Alfateam2._0.Models.General
         /// <summary>
         /// Id связанного пользователя в CRM системе
         /// </summary>
-        [JsonIgnore]
         public int? BindedCRMUser { get; set; }
         public UserRoleModel RoleModel { get; set; }
 
 
         public Country? Country { get; set; }
+        public int? CountryId { get; set; }
+
         public Country? RegisteredFromCountry { get; set; }
-        
+        public int? RegisteredFromCountryId { get; set; }
+
 
         /// <summary>
         /// Корзина пользователя. При покупки заказ за Basket переходит в Orders  

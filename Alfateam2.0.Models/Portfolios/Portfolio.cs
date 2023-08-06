@@ -13,7 +13,7 @@ namespace Alfateam2._0.Models.Portfolios
     /// <summary>
     /// Сущность кейса
     /// </summary>
-    public class Portfolio : AbsModel
+    public class Portfolio : AvailabilityModel
     {
         public string Title { get; set; }
         public string ImgPath { get; set; }
@@ -21,8 +21,12 @@ namespace Alfateam2._0.Models.Portfolios
         public Content Content { get; set; }
 
         public PortfolioCategory Category { get; set; }
+        public int CategoryId { get; set; }
+
+
         public PortfolioIndustry Industry { get; set; }
-        
+        public int IndustryId { get; set; }
+
 
 
         public int Watches { get; set; }
@@ -32,6 +36,9 @@ namespace Alfateam2._0.Models.Portfolios
 
 
 
+
+        public Language MainLanguage { get; set; }
+        public int MainLanguageId { get; set; }
         public List<PortfolioLocalization> Localizations { get; set; } = new List<PortfolioLocalization>();
     }
 }
