@@ -14,6 +14,8 @@ namespace Alfateam2._0.Models.Shop.Orders
     public class ShopOrderItemModifierOption : AbsModel
     {
         public ProductModifierItem Option { get; set; }
+        public int OptionId { get; set; }
+
 
 
         //public double Amount { get; set; }

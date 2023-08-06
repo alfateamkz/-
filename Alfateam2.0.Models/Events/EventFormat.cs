@@ -12,7 +12,7 @@ namespace Alfateam2._0.Models.Events
     /// <summary>
     /// Модель формата мероприятия
     /// </summary>
-    public class EventFormat : AbsModel
+    public class EventFormat : AvailabilityModel
     {
         public string Title { get; set; }
 

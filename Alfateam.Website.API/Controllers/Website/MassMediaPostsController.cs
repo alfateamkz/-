@@ -1,8 +1,11 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Models.ClientModels;
 using Alfateam2._0.Models;
+using Alfateam2._0.Models.HR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Alfateam.Website.API.Controllers.Website
 {
@@ -16,10 +19,7 @@ namespace Alfateam.Website.API.Controllers.Website
         [HttpGet, Route("GetPosts")]
         public async Task<IEnumerable<MassMediaPostClientModel>> GetPosts(int offset, int count = 20)
         {
-            var items = DB.MassMediaPosts.Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
-                                         .Skip(offset)
-                                         .Take(count)
-                                         .ToList();
+            var items = GetMassMediaPosts().Skip(offset).Take(count).ToList();
             return MassMediaPostClientModel.CreateItems(items, LanguageId);
         }
 
@@ -38,5 +38,15 @@ namespace Alfateam.Website.API.Controllers.Website
             }
             return false;
         }
+
+
+        #region Private methods
+        public IQueryable<MassMediaPost> GetMassMediaPosts()
+        {
+            return DB.MassMediaPosts.IncludeAvailability()
+                                    .Include(o => o.Localizations)
+                                    .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
+        }
+        #endregion
     }
 }

@@ -39,16 +39,12 @@ namespace Alfateam2._0.Models.Roles
 
 
 
-        /// <summary>
-        /// Если AllContentAccess по правам установлен выше, чем другие доступы, то другие доступы
-        /// автоматически повышаются до AllContentAccess
-        /// </summary>
-        public AllContentAccessType AllContentAccess { get; set; } = AllContentAccessType.None;
-        public PortfolioAccessType PortfolioAccess { get; set; } = PortfolioAccessType.None;
+        public List<ContentAccessModel> ContentAccessTypes { get; set; } = new List<ContentAccessModel>();
+        public ContentAccessModel GetContentAccess(ContentAccessModelType type)
+        {
+            return ContentAccessTypes.FirstOrDefault(o => o.Type == type);
+        }
 
-
-        public PostsAccessModel PostsAccess { get; set; }
-        public MassMediaPostsAccessType MassMediaPostsAccess { get; set; } = MassMediaPostsAccessType.None;
 
 
         public HRAccessType HRAccess { get; set; } = HRAccessType.None;

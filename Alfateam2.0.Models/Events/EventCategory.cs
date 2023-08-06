@@ -12,7 +12,7 @@ namespace Alfateam2._0.Models.Events
     /// <summary>
     /// Модель категории мероприятия
     /// </summary>
-    public class EventCategory : AbsModel
+    public class EventCategory : AvailabilityModel
     {
         public string Title { get; set; }
         public string? Description { get; set; }

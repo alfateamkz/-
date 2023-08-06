@@ -57,7 +57,7 @@ namespace Alfateam.Website.API.Models.ClientModels.Shop
             }
 
             model.Category = ShopProductCategoryClientModel.Create(item.Category, langId);
-            model.Modifiers = ProductModifierClientModel.CreateItems(item.Modifiers, langId);
+            model.Modifiers = ProductModifierClientModel.CreateItems(item.Modifiers, langId, countryId);
 
             return model;
         }

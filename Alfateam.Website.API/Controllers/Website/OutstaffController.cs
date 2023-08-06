@@ -5,6 +5,7 @@ using Alfateam2._0.Models.Outstaff;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using Alfateam2._0.Models.Portfolios;
 
 namespace Alfateam.Website.API.Controllers.Website
 {
@@ -17,9 +18,12 @@ namespace Alfateam.Website.API.Controllers.Website
         [HttpGet, Route("GetOutstaffMatrix")]
         public async Task<OutstaffMatrixClientModel> GetOutstaffMatrix()
         {
-            var matrix = DB.OutstaffMatrices.Include(o => o.Columns)
+            var matrix = DB.OutstaffMatrices.Include(o => o.Columns).ThenInclude(o => o.Localizations)
                                             .Include(o => o.Items).ThenInclude(o => o.Grades).ThenInclude(o => o.Prices).ThenInclude(o => o.CostPerHour).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
                                             .Include(o => o.Items).ThenInclude(o => o.Grades).ThenInclude(o => o.Prices).ThenInclude(o => o.CostPerHour).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
+                                            .Include(o => o.Items).ThenInclude(o => o.Grades).ThenInclude(o => o.Prices).ThenInclude(o => o.Column).ThenInclude(o => o.Localizations)
+                                            .Include(o => o.Items).ThenInclude(o => o.Grades).ThenInclude(o => o.Localizations)
+                                            .Include(o => o.Items).ThenInclude(o => o.Localizations)
                                             .FirstOrDefault();
 
             return OutstaffMatrixClientModel.Create(matrix,LanguageId,CountryId);

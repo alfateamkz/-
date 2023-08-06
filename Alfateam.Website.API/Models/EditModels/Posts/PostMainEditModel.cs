@@ -5,7 +5,7 @@ using Alfateam2._0.Models.Posts;
 
 namespace Alfateam.Website.API.Models.EditModels.Posts
 {
-    public class PostMainEditModel : EditModel
+    public class PostMainEditModel : EditModel<Post>
     {
         public string Title { get; set; }
         public string ImgPath { get; set; }
@@ -33,7 +33,7 @@ namespace Alfateam.Website.API.Models.EditModels.Posts
             return isValid;
         }
 
-        public void Fill(Post post)
+        public override void Fill(Post post)
         {
             post.Title = Title;
             post.ImgPath = ImgPath;

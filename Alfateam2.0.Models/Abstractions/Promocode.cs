@@ -14,6 +14,8 @@ namespace Alfateam2._0.Models.Abstractions
     /// </summary>
     public abstract class Promocode : AvailabilityModel
     {
+
+        //TODO: посмотреть по коду доступность промокода
         public string Code { get; set; }
 
 

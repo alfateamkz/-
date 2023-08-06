@@ -23,6 +23,12 @@ namespace Alfateam2._0.Models.Shop.Orders
         public Currency? Currency { get; set; }
         public int? CurrencyId { get; set; }
 
+        /// <summary>
+        /// Страна, из которой создан заказ
+        /// </summary>
+        public Country? Country { get; set; }
+        public int? CountryId { get; set; }
+
 
         [NotMapped]
         public double SumWithoutDiscount

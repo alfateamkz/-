@@ -12,7 +12,7 @@ namespace Alfateam2._0.Models.Portfolios
     /// <summary>
     /// Сущность категории кейса
     /// </summary>
-    public class PortfolioCategory : AbsModel
+    public class PortfolioCategory : AvailabilityModel
     {
         public string Title { get; set; }
 

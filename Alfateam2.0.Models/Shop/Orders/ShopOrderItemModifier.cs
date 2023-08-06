@@ -14,6 +14,7 @@ namespace Alfateam2._0.Models.Shop.Orders
     public class ShopOrderItemModifier : AbsModel
     {
         public ProductModifier Modifier { get; set; }
+        public int ModifierId { get; set; }
         public List<ShopOrderItemModifierOption> SelectedOptions { get; set; } = new List<ShopOrderItemModifierOption>();
     }
 }

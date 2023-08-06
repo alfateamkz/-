@@ -34,8 +34,7 @@ namespace Alfateam2._0.Models.Posts
 
 
 
-        public Language MainLanguage { get; set; }
-        public int MainLanguageId { get; set; }
+      
         public List<PostLocalization> Localizations { get; set; } = new List<PostLocalization>();
 
         public bool IsValid()

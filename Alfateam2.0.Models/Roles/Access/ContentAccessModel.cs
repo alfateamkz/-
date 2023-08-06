@@ -1,4 +1,5 @@
 ﻿using Alfateam2._0.Models.Abstractions;
+using Alfateam2._0.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,9 +9,13 @@ using System.Threading.Tasks;
 
 namespace Alfateam2._0.Models.Roles.Access
 {
-    public class PostsAccessModel : AbsModel
+    public class ContentAccessModel : AbsModel
     {
+        public ContentAccessModelType Type { get; set; }
         public int AccessLevel { get; set; }
+
+
+
 
         [NotMapped]
         public bool CanWatch => AccessLevel >= 1;

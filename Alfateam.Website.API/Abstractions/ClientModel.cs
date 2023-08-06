@@ -14,8 +14,6 @@ namespace Alfateam.Website.API.Abstractions
 
         protected static List<Cost> GetLocalCosts(PricingMatrix matrix,int? countryId)
         {
-            //TODO: надо инклюдить валюту
-
             PricingMatrixItem found = null;
 
             if (countryId != null)

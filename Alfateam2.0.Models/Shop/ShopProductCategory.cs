@@ -12,7 +12,7 @@ namespace Alfateam2._0.Models.Shop
     /// <summary>
     /// Категория товара
     /// </summary>
-    public class ShopProductCategory : AbsModel
+    public class ShopProductCategory : AvailabilityModel
     {
         public string Title { get; set; }
 

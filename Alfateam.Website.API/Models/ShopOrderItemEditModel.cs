@@ -1,4 +1,5 @@
 ﻿using Alfateam2._0.Models.General;
+using Alfateam2._0.Models.Shop.Orders;
 
 namespace Alfateam.Website.API.Models
 {
@@ -8,5 +9,8 @@ namespace Alfateam.Website.API.Models
         public int ItemId { get; set; }
 
         public double Amount { get; set; }
+
+
+        public List<ShopOrderItemModifierEditModel> SelectedModifiers { get; set; } = new List<ShopOrderItemModifierEditModel>();
     }
 }

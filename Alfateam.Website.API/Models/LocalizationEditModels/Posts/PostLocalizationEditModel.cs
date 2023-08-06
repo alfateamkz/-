@@ -5,7 +5,7 @@ using Alfateam2._0.Models.Posts;
 
 namespace Alfateam.Website.API.Models.LocalizationEditModels.Posts
 {
-    public class PostLocalizationEditModel : LocalizationEditModel
+    public class PostLocalizationEditModel : LocalizationEditModel<PostLocalization>
     {
         public string Title { get; set; }
         public string ImgPath { get; set; }
@@ -24,7 +24,7 @@ namespace Alfateam.Website.API.Models.LocalizationEditModels.Posts
             return isValid;
         }
 
-        public void Fill(PostLocalization localization)
+        public override void Fill(PostLocalization localization)
         {
             localization.Title = Title;
             localization.ImgPath = ImgPath;

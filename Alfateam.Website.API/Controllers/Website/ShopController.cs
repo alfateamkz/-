@@ -1,5 +1,6 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.ClientModels.Shop;
 using Alfateam.Website.API.Models.Core;
@@ -30,27 +31,14 @@ namespace Alfateam.Website.API.Controllers.Website
         [HttpGet, Route("GetProducts")]
         public async Task<IEnumerable<ShopProductClientModel>> GetProducts(int offset, int count = 20)
         {
-            //TODO: инклюды везде чекнуть по шопу
-            var items = DB.ShopProducts.Include(o => o.Category)
-                                       .Include(o => o.MainImage)
-                                       .Include(o => o.Modifiers).ThenInclude(o => o.Options).ThenInclude(o => o.Pricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
-                                       .Include(o => o.Modifiers).ThenInclude(o => o.Options).ThenInclude(o => o.Pricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
-                                       .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
-                                       .Skip(offset)
-                                       .Take(count)
-                                       .ToList();
+            var items = GetShopProducts().Skip(offset).Take(count).ToList();
             return ShopProductClientModel.CreateItems(items, LanguageId,CountryId);
         }
 
         [HttpGet, Route("GetProductsByFilter")]
         public async Task<IEnumerable<ShopProductClientModel>> GetProductsByFilter(ShopProductsFilter filter)
         {
-            var products = DB.ShopProducts.Include(o => o.Category)
-                                          .Include(o => o.MainImage)
-                                          .Include(o => o.Modifiers).ThenInclude(o => o.Options).ThenInclude(o => o.Pricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
-                                          .Include(o => o.Modifiers).ThenInclude(o => o.Options).ThenInclude(o => o.Pricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
-                                          .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
-                                          .Where(o => !o.IsDeleted);
+            var products = GetShopProducts();
 
             if (filter.CategoryId > 0)
             {
@@ -69,14 +57,7 @@ namespace Alfateam.Website.API.Controllers.Website
         [HttpGet, Route("GetProduct")]
         public async Task<ShopProductClientModel> GetProduct(int id)
         {
-            var product = DB.ShopProducts.Include(o => o.Category)
-                                         .Include(o => o.MainImage)
-                                         .Include(o => o.Images)
-                                         .Include(o => o.BasePricing)
-                                         .Include(o => o.Modifiers).ThenInclude(o => o.Options).ThenInclude(o => o.Pricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
-                                         .Include(o => o.Modifiers).ThenInclude(o => o.Options).ThenInclude(o => o.Pricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
-                                         .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
-                                         .FirstOrDefault(o => o.Id == id);
+            var product = GetShopProducts().FirstOrDefault(o => o.Id == id);
             return ShopProductClientModel.Create(product,LanguageId,CountryId);
         }
 
@@ -87,7 +68,10 @@ namespace Alfateam.Website.API.Controllers.Website
         [HttpGet, Route("GetProductCategories")]
         public async Task<IEnumerable<ShopProductCategoryClientModel>> GetProductCategories()
         {
-            var items = DB.ShopProductCategories.Where(o => !o.IsDeleted).ToList();
+            var items = DB.ShopProductCategories.IncludeAvailability()
+                                                .Include(o => o.Localizations)
+                                                .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
+                                                .ToList();
             return ShopProductCategoryClientModel.CreateItems(items, LanguageId);
         }
 
@@ -100,10 +84,8 @@ namespace Alfateam.Website.API.Controllers.Website
         {
             var res = new RequestResult<ShopOrder>();
 
-            //TODO: добить инклюды
-            var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.Basket).ThenInclude(o => o.Items).ThenInclude(o => o.Item).ThenInclude(o => o.MainImage)
-                                     .FirstOrDefault(o => o.SessID == this.UserSessid);
 
+            var session = GetSessionWithBasketInclude();
             var checkSessionRes = CheckSession(session);
             if (!checkSessionRes.Success)
             {
@@ -132,29 +114,23 @@ namespace Alfateam.Website.API.Controllers.Website
         {
             var res = new RequestResult();
 
-
-            var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.Basket).ThenInclude(o => o.Items)
-                                   .FirstOrDefault(o => o.SessID == this.UserSessid);
-
+            var session = GetSessionWithBasketInclude();
             var checkSessionRes = CheckSession(session);
             if (!checkSessionRes.Success)
             {
-                res.FillFromRequestResult(checkSessionRes);
+                return res.FillFromRequestResult(checkSessionRes);
             }
             else if(this.CurrencyId == null)
             {
-                res.Code = 400;
-                res.Error = "Id валюты за заголовке CurrencyId не должен быть равен null";
+                return res.SetError(400, "Id валюты за заголовке CurrencyId не должен быть равен null");
             }
             else if (!DB.Currencies.Any(o => o.Id == this.CurrencyId && !o.IsDeleted))
             {
-                res.Code = 400;
-                res.Error = "По id, указанному в заголовке CurrencyId не найдено валюты";
+                return res.SetError(400, "По id, указанному в заголовке CurrencyId не найдено валюты");
             }
             else if (session.User.Basket?.Items?.Any(o => !o.IsDeleted) == true)
             {
-                res.Code = 403;
-                res.Error = "Нельзя изменить валюту, когда в корзине есть товары. Сначала удалите из корзины все позиции";
+                return res.SetError(400, "Нельзя изменить валюту, когда в корзине есть товары. Сначала удалите из корзины все позиции");
             }
             else
             {
@@ -166,9 +142,11 @@ namespace Alfateam.Website.API.Controllers.Website
 
                 DB.Users.Update(session.User);
                 DB.SaveChanges();
+
+                return res.SetSuccess();
             }
 
-            return res;
+        
         }
 
 
@@ -178,42 +156,39 @@ namespace Alfateam.Website.API.Controllers.Website
             var res = new RequestResult();
 
 
-            var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.Basket).ThenInclude(o => o.Items)
-                                     .Include(o => o.User).ThenInclude(o => o.Basket).ThenInclude(o => o.Currency)
-                                     .FirstOrDefault(o => o.SessID == this.UserSessid);
-
+            var session = GetSessionWithBasketInclude();
             var checkSessionRes = CheckSession(session);
             if (!checkSessionRes.Success)
             {
-                res.FillFromRequestResult(checkSessionRes);
-                return res;
+                return res.FillFromRequestResult(checkSessionRes);
             }
-            if(session.User.Basket.Currency == null)
+
+            if(session.User.Basket.CurrencyId == null)
             {
-                res.Code = 400;
-                res.Error = "Невозможно добавить в корзину товар, пока не выбрана валюта";
+                return res.SetError(400, "Невозможно добавить в корзину товар, пока не выбрана валюта");
             }
-            else
+            if (session.User.Basket.CountryId == null)
             {
-                try
-                {
-                    //TODO: проставить стоимость
-
-                    session.User.Basket.Items.Add(item);
-                    DB.Users.Update(session.User);
-                    DB.SaveChanges();
-
-                    res.Success = true;
-                }
-                catch (Exception ex)
-                {
-                    res.Code = 400;
-                    res.Error = "Неверно заполнены поля";
-                }
+                return res.SetError(400, "Невозможно добавить в корзину товар, пока не выбрана страна");
             }
 
-          
-            return res;
+
+            var product = DB.ShopProducts.FirstOrDefault(o => o.Id == item.ItemId && !o.IsDeleted);
+            if(product == null)
+            {
+                return res.SetError(404, "Товар с данным id не найден");
+            }
+
+    
+
+            SetItemActualPrices(session.User.Basket,item);
+
+
+            session.User.Basket.Items.Add(item);
+            DB.Users.Update(session.User);
+            DB.SaveChanges();
+
+            return res.SetSuccess();
         }
 
         [HttpPut, Route("EditBasketItem")]
@@ -222,9 +197,7 @@ namespace Alfateam.Website.API.Controllers.Website
             var res = new RequestResult();
 
 
-            var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.Basket).ThenInclude(o => o.Items)
-                                   .FirstOrDefault(o => o.SessID == this.UserSessid);
-
+            var session = GetSessionWithBasketInclude();
             var checkSessionRes = CheckSession(session);
             if (!checkSessionRes.Success)
             {
@@ -235,26 +208,21 @@ namespace Alfateam.Website.API.Controllers.Website
                 var item = DB.ShopOrderItems.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
                 if (item == null)
                 {
-                    res.Code = 404;
-                    res.Error = "Товар в системе не найден";
+                    res.SetError(404, "Товар в системе не найден");
                 }
                 else if (item.ShopOrderId != session.User.Basket?.Id)
                 {
-                    res.Code = 403;
-                    res.Error = "Данная позиция не принадлежит пользователю";
+                    res.SetError(403, "Данная позиция не принадлежит пользователю");
                 }
                 else
                 {
-                    item.ItemId = model.ItemId;
-                    item.Amount = model.Amount;
-
-                    //TODO: проставить стоимость
-                    //TODO: сделать и потестить модификаторы
+                    UpdateOrderItem(item, model);
+                    SetItemActualPrices(session.User.Basket, item);
 
                     DB.ShopOrderItems.Update(item);
                     DB.SaveChanges();
 
-                    res.Success = true;
+                    res.SetSuccess();
                 }
             }
 
@@ -268,9 +236,7 @@ namespace Alfateam.Website.API.Controllers.Website
             var res = new RequestResult();
 
 
-            var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.Basket).ThenInclude(o => o.Items)
-                                   .FirstOrDefault(o => o.SessID == this.UserSessid);
-
+            var session = GetSessionWithBasketInclude();
             var checkSessionRes = CheckSession(session);
             if (!checkSessionRes.Success)
             {
@@ -314,10 +280,7 @@ namespace Alfateam.Website.API.Controllers.Website
         {
             var res = new RequestResult<ShopWishlist>();
 
-            //TODO: добить инклюды
-
-            var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.Wishlist).ThenInclude(o => o.Items).ThenInclude(o => o.Product).ThenInclude(o => o.MainImage)
-                                     .FirstOrDefault(o => o.SessID == this.UserSessid);
+            var session = GetSessionWithWishlistInclude();
             if (session == null)
             {
                 res.Code = 404;
@@ -342,10 +305,7 @@ namespace Alfateam.Website.API.Controllers.Website
         {
             var res = new RequestResult<bool>();
 
-            var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.Wishlist).ThenInclude(o => o.Items)
-                                     .FirstOrDefault(o => o.SessID == this.UserSessid);
-
-
+            var session = GetSessionWithWishlistInclude();
             var checkSessionRes = CheckSession(session);
             if (!checkSessionRes.Success)
             {
@@ -395,11 +355,7 @@ namespace Alfateam.Website.API.Controllers.Website
         {
             var res = new RequestResult<ShopWishlist>();
 
-            //TODO: добить инклюды
-            var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.Orders).ThenInclude(o => o.Items).ThenInclude(o => o.Item).ThenInclude(o => o.MainImage)
-                                     .FirstOrDefault(o => o.SessID == this.UserSessid);
-
-
+            var session = GetSessionWithOrdersInclude();
             var checkSessionRes = CheckSession(session);
             if (!checkSessionRes.Success)
             {
@@ -414,10 +370,7 @@ namespace Alfateam.Website.API.Controllers.Website
         {
             var res = new RequestResult<ShopOrder>();
 
-            //TODO: добить инклюды
-            var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.Orders).ThenInclude(o => o.Items).ThenInclude(o => o.Item).ThenInclude(o => o.MainImage)
-                                     .FirstOrDefault(o => o.SessID == this.UserSessid);
-
+            var session = GetSessionWithOrdersInclude();
             var checkSessionRes = CheckSession(session);
             if (!checkSessionRes.Success)
             {
@@ -442,9 +395,7 @@ namespace Alfateam.Website.API.Controllers.Website
         {
             var res = new RequestResult();
 
-            var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.Basket).ThenInclude(o => o.Items)
-                                     .FirstOrDefault(o => o.SessID == this.UserSessid);
-
+            var session = GetSessionWithOrdersInclude();
             var checkSessionRes = CheckSession(session);
             if (!checkSessionRes.Success)
             {
@@ -477,9 +428,7 @@ namespace Alfateam.Website.API.Controllers.Website
         {
             var res = new RequestResult();
 
-            var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.Orders)
-                                     .FirstOrDefault(o => o.SessID == this.UserSessid);
-
+            var session = GetSessionWithOrdersInclude();
             var checkSessionRes = CheckSession(session);
             if (!checkSessionRes.Success)
             {
@@ -525,13 +474,7 @@ namespace Alfateam.Website.API.Controllers.Website
         {
             var res = new RequestResult();
 
-            //TODO: добить инклюды
-            var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.Orders).ThenInclude(o => o.Items).ThenInclude(o => o.Item).ThenInclude(o => o.MainImage)
-                                     .Include(o => o.User).ThenInclude(o => o.Orders).ThenInclude(o => o.UsedPromocode)
-                                     .Include(o => o.User).ThenInclude(o => o.Orders).ThenInclude(o => o.Currency)
-                                     .FirstOrDefault(o => o.SessID == this.UserSessid);
-
-
+            var session = GetSessionWithOrdersInclude();
             var checkSessionRes = CheckSession(session);
             if (!checkSessionRes.Success)
             {
@@ -599,6 +542,126 @@ namespace Alfateam.Website.API.Controllers.Website
         public async Task KZ_JusanWebhook()
         {
 
+        }
+
+        #endregion
+
+
+        #region Private methods
+
+
+        private void UpdateOrderItem(ShopOrderItem item, ShopOrderItemEditModel editModel)
+        {
+            item.ItemId = editModel.ItemId;
+            item.Amount = editModel.Amount;
+
+            item.SelectedModifiers.Clear();
+            foreach(var updModifier in editModel.SelectedModifiers)
+            {
+                var modifier = new ShopOrderItemModifier()
+                {
+                    ModifierId = updModifier.ModifierId
+                };
+
+                foreach(var updOption in updModifier.SelectedOptions)
+                {
+                    modifier.SelectedOptions.Add(new ShopOrderItemModifierOption
+                    {
+                        OptionId = updOption.OptionId,
+                    });
+                }
+            }
+
+            //TODO: внимательно проверить работу метода
+        }
+
+
+        private void SetOrderActualPrices(ShopOrder order)
+        {
+            foreach(var item in order.Items)
+            {
+                SetItemActualPrices(order, item);
+            }
+        }
+        private void SetItemActualPrices(ShopOrder order, ShopOrderItem item)
+        {
+            var product = item.Item;
+            if(product == null)
+            {
+                product = DB.ShopProducts.FirstOrDefault(o => o.Id == item.ItemId);
+            }
+
+            var cost = product.BasePricing.GetPrice(order.CountryId, (int)order.CurrencyId);
+            item.PriceForOne = cost.Value;
+
+            foreach (var selectedOption in item.SelectedModifiers.SelectMany(o => o.SelectedOptions))
+            {
+                var option = selectedOption.Option;
+                if (option == null)
+                {
+                    option = DB.ProductModifierItems.FirstOrDefault(o => o.Id == selectedOption.OptionId);
+                }
+
+                var optionCost = option.Pricing.GetPrice(order.CountryId, (int)order.CurrencyId);
+                item.PriceForOne = optionCost.Value;
+            }
+        }
+
+        #endregion
+
+        #region Private include methods
+        private IQueryable<ShopProduct> GetShopProducts()
+        {
+            return DB.ShopProducts.IncludeAvailability()
+                                  .Include(o => o.Category).ThenInclude(o => o.Localizations)
+                                  .Include(o => o.MainImage)
+                                  .Include(o => o.Images)
+                                  .IncludePricing()
+                                  .Include(o => o.Modifiers).ThenInclude(o => o.Localizations)
+                                  .Include(o => o.Modifiers).ThenInclude(o => o.Options).ThenInclude(o => o.Localizations)
+                                  .Include(o => o.Modifiers).ThenInclude(o => o.Options).ThenInclude(o => o.Pricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
+                                  .Include(o => o.Modifiers).ThenInclude(o => o.Options).ThenInclude(o => o.Pricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
+                                  .Include(o => o.Localizations)
+                                  .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
+        }
+
+
+        private Session GetSessionWithBasketInclude()
+        {
+            var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.Basket).ThenInclude(o => o.Items).ThenInclude(o => o.Item).ThenInclude(o => o.MainImage)
+                                     .Include(o => o.User).ThenInclude(o => o.Basket).ThenInclude(o => o.Items).ThenInclude(o => o.SelectedModifiers).ThenInclude(o => o.Modifier)
+                                     .Include(o => o.User).ThenInclude(o => o.Basket).ThenInclude(o => o.Items).ThenInclude(o => o.SelectedModifiers).ThenInclude(o => o.SelectedOptions).ThenInclude(o => o.Option)
+                                     .Include(o => o.User).ThenInclude(o => o.Basket).ThenInclude(o => o.Address).ThenInclude(o => o.Country)
+                                     .Include(o => o.User).ThenInclude(o => o.Basket).ThenInclude(o => o.Currency)
+                                     .Include(o => o.User).ThenInclude(o => o.Basket).ThenInclude(o => o.Payments).ThenInclude(o => o.Currency)
+                                     .Include(o => o.User).ThenInclude(o => o.Basket).ThenInclude(o => o.Return)
+                                     .FirstOrDefault(o => o.SessID == this.UserSessid);
+
+            return session;
+        }
+        private Session GetSessionWithOrdersInclude()
+        {
+            var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.Orders).ThenInclude(o => o.Items).ThenInclude(o => o.Item).ThenInclude(o => o.MainImage)
+                                     .Include(o => o.User).ThenInclude(o => o.Orders).ThenInclude(o => o.Items).ThenInclude(o => o.SelectedModifiers).ThenInclude(o => o.Modifier)
+                                     .Include(o => o.User).ThenInclude(o => o.Orders).ThenInclude(o => o.Items).ThenInclude(o => o.SelectedModifiers).ThenInclude(o => o.SelectedOptions).ThenInclude(o => o.Option)
+                                     .Include(o => o.User).ThenInclude(o => o.Orders).ThenInclude(o => o.Address).ThenInclude(o => o.Country)
+                                     .Include(o => o.User).ThenInclude(o => o.Orders).ThenInclude(o => o.Currency)
+                                     .Include(o => o.User).ThenInclude(o => o.Orders).ThenInclude(o => o.Payments).ThenInclude(o => o.Currency)
+                                     .Include(o => o.User).ThenInclude(o => o.Orders).ThenInclude(o => o.Return)
+                                     .FirstOrDefault(o => o.SessID == this.UserSessid);
+
+            return session;
+        }
+        private Session GetSessionWithWishlistInclude()
+        {
+            var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.Wishlist).ThenInclude(o => o.Items).ThenInclude(o => o.Product).ThenInclude(o => o.MainImage)
+                                     .Include(o => o.User).ThenInclude(o => o.Wishlist).ThenInclude(o => o.Items).ThenInclude(o => o.Product).ThenInclude(o => o.Localizations)
+                                     .Include(o => o.User).ThenInclude(o => o.Wishlist).ThenInclude(o => o.Items).ThenInclude(o => o.Product).ThenInclude(o => o.Category).ThenInclude(o => o.Localizations)
+                                     .Include(o => o.User).ThenInclude(o => o.Wishlist).ThenInclude(o => o.Items).ThenInclude(o => o.Product).ThenInclude(o => o.BasePricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
+                                     .Include(o => o.User).ThenInclude(o => o.Wishlist).ThenInclude(o => o.Items).ThenInclude(o => o.Product).ThenInclude(o => o.BasePricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
+                                     .FirstOrDefault(o => o.SessID == this.UserSessid);
+
+            return session;
         }
 
         #endregion

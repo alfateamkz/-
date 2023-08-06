@@ -1,7 +1,9 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Models.ClientModels.Portfolios;
 using Alfateam.Website.API.Models.Core;
+using Alfateam2._0.Models;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Portfolios;
 using Microsoft.AspNetCore.Mvc;
@@ -18,17 +20,14 @@ namespace Alfateam.Website.API.Controllers.Website
         [HttpGet, Route("GetPortfolios")]
         public async Task<IEnumerable<PortfolioClientModel>> GetPortfolios(int offset,int count = 20)
         {
-            var items = DB.Portfolios.Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
-                                     .Skip(offset)
-                                     .Take(count)
-                                     .ToList();
+            var items = GetPortfoliosList().Skip(offset).Take(count).ToList();
             return PortfolioClientModel.CreateItems(items, LanguageId);
         }
 
         [HttpGet, Route("GetPortfoliosByFilter")]
         public async Task<IEnumerable<PortfolioClientModel>> GetPortfoliosByFilter(int categoryId, int industryId, int offset, int count = 20)
         {
-            var portfolios = DB.Portfolios.Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
+            var portfolios = GetPortfoliosList();
             if(categoryId > 0)
             {
                 portfolios = portfolios.Where(o => o.CategoryId == categoryId);
@@ -46,11 +45,7 @@ namespace Alfateam.Website.API.Controllers.Website
         [HttpGet, Route("GetPortfolio")]
         public async Task<PortfolioClientModel> GetPortfolio(int id)
         {
-            var portfolio = DB.Portfolios.Include(o => o.Category)
-                                         .Include(o => o.Industry)
-                                         .Include(o => o.Content).ThenInclude(o => o.Items)
-                                         .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
-                                         .FirstOrDefault(o => o.Id == id);
+            var portfolio = GetFullIncludedPortfoliosList().FirstOrDefault(o => o.Id == id);
             return PortfolioClientModel.Create(portfolio,LanguageId);
         }
 
@@ -185,14 +180,43 @@ namespace Alfateam.Website.API.Controllers.Website
         [HttpGet, Route("GetPortfolioCategories")]
         public async Task<IEnumerable<PortfolioCategoryClientModel>> GetPortfolioCategories()
         {
-            var items = DB.PortfolioCategories.Where(o => !o.IsDeleted).ToList();
+            var items = DB.PortfolioCategories.IncludeAvailability()
+                                              .Include(o => o.Localizations)
+                                              .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
+                                              .ToList();
             return PortfolioCategoryClientModel.CreateItems(items, LanguageId);
         }
         [HttpGet, Route("GetPortfolioIndustries")]
         public async Task<IEnumerable<PortfolioIndustryClientModel>> GetPortfolioIndustries()
         {
-            var items = DB.PortfolioIndustries.Where(o => !o.IsDeleted).ToList();
+            var items = DB.PortfolioIndustries.IncludeAvailability()
+                                              .Include(o => o.Localizations)
+                                              .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
+                                              .ToList();
             return PortfolioIndustryClientModel.CreateItems(items, LanguageId);
         }
+
+
+
+        #region Private methods
+        public IQueryable<Portfolio> GetPortfoliosList()
+        {
+            return DB.Portfolios.IncludeAvailability()
+                                .Include(o => o.Industry).ThenInclude(o => o.Localizations)
+                                .Include(o => o.Category).ThenInclude(o => o.Localizations)
+                                .Include(o => o.Localizations)
+                                .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
+        }
+        public IQueryable<Portfolio> GetFullIncludedPortfoliosList()
+        {
+            return DB.Portfolios.IncludeAvailability()
+                                .Include(o => o.Industry).ThenInclude(o => o.Localizations)
+                                .Include(o => o.Category).ThenInclude(o => o.Localizations)
+                                .Include(o => o.Localizations)
+                                .Include(o => o.Content).ThenInclude(o => o.Items)
+                                .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
+        }
+
+        #endregion
     }
 }

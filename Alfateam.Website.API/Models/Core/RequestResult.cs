@@ -7,31 +7,86 @@
         public int Code { get; set; } = 200;
 
 
-        public void FillFromRequestResult(RequestResult result)
+
+        /// <summary>
+        /// Заполняет значения из другого RequestResult и возвращает ссылку на себя
+        /// </summary>
+        public virtual RequestResult FillFromRequestResult(RequestResult result)
         {
             Success = result.Success;
             Error = result.Error;
             Code = result.Code;
+
+            return this;
         }
 
-        public void SetError(int code,string error)
+
+        /// <summary>
+        /// Задает значения Code и Error и возвращает ссылку на себя
+        /// </summary>
+        public virtual RequestResult SetError(int code,string error)
         {
             Code = code;
             Error = error;
+
+            return this;
         }
+
+        /// <summary>
+        /// Задает значения Success = true и возвращает ссылку на себя
+        /// </summary>
+        public RequestResult SetSuccess()
+        {
+            Success = true;
+
+            return this;
+        }
+
     }
 
     public class RequestResult<T> : RequestResult
     {
         public T Value { get; set; }
 
-        //public void FillFromRequestResult(RequestResult<T> result)
-        //{
-        //    Success = result.Success;
-        //    Error = result.Error;
-        //    Code = result.Code;
 
-        //    Value = result.Value;
-        //}
+
+        public override RequestResult<T> FillFromRequestResult(RequestResult result)
+        {
+            base.FillFromRequestResult(result);
+            return this;
+        }
+
+
+        /// <summary>
+        /// Заполняет значения из другого RequestResult и возвращает ссылку на себя
+        /// </summary>
+        public RequestResult<T> FillFromRequestResult(RequestResult<T> result)
+        {
+            this.FillFromRequestResult(result);
+            Value = result.Value;
+
+            return this;
+        }
+
+
+
+        public override RequestResult<T> SetError(int code, string error)
+        {
+            base.SetError(code, error);
+
+            return this;
+        }
+
+
+        /// <summary>
+        /// Задает значения Success = true и Value и возвращает ссылку на себя
+        /// </summary>
+        public RequestResult<T> SetSuccess(T val)
+        {
+            Success = true;
+            Value = val;
+
+            return this;
+        }
     }
 }
