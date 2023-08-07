@@ -1,8 +1,10 @@
 ﻿using Alfateam.DB;
+using Alfateam.Website.API.Enums;
 using Alfateam.Website.API.Models.Core;
 using Alfateam2._0.Models.General;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace Alfateam.Website.API.Abstractions
 {
@@ -68,43 +70,132 @@ namespace Alfateam.Website.API.Abstractions
         }
 
 
-        [NonAction]
+        #region File check
         protected RequestResult CheckImageFile(IFormFile file)
         {
-            var res = new RequestResult();
+            var baseCheckRes = CheckFileBase(file);
+            if (!baseCheckRes.Success) return baseCheckRes;
 
+            if (!this.IsImageFileExtension(file.FileName))
+            {
+                return RequestResult.AsError(400, "Неподдерживаемый формат файла");
+            }
+
+            return RequestResult.AsSuccess();
+        }
+        protected RequestResult CheckDocumentFile(IFormFile file)
+        {
+            var baseCheckRes = CheckFileBase(file);
+            if (!baseCheckRes.Success) return baseCheckRes;
+
+            if (!this.IsDocumentFileExtension(file.FileName))
+            {
+                return RequestResult.AsError(400, "Неподдерживаемый формат файла");
+            }
+
+            return RequestResult.AsSuccess();
+        }
+        protected RequestResult CheckAudioFile(IFormFile file)
+        {
+            var baseCheckRes = CheckFileBase(file);
+            if (!baseCheckRes.Success) return baseCheckRes;
+
+            if (!this.IsAudioFileExtension(file.FileName))
+            {
+                return RequestResult.AsError(400, "Неподдерживаемый формат файла");
+            }
+
+            return RequestResult.AsSuccess();
+        }
+        protected RequestResult CheckVideoFile(IFormFile file)
+        {
+            var baseCheckRes = CheckFileBase(file);
+            if (!baseCheckRes.Success) return baseCheckRes;
+
+            if (!this.IsVideoFileExtension(file.FileName))
+            {
+                return RequestResult.AsError(400, "Неподдерживаемый формат файла");
+            }
+
+            return RequestResult.AsSuccess();
+        }
+        private RequestResult CheckFileBase(IFormFile file)
+        {
             if (file == null)
             {
-                res.Code = 400;
-                res.Error = "Необходимо загрузить аватар";
+                return RequestResult.AsError(400, "Необходимо загрузить файл");
             }
             else if (file.Length == 0)
             {
-                res.Code = 400;
-                res.Error = "Пустой файл";
+                return RequestResult.AsError(400, "Пустой файл");
             }
-            else if (!this.IsImageFileExtension(file.FileName))
-            {
-                res.Code = 400;
-                res.Error = "Неподдерживаемый формат файла";
-            }
-            else
-            {
-                res.Success = true;
-            }
-
-            return res;
+            return RequestResult.AsSuccess();
         }
-        [NonAction]
+
+
+
         protected bool IsImageFileExtension(string filename)
         {
             var ext = Path.GetExtension(filename);
             return ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp";
         }
+        protected bool IsDocumentFileExtension(string filename)
+        {
+            var ext = Path.GetExtension(filename);
+            return ext == ".pdf" || ext == ".docx" || ext == ".xls" || ext == ".xlsx" || ext == ".ort" || ext == ".rtf";
+        }
+        protected bool IsAudioFileExtension(string filename)
+        {
+            var ext = Path.GetExtension(filename);
+            return ext == ".mp3" || ext == ".wav" || ext == ".ogg";
+        }
+        protected bool IsVideoFileExtension(string filename)
+        {
+            var ext = Path.GetExtension(filename);
+            return ext == ".mp4" || ext == ".avi" || ext == ".mkv";
+        }
+        #endregion
 
         #region UploadFile
 
-        [NonAction]
+
+        protected async Task<RequestResult<string>> TryUploadFile(string formFileName, FileType fileType)
+        {
+            var res = new RequestResult<string>();
+
+            //Загрузка главной картинки
+            var file = Request.Form.Files.FirstOrDefault(o => o.Name == formFileName);
+
+            RequestResult fileCheckResult = null;
+            switch (fileType)
+            {
+                case FileType.Image:
+                    fileCheckResult = this.CheckImageFile(file);
+                    break;
+                case FileType.Document:
+                    fileCheckResult = this.CheckDocumentFile(file);
+                    break;
+                case FileType.Video:
+                    fileCheckResult = this.CheckVideoFile(file);
+                    break;
+                case FileType.Audio:
+                    fileCheckResult = this.CheckAudioFile(file);
+                    break;
+            }
+
+
+
+            if (!fileCheckResult.Success)
+            {
+                res.FillFromRequestResult(fileCheckResult);
+                res.Error += $"\r\nПроблема с файлом {formFileName}";
+                return res;
+            }
+
+            string filepath = await this.UploadFile(file);
+            return res.SetSuccess(filepath);
+        }
+
         protected async Task<string> UploadFile(int index = 0)
         {
             var attachment = Request.Form.Files.Skip(index).FirstOrDefault();
@@ -121,7 +212,6 @@ namespace Alfateam.Website.API.Abstractions
             }
             return "";
         }
-        [NonAction]
         protected async Task<string> UploadFile(IFormFile file)
         {
             var filePath = "/uploads/" + Guid.NewGuid().ToString();
@@ -137,8 +227,6 @@ namespace Alfateam.Website.API.Abstractions
             }
             return "";
         }
-
-        [NonAction]
         protected async Task<string> UploadFile(string formFileName)
         {
             var attachment = Request.Form.Files.FirstOrDefault(o => o.Name == formFileName);
@@ -157,6 +245,29 @@ namespace Alfateam.Website.API.Abstractions
         }
         #endregion
 
+        #region Delete file
+        protected void DeleteFiles(List<string> paths)
+        {
+            foreach (var path in paths)
+            {
+                DeleteFile(path);
+            }
+        }
+        protected void DeleteFile(string path)
+        {
+            if(System.IO.File.Exists(AppEnvironment.WebRootPath + path))
+            {
+                System.IO.File.Delete(AppEnvironment.WebRootPath + path);
+            }
+        }
+
+
+        #endregion
+
+        protected long GetFileSizeInBytes(string filepath)
+        {
+            return new FileInfo(AppEnvironment.WebRootPath + filepath).Length;
+        }
 
 
 

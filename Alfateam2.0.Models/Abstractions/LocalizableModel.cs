@@ -14,5 +14,7 @@ namespace Alfateam2._0.Models.Abstractions
     {
         public Language Language { get; set; }
         public int LanguageId { get; set; }
+
+
     }
 }

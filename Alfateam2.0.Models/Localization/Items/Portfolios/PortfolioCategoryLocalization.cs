@@ -10,5 +10,12 @@ namespace Alfateam2._0.Models.Localization.Items.Portfolios
     public class PortfolioCategoryLocalization : LocalizableModel
     {
         public string Title { get; set; }
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// Указывает на главный объект (категорию)
+        /// </summary>
+        public int PortfolioCategoryId { get; set; }
     }
 }

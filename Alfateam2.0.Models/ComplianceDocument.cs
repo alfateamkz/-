@@ -18,15 +18,32 @@ namespace Alfateam2._0.Models
         /// Размер в килобайтах. 
         /// Проставляется автоматически при заливки документа по пути DocumentPath
         /// </summary>
-        public int KBSize { get; set; }
+        public long KBSize { get; set; }
         public string Title { get; set; }
         public string ImgPreviewPath { get; set; }
         public string DocumentPath { get; set; }
 
 
 
-        public Language MainLanguage { get; set; }
-        public int MainLanguageId { get; set; }
+
         public List<ComplianceDocumentLocalization> Localizations { get; set; } = new List<ComplianceDocumentLocalization>();
+
+        public override bool IsValid()
+        {
+            bool isValid = true; 
+
+            isValid &= !string.IsNullOrEmpty(Title);
+            isValid &= !string.IsNullOrEmpty(ImgPreviewPath);
+            isValid &= !string.IsNullOrEmpty(DocumentPath);
+
+            foreach (var localization in Localizations)
+            {
+                isValid &= !string.IsNullOrEmpty(localization.Title);
+                isValid &= !string.IsNullOrEmpty(localization.ImgPreviewPath);
+                isValid &= !string.IsNullOrEmpty(localization.DocumentPath);
+            }
+
+            return isValid;
+        }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Alfateam.Website.API.Abstractions;
-using Alfateam2._0.Models.Abstractions.Interfaces;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.Posts;
 

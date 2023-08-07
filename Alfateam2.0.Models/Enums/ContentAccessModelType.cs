@@ -15,5 +15,7 @@ namespace Alfateam2._0.Models.Enums
         Posts = 2,
         MassMediaPosts = 3,
         Portfolio = 4,
+        Compliance = 5,
+        Events = 6
     }
 }

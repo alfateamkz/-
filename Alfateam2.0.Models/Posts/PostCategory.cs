@@ -1,5 +1,4 @@
 ﻿using Alfateam2._0.Models.Abstractions;
-using Alfateam2._0.Models.Abstractions.Interfaces;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Localization.Items.Posts;
 using System;
@@ -13,7 +12,7 @@ namespace Alfateam2._0.Models.Posts
     /// <summary>
     /// Категория новостных статей
     /// </summary>
-    public class PostCategory : AvailabilityModel, IValidatableModel
+    public class PostCategory : AvailabilityModel
     {
         public string Title { get; set; }
 
@@ -23,7 +22,7 @@ namespace Alfateam2._0.Models.Posts
         public int MainLanguageId { get; set; }
         public List<PostCategoryLocalization> Localizations { get; set; } = new List<PostCategoryLocalization>();
 
-        public bool IsValid()
+        public override bool IsValid()
         {
             bool isValid = true;
 

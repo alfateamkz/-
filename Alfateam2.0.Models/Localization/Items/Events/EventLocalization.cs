@@ -16,5 +16,12 @@ namespace Alfateam2._0.Models.Localization.Items.Events
 
         public string? EventOrganizer { get; set; }
         public string? EventMembers { get; set; }
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// Указывает на главный объект (Событие)
+        /// </summary>
+        public int EventId { get; set; }
     }
 }

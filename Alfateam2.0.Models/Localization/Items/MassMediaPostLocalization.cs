@@ -11,5 +11,12 @@ namespace Alfateam2._0.Models.Localization.Items
     {
         public string Title { get; set; }
         public string ShortDescription { get; set; }
+
+
+
+        /// <summary>
+        /// Автоматическое поле, указывает на главную запись
+        /// </summary>
+        public int MassMediaPostId { get; set; }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Alfateam2._0.Models.Abstractions;
-using Alfateam2._0.Models.Abstractions.Interfaces;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Localization.Items.Posts;
@@ -14,7 +13,7 @@ namespace Alfateam2._0.Models.Posts
     /// <summary>
     /// Сущность новостной записи
     /// </summary>
-    public class Post : AvailabilityModel, IValidatableModel
+    public class Post : AvailabilityModel
     {
         public string Title { get; set; }
         public string ImgPath { get; set; }
@@ -37,7 +36,7 @@ namespace Alfateam2._0.Models.Posts
       
         public List<PostLocalization> Localizations { get; set; } = new List<PostLocalization>();
 
-        public bool IsValid()
+        public override bool IsValid()
         {
             bool isValid = true;
 

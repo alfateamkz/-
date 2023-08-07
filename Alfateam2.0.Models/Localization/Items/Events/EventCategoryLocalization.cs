@@ -11,5 +11,11 @@ namespace Alfateam2._0.Models.Localization.Items.Events
     {
         public string Title { get; set; }
         public string? Description { get; set; }
+
+
+        /// <summary>
+        /// Автоматическое свойство, указывающее на главный объект
+        /// </summary>
+        public int EventCategoryId { get; set; }
     }
 }

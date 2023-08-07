@@ -28,5 +28,20 @@ namespace Alfateam2._0.Models
         public Language MainLanguage { get; set; }
         public int MainLanguageId { get; set; }
         public List<MassMediaPostLocalization> Localizations { get; set; } = new List<MassMediaPostLocalization>();
+
+        public override bool IsValid()
+        {
+            bool isValid = true;
+
+            isValid &= !string.IsNullOrEmpty(ImgPath);
+            isValid &= !string.IsNullOrEmpty(Title);
+            isValid &= !string.IsNullOrEmpty(ShortDescription);
+            isValid &= !string.IsNullOrEmpty(URL);
+
+            isValid &= ClicksCount >= 0;
+            isValid &= MainLanguageId > 0;
+
+            return isValid;
+        }
     }
 }

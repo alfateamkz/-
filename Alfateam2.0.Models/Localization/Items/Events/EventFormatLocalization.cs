@@ -10,5 +10,11 @@ namespace Alfateam2._0.Models.Localization.Items.Events
     public class EventFormatLocalization : LocalizableModel
     {
         public string Title { get; set; }
+
+        /// <summary>
+        /// Автоматическое свойство
+        /// Указывает на главный объект (формат события)
+        /// </summary>
+        public int EventFormatId { get; set; }
     }
 }

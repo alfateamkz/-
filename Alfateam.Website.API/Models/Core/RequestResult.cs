@@ -8,6 +8,16 @@
 
 
 
+        public static RequestResult AsError(int code, string error)
+        {
+            return new RequestResult().SetError(code, error);
+        }
+        public static RequestResult AsSuccess()
+        {
+            return new RequestResult().SetSuccess();
+        }
+
+
         /// <summary>
         /// Заполняет значения из другого RequestResult и возвращает ссылку на себя
         /// </summary>
@@ -38,6 +48,7 @@
         public RequestResult SetSuccess()
         {
             Success = true;
+            Code = 200;
 
             return this;
         }
@@ -48,6 +59,12 @@
     {
         public T Value { get; set; }
 
+
+
+        public static RequestResult AsSuccess(T value)
+        {
+            return new RequestResult<T>().SetSuccess(value);
+        }
 
 
         public override RequestResult<T> FillFromRequestResult(RequestResult result)
@@ -83,6 +100,7 @@
         /// </summary>
         public RequestResult<T> SetSuccess(T val)
         {
+            Code = 200;
             Success = true;
             Value = val;
 

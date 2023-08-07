@@ -28,7 +28,7 @@ namespace Alfateam.Website.API.Models.ClientModels.Posts
 
             return model;
         }
-        public static List<PostIndustryClientModel> CreateItems(List<PostIndustry> items, int? langId)
+        public static List<PostIndustryClientModel> CreateItems(IEnumerable<PostIndustry> items, int? langId)
         {
             var models = new List<PostIndustryClientModel>();
             foreach (var item in items)

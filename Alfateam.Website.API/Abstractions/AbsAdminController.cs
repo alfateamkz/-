@@ -1,7 +1,10 @@
 ﻿using Alfateam.DB;
+using Alfateam.Website.API.Enums;
+using Alfateam.Website.API.Models.ClientModels.Posts;
 using Alfateam.Website.API.Models.Core;
+using Alfateam2._0.Models;
 using Alfateam2._0.Models.Abstractions;
-using Alfateam2._0.Models.Abstractions.Interfaces;
+using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Posts;
@@ -16,8 +19,12 @@ namespace Alfateam.Website.API.Abstractions
     {
         protected AbsAdminController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
         {
+            
         }
 
+        //TODO: Рефакторинг методов создания и апдейта, слишком много входных параметров
+        //TODO: В будущем: таблица файлов, удаление невостребованных(например файл был загружен на сервер, но дальше вышла ошибка и по факту моделька не сохранилась)
+        
 
         [NonAction]
         protected Session GetSessionWithRoleInclude()
@@ -66,6 +73,48 @@ namespace Alfateam.Website.API.Abstractions
             }
 
             return allowedModels;
+        }
+
+
+
+        protected async Task<RequestResult> UploadContentMedia(Content content)
+        {
+            foreach(var item in content.Items)
+            {
+                if(item is AudioContentItem audio)
+                {
+                    var fileUploadResult = await TryUploadFile(item.Guid, FileType.Audio);
+                    if (!fileUploadResult.Success) return fileUploadResult;
+
+                    audio.AudioPath = fileUploadResult.Value;
+                }
+                else if (item is ImageContentItem image)
+                {
+                    var fileUploadResult = await TryUploadFile(item.Guid, FileType.Image);
+                    if (!fileUploadResult.Success) return fileUploadResult;
+
+                    image.ImgPath = fileUploadResult.Value;
+                }
+                else if (item is ImageSliderContentItem slider)
+                {
+                    foreach(var img in slider.Images)
+                    {
+                        var fileUploadResult = await TryUploadFile(item.Guid, FileType.Image);
+                        if (!fileUploadResult.Success) return fileUploadResult;
+
+                        img.ImgPath = fileUploadResult.Value;
+                    }
+                }
+                else if (item is VideoContentItem video)
+                {
+                    var fileUploadResult = await TryUploadFile(item.Guid, FileType.Video);
+                    if (!fileUploadResult.Success) return fileUploadResult;
+
+                    video.VideoPath = fileUploadResult.Value;
+                }
+            }
+
+            return RequestResult.AsSuccess();
         }
 
 
@@ -217,14 +266,51 @@ namespace Alfateam.Website.API.Abstractions
         #endregion
 
 
+        #region Обобщенные методы получения объектов
+        protected RequestResult<IEnumerable<T>> TryGetMany<T>(IEnumerable<T> fromModels, ContentAccessModelType accessType, int offset,int count = 20) where T : AvailabilityModel
+        {
+            var res = new RequestResult<IEnumerable<T>>();
 
 
+            var session = GetSessionWithRoleInclude();
+            var contentRightsCheck = CheckContentAreaRights(session, accessType, 1);
+            if (!contentRightsCheck.Success)
+            {
+                return res.FillFromRequestResult(contentRightsCheck);
+            }
+            else
+            {
+                var availableModels = this.GetAvailableModels(session.User, fromModels);
+                availableModels = availableModels.Skip(offset).Take(count);
 
+                return res.SetSuccess(availableModels.Cast<T>());
+            }
+        }
+        protected RequestResult<T> TryGetOne<T>(IEnumerable<T> fromModels, int id, ContentAccessModelType accessType) where T: AvailabilityModel
+        {
+            var res = new RequestResult<T>();
+
+            var item = fromModels.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (item == null)
+            {
+                return res.SetError(404, "Запись по данному id не найдена");
+            }
+
+            var session = GetSessionWithRoleInclude();
+            var contentRightsCheck = CheckContentAreaRights(session, item, accessType, 1);
+            if (!contentRightsCheck.Success)
+            {
+                return res.FillFromRequestResult(contentRightsCheck);
+            }
+
+            return res.SetSuccess(item);
+        }
+        #endregion
 
         #region Обобщенные методы создания объекта
-        protected RequestResult<T> TryCreate<T>(DbSet<T> dbSet,T item) where T : AvailabilityModel, IValidatableModel
+        protected RequestResult<T> TryCreate<T>(DbSet<T> dbSet,T item, ContentAccessModelType accessType) where T : AvailabilityModel
         {
-            var res = CheckBaseBeforeCreate(item);
+            var res = CheckBaseBeforeCreate(item, accessType);
             if (!res.Success)
             {
                 return res;
@@ -235,9 +321,9 @@ namespace Alfateam.Website.API.Abstractions
 
             return res.SetSuccess(item);
         }
-        protected RequestResult<T> TryCreate<T>(DbSet<T> dbSet, T item,Func<RequestResult> callback) where T : AvailabilityModel, IValidatableModel
+        protected RequestResult<T> TryCreate<T>(DbSet<T> dbSet, T item, ContentAccessModelType accessType, Func<RequestResult> callback) where T : AvailabilityModel
         {
-            var res = CheckBaseBeforeCreate(item);
+            var res = CheckBaseBeforeCreate(item, accessType);
             if (!res.Success)
             {
                 return res;
@@ -252,9 +338,9 @@ namespace Alfateam.Website.API.Abstractions
 
             return res.SetSuccess(item);
         }
-        protected async Task<RequestResult<T>> TryCreate<T>(DbSet<T> dbSet, T item, Func<Task<RequestResult>> callback) where T : AvailabilityModel, IValidatableModel
+        protected async Task<RequestResult<T>> TryCreate<T>(DbSet<T> dbSet, T item, ContentAccessModelType accessType, Func<Task<RequestResult>> callback) where T : AvailabilityModel
         {
-            var res = CheckBaseBeforeCreate(item);
+            var res = CheckBaseBeforeCreate(item, accessType);
             if (!res.Success)
             {
                 return res;
@@ -269,20 +355,53 @@ namespace Alfateam.Website.API.Abstractions
 
             return res.SetSuccess(item);
         }
-        private RequestResult<T> CheckBaseBeforeCreate<T>(T item) where T : AvailabilityModel, IValidatableModel
+
+
+
+
+
+        protected RequestResult CheckLocalizationModelBeforeCreate<T>(LocalizableModel model,
+                                                                      T mainEntity,
+                                                                      ContentAccessModelType accessType) where T : AvailabilityModel
+        {
+            if (mainEntity == null)
+            {
+                return new RequestResult().SetError(400, "Внутренняя ошибка");
+            }
+
+
+            var session = GetSessionWithRoleInclude();
+            var contentRightsCheck = CheckContentAreaRights(session, mainEntity, accessType, 3);
+            if (!contentRightsCheck.Success)
+            {
+                return new RequestResult().FillFromRequestResult(contentRightsCheck);
+            }
+
+
+            if (!model.IsValid())
+            {
+                return new RequestResult().SetError(400, "Некорректно заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз");
+            }
+
+            return new RequestResult().SetSuccess();
+        }
+        private RequestResult<T> CheckBaseBeforeCreate<T>(T item, ContentAccessModelType accessType) where T : AvailabilityModel
         {
 
             var session = GetSessionWithRoleInclude();
-            var contentRightsCheck = CheckContentAreaRights(session, item, ContentAccessModelType.Posts, 4);
+            var contentRightsCheck = CheckContentAreaRights(session, item, accessType, 4);
             if (!contentRightsCheck.Success)
             {
                 return new RequestResult<T>().FillFromRequestResult(contentRightsCheck);
             }
 
-
-            if (!item.IsValid())
+            if (item.Id != 0)
             {
-                return new RequestResult<T>().SetError(400, "Не заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз");
+                return new RequestResult<T>().SetError(400, "Id должен быть нулевым");
+            }
+            else if (!item.IsValid())
+            {
+                return new RequestResult<T>().SetError(400, "Некорректно заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз");
             }
             else if (!DB.Languages.Any(o => o.Id == item.MainLanguageId && !o.IsDeleted))
             {
@@ -296,7 +415,9 @@ namespace Alfateam.Website.API.Abstractions
         #region Обобщенные методы редактирования объекта
 
 
-        protected RequestResult<T> CheckMainModelBeforeUpdate<T>(DbSet<T> dbSet, EditModel<T> model) where T : AvailabilityModel, IValidatableModel
+        protected RequestResult<T> CheckMainModelBeforeUpdate<T>(IQueryable<T> dbSet, 
+                                                                 EditModel<T> model, 
+                                                                 ContentAccessModelType accessType) where T : AvailabilityModel
         {
 
             var item = dbSet.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
@@ -306,7 +427,7 @@ namespace Alfateam.Website.API.Abstractions
             }
 
             var session = GetSessionWithRoleInclude();
-            var contentRightsCheck = CheckContentAreaRights(session, item, ContentAccessModelType.Posts, 2);
+            var contentRightsCheck = CheckContentAreaRights(session, item, accessType, 2);
             if (!contentRightsCheck.Success)
             {
                 return new RequestResult<T>().FillFromRequestResult(contentRightsCheck);
@@ -321,7 +442,10 @@ namespace Alfateam.Website.API.Abstractions
 
             return new RequestResult<T>().SetSuccess(item);
         }
-        protected RequestResult CheckLocalizationModelBeforeUpdate<T>(IQueryable<T> dbSet, LocalizationEditModel model,  int mainEntityId) where T: AvailabilityModel
+        protected RequestResult CheckLocalizationModelBeforeUpdate<T>(IQueryable<T> dbSet,
+                                                                     LocalizationEditModel model, 
+                                                                     int mainEntityId, 
+                                                                     ContentAccessModelType accessType) where T: AvailabilityModel
         {
             var category = dbSet.FirstOrDefault(o => o.Id == mainEntityId && !o.IsDeleted);
             if (category == null)
@@ -331,7 +455,7 @@ namespace Alfateam.Website.API.Abstractions
 
 
             var session = GetSessionWithRoleInclude();
-            var contentRightsCheck = CheckContentAreaRights(session, category, ContentAccessModelType.Posts, 3);
+            var contentRightsCheck = CheckContentAreaRights(session, category, accessType, 3);
             if (!contentRightsCheck.Success)
             {
                 return new RequestResult().FillFromRequestResult(contentRightsCheck);
@@ -348,7 +472,7 @@ namespace Alfateam.Website.API.Abstractions
 
 
 
-        protected RequestResult<T> UpdateModel<T>(DbSet<T> dbSet, EditModel<T> model,T item) where T : AvailabilityModel, IValidatableModel
+        protected RequestResult<T> UpdateModel<T>(DbSet<T> dbSet, EditModel<T> model,T item) where T : AvailabilityModel
         {
             model.Fill(item);
 
@@ -371,12 +495,12 @@ namespace Alfateam.Website.API.Abstractions
         #endregion
 
         #region Обобщенные методы удаления объекта
-        protected RequestResult TryDelete<T>(DbSet<T> dbSet, T item) where T : AvailabilityModel
+        protected RequestResult TryDelete<T>(DbSet<T> dbSet, T item, ContentAccessModelType accessType) where T : AvailabilityModel
         {
             var res = new RequestResult();
 
             var session = GetSessionWithRoleInclude();
-            var contentRightsCheck = CheckContentAreaRights(session, item, ContentAccessModelType.Posts, 5);
+            var contentRightsCheck = CheckContentAreaRights(session, item, accessType, 5);
             res.FillFromRequestResult(contentRightsCheck);
 
             if (contentRightsCheck.Success)
@@ -392,6 +516,45 @@ namespace Alfateam.Website.API.Abstractions
 
             return res;
         }
+
+        protected RequestResult CheckLocalizationModelBeforeDelete<T>(IQueryable<T> mainEntityDbSet,
+                                                                     int mainEntityId,
+                                                                     ContentAccessModelType accessType) where T : AvailabilityModel
+        {
+            var mainModel = mainEntityDbSet.FirstOrDefault(o => o.Id == mainEntityId && !o.IsDeleted);
+            if (mainModel == null)
+            {
+                return new RequestResult().SetError(400, "Внутренняя ошибка");
+            }
+
+
+            var session = GetSessionWithRoleInclude();
+            var contentRightsCheck = CheckContentAreaRights(session, mainModel, accessType, 5);
+            if (!contentRightsCheck.Success)
+            {
+                return new RequestResult().FillFromRequestResult(contentRightsCheck);
+            }
+
+            return new RequestResult().SetSuccess();
+        }
+
+
+        protected RequestResult<T> DeleteModel<T>(DbSet<T> dbSet,T item,bool softDelete = true) where T : AbsModel
+        {
+            if (softDelete)
+            {
+                item.IsDeleted = true;
+                dbSet.Update(item);       
+            }
+            else
+            {
+                dbSet.Remove(item);
+            }
+
+            DB.SaveChanges();
+            return new RequestResult<T>().SetSuccess(item);
+        }
+
         #endregion
 
 

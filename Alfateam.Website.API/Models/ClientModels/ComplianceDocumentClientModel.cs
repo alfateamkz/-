@@ -9,7 +9,7 @@ namespace Alfateam.Website.API.Models.ClientModels
         /// Размер в килобайтах. 
         /// Проставляется автоматически при заливки документа по пути DocumentPath
         /// </summary>
-        public int KBSize { get; set; }
+        public long KBSize { get; set; }
         public string Title { get; set; }
         public string ImgPreviewPath { get; set; }
         public string DocumentPath { get; set; }

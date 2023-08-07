@@ -14,5 +14,12 @@ namespace Alfateam2._0.Models.Localization.Items.Portfolios
         public string ImgPath { get; set; }
         public string ShortDescription { get; set; }
         public Content Content { get; set; }
+
+
+        /// <summary>
+        /// Автоматическое свойство
+        /// Указывает на главный объект (портфолио)
+        /// </summary>
+        public int PortfolioId { get; set; }
     }
 }
