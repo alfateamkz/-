@@ -1,4 +1,5 @@
-﻿using Alfateam2._0.Models.General;
+﻿using Alfateam2._0.Models.Enums;
+using Alfateam2._0.Models.General;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -14,6 +15,8 @@ namespace Alfateam2._0.Models.Abstractions
     /// </summary>
     public abstract class Promocode : AvailabilityModel
     {
+        [NotMapped]
+        public abstract PromocodeType Type { get; }
 
         //TODO: посмотреть по коду доступность промокода
         public string Code { get; set; }

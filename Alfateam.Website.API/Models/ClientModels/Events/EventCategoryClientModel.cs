@@ -1,5 +1,8 @@
-﻿using Alfateam.Website.API.Abstractions;
+﻿using Alfateam.Models.Helpers;
+using Alfateam.Website.API.Abstractions;
 using Alfateam2._0.Models.Events;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Xml.Linq;
 
 namespace Alfateam.Website.API.Models.ClientModels.Events
 {
@@ -9,6 +12,9 @@ namespace Alfateam.Website.API.Models.ClientModels.Events
 
         public string Title { get; set; }
         public string? Description { get; set; }
+
+        
+        public string Slug => SlugHelper.GetLatynSlug(Title);
 
         public static EventCategoryClientModel Create(EventCategory item, int? langId)
         {

@@ -12,6 +12,8 @@ namespace Alfateam.Website.API.Controllers.Admin
 {
     public class AdminUsersController : AbsController
     {
+
+        //TODO: роль
         public AdminUsersController(WebsiteDBContext db) : base(db)
         {
         }

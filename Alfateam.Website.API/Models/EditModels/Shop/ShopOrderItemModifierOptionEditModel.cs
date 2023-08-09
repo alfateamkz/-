@@ -1,4 +1,4 @@
-﻿namespace Alfateam.Website.API.Models
+﻿namespace Alfateam.Website.API.Models.EditModels.Shop
 {
     public class ShopOrderItemModifierOptionEditModel
     {

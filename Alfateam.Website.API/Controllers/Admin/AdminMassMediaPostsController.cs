@@ -13,6 +13,8 @@ using Alfateam.Website.API.Enums;
 using Alfateam.Website.API.Models.EditModels;
 using Alfateam.Website.API.Models.LocalizationEditModels;
 using Alfateam2._0.Models.Localization.Items;
+using Alfateam.Website.API.Models.EditModels.General;
+using Alfateam2._0.Models.General;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -22,6 +24,8 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
 
         }
+
+        #region Посты
 
         [HttpGet, Route("GetPosts")]
         public async Task<RequestResult<IEnumerable<MassMediaPostClientModel>>> GetPosts(int offset, int count = 20)
@@ -43,6 +47,28 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return TryGetOne(GetPostsList(), id, ContentAccessModelType.MassMediaPosts);
         }
+
+        [HttpGet, Route("GetPostLocalization")]
+        public async Task<RequestResult<MassMediaPostLocalization>> GetPostLocalization(int id)
+        {
+            var localization = DB.MassMediaPostLocalizations.Include(o => o.Language)
+                                                            .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (localization == null)
+            {
+                return new RequestResult<MassMediaPostLocalization>().SetError(404, "Локализация с данным id не найдена");
+            }
+
+            //Проверяем, есть ли доступ у пользователя к главной сущности
+            var checkAccessResult = TryGetOne(GetPostsList(), localization.MassMediaPostId, ContentAccessModelType.MassMediaPosts);
+            if (!checkAccessResult.Success)
+            {
+                return new RequestResult<MassMediaPostLocalization>().FillFromRequestResult(checkAccessResult);
+            }
+
+            return new RequestResult<MassMediaPostLocalization>().SetSuccess(localization);
+        }
+
+
 
 
 
@@ -156,6 +182,21 @@ namespace Alfateam.Website.API.Controllers.Admin
             return DeleteModel(DB.MassMediaPostLocalizations, item, false);
         }
 
+        #endregion
+
+        [HttpPut, Route("UpdateAvailability")]
+        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityEditModel model)
+        {
+            bool hasThisModel = false;
+            hasThisModel |= DB.MassMediaPosts.Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+
+            if (!hasThisModel)
+            {
+                return new RequestResult<Availability>().SetError(403, "У данного пользователя нет прав на редактирование матрицы доступности");
+            }
+
+            return TryUpdateAvailability(model, ContentAccessModelType.Compliance);
+        }
 
         #region Private methods
 

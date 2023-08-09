@@ -10,6 +10,7 @@ namespace Alfateam2._0.Models.Abstractions
     public abstract class AvailabilityModel : AbsModel
     {
         public Availability Availability { get; set; }
+        public int AvailabilityId { get; set; }
 
 
         public Language MainLanguage { get; set; }

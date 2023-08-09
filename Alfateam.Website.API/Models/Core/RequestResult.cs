@@ -7,6 +7,11 @@
         public int Code { get; set; } = 200;
 
 
+        public static RequestResult FromBoolean(bool val, int errorCode, string errorText)
+        {
+            if (val) return AsSuccess();
+            return AsError(errorCode,errorText);
+        }
 
         public static RequestResult AsError(int code, string error)
         {
@@ -60,8 +65,11 @@
         public T Value { get; set; }
 
 
-
-        public static RequestResult AsSuccess(T value)
+        public static RequestResult<T> AsError(int code, string error)
+        {
+            return new RequestResult<T>().SetError(code, error);
+        }
+        public static RequestResult<T> AsSuccess(T value)
         {
             return new RequestResult<T>().SetSuccess(value);
         }

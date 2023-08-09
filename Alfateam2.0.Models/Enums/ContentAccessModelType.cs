@@ -11,11 +11,13 @@ namespace Alfateam2._0.Models.Enums
     /// </summary>
     public enum ContentAccessModelType
     {
-        All = 1,
-        Posts = 2,
-        MassMediaPosts = 3,
-        Portfolio = 4,
-        Compliance = 5,
-        Events = 6
+        All = 1, //Все разделы
+        Posts = 2, //Новостные записи
+        MassMediaPosts = 3, //Записи раздела "Мы в СМИ"
+        Portfolio = 4, //Портфолио
+        Compliance = 5, //Комплаенс
+        Events = 6, //События
+        Team = 7, //Раздел "Команда"
+        General = 8, // Раздел в админке "Основное"
     }
 }

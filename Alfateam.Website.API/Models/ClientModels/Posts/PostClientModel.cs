@@ -1,6 +1,8 @@
-﻿using Alfateam.Website.API.Abstractions;
+﻿using Alfateam.Models.Helpers;
+using Alfateam.Website.API.Abstractions;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.Posts;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Alfateam.Website.API.Models.ClientModels.Posts
 {
@@ -18,6 +20,9 @@ namespace Alfateam.Website.API.Models.ClientModels.Posts
         public string ImgPath { get; set; }
         public string ShortDescription { get; set; }
         public Content Content { get; set; }
+
+
+        public string Slug => SlugHelper.GetLatynSlug(Title);
 
 
         public PostCategoryClientModel Category { get; set; }

@@ -5,12 +5,14 @@ using Alfateam.Website.API.Models.ClientModels;
 using Alfateam.Website.API.Models.ClientModels.Posts;
 using Alfateam.Website.API.Models.Core;
 using Alfateam.Website.API.Models.EditModels;
+using Alfateam.Website.API.Models.EditModels.General;
 using Alfateam.Website.API.Models.LocalizationEditModels;
 using Alfateam.Website.API.Models.LocalizationEditModels.Posts;
 using Alfateam2._0.Models;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Localization.Items;
+using Alfateam2._0.Models.Localization.Items.Events;
 using Alfateam2._0.Models.Localization.Items.Posts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +26,8 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             
         }
+
+        #region Комплаенс-документы
 
         [HttpGet, Route("GetComplianceDocuments")]
         public async Task<RequestResult<IEnumerable<ComplianceDocumentClientModel>>> GetComplianceDocuments(int offset, int count = 20)
@@ -45,6 +49,28 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return TryGetOne(ComplianceDocuments(), id, ContentAccessModelType.Compliance);
         }
+
+        [HttpGet, Route("GetComplianceDocumentLocalization")]
+        public async Task<RequestResult<ComplianceDocumentLocalization>> GetComplianceDocumentLocalization(int id)
+        {
+            var localization = DB.ComplianceDocumentLocalizations.Include(o => o.Language)
+                                                                 .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (localization == null)
+            {
+                return new RequestResult<ComplianceDocumentLocalization>().SetError(404, "Локализация с данным id не найдена");
+            }
+
+            //Проверяем, есть ли доступ у пользователя к главной сущности
+            var checkAccessResult = TryGetOne(ComplianceDocuments(), localization.ComplianceDocumentId, ContentAccessModelType.Compliance);
+            if (!checkAccessResult.Success)
+            {
+                return new RequestResult<ComplianceDocumentLocalization>().FillFromRequestResult(checkAccessResult);
+            }
+
+            return new RequestResult<ComplianceDocumentLocalization>().SetSuccess(localization);
+        }
+
+
 
 
 
@@ -160,8 +186,21 @@ namespace Alfateam.Website.API.Controllers.Admin
 
             return DeleteModel(DB.ComplianceDocumentLocalizations, item, false);
         }
+        #endregion
 
+        [HttpPut, Route("UpdateAvailability")]
+        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityEditModel model)
+        {
+            bool hasThisModel = false;
+            hasThisModel |= DB.ComplianceDocuments.Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
 
+            if (!hasThisModel)
+            {
+                return new RequestResult<Availability>().SetError(403, "У данного пользователя нет прав на редактирование матрицы доступности");
+            }
+
+            return TryUpdateAvailability(model, ContentAccessModelType.Compliance);
+        }
 
 
         #region Private methods

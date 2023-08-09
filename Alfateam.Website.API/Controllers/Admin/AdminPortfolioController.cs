@@ -1,16 +1,20 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Enums;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Models.ClientModels.Events;
 using Alfateam.Website.API.Models.ClientModels.Portfolios;
 using Alfateam.Website.API.Models.Core;
+using Alfateam.Website.API.Models.EditModels.General;
 using Alfateam.Website.API.Models.EditModels.Portfolios;
 using Alfateam.Website.API.Models.LocalizationEditModels.Events;
 using Alfateam.Website.API.Models.LocalizationEditModels.Portfolios;
 using Alfateam2._0.Models.Enums;
+using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Localization.Items.Events;
 using Alfateam2._0.Models.Localization.Items.Portfolios;
 using Alfateam2._0.Models.Portfolios;
+using Alfateam2._0.Models.Team;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,7 +24,7 @@ namespace Alfateam.Website.API.Controllers.Admin
     {
         public AdminPortfolioController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
         {
-            //TODO: реализовать контроллер
+        
         }
 
         #region Портфолио
@@ -46,8 +50,117 @@ namespace Alfateam.Website.API.Controllers.Admin
             return TryGetOne(GetPortfoliosFullIncludedList(), id, ContentAccessModelType.Portfolio);
         }
 
+        [HttpGet, Route("GetPortfolioLocalization")]
+        public async Task<RequestResult<PortfolioLocalization>> GetPortfolioLocalization(int id)
+        {
+            var localization = DB.PortfolioLocalizations.Include(o => o.Language)
+                                                        .Include(o => o.Content).ThenInclude(o => o.Items)
+                                                        .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (localization == null)
+            {
+                return new RequestResult<PortfolioLocalization>().SetError(404, "Локализация с данным id не найдена");
+            }
+
+            //Проверяем, есть ли доступ у пользователя к главной сущности
+            var checkAccessResult = TryGetOne(GetPortfoliosList(), localization.PortfolioId, ContentAccessModelType.Portfolio);
+            if (!checkAccessResult.Success)
+            {
+                return new RequestResult<PortfolioLocalization>().FillFromRequestResult(checkAccessResult);
+            }
+
+            return new RequestResult<PortfolioLocalization>().SetSuccess(localization);
+        }
 
 
+
+
+        [HttpPost, Route("CreatePortfolio")]
+        public async Task<RequestResult<Portfolio>> CreatePortfolio(Portfolio item)
+        {
+            return await TryCreate(DB.Portfolios, item, ContentAccessModelType.Portfolio, () =>  PreparePortfolioBeforeCreate(item));
+        }
+        [HttpPost, Route("CreatePortfolioLocalization")]
+        public async Task<RequestResult<PortfolioLocalization>> CreatePortfolioLocalization(int itemId, PortfolioLocalization localization)
+        {
+            var mainEntity = GetPortfoliosList().FirstOrDefault(o => o.Id == itemId);
+
+
+            var checkResult = CheckLocalizationModelBeforeCreate(localization, mainEntity, ContentAccessModelType.Portfolio);
+            if (!checkResult.Success)
+            {
+                return new RequestResult<PortfolioLocalization>().FillFromRequestResult(checkResult);
+            }
+
+            var prepareResult = await PreparePortfolioLocalizationBeforeCreate(localization);
+            if (!prepareResult.Success)
+            {
+                return new RequestResult<PortfolioLocalization>().FillFromRequestResult(prepareResult);
+            }
+
+
+            mainEntity.Localizations.Add(localization);
+            DB.Portfolios.Update(mainEntity);
+            DB.SaveChanges();
+
+            return new RequestResult<PortfolioLocalization>().SetSuccess(localization);
+        }
+
+
+
+
+        [HttpPut, Route("UpdatePortfolioMain")]
+        public async Task<RequestResult<Portfolio>> UpdatePortfolioMain(PortfolioMainEditModel model)
+        {
+            var res = new RequestResult<Portfolio>();
+
+            var baseCheckResult = CheckMainModelBeforeUpdate(GetPortfoliosFullIncludedList(), model, ContentAccessModelType.Portfolio);
+            if (!baseCheckResult.Success)
+            {
+                return baseCheckResult;
+            }
+            var item = baseCheckResult.Value;
+
+
+            if (!DB.Languages.Any(o => o.Id == model.MainLanguageId && !o.IsDeleted))
+            {
+                return res.SetError(404, "Языка с данным id не существует");
+            }
+
+            var prepareResult = await PreparePortfolioBeforeUpdate(item, model);
+            if (!prepareResult.Success)
+            {
+                return baseCheckResult;
+            }
+
+
+            return UpdateModel(DB.Portfolios, item);
+        }
+
+        [HttpPut, Route("UpdatePortfolioLocalization")]
+        public async Task<RequestResult<PortfolioLocalization>> UpdatePortfolioLocalization(PortfolioLocalizationEditModel model)
+        {
+            var res = new RequestResult<PortfolioLocalization>();
+
+            var localization = DB.PortfolioLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            if (localization == null)
+            {
+                return res.SetError(404, "Локализация с данным id не найдена");
+            }
+
+            var checkResult = CheckLocalizationModelBeforeUpdate(GetPortfoliosList(), model, localization.PortfolioId, ContentAccessModelType.Portfolio);
+            if (!checkResult.Success)
+            {
+                return res.FillFromRequestResult(checkResult);
+            }
+
+            var prepareResult = await PreparePortfolioLocalizationBeforeUpdate(localization, model);
+            if (!prepareResult.Success)
+            {
+                return res.FillFromRequestResult(prepareResult);
+            }
+
+            return UpdateModel(DB.PortfolioLocalizations, localization);
+        }
 
 
 
@@ -113,6 +226,28 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return TryGetOne(GetPortfolioCategoriesList(), id, ContentAccessModelType.Portfolio);
         }
+
+        [HttpGet, Route("GetPortfolioCategoryLocalization")]
+        public async Task<RequestResult<PortfolioCategoryLocalization>> GetPortfolioCategoryLocalization(int id)
+        {
+            var localization = DB.PortfolioCategoryLocalizations.Include(o => o.Language)
+                                                                .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (localization == null)
+            {
+                return new RequestResult<PortfolioCategoryLocalization>().SetError(404, "Локализация с данным id не найдена");
+            }
+
+            //Проверяем, есть ли доступ у пользователя к главной сущности
+            var checkAccessResult = TryGetOne(GetPortfolioCategoriesList(), localization.PortfolioCategoryId, ContentAccessModelType.Portfolio);
+            if (!checkAccessResult.Success)
+            {
+                return new RequestResult<PortfolioCategoryLocalization>().FillFromRequestResult(checkAccessResult);
+            }
+
+            return new RequestResult<PortfolioCategoryLocalization>().SetSuccess(localization);
+        }
+
+        
 
 
 
@@ -247,6 +382,25 @@ namespace Alfateam.Website.API.Controllers.Admin
             return TryGetOne(GetPortfolioIndustriesList(), id, ContentAccessModelType.Portfolio);
         }
 
+        [HttpGet, Route("GetPortfolioIndustryLocalization")]
+        public async Task<RequestResult<PortfolioIndustryLocalization>> GetPortfolioIndustryLocalization(int id)
+        {
+            var localization = DB.PortfolioIndustryLocalizations.Include(o => o.Language)
+                                                                .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (localization == null)
+            {
+                return new RequestResult<PortfolioIndustryLocalization>().SetError(404, "Локализация с данным id не найдена");
+            }
+
+            //Проверяем, есть ли доступ у пользователя к главной сущности
+            var checkAccessResult = TryGetOne(GetPortfolioIndustriesList(), localization.PortfolioIndustryId, ContentAccessModelType.Portfolio);
+            if (!checkAccessResult.Success)
+            {
+                return new RequestResult<PortfolioIndustryLocalization>().FillFromRequestResult(checkAccessResult);
+            }
+
+            return new RequestResult<PortfolioIndustryLocalization>().SetSuccess(localization);
+        }
 
 
 
@@ -362,7 +516,129 @@ namespace Alfateam.Website.API.Controllers.Admin
         #endregion
 
 
+        [HttpPut, Route("UpdateAvailability")]
+        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityEditModel model)
+        {
+            bool hasThisModel = false;
+            hasThisModel |= DB.Portfolios.Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            hasThisModel |= DB.PortfolioCategories.Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            hasThisModel |= DB.PortfolioIndustries.Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
 
+            if (!hasThisModel)
+            {
+                return new RequestResult<Availability>().SetError(403, "У данного пользователя нет прав на редактирование матрицы доступности");
+            }
+
+            return TryUpdateAvailability(model, ContentAccessModelType.Compliance);
+        }
+
+
+        #region Private methods
+        
+        private async Task<RequestResult> PreparePortfolioBeforeCreate(Portfolio item)
+        {
+            item.Category = null;
+            item.Industry = null;
+            item.WatchesList = new List<Watch>();
+            item.LikesList = new List<RateVote>();
+
+            var imgUploadResult = await TryUploadFile("mainImg", FileType.Image);
+            if (!imgUploadResult.Success)
+            {
+                return imgUploadResult;
+            }
+            item.ImgPath = imgUploadResult.Value;
+
+
+            var mainContentPageUploadRes = await this.UploadContentMedia(item.Content);
+            if (!mainContentPageUploadRes.Success)
+            {
+                return mainContentPageUploadRes;
+            }
+            
+            foreach(var localization in item.Localizations)
+            {
+                var localizationPrepareRes = await PreparePortfolioLocalizationBeforeCreate(localization);
+                if (!localizationPrepareRes.Success)
+                {
+                    return localizationPrepareRes;
+                }
+            }
+
+            return RequestResult.AsSuccess();
+        }
+        private async Task<RequestResult> PreparePortfolioBeforeUpdate(Portfolio item, PortfolioMainEditModel model)
+        {
+
+            if(item.ImgPath != model.ImgPath)
+            {
+                var imgUploadResult = await TryUploadFile("mainImg", FileType.Image);
+                if (!imgUploadResult.Success)
+                {
+                    return imgUploadResult;
+                }
+                item.ImgPath = imgUploadResult.Value;
+            }
+
+
+            if (!item.Content.AreSame(model.Content))
+            {
+                var contentPageUploadRes = await this.UploadContentMedia(item.Content);
+                if (!contentPageUploadRes.Success)
+                {
+                    return contentPageUploadRes;
+                }
+            }
+
+            return RequestResult.AsSuccess();
+        }
+
+
+        private async Task<RequestResult> PreparePortfolioLocalizationBeforeCreate(PortfolioLocalization item)
+        {
+            var imgUploadResult = await TryUploadFile($"{item.LanguageId}_localization_Img", FileType.Image);
+            if (!imgUploadResult.Success)
+            {
+                return new RequestResult().FillFromRequestResult(imgUploadResult);
+            }
+            item.ImgPath = imgUploadResult.Value;
+
+
+            var mainContentPageUploadRes = await this.UploadContentMedia(item.Content);
+            if (!mainContentPageUploadRes.Success)
+            {
+                return new RequestResult().FillFromRequestResult(mainContentPageUploadRes);
+            }
+
+            return RequestResult.AsSuccess();
+        }
+        private async Task<RequestResult> PreparePortfolioLocalizationBeforeUpdate(PortfolioLocalization item, PortfolioLocalizationEditModel model)
+        {
+
+            if (item.ImgPath != model.ImgPath)
+            {
+                var imgUploadResult = await TryUploadFile($"{item.LanguageId}_localization_Img", FileType.Image);
+                if (!imgUploadResult.Success)
+                {
+                    return imgUploadResult;
+                }
+                item.ImgPath = imgUploadResult.Value;
+            }
+
+            if (!item.Content.AreSame(model.Content))
+            {
+                var contentPageUploadRes = await this.UploadContentMedia(item.Content);
+                if (!contentPageUploadRes.Success)
+                {
+                    return contentPageUploadRes;
+                }
+            }
+
+
+            return RequestResult.AsSuccess();
+        }
+
+        #endregion
 
         #region Private get included methods
         private IQueryable<Portfolio> GetPortfoliosList()

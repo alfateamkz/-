@@ -4,12 +4,14 @@ using Alfateam.Website.API.Enums;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Models.ClientModels.Posts;
 using Alfateam.Website.API.Models.Core;
+using Alfateam.Website.API.Models.EditModels.General;
 using Alfateam.Website.API.Models.EditModels.Posts;
 using Alfateam.Website.API.Models.LocalizationEditModels.Posts;
 using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Localization.Items;
+using Alfateam2._0.Models.Localization.Items.Events;
 using Alfateam2._0.Models.Localization.Items.Posts;
 using Alfateam2._0.Models.Posts;
 using Microsoft.AspNetCore.Mvc;
@@ -49,6 +51,27 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return TryGetOne(GetFullIncludedPosts(), id, ContentAccessModelType.Posts);
         }
+
+        [HttpGet, Route("GetPostLocalization")]
+        public async Task<RequestResult<PostLocalization>> GetPostLocalization(int id)
+        {
+            var localization = DB.PostLocalizations.Include(o => o.Language)
+                                                   .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (localization == null)
+            {
+                return new RequestResult<PostLocalization>().SetError(404, "Локализация с данным id не найдена");
+            }
+
+            //Проверяем, есть ли доступ у пользователя к главной сущности
+            var checkAccessResult = TryGetOne(GetPosts(), localization.PostId, ContentAccessModelType.Posts);
+            if (!checkAccessResult.Success)
+            {
+                return new RequestResult<PostLocalization>().FillFromRequestResult(checkAccessResult);
+            }
+
+            return new RequestResult<PostLocalization>().SetSuccess(localization);
+        }
+
 
 
 
@@ -229,6 +252,25 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return TryGetOne(GetPostCategoriesList(), id, ContentAccessModelType.Posts);
         }
+        [HttpGet, Route("GetPostCategoryLocalization")]
+        public async Task<RequestResult<PostCategoryLocalization>> GetPostCategoryLocalization(int id)
+        {
+            var localization = DB.PostCategoryLocalizations.Include(o => o.Language)
+                                                           .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (localization == null)
+            {
+                return new RequestResult<PostCategoryLocalization>().SetError(404, "Локализация с данным id не найдена");
+            }
+
+            //Проверяем, есть ли доступ у пользователя к главной сущности
+            var checkAccessResult = TryGetOne(GetPostCategoriesList(), localization.PostCategoryId, ContentAccessModelType.Posts);
+            if (!checkAccessResult.Success)
+            {
+                return new RequestResult<PostCategoryLocalization>().FillFromRequestResult(checkAccessResult);
+            }
+
+            return new RequestResult<PostCategoryLocalization>().SetSuccess(localization);
+        }
 
 
 
@@ -363,7 +405,25 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return TryGetOne(GetPostPostIndustriesList(), id, ContentAccessModelType.Posts);
         }
+        [HttpGet, Route("GetPostIndustryLocalization")]
+        public async Task<RequestResult<PostIndustryLocalization>> GetPostIndustryLocalization(int id)
+        {
+            var localization = DB.PostIndustryLocalizations.Include(o => o.Language)
+                                                           .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (localization == null)
+            {
+                return new RequestResult<PostIndustryLocalization>().SetError(404, "Локализация с данным id не найдена");
+            }
 
+            //Проверяем, есть ли доступ у пользователя к главной сущности
+            var checkAccessResult = TryGetOne(GetPostPostIndustriesList(), localization.PostIndustryId, ContentAccessModelType.Posts);
+            if (!checkAccessResult.Success)
+            {
+                return new RequestResult<PostIndustryLocalization>().FillFromRequestResult(checkAccessResult);
+            }
+
+            return new RequestResult<PostIndustryLocalization>().SetSuccess(localization);
+        }
 
 
 
@@ -474,6 +534,23 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         #endregion
+
+
+        [HttpPut, Route("UpdateAvailability")]
+        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityEditModel model)
+        {
+            bool hasThisModel = false;
+            hasThisModel |= DB.Posts.Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            hasThisModel |= DB.PostCategories.Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            hasThisModel |= DB.PostIndustries.Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+
+            if (!hasThisModel)
+            {
+                return new RequestResult<Availability>().SetError(403, "У данного пользователя нет прав на редактирование матрицы доступности");
+            }
+
+            return TryUpdateAvailability(model, ContentAccessModelType.Compliance);
+        }
 
 
         #region Private methods

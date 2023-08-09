@@ -21,5 +21,13 @@ namespace Alfateam2._0.Models.Localization.Items.Team
 
         public Content DetailContent { get; set; }
         public string? CVFilepath { get; set; }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// Указывает на члена команды
+        /// </summary>
+        public int TeamMemberId { get; set; }
     }
 }

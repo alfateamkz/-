@@ -6,11 +6,14 @@ using Alfateam.Website.API.Models.ClientModels.Events;
 using Alfateam.Website.API.Models.ClientModels.Posts;
 using Alfateam.Website.API.Models.Core;
 using Alfateam.Website.API.Models.EditModels.Events;
+using Alfateam.Website.API.Models.EditModels.General;
 using Alfateam.Website.API.Models.LocalizationEditModels.Events;
 using Alfateam.Website.API.Models.LocalizationEditModels.Posts;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.Events;
+using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Localization.Items.Events;
+using Alfateam2._0.Models.Localization.Items.Portfolios;
 using Alfateam2._0.Models.Localization.Items.Posts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -48,6 +51,26 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return TryGetOne(GetEventsList(), id, ContentAccessModelType.Events);
         }
+        [HttpGet, Route("GetEventLocalization")]
+        public async Task<RequestResult<EventLocalization>> GetEventLocalization(int id)
+        {
+            var localization = DB.EventLocalizations.Include(o => o.Language)
+                                                    .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (localization == null)
+            {
+                return new RequestResult<EventLocalization>().SetError(404, "Локализация с данным id не найдена");
+            }
+
+            //Проверяем, есть ли доступ у пользователя к главной сущности
+            var checkAccessResult = TryGetOne(GetEventsList(), localization.EventId, ContentAccessModelType.Events);
+            if (!checkAccessResult.Success)
+            {
+                return new RequestResult<EventLocalization>().FillFromRequestResult(checkAccessResult);
+            }
+
+            return new RequestResult<EventLocalization>().SetSuccess(localization);
+        }
+
 
 
 
@@ -207,6 +230,28 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return TryGetOne(GetEventCategoriesList(), id, ContentAccessModelType.Events);
         }
+        [HttpGet, Route("GetEventCategoryLocalization")]
+        public async Task<RequestResult<EventCategoryLocalization>> GetEventCategoryLocalization(int id)
+        {
+            var localization = DB.EventCategoryLocalizations.Include(o => o.Language)
+                                                            .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (localization == null)
+            {
+                return new RequestResult<EventCategoryLocalization>().SetError(404, "Локализация с данным id не найдена");
+            }
+
+            //Проверяем, есть ли доступ у пользователя к главной сущности
+            var checkAccessResult = TryGetOne(GetEventCategoriesList(), localization.EventCategoryId, ContentAccessModelType.Events);
+            if (!checkAccessResult.Success)
+            {
+                return new RequestResult<EventCategoryLocalization>().FillFromRequestResult(checkAccessResult);
+            }
+
+            return new RequestResult<EventCategoryLocalization>().SetSuccess(localization);
+        }
+
+
+
 
 
         [HttpPost, Route("CreateEventCategory")]
@@ -339,6 +384,26 @@ namespace Alfateam.Website.API.Controllers.Admin
             return TryGetOne(GetEventFormatsList(), id, ContentAccessModelType.Events);
         }
 
+        [HttpGet, Route("GetEventFormatLocalization")]
+        public async Task<RequestResult<EventFormatLocalization>> GetEventFormatLocalization(int id)
+        {
+            var localization = DB.EventFormatLocalizations.Include(o => o.Language)
+                                                          .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (localization == null)
+            {
+                return new RequestResult<EventFormatLocalization>().SetError(404, "Локализация с данным id не найдена");
+            }
+
+            //Проверяем, есть ли доступ у пользователя к главной сущности
+            var checkAccessResult = TryGetOne(GetEventFormatsList(), localization.EventFormatId, ContentAccessModelType.Events);
+            if (!checkAccessResult.Success)
+            {
+                return new RequestResult<EventFormatLocalization>().FillFromRequestResult(checkAccessResult);
+            }
+
+            return new RequestResult<EventFormatLocalization>().SetSuccess(localization);
+        }
+
 
 
 
@@ -408,7 +473,8 @@ namespace Alfateam.Website.API.Controllers.Admin
 
             return UpdateModel(DB.EventFormatLocalizations, model, localization);
         }
-
+   
+      
 
 
 
@@ -449,6 +515,22 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #endregion
 
+
+        [HttpPut, Route("UpdateAvailability")]
+        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityEditModel model)
+        {
+            bool hasThisModel = false;
+            hasThisModel |= DB.Events.Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            hasThisModel |= DB.EventCategories.Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            hasThisModel |= DB.EventFormats.Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+
+            if (!hasThisModel)
+            {
+                return new RequestResult<Availability>().SetError(403, "У данного пользователя нет прав на редактирование матрицы доступности");
+            }
+
+            return TryUpdateAvailability(model, ContentAccessModelType.Events);
+        }
 
 
         #region Private methods

@@ -21,5 +21,12 @@ namespace Alfateam2._0.Models.Team
         public Language MainLanguage { get; set; }
         public int MainLanguageId { get; set; }
         public List<TeamGroupLocalization> Localizations { get; set; } = new List<TeamGroupLocalization>();
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// Указывает на главную сущность (структуру команд)
+        /// </summary>
+        public int TeamStructureId { get; set; }
     }
 }

@@ -12,7 +12,7 @@ namespace Alfateam2._0.Models.Enums
     public enum ShopOrderStatus
     {
         Basket = 1, //Заказ как "корзина"
-        Unpaid = 2, //Оплачен
+        Unpaid = 2, //Не оплачен
         Paid = 3, //Оплачен
         InDelivery = 4, //В доставке
         Delivered = 5, //Доставлен

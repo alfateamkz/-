@@ -1,7 +1,9 @@
-﻿using Alfateam.Website.API.Abstractions;
+﻿using Alfateam.Models.Helpers;
+using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Models.ClientModels.Posts;
 using Alfateam2._0.Models.Portfolios;
 using Alfateam2._0.Models.Posts;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Alfateam.Website.API.Models.ClientModels.Portfolios
 {
@@ -10,6 +12,10 @@ namespace Alfateam.Website.API.Models.ClientModels.Portfolios
         protected PortfolioIndustryClientModel() { }
 
         public string Title { get; set; }
+
+
+
+        public string Slug => SlugHelper.GetLatynSlug(Title);
 
         public static PortfolioIndustryClientModel Create(PortfolioIndustry item, int? langId)
         {

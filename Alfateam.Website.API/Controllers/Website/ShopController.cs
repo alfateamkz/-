@@ -1,9 +1,9 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Extensions;
-using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.ClientModels.Shop;
 using Alfateam.Website.API.Models.Core;
+using Alfateam.Website.API.Models.EditModels.Shop;
 using Alfateam.Website.API.Models.Filters;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;

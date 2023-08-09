@@ -13,6 +13,8 @@ namespace Alfateam.Website.API.Models.ClientModels
         public string ShortDescription { get; set; }
 
 
+
+
         public static MassMediaPostClientModel Create(MassMediaPost item, int? langId)
         {
 

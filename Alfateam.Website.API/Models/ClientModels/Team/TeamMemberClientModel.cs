@@ -1,6 +1,8 @@
-﻿using Alfateam.Website.API.Abstractions;
+﻿using Alfateam.Models.Helpers;
+using Alfateam.Website.API.Abstractions;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.Team;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Alfateam.Website.API.Models.ClientModels.Team
 {
@@ -13,6 +15,9 @@ namespace Alfateam.Website.API.Models.ClientModels.Team
         public string Position { get; set; }
         public string ShortExpierence { get; set; }
         public string Quote { get; set; }
+
+
+        public string Slug => SlugHelper.GetLatynSlug($"{Surname} {Name} - {Position}");
 
 
         public Content DetailContent { get; set; }

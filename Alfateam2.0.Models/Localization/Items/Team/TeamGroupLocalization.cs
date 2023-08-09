@@ -10,5 +10,13 @@ namespace Alfateam2._0.Models.Localization.Items.Team
     public class TeamGroupLocalization : LocalizableModel
     {
         public string Title { get; set; }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// Указывает на команду
+        /// </summary>
+        public int TeamGroupId { get; set; }
     }
 }

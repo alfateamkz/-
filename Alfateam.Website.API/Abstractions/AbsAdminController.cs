@@ -2,6 +2,7 @@
 using Alfateam.Website.API.Enums;
 using Alfateam.Website.API.Models.ClientModels.Posts;
 using Alfateam.Website.API.Models.Core;
+using Alfateam.Website.API.Models.EditModels.General;
 using Alfateam2._0.Models;
 using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.ContentItems;
@@ -74,9 +75,13 @@ namespace Alfateam.Website.API.Abstractions
 
             return allowedModels;
         }
+        protected IEnumerable<AvailabilityModel> GetAvailableModels(User user, IEnumerable<AvailabilityModel> allModels,int offset, int count)
+        {
+            return GetAvailableModels(user,allModels).Skip(offset).Take(count);
+        }
 
 
-
+        //TODO: Сделать метод UpdateContentMedia и применить его по проекту
         protected async Task<RequestResult> UploadContentMedia(Content content)
         {
             foreach(var item in content.Items)
@@ -123,19 +128,11 @@ namespace Alfateam.Website.API.Abstractions
     
         protected RequestResult CheckBaseRights(Session session, AvailabilityModel model)
         {
-            var res = new RequestResult();
-
-            var checkSessionRes = CheckSession(session);
-            if (!checkSessionRes.Success)
+            return TryFinishAllRequestes(new[]
             {
-                return res.FillFromRequestResult(checkSessionRes);
-            }
-            if (!this.CheckBasePermissions(session.User, model))
-            {
-                return res.SetError(403, "У данного пользователя нет доступа к записи");
-            }
-
-            return res.SetSuccess();
+               () => CheckSession(session),
+               () => RequestResult.FromBoolean(CheckBasePermissions(session.User, model), 403, "У данного пользователя нет доступа к записи"),
+            });
         }
         protected RequestResult CheckContentAreaRights(Session session, AvailabilityModel model, ContentAccessModelType type, int requiredLevel)
         {
@@ -155,11 +152,11 @@ namespace Alfateam.Website.API.Abstractions
 
 
 
-        private bool IsInAdminRole(User user)
+        protected bool IsInAdminRole(User user)
         {
             return user.RoleModel.Role == UserRole.Admin || user.RoleModel.Role == UserRole.Owner;
         }
-        private bool CheckBasePermissions(User user, AvailabilityModel model/*, AdminActionType type*/)
+        protected bool CheckBasePermissions(User user, AvailabilityModel model/*, AdminActionType type*/)
         {
             bool success = IsInAdminRole(user);
             if (!success) return success;
@@ -218,17 +215,20 @@ namespace Alfateam.Website.API.Abstractions
         {
             var res = new RequestResult();
 
+            if (session.User.RoleModel.Role == UserRole.User)
+            {
+                return res.SetError(403, "У пользователя нет доступа в администраторскую часть");
+            }
+
             var userAccess = session.User.RoleModel.GetContentAccess(type);
             if (userAccess == null)
             {
                 userAccess = session.User.RoleModel.GetContentAccess(ContentAccessModelType.All);
                 if (userAccess == null)
                 {
-                    res.SetError(403, "У пользователя нет прав на данный раздел");
-                    return res;
+                    return res.SetError(403, "У пользователя нет прав на данный раздел");
                 }
             }
-
 
 
             if (userAccess.AccessLevel < requiredLevel && session.User.RoleModel.Role != UserRole.Owner)
@@ -236,28 +236,19 @@ namespace Alfateam.Website.API.Abstractions
                 switch (requiredLevel)
                 {
                     case 1:
-                        res.SetError(403, "У пользователя нет прав на просмотр записей");
-                        break;
+                        return res.SetError(403, "У пользователя нет прав на просмотр записей");
                     case 2:
-                        res.SetError(403, "У пользователя нет прав на редактирование записей");
-                        break;
+                        return res.SetError(403, "У пользователя нет прав на редактирование записей");
                     case 3:
-                        res.SetError(403, "У пользователя нет прав на редактирование локализаций записей");
-                        break;
+                        return res.SetError(403, "У пользователя нет прав на редактирование локализаций записей");
                     case 4:
-                        res.SetError(403, "У пользователя нет прав на создание новых записей");
-                        break;
+                        return res.SetError(403, "У пользователя нет прав на создание новых записей");
                     case 5:
-                        res.SetError(403, "У пользователя нет прав на удаление записей");
-                        break;
+                        return res.SetError(403, "У пользователя нет прав на удаление записей");
                 }
             }
-            else
-            {
-                res.Success = true;
-            }
 
-            return res;
+            return res.SetSuccess();
         }
 
 
@@ -280,9 +271,7 @@ namespace Alfateam.Website.API.Abstractions
             }
             else
             {
-                var availableModels = this.GetAvailableModels(session.User, fromModels);
-                availableModels = availableModels.Skip(offset).Take(count);
-
+                var availableModels = this.GetAvailableModels(session.User, fromModels, offset, count);
                 return res.SetSuccess(availableModels.Cast<T>());
             }
         }
@@ -305,55 +294,43 @@ namespace Alfateam.Website.API.Abstractions
 
             return res.SetSuccess(item);
         }
+        protected RequestResult<T> TryGetOne<T>(IEnumerable<T> fromModels, int id) where T : AbsModel
+        {
+            var item = fromModels.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (item == null)
+            {
+                return RequestResult<T>.AsError(404, "Запись по данному id не найдена");
+            }
+            return RequestResult<T>.AsSuccess(item);
+        }
         #endregion
 
         #region Обобщенные методы создания объекта
         protected RequestResult<T> TryCreate<T>(DbSet<T> dbSet,T item, ContentAccessModelType accessType) where T : AvailabilityModel
         {
-            var res = CheckBaseBeforeCreate(item, accessType);
-            if (!res.Success)
+            return TryFinishAllRequestes<T>(new[]
             {
-                return res;
-            }
-
-            dbSet.Add(item);
-            DB.SaveChanges();
-
-            return res.SetSuccess(item);
+                () => CheckBaseBeforeCreate(item, accessType),
+                () => CreateModel(dbSet,item)
+            });
         }
         protected RequestResult<T> TryCreate<T>(DbSet<T> dbSet, T item, ContentAccessModelType accessType, Func<RequestResult> callback) where T : AvailabilityModel
         {
-            var res = CheckBaseBeforeCreate(item, accessType);
-            if (!res.Success)
-            {
-                return res;
-            }
-
-            var callbackRes = callback.Invoke();
-            if (!callbackRes.Success) return res.FillFromRequestResult(callbackRes);
-
-
-            dbSet.Add(item);
-            DB.SaveChanges();
-
-            return res.SetSuccess(item);
+           return TryFinishAllRequestes<T>(new[]
+           {
+                () => CheckBaseBeforeCreate(item, accessType),
+                () => callback.Invoke(),
+                () => CreateModel(dbSet,item)
+            });
         }
         protected async Task<RequestResult<T>> TryCreate<T>(DbSet<T> dbSet, T item, ContentAccessModelType accessType, Func<Task<RequestResult>> callback) where T : AvailabilityModel
         {
-            var res = CheckBaseBeforeCreate(item, accessType);
-            if (!res.Success)
+            return TryFinishAllRequestes<T>(new[]
             {
-                return res;
-            }
-
-            var callbackRes = await callback.Invoke();
-            if (!callbackRes.Success) return res.FillFromRequestResult(callbackRes);
-
-
-            dbSet.Add(item);
-            DB.SaveChanges();
-
-            return res.SetSuccess(item);
+                () => CheckBaseBeforeCreate(item, accessType),
+                () => callback.Invoke().Result,
+                () => CreateModel(dbSet,item)
+            });
         }
 
 
@@ -364,51 +341,54 @@ namespace Alfateam.Website.API.Abstractions
                                                                       T mainEntity,
                                                                       ContentAccessModelType accessType) where T : AvailabilityModel
         {
-            if (mainEntity == null)
-            {
-                return new RequestResult().SetError(400, "Внутренняя ошибка");
-            }
-
-
             var session = GetSessionWithRoleInclude();
-            var contentRightsCheck = CheckContentAreaRights(session, mainEntity, accessType, 3);
-            if (!contentRightsCheck.Success)
+            return TryFinishAllRequestes<T>(new[]
             {
-                return new RequestResult().FillFromRequestResult(contentRightsCheck);
-            }
-
-
-            if (!model.IsValid())
-            {
-                return new RequestResult().SetError(400, "Некорректно заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз");
-            }
-
-            return new RequestResult().SetSuccess();
+                () => RequestResult.FromBoolean(mainEntity != null, 400, "Внутренняя ошибка"),
+                () => CheckContentAreaRights(session, mainEntity, accessType, 3),
+                () => RequestResult.FromBoolean(model.IsValid(), 400, "Некорректно заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз")
+            });
         }
+
+
+
         private RequestResult<T> CheckBaseBeforeCreate<T>(T item, ContentAccessModelType accessType) where T : AvailabilityModel
         {
-
             var session = GetSessionWithRoleInclude();
-            var contentRightsCheck = CheckContentAreaRights(session, item, accessType, 4);
-            if (!contentRightsCheck.Success)
+            return TryFinishAllRequestes<T>(new[]
             {
-                return new RequestResult<T>().FillFromRequestResult(contentRightsCheck);
-            }
+                () => CheckContentAreaRights(session, item, accessType, 4),
+                () => CheckBasePropsBeforeCreate(item)
+            });
+        }
+        protected RequestResult<T> CheckBasePropsBeforeCreate<T>(T item) where T : AbsModel
+        {
+            return TryFinishAllRequestes<T>(new[]
+            {
+                () => RequestResult.FromBoolean(item.Id == 0, 400, "Id должен быть нулевым"),
+                () => RequestResult.FromBoolean(item.IsValid(), 400, "Некорректно заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз"),
+                () =>
+                {
+                   var mainLangIdProp = item.GetType().GetProperties().FirstOrDefault(o => o.Name == "MainLanguageId");
+                   if(mainLangIdProp != null)
+                   {
+                       var mainLanguageId = (int)mainLangIdProp.GetValue(item);
+                       if (!DB.Languages.Any(o => o.Id == mainLanguageId && !o.IsDeleted))
+                       {
+                           return new RequestResult<T>().SetError(404, "Языка с данным id не существует");
+                       }
+                   }
+                   return RequestResult<T>.AsSuccess(item);
+                }
+            });
+        }
 
-            if (item.Id != 0)
-            {
-                return new RequestResult<T>().SetError(400, "Id должен быть нулевым");
-            }
-            else if (!item.IsValid())
-            {
-                return new RequestResult<T>().SetError(400, "Некорректно заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз");
-            }
-            else if (!DB.Languages.Any(o => o.Id == item.MainLanguageId && !o.IsDeleted))
-            {
-                return new RequestResult<T>().SetError(404, "Языка с данным id не существует");
-            }
 
-            return new RequestResult<T>().SetSuccess(item);
+        protected RequestResult<T> CreateModel<T>(DbSet<T> dbSet, T item) where T : AbsModel
+        {
+            dbSet.Add(item);
+            DB.SaveChanges();
+            return RequestResult<T>.AsSuccess(item);
         }
         #endregion
 
@@ -421,26 +401,12 @@ namespace Alfateam.Website.API.Abstractions
         {
 
             var item = dbSet.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            if (item == null)
+            return TryFinishAllRequestes<T>(new[]
             {
-                return new RequestResult<T>().SetError(404, "Запись по данному id не найдена");
-            }
-
-            var session = GetSessionWithRoleInclude();
-            var contentRightsCheck = CheckContentAreaRights(session, item, accessType, 2);
-            if (!contentRightsCheck.Success)
-            {
-                return new RequestResult<T>().FillFromRequestResult(contentRightsCheck);
-            }
-
-
-            if (model.IsValid())
-            {
-                return new RequestResult<T>().SetError(400, "Не заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз");
-            }
-            
-
-            return new RequestResult<T>().SetSuccess(item);
+                () => RequestResult.FromBoolean(item != null, 400, "Запись по данному id не найдена"),
+                () => CheckContentAreaRights(GetSessionWithRoleInclude(), item, accessType, 3),
+                () => RequestResult.FromBoolean(model.IsValid(), 400, "Некорректно заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз")
+            });
         }
         protected RequestResult CheckLocalizationModelBeforeUpdate<T>(IQueryable<T> dbSet,
                                                                      LocalizationEditModel model, 
@@ -448,94 +414,82 @@ namespace Alfateam.Website.API.Abstractions
                                                                      ContentAccessModelType accessType) where T: AvailabilityModel
         {
             var category = dbSet.FirstOrDefault(o => o.Id == mainEntityId && !o.IsDeleted);
-            if (category == null)
+            return TryFinishAllRequestes<T>(new[]
             {
-                return new RequestResult().SetError(400, "Внутренняя ошибка");
-            }
-
-
-            var session = GetSessionWithRoleInclude();
-            var contentRightsCheck = CheckContentAreaRights(session, category, accessType, 3);
-            if (!contentRightsCheck.Success)
-            {
-                return new RequestResult().FillFromRequestResult(contentRightsCheck);
-            }
-
-
-            if (!model.IsValid())
-            {
-                return new RequestResult().SetError(400, "Не заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз");
-            }
-
-            return new RequestResult().SetSuccess();
+                () => RequestResult.FromBoolean(category != null, 400, "Внутренняя ошибка"),
+                () => CheckContentAreaRights(GetSessionWithRoleInclude(), category, accessType, 3),
+                () => RequestResult.FromBoolean(model.IsValid(), 400, "Некорректно заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз")
+            });
         }
 
 
 
-        protected RequestResult<T> UpdateModel<T>(DbSet<T> dbSet, EditModel<T> model,T item) where T : AvailabilityModel
+        protected RequestResult<T> UpdateModel<T>(DbSet<T> dbSet, EditModel<T> model,T item) where T : AbsModel
         {
             model.Fill(item);
-
-            dbSet.Update(item);
-            DB.SaveChanges();
-
-            return new RequestResult<T>().SetSuccess(item);
+            return UpdateModel(dbSet, item);
         }
         protected RequestResult<T> UpdateModel<T>(DbSet<T> dbSet, LocalizationEditModel<T> model, T item) where T: AbsModel
         {
             model.Fill(item);
-
+            return UpdateModel(dbSet, item);
+        }
+        protected RequestResult<T> UpdateModel<T>(DbSet<T> dbSet, T item) where T : AbsModel
+        {
             dbSet.Update(item);
             DB.SaveChanges();
 
             return new RequestResult<T>().SetSuccess(item);
         }
+
+
+        protected RequestResult<Availability> TryUpdateAvailability(AvailabilityEditModel model, ContentAccessModelType accessType)
+        {
+           var availability = DB.GetIncludedAvailability(model.Id);
+           return TryFinishAllRequestes<Availability>(new[]
+           {
+                () => RequestResult.FromBoolean(availability != null, 404, "Запись по данному id не найдена"),
+                () => CheckContentAreaRights(GetSessionWithRoleInclude(), accessType, 2),
+                () => UpdateModel(DB.Availabilities, model, availability)
+            });
+        }
+
 
 
         #endregion
 
         #region Обобщенные методы удаления объекта
-        protected RequestResult TryDelete<T>(DbSet<T> dbSet, T item, ContentAccessModelType accessType) where T : AvailabilityModel
+        protected RequestResult TryDelete<T>(DbSet<T> dbSet, T item, ContentAccessModelType accessType,bool softDelete = true) where T : AvailabilityModel
         {
-            var res = new RequestResult();
-
-            var session = GetSessionWithRoleInclude();
-            var contentRightsCheck = CheckContentAreaRights(session, item, accessType, 5);
-            res.FillFromRequestResult(contentRightsCheck);
-
-            if (contentRightsCheck.Success)
-            {
-                item.IsDeleted = true;
-
-                dbSet.Update(item);
-                DB.SaveChanges();
-
-                res.Success = true;
-            }
-
-
-            return res;
+           return TryFinishAllRequestes<T>(new[]
+           {
+                () => CheckContentAreaRights(GetSessionWithRoleInclude(), item, accessType, 5),
+                () => DeleteModel(dbSet, item, softDelete)
+           });
         }
 
         protected RequestResult CheckLocalizationModelBeforeDelete<T>(IQueryable<T> mainEntityDbSet,
                                                                      int mainEntityId,
                                                                      ContentAccessModelType accessType) where T : AvailabilityModel
         {
+           var mainModel = mainEntityDbSet.FirstOrDefault(o => o.Id == mainEntityId && !o.IsDeleted);
+           return TryFinishAllRequestes<T>(new[]
+           {
+               () => RequestResult.FromBoolean(mainModel != null, 400, "Внутренняя ошибка"),
+               () => CheckContentAreaRights(GetSessionWithRoleInclude(), mainModel, accessType, 5),
+           });
+        }
+
+        protected RequestResult CheckLocalizationBeforeDelete<T>(IQueryable<T> mainEntityDbSet,
+                                                                 int mainEntityId,
+                                                                 ContentAccessModelType accessType) where T : AbsModel
+        {
             var mainModel = mainEntityDbSet.FirstOrDefault(o => o.Id == mainEntityId && !o.IsDeleted);
-            if (mainModel == null)
+            return TryFinishAllRequestes<T>(new[]
             {
-                return new RequestResult().SetError(400, "Внутренняя ошибка");
-            }
-
-
-            var session = GetSessionWithRoleInclude();
-            var contentRightsCheck = CheckContentAreaRights(session, mainModel, accessType, 5);
-            if (!contentRightsCheck.Success)
-            {
-                return new RequestResult().FillFromRequestResult(contentRightsCheck);
-            }
-
-            return new RequestResult().SetSuccess();
+               () => RequestResult.FromBoolean(mainModel != null, 400, "Внутренняя ошибка"),
+               () => CheckContentAreaRights(GetSessionWithRoleInclude(), accessType, 5),
+            });
         }
 
 

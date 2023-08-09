@@ -20,5 +20,13 @@ namespace Alfateam2._0.Models.Localization.Items.Shop
         public bool UseLocalizationImages { get; set; } = true;
         public ShopProductImage MainImage { get; set; }
         public List<ShopProductImage> Images { get; set; } = new List<ShopProductImage>();
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// Указывает на главную сущность (товар)
+        /// </summary>
+        public int ShopProductId { get; set; }
     }
 }

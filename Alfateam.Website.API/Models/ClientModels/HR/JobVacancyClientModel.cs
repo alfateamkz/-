@@ -1,7 +1,9 @@
-﻿using Alfateam.Website.API.Abstractions;
+﻿using Alfateam.Models.Helpers;
+using Alfateam.Website.API.Abstractions;
 using Alfateam2._0.Models;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.HR;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Alfateam.Website.API.Models.ClientModels.HR
 {
@@ -11,6 +13,10 @@ namespace Alfateam.Website.API.Models.ClientModels.HR
 
         public string Title { get; set; }
         public Content InnerContent { get; set; }
+
+
+
+        public string Slug => SlugHelper.GetLatynSlug(Title);
 
         public static JobVacancyClientModel Create(JobVacancy item, int? langId)
         {

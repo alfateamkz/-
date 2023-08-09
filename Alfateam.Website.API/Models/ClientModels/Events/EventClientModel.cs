@@ -1,5 +1,7 @@
-﻿using Alfateam.Website.API.Abstractions;
+﻿using Alfateam.Models.Helpers;
+using Alfateam.Website.API.Abstractions;
 using Alfateam2._0.Models.Events;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Alfateam.Website.API.Models.ClientModels.Events
 {
@@ -13,6 +15,10 @@ namespace Alfateam.Website.API.Models.ClientModels.Events
         public string? EventOrganizer { get; set; }
         public string? EventMembers { get; set; }
 
+
+
+
+        public string Slug => SlugHelper.GetLatynSlug(Title);
 
 
         public EventCategoryClientModel Category { get; set; }

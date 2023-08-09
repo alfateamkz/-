@@ -1,5 +1,7 @@
-﻿using Alfateam.Website.API.Abstractions;
+﻿using Alfateam.Models.Helpers;
+using Alfateam.Website.API.Abstractions;
 using Alfateam2._0.Models.Posts;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Alfateam.Website.API.Models.ClientModels.Posts
 {
@@ -8,6 +10,10 @@ namespace Alfateam.Website.API.Models.ClientModels.Posts
         protected PostIndustryClientModel() { }
 
         public string Title { get; set; }
+
+
+
+        public string Slug => SlugHelper.GetLatynSlug(Title);
 
         public static PostIndustryClientModel Create(PostIndustry item,int? langId)
         {

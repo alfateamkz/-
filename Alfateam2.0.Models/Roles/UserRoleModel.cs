@@ -48,6 +48,6 @@ namespace Alfateam2._0.Models.Roles
 
 
         public HRAccessType HRAccess { get; set; } = HRAccessType.None;
-        public ShopAccessType ShopAccess { get; set; } = ShopAccessType.None;
+        public ShopAccessModel ShopAccess { get; set; }
     }
 }

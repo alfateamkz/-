@@ -1,4 +1,5 @@
-﻿using Alfateam.Website.API.Abstractions;
+﻿using Alfateam.Models.Helpers;
+using Alfateam.Website.API.Abstractions;
 using Alfateam2._0.Models.Shop;
 
 namespace Alfateam.Website.API.Models.ClientModels.Shop
@@ -6,6 +7,8 @@ namespace Alfateam.Website.API.Models.ClientModels.Shop
     public class ShopProductCategoryClientModel : ClientModel
     {
         public string Title { get; set; }
+
+        public string Slug => SlugHelper.GetLatynSlug(Title);
 
         public static ShopProductCategoryClientModel Create(ShopProductCategory item, int? langId)
         {
@@ -26,7 +29,7 @@ namespace Alfateam.Website.API.Models.ClientModels.Shop
 
             return model;
         }
-        public static List<ShopProductCategoryClientModel> CreateItems(List<ShopProductCategory> items, int? langId)
+        public static List<ShopProductCategoryClientModel> CreateItems(IEnumerable<ShopProductCategory> items, int? langId)
         {
             var models = new List<ShopProductCategoryClientModel>();
             foreach (var item in items)

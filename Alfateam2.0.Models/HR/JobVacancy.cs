@@ -1,9 +1,11 @@
-﻿using Alfateam2._0.Models.Abstractions;
+﻿using Alfateam.Models.Helpers;
+using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Localization.Items.HR;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -21,6 +23,10 @@ namespace Alfateam2._0.Models.HR
         public Currency Currency { get; set; }
         public double? SalaryFrom { get; set; }
         public double? SalaryTo { get; set; }
+
+
+        [NotMapped]
+        public string Slug => SlugHelper.GetLatynSlug(Title);
 
         public Content InnerContent { get; set; }
 

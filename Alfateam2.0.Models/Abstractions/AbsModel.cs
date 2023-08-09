@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Alfateam2._0.Models.ContentItems;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -45,13 +46,18 @@ namespace Alfateam2._0.Models.Abstractions
                     int val = (int)prop.GetValue(this);
                     isValid &= val > 0;
                 }
-                else if (Nullable.GetUnderlyingType(typeof(int)) == typeof(int))
+                else if (Nullable.GetUnderlyingType(typeof(int)) == typeof(int) && prop.Name.EndsWith("Id"))
                 {
                     int? val = (int)prop.GetValue(this);
                     if (val.HasValue)
                     {
                         isValid &= val.Value > 0;
                     }
+                }
+                else if (type == typeof(Content))
+                {
+                    Content val = (Content)prop.GetValue(this);
+                    isValid &= val.IsValid();
                 }
 
             }

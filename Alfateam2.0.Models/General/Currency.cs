@@ -1,4 +1,5 @@
 ﻿using Alfateam2._0.Models.Abstractions;
+using Alfateam2._0.Models.Localization.General;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,5 +16,17 @@ namespace Alfateam2._0.Models.General
         public string Title { get; set; }   
         public string Code { get; set; }
         public string Symbol { get; set; }
+
+
+        /// <summary>
+        /// Скрыта ли данная модель от пользователей сайта
+        /// </summary>
+        public bool IsHidden { get; set; }
+
+
+
+        public Language MainLanguage { get; set; }
+        public int MainLanguageId { get; set; }
+        public List<CurrencyLocalization> Localizations { get; set; } = new List<CurrencyLocalization>();
     }
 }

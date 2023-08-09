@@ -1,6 +1,7 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Enums;
 using Alfateam.Website.API.Models.Core;
+using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.General;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -195,6 +196,39 @@ namespace Alfateam.Website.API.Abstractions
             string filepath = await this.UploadFile(file);
             return res.SetSuccess(filepath);
         }
+        protected async Task<RequestResult<string>> TryUploadFile(IFormFile file, FileType fileType)
+        {
+            var res = new RequestResult<string>();
+  
+            RequestResult fileCheckResult = null;
+            switch (fileType)
+            {
+                case FileType.Image:
+                    fileCheckResult = this.CheckImageFile(file);
+                    break;
+                case FileType.Document:
+                    fileCheckResult = this.CheckDocumentFile(file);
+                    break;
+                case FileType.Video:
+                    fileCheckResult = this.CheckVideoFile(file);
+                    break;
+                case FileType.Audio:
+                    fileCheckResult = this.CheckAudioFile(file);
+                    break;
+            }
+
+
+
+            if (!fileCheckResult.Success)
+            {
+                res.FillFromRequestResult(fileCheckResult);
+                res.Error += $"\r\nПроблема с файлом {file.Name}";
+                return res;
+            }
+
+            string filepath = await this.UploadFile(file);
+            return res.SetSuccess(filepath);
+        }
 
         protected async Task<string> UploadFile(int index = 0)
         {
@@ -264,14 +298,35 @@ namespace Alfateam.Website.API.Abstractions
 
         #endregion
 
-        protected long GetFileSizeInBytes(string filepath)
+
+
+        public RequestResult TryFinishAllRequestes(Func<RequestResult>[] funcs)
         {
-            return new FileInfo(AppEnvironment.WebRootPath + filepath).Length;
+            RequestResult successResult = null;
+
+            foreach (var func in funcs)
+            {
+                var res = func.Invoke();
+                if (!res.Success) return res;
+
+                successResult = res;
+            }
+
+            return successResult;
+        }
+        public RequestResult<T> TryFinishAllRequestes<T>(Func<RequestResult>[] funcs)
+        {
+            return (RequestResult<T>)TryFinishAllRequestes(funcs);
         }
 
 
 
 
+
+        protected long GetFileSizeInBytes(string filepath)
+        {
+            return new FileInfo(AppEnvironment.WebRootPath + filepath).Length;
+        }
 
         private int? ParseIntValueFromHeader(string key)
         {

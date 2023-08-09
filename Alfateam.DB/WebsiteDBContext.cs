@@ -3,6 +3,7 @@ using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.Events;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.HR;
+using Alfateam2._0.Models.Localization.General;
 using Alfateam2._0.Models.Localization.Items;
 using Alfateam2._0.Models.Localization.Items.Events;
 using Alfateam2._0.Models.Localization.Items.HR;
@@ -72,6 +73,12 @@ namespace Alfateam.DB
         #endregion
 
         #region Localization
+
+        #region General
+        public DbSet<CountryLocalization> CountryLocalizations { get; set; }
+        public DbSet<CurrencyLocalization> CurrencyLocalizations { get; set; }
+        public DbSet<LanguageLocalization> LanguageLocalizations { get; set; }
+        #endregion
 
         #region Items
 
@@ -188,5 +195,21 @@ namespace Alfateam.DB
         public DbSet<ComplianceDocument> ComplianceDocuments { get; set; }
         public DbSet<MassMediaPost> MassMediaPosts { get; set; }
         public DbSet<Partner> Partners { get; set; }
+
+
+
+
+
+        #region Public methods
+
+        public Availability GetIncludedAvailability(int id)
+        {
+            return this.Availabilities.Include(o => o.AllowedCountries)
+                                      .Include(o => o.DisallowedCountries)
+                                      .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+        }
+
+        #endregion
+
     }
 }

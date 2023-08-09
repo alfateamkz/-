@@ -31,20 +31,33 @@ namespace Alfateam2._0.Models.Shop.Orders
 
 
         [NotMapped]
-        public double SumWithoutDiscount
+        public double SumWithoutDiscount => Items.Sum(o => o.Sum);
+        [NotMapped]
+        public double TotalSum
         {
             get
             {
-                double val = 0;
+                double val = SumWithoutDiscount;
 
-                foreach(var item in Items)
+                if (UsedPromocodeType != null)
                 {
-                    val += item.Sum;
+                    switch (UsedPromocodeType)
+                    {
+                        case PromocodeType.Fixed:
+                            val -= (double)DiscountByPromocode;
+                            break;
+                        case PromocodeType.Percent:
+                            val -= val - val / 100 * (double)DiscountByPromocode;
+                            break;
+                    }
                 }
-
                 return val;
             }
         }
+
+
+
+
 
 
         public ShopOrderStatus Status { get; set; } = ShopOrderStatus.Basket;
@@ -55,7 +68,15 @@ namespace Alfateam2._0.Models.Shop.Orders
         [JsonIgnore]
         public Promocode? UsedPromocode { get; set; }
 
+        /// <summary>
+        /// Сохраняем значение на момент применения промокода, т.к. может измениться тип промокода в будущем
+        /// и подсчеты будут неверны
+        /// </summary>
+        public PromocodeType? UsedPromocodeType { get; set; }
         public double? DiscountByPromocode { get; set; }
+
+
+
 
         /// <summary>
         /// Список всех оплат(неуспешные и одна успешная)

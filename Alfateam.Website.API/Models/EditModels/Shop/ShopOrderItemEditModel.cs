@@ -1,7 +1,7 @@
 ﻿using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Shop.Orders;
 
-namespace Alfateam.Website.API.Models
+namespace Alfateam.Website.API.Models.EditModels.Shop
 {
     public class ShopOrderItemEditModel
     {
