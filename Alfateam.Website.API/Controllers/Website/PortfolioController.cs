@@ -17,6 +17,7 @@ namespace Alfateam.Website.API.Controllers.Website
         {
         }
 
+        #region Получение портфолио
         [HttpGet, Route("GetPortfolios")]
         public async Task<IEnumerable<PortfolioClientModel>> GetPortfolios(int offset,int count = 20)
         {
@@ -48,9 +49,10 @@ namespace Alfateam.Website.API.Controllers.Website
             var portfolio = GetFullIncludedPortfoliosList().FirstOrDefault(o => o.Id == id);
             return PortfolioClientModel.Create(portfolio,LanguageId);
         }
+        #endregion
 
 
-
+        #region Взаимодействие с портфолио
 
         [HttpPut, Route("AddWatch")]
         public async Task<RequestResult> AddWatch(int id,string fingerprint)
@@ -173,9 +175,10 @@ namespace Alfateam.Website.API.Controllers.Website
            
             return res;
         }
+        #endregion
 
 
-
+        #region Получение категорий и индустрии
 
         [HttpGet, Route("GetPortfolioCategories")]
         public async Task<IEnumerable<PortfolioCategoryClientModel>> GetPortfolioCategories()
@@ -195,7 +198,7 @@ namespace Alfateam.Website.API.Controllers.Website
                                               .ToList();
             return PortfolioIndustryClientModel.CreateItems(items, LanguageId);
         }
-
+        #endregion
 
 
         #region Private methods

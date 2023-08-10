@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Controllers\Admin\Localizations\" />
     <Folder Include="Controllers\Cabinet\" />
     <Folder Include="Middlewares\" />
   </ItemGroup>

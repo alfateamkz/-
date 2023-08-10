@@ -12,5 +12,12 @@ namespace Alfateam2._0.Models.Localization.Items.HR
     {
         public string Title { get; set; }
         public Content InnerContent { get; set; }
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// Указывает на главную сущность (вакансию)
+        /// </summary>
+        public int JobVacancyId { get; set; }
     }
 }

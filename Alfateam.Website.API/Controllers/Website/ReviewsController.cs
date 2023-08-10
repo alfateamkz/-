@@ -23,11 +23,11 @@ namespace Alfateam.Website.API.Controllers.Website
                              .ToList();
         }
 
+
+
         [HttpPost, Route("AddReview")]
         public async Task<RequestResult> AddReview(Review review)
         {
-            var res = new RequestResult();
-
             try
             {
                 review.PublishedAt = DateTime.UtcNow;
@@ -35,15 +35,12 @@ namespace Alfateam.Website.API.Controllers.Website
                 DB.Reviews.Add(review);
                 DB.SaveChanges();
 
-                res.Success = true;
+                return RequestResult.AsSuccess();
             }
             catch
             {
-                res.Code = 400;
-                res.Error = "Неверно заполнены поля";
+                return RequestResult.AsError(400, "Неверно заполнены поля");
             }
-
-            return res;
         }
     }
 }

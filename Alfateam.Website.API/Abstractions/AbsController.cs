@@ -300,6 +300,9 @@ namespace Alfateam.Website.API.Abstractions
 
 
 
+
+
+        #region TryFinishAllRequestes
         public RequestResult TryFinishAllRequestes(Func<RequestResult>[] funcs)
         {
             RequestResult successResult = null;
@@ -319,6 +322,25 @@ namespace Alfateam.Website.API.Abstractions
             return (RequestResult<T>)TryFinishAllRequestes(funcs);
         }
 
+        public RequestResult TryFinishAllRequestes(RequestResult[] funcs)
+        {
+            RequestResult successResult = null;
+
+            foreach (var res in funcs)
+            {
+                if (!res.Success) return res;
+                successResult = res;
+            }
+
+            return successResult;
+        }
+        public RequestResult<T> TryFinishAllRequestes<T>(RequestResult[] funcs)
+        {
+            return (RequestResult<T>)TryFinishAllRequestes(funcs);
+        }
+
+
+        #endregion
 
 
 

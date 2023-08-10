@@ -68,6 +68,7 @@ namespace Alfateam.DB
         #endregion
 
         #region HR
+        public DbSet<JobSummary> JobSummaries { get; set; }
         public DbSet<JobVacancy> JobVacancies { get; set; }
         public DbSet<JobVacancyExpierence> JobVacancyExpierences { get; set; }
         #endregion
@@ -207,6 +208,24 @@ namespace Alfateam.DB
             return this.Availabilities.Include(o => o.AllowedCountries)
                                       .Include(o => o.DisallowedCountries)
                                       .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+        }
+        public PricingMatrix GetIncludedPricingMatrix(int id)
+        {
+            return this.PricingMatrices.Include(o => o.Costs).ThenInclude(o => o.Country)
+                                       .Include(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
+                                      .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+        }
+
+        public OutstaffMatrix GetOutstaffMatrix()
+        {
+            return OutstaffMatrices.Include(o => o.Columns).ThenInclude(o => o.Localizations)
+                                   .Include(o => o.Items).ThenInclude(o => o.Grades).ThenInclude(o => o.Prices).ThenInclude(o => o.CostPerHour).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
+                                   .Include(o => o.Items).ThenInclude(o => o.Grades).ThenInclude(o => o.Prices).ThenInclude(o => o.CostPerHour).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
+                                   .Include(o => o.Items).ThenInclude(o => o.Grades).ThenInclude(o => o.Prices).ThenInclude(o => o.Column).ThenInclude(o => o.Localizations)
+                                   .Include(o => o.Items).ThenInclude(o => o.Grades).ThenInclude(o => o.Localizations)
+                                   .Include(o => o.Items).ThenInclude(o => o.Localizations)
+                                   .FirstOrDefault();
+
         }
 
         #endregion

@@ -25,7 +25,8 @@ namespace Alfateam.Website.API.Abstractions
 
         //TODO: Рефакторинг методов создания и апдейта, слишком много входных параметров
         //TODO: В будущем: таблица файлов, удаление невостребованных(например файл был загружен на сервер, но дальше вышла ошибка и по факту моделька не сохранилась)
-        
+        //TODO: UpdateAvailability - проверка через GetAvailableModels()
+        //TODO: Чекнуть, что возвращают методы создания локализаций
 
         [NonAction]
         protected Session GetSessionWithRoleInclude()
@@ -123,6 +124,41 @@ namespace Alfateam.Website.API.Abstractions
         }
 
 
+
+        protected PricingMatrix CreateDefaultPricingMatrix()
+        {
+            var matrix = new PricingMatrix();
+
+            foreach (var country in DB.Countries.Include(o => o.Currencies).Where(o => !o.IsDeleted))
+            {
+                var countryItem = new PricingMatrixItem();
+                countryItem.CountryId = country.Id;
+     
+                foreach (var currency in country.Currencies)
+                {
+                    countryItem.Costs.Add(new Cost
+                    {
+                        CurrencyId = currency.Id,
+                        Value = 0.00,
+                    });
+                }
+                matrix.Costs.Add(countryItem);
+            }
+
+
+            var otherCountriesItem = new PricingMatrixItem();
+            otherCountriesItem.CountryId = null;
+            otherCountriesItem.Costs.Add(new Cost
+            {
+                CurrencyId = DB.Currencies.FirstOrDefault(o => o.Code == "USD").Id,
+                Value = 0.00,
+            });
+
+
+            return matrix;
+        }
+   
+
         #region Проверка прав
 
     
@@ -158,6 +194,8 @@ namespace Alfateam.Website.API.Abstractions
         }
         protected bool CheckBasePermissions(User user, AvailabilityModel model/*, AdminActionType type*/)
         {
+            if (user == null) return false;
+
             bool success = IsInAdminRole(user);
             if (!success) return success;
 
@@ -260,39 +298,26 @@ namespace Alfateam.Website.API.Abstractions
         #region Обобщенные методы получения объектов
         protected RequestResult<IEnumerable<T>> TryGetMany<T>(IEnumerable<T> fromModels, ContentAccessModelType accessType, int offset,int count = 20) where T : AvailabilityModel
         {
-            var res = new RequestResult<IEnumerable<T>>();
-
-
             var session = GetSessionWithRoleInclude();
-            var contentRightsCheck = CheckContentAreaRights(session, accessType, 1);
-            if (!contentRightsCheck.Success)
+            return TryFinishAllRequestes<IEnumerable<T>>(new[]
             {
-                return res.FillFromRequestResult(contentRightsCheck);
-            }
-            else
-            {
-                var availableModels = this.GetAvailableModels(session.User, fromModels, offset, count);
-                return res.SetSuccess(availableModels.Cast<T>());
-            }
+                () => CheckContentAreaRights(session, accessType, 1),
+                () =>
+                {
+                   var availableModels = this.GetAvailableModels(session.User, fromModels, offset, count);
+                   return RequestResult<IEnumerable<T>>.AsSuccess(availableModels.Cast<T>());
+                }
+            });
         }
         protected RequestResult<T> TryGetOne<T>(IEnumerable<T> fromModels, int id, ContentAccessModelType accessType) where T: AvailabilityModel
         {
-            var res = new RequestResult<T>();
-
             var item = fromModels.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (item == null)
+            return TryFinishAllRequestes<T>(new[]
             {
-                return res.SetError(404, "Запись по данному id не найдена");
-            }
-
-            var session = GetSessionWithRoleInclude();
-            var contentRightsCheck = CheckContentAreaRights(session, item, accessType, 1);
-            if (!contentRightsCheck.Success)
-            {
-                return res.FillFromRequestResult(contentRightsCheck);
-            }
-
-            return res.SetSuccess(item);
+                () => RequestResult.FromBoolean(item != null,404, "Запись по данному id не найдена"),
+                () => CheckContentAreaRights(GetSessionWithRoleInclude(), item, accessType, 1),
+                () => RequestResult<T>.AsSuccess(item)
+            });
         }
         protected RequestResult<T> TryGetOne<T>(IEnumerable<T> fromModels, int id) where T : AbsModel
         {

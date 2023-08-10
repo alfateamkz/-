@@ -38,6 +38,8 @@ namespace Alfateam.Website.API.Abstractions
 
             return isValid;
         }
+
+
         public virtual void Fill(T item)
         {
             var props = this.GetType().GetProperties();

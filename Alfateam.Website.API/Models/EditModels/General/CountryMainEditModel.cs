@@ -18,6 +18,13 @@ namespace Alfateam.Website.API.Models.EditModels.General
 
         public int MainLanguageId { get; set; }
 
+
+
+        public int MainCurrencyId { get; set; }
+        public List<int> Currencies { get; set; } = new List<int>();
+
+
+
         public override void Fill(Country item)
         {
             base.Fill(item);

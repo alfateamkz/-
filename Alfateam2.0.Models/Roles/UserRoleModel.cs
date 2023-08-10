@@ -38,7 +38,9 @@ namespace Alfateam2._0.Models.Roles
 
 
 
-
+        public HRAccessModel HRAccess { get; set; }
+        public ShopAccessModel ShopAccess { get; set; }
+        public OutstaffAccessModel OutstaffAccess { get; set; }
         public List<ContentAccessModel> ContentAccessTypes { get; set; } = new List<ContentAccessModel>();
         public ContentAccessModel GetContentAccess(ContentAccessModelType type)
         {
@@ -47,7 +49,6 @@ namespace Alfateam2._0.Models.Roles
 
 
 
-        public HRAccessType HRAccess { get; set; } = HRAccessType.None;
-        public ShopAccessModel ShopAccess { get; set; }
+      
     }
 }

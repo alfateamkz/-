@@ -3,7 +3,10 @@ using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.ClientModels.HR;
+using Alfateam.Website.API.Models.Core;
+using Alfateam.Website.API.Models.EditModels.HR;
 using Alfateam.Website.API.Models.Filters;
+using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.HR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +20,8 @@ namespace Alfateam.Website.API.Controllers.Website
         {
         }
 
+        #region Получение вакансий
+
         [HttpGet, Route("GetJobVacancies")]
         public async Task<IEnumerable<JobVacancyCard>> GetJobVacancies(int offset, int count = 20)
         {
@@ -24,7 +29,6 @@ namespace Alfateam.Website.API.Controllers.Website
 
             return MakeJobVacancyCards(vacancies);
         }
-
 
         [HttpGet, Route("GetJobVacanciesByFilter")]
         public async Task<IEnumerable<JobVacancyCard>> GetJobVacanciesByFilter(JobVacanciesFIlter filter)
@@ -52,7 +56,6 @@ namespace Alfateam.Website.API.Controllers.Website
             return MakeJobVacancyCards(vacancies);
         }
 
-
         [HttpGet, Route("GetJobVacancy")]
         public async Task<JobVacancyCard> GetJobVacancy(int id)
         {
@@ -69,11 +72,136 @@ namespace Alfateam.Website.API.Controllers.Website
             return MakeJobVacancyCard(vacancy);
         }
 
+        #endregion
+
+        #region Взаимодействие с вакансиями
+
+        [HttpPut, Route("AddWatch")]
+        public async Task<RequestResult> AddWatch(int id, string fingerprint)
+        {
+            var portfolio = DB.JobVacancies.FirstOrDefault(o => o.Id == id);
+            if (portfolio != null)
+            {
+                int? userId = null;
+                if (!string.IsNullOrEmpty(this.UserSessid))
+                {
+                    var session = DB.Sessions.Include(o => o.User)
+                                             .FirstOrDefault(o => o.SessID == this.UserSessid);
+
+                    var checkSessionRes = CheckSession(session);
+                    if (!checkSessionRes.Success)
+                    {
+                        return checkSessionRes;
+                    }
+                    userId = session.User.Id;
+                }
+
+
+                portfolio.Watches++;
+                portfolio.WatchesList.Add(new Watch
+                {
+                    WatchedByFingerprint = fingerprint,
+                    WatchedById = userId
+                });
+
+                DB.JobVacancies.Update(portfolio);
+                DB.SaveChanges();
+
+                return RequestResult.AsSuccess();
+            }
+            else
+            {
+                return RequestResult.AsError(404, "Портфолио по данному id не найдено");
+            }
+        }
 
 
 
+        [HttpGet, Route("GetSummary")]
+        public async Task<RequestResult<JobSummary>> GetSummary(int vacancyId,string fingerprint)
+        {
+            var vacancy = DB.JobVacancies.Include(o => o.Summaries).FirstOrDefault(o => o.Id == vacancyId && !o.IsDeleted);
+            if (vacancy == null)
+            {
+                return RequestResult<JobSummary>.AsError(404, "Сушность с данным id не найдена");
+            }
 
-       
+            return GetSummaryFromVacancy(vacancy,fingerprint);
+        }
+
+        [HttpPost, Route("CreateSummary")]
+        public async Task<RequestResult> CreateSummary(int vacancyId,JobSummary summary)
+        {
+            var vacancy = DB.JobVacancies.FirstOrDefault(o => o.Id == vacancyId && !o.IsDeleted);
+
+            return TryFinishAllRequestes(new[]
+            {
+                () => RequestResult.FromBoolean(vacancy != null, 404,"Сушность с данным id не найдена"),
+                () => RequestResult.FromBoolean(summary.IsValid(), 400, "Проверьте корректность заполненных значений"),
+                () => PrepareSummaryBeforeCreate(summary).Result,
+                () =>
+                {
+                    vacancy.Summaries.Add(summary);
+                    DB.JobVacancies.Update(vacancy);
+                    return RequestResult.AsSuccess();
+                }
+            });
+        }
+
+        [HttpPut, Route("UpdateSummary")]
+        public async Task<RequestResult<JobSummary>> UpdateSummary(int vacancyId, JobSummaryEditModel model)
+        {
+            var vacancy = DB.JobVacancies.FirstOrDefault(o => o.Id == vacancyId && !o.IsDeleted);
+            if (vacancy == null)
+            {
+                return RequestResult<JobSummary>.AsError(404, "Сушность с данным id не найдена");
+            }
+            var summaryGetResult = GetSummaryFromVacancy(vacancy, model.CreatedByFingerprint);
+            if (!summaryGetResult.Success)
+            {
+                return summaryGetResult;
+            }
+            var summary = summaryGetResult.Value;
+
+            return TryFinishAllRequestes<JobSummary>(new[]
+            {
+                () => RequestResult.FromBoolean(vacancy != null, 404,"Сушность с данным id не найдена"),
+                () => RequestResult.FromBoolean(summary.IsValid(), 400, "Проверьте корректность заполненных значений"),
+                () => PrepareSummaryBeforeUpdate(summary,model).Result,
+                () =>
+                {
+                    DB.JobSummaries.Update(summary);
+                    DB.SaveChanges();
+                    return RequestResult<JobSummary>.AsSuccess(summary);
+                }
+            });
+        }
+
+        [HttpDelete, Route("RemoveSummary")]
+        public async Task<RequestResult> RemoveSummary(int vacancyId, string fingerprint)
+        {
+            var vacancy = DB.JobVacancies.Include(o => o.Summaries).FirstOrDefault(o => o.Id == vacancyId && !o.IsDeleted);
+            if (vacancy == null)
+            {
+                return RequestResult.AsError(404, "Сушность с данным id не найдена");
+            }
+            var summaryGetResult = GetSummaryFromVacancy(vacancy, fingerprint);
+            if (!summaryGetResult.Success)
+            {
+                return summaryGetResult;
+            }
+
+            var summary = summaryGetResult.Value;
+            summary.IsDeleted = true;
+            DB.JobSummaries.Update(summary);
+            DB.SaveChanges();
+            return RequestResult.AsSuccess();
+        }
+
+        #endregion
+
+
+
 
 
         #region Private methods
@@ -86,6 +214,7 @@ namespace Alfateam.Website.API.Controllers.Website
                                   .Include(o => o.Localizations)
                                   .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
         }
+
 
         private List<JobVacancyCard> MakeJobVacancyCards(IEnumerable<JobVacancy> vacancies)
         {
@@ -108,6 +237,61 @@ namespace Alfateam.Website.API.Controllers.Website
                 Vacancy = JobVacancyClientModel.Create(vacancy, LanguageId),
                 WatchingNow = watchingNow,
             };
+        }
+
+        private RequestResult<JobSummary> GetSummaryFromVacancy(JobVacancy vacancy,string fingerprint)
+        {
+            int? userId = null;
+
+            var session = DB.Sessions.Include(o => o.User).FirstOrDefault(o => o.SessID == this.UserSessid);
+            if (session != null)
+            {
+                var checkSessionRes = CheckSession(session);
+                if (!checkSessionRes.Success)
+                {
+                    return new RequestResult<JobSummary>().FillFromRequestResult(checkSessionRes);
+                }
+                userId = session.User.Id;
+            }
+
+            JobSummary summary = null;
+            if (userId != null)
+            {
+                summary = vacancy.Summaries.FirstOrDefault(o => o.CreatedById == userId);
+            }
+            else
+            {
+                summary = vacancy.Summaries.FirstOrDefault(o => o.CreatedByFingerprint == fingerprint);
+            }
+            return RequestResult<JobSummary>.AsSuccess(summary);
+        }
+        private async Task<RequestResult> PrepareSummaryBeforeCreate(JobSummary summary)
+        {
+            var cvFile = Request.Form.Files.FirstOrDefault(o => o.Name == "cvFile");
+            if (cvFile != null)
+            {
+                var uploadResult = await TryUploadFile(cvFile, Enums.FileType.Document);
+                if (!uploadResult.Success)
+                {
+                    return uploadResult;
+                }
+                summary.CVPath = uploadResult.Value;
+            }
+            return RequestResult.AsSuccess();
+        }
+        private async Task<RequestResult> PrepareSummaryBeforeUpdate(JobSummary summary, JobSummaryEditModel model)
+        {
+            var cvFile = Request.Form.Files.FirstOrDefault(o => o.Name == "cvFile");
+            if (cvFile != null)
+            {
+                var uploadResult = await TryUploadFile(cvFile, Enums.FileType.Document);
+                if (!uploadResult.Success)
+                {
+                    return uploadResult;
+                }
+                summary.CVPath = uploadResult.Value;
+            }
+            return RequestResult.AsSuccess();
         }
 
         #endregion

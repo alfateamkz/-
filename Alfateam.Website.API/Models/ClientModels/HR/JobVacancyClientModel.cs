@@ -39,7 +39,7 @@ namespace Alfateam.Website.API.Models.ClientModels.HR
 
             return model;
         }
-        public static List<JobVacancyClientModel> CreateItems(List<JobVacancy> items, int? langId)
+        public static List<JobVacancyClientModel> CreateItems(IEnumerable<JobVacancy> items, int? langId)
         {
             var models = new List<JobVacancyClientModel>();
             foreach (var item in items)

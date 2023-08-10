@@ -32,5 +32,13 @@ namespace Alfateam2._0.Models.Shop.Modifiers
         public Language MainLanguage { get; set; }
         public int MainLanguageId { get; set; }
         public List<ProductModifierLocalization> Localizations { get; set; } = new List<ProductModifierLocalization>();
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// Указывает на главную сущность (товар)
+        /// </summary>
+        public int ShopProductId { get; set; }
     }
 }

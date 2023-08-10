@@ -27,7 +27,17 @@ namespace Alfateam2._0.Models.General
         /// </summary>
         public Language OfficialMainLanguage { get; set; }
         public int OfficialMainLanguageId { get; set; }
+        //TODO: сделать связь многие ко многим
         public List<Language> Languages { get; set; } = new List<Language>();
+
+
+
+        public Currency MainCurrency { get; set; }
+        public int MainCurrencyId { get; set; }
+
+        //TODO: сделать связь многие ко многим
+        public List<Currency> Currencies { get; set; } = new List<Currency>();
+
 
 
 

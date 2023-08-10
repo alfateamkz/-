@@ -30,6 +30,9 @@ namespace Alfateam2._0.Models.Abstractions
 
         public virtual bool IsValid()
         {
+            //TODO: может быть большая проблема, на автоайдишниках не нужно чекать, если создание сущности
+            //TODO: нужно проходиться так же по AbsModel и List<AbsModel>, чтобы корректно работало
+
             bool isValid = true;
 
             var props = this.GetType().GetProperties();

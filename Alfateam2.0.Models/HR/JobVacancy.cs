@@ -20,7 +20,10 @@ namespace Alfateam2._0.Models.HR
     public class JobVacancy : AvailabilityModel
     {
         public string Title { get; set; }
+
         public Currency Currency { get; set; }
+        public int CurrencyId { get; set; }
+
         public double? SalaryFrom { get; set; }
         public double? SalaryTo { get; set; }
 
@@ -33,6 +36,8 @@ namespace Alfateam2._0.Models.HR
 
         public JobVacancyExpierence Expierence { get; set; }
 
+
+        public List<JobSummary> Summaries { get; set; } = new List<JobSummary>();
 
 
         public int Watches { get; set; }

@@ -21,5 +21,15 @@ namespace Alfateam2._0.Models.Abstractions
         public Language MainLanguage { get; set; }
         public int MainLanguageId { get; set; }
         public List<ProductModifierItemLocalization> Localizations { get; set; } = new List<ProductModifierItemLocalization>();
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// Указывает на главную сущность(модификатор)
+        /// </summary>
+        public int ProductModifierId { get; set; }
+
+
+        
     }
 }
