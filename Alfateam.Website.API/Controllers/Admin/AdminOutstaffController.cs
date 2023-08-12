@@ -22,7 +22,6 @@ namespace Alfateam.Website.API.Controllers.Admin
 {
     public class AdminOutstaffController : AbsAdminController
     {
-        //TODO: реализовать методы isValid для сущностей сетки
         public AdminOutstaffController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
         {
 

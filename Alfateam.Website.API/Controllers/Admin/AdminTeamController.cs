@@ -15,8 +15,10 @@ using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Localization.Items;
 using Alfateam2._0.Models.Localization.Items.Events;
+using Alfateam2._0.Models.Localization.Items.Posts;
 using Alfateam2._0.Models.Localization.Items.Team;
 using Alfateam2._0.Models.Portfolios;
+using Alfateam2._0.Models.Roles.Access;
 using Alfateam2._0.Models.Team;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -38,16 +40,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpGet, Route("GetTeamStructures")]
         public async Task<RequestResult<IEnumerable<TeamStructureClientModel>>> GetTeamStructures(int offset, int count = 20)
         {
-            var res = new RequestResult<IEnumerable<TeamStructureClientModel>>();
-
-            var tryGetManyResponse = TryGetMany(GetTeamStructuresList(), ContentAccessModelType.Team, offset, count);
-            if (!tryGetManyResponse.Success)
+            var session = GetSessionWithRoleInclude();
+            return TryFinishAllRequestes<IEnumerable<TeamStructureClientModel>>(new Func<RequestResult>[]
             {
-                return res.FillFromRequestResult(tryGetManyResponse);
-            }
-
-            var models = TeamStructureClientModel.CreateItems(tryGetManyResponse.Value.ToList(), LanguageId);
-            return res.SetSuccess(models);
+                () => CheckContentAreaRights(session, ContentAccessModelType.Posts, 1),
+                () => {
+                    var items = GetAvailableModels(session.User, GetTeamStructuresList(), offset, count);
+                    var models = TeamStructureClientModel.CreateItems(items.Cast<TeamStructure>(), LanguageId);
+                    return RequestResult<IEnumerable<TeamStructureClientModel>>.AsSuccess(models);
+                }
+            });
         }
 
         [HttpGet, Route("GetTeamStructure")]
@@ -62,7 +64,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreateTeamStructure")]
         public async Task<RequestResult<TeamStructure>> CreateTeamStructure(TeamStructure structure)
         {
-            return TryCreate(DB.TeamStructures, structure, ContentAccessModelType.Team);
+            return await TryCreate(DB.TeamStructures, structure, ContentAccessModelType.Team, () => PrepareTeamStructureBeforeCreate(structure));
         }
 
 
@@ -71,15 +73,12 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpDelete, Route("DeleteTeamStructure")]
         public async Task<RequestResult> DeleteTeamStructure(int id)
         {
-            var res = new RequestResult();
-
             var item = GetTeamStructuresList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (item == null)
+            return TryFinishAllRequestes<TeamGroup>(new[]
             {
-                return res.SetError(404, "Запись по данному id не найдена");
-            }
-
-            return TryDelete(DB.TeamStructures, item, ContentAccessModelType.Team);
+                () => RequestResult.FromBoolean(item != null, 404, "Сущность по данному id не найдена"),
+                () => TryDelete(DB.TeamStructures, item, ContentAccessModelType.Team)
+            });
         }
 
 
@@ -91,38 +90,24 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<RequestResult<TeamGroup>> GetTeamGroup(int id)
         {
             var group = GetTeamGroupsList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (group == null)
+            return TryFinishAllRequestes<TeamGroup>(new[]
             {
-                return RequestResult<TeamGroup>.AsError(404, "Сущность с данным id не найдена");
-            }
-
-            //Проверяем, есть ли доступ у пользователя к главной сущности
-            var checkAccessResult = TryGetOne(GetTeamStructuresList(), group.TeamStructureId, ContentAccessModelType.Team);
-            if (!checkAccessResult.Success)
-            {
-                return new RequestResult<TeamGroup>().FillFromRequestResult(checkAccessResult);
-            }
-
-            return RequestResult<TeamGroup>.AsSuccess(group);
+                () => RequestResult.FromBoolean(group != null, 404, "Сущность по данному id не найдена"),
+                () => TryGetOne(GetTeamStructuresList(), group.TeamStructureId, ContentAccessModelType.Team),
+                () => RequestResult<TeamGroup>.AsSuccess(group)
+            });
         }
 
         [HttpGet, Route("GetTeamGroupLocalization")]
         public async Task<RequestResult<TeamGroupLocalization>> GetTeamGroupLocalization(int id)
         {
-            var localization = DB.TeamGroupLocalizations.Include(o => o.Language)
-                                                        .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null)
+            var localization = DB.TeamGroupLocalizations.Include(o => o.Language).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            return TryFinishAllRequestes<TeamGroupLocalization>(new[]
             {
-                return new RequestResult<TeamGroupLocalization>().SetError(404, "Локализация с данным id не найдена");
-            }
-
-            var checkRes = CheckFromTeamGroup(localization.TeamGroupId);
-            if (!checkRes.Success)
-            {
-                return new RequestResult<TeamGroupLocalization>().FillFromRequestResult(checkRes);
-            }
-
-            return new RequestResult<TeamGroupLocalization>().SetSuccess(localization);
+                () => RequestResult.FromBoolean(localization != null,404, "Сущность по данному id не найдена"),
+                () => CheckFromTeamGroup(localization.TeamGroupId, ContentAccessModel.WatchLevel),
+                () => new RequestResult<TeamGroupLocalization>().SetSuccess(localization)
+            });
         }
 
 
@@ -131,28 +116,21 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("AddTeamGroup")]
         public async Task<RequestResult<TeamGroup>> AddTeamGroup(int structureId, TeamGroup item)
         {
-
-            //Проверяем, есть ли доступ у пользователя к главной сущности
-            var checkAccessResult = TryGetOne(GetTeamStructuresList(), structureId, ContentAccessModelType.Team);
-            if (!checkAccessResult.Success)
+            var structure = GetTeamStructuresList().FirstOrDefault(o => o.Id == structureId && !o.IsDeleted);
+            var session = GetSessionWithRoleInclude();
+            return TryFinishAllRequestes<TeamGroup>(new[]
             {
-                return new RequestResult<TeamGroup>().FillFromRequestResult(checkAccessResult);
-            }
-            var structure = checkAccessResult.Value;
-
-
-
-            var сheckRes = CheckBasePropsBeforeCreate(item);
-            if (!сheckRes.Success)
-            {
-                return new RequestResult<TeamGroup>().FillFromRequestResult(сheckRes);
-            }
-
-
-            structure.Groups.Add(item);
-            DB.TeamStructures.Update(structure);
-            DB.SaveChanges();
-            return new RequestResult<TeamGroup>().SetSuccess(item);
+                () => RequestResult.FromBoolean(structure != null,404, "Сущность по данному id не найдена"),
+                () => CheckContentAreaRights(session, structure, ContentAccessModelType.Team, ContentAccessModel.CreateNewLevel),
+                () => CheckBasePropsBeforeCreate(item),
+                () => PrepareTeamGroupBeforeCreate(item).Result,
+                () =>
+                {
+                    structure.Groups.Add(item);
+                    UpdateModel(DB.TeamStructures,structure);
+                    return new RequestResult<TeamGroup>().SetSuccess(item);
+                }
+            });
 
         }
   
@@ -160,18 +138,17 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<RequestResult<TeamGroupLocalization>> AddTeamGroupLocalization(int itemId, TeamGroupLocalization localization)
         {
             var mainEntity = GetTeamGroupsList().FirstOrDefault(o => o.Id == itemId);
-
-            var checkRes = CheckFromTeamStructure(mainEntity.TeamStructureId);
-            if (!checkRes.Success)
+            return TryFinishAllRequestes<TeamGroupLocalization>(new[]
             {
-                return new RequestResult<TeamGroupLocalization>().FillFromRequestResult(checkRes);
-            }
-
-            mainEntity.Localizations.Add(localization);
-            DB.TeamGroups.Update(mainEntity);
-            DB.SaveChanges();
-
-            return new RequestResult<TeamGroupLocalization>().SetSuccess(localization);
+                () => RequestResult.FromBoolean(mainEntity != null , 404, "Сущность с данным id не найдена"),
+                () => CheckFromTeamStructure(mainEntity.TeamStructureId, ContentAccessModel.CreateNewLevel),
+                () =>
+                {
+                    mainEntity.Localizations.Add(localization);
+                    UpdateModel(DB.TeamGroups,mainEntity);
+                    return RequestResult<TeamGroupLocalization>.AsSuccess(localization);
+                }
+            });
         }
 
 
@@ -179,41 +156,25 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("UpdateTeamGroupMain")]
         public async Task<RequestResult<TeamGroup>> UpdateTeamGroupMain(TeamGroupMainEditModel model)
         {
-            var res = new RequestResult<TeamGroup>();
-
             var item = GetTeamGroupsList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            if (item == null)
+            return TryFinishAllRequestes<TeamGroup>(new[]
             {
-                return res.SetError(404, "Запись по данному id не найдена");
-            }
-
-            var checkRes = CheckFromTeamStructure(item.TeamStructureId);
-            if (!checkRes.Success)
-            {
-                return new RequestResult<TeamGroup>().FillFromRequestResult(checkRes);
-            }
-
-            return UpdateModel(DB.TeamGroups, model, item);
+                () => RequestResult.FromBoolean(item != null , 404, "Сущность с данным id не найдена"),
+                () => CheckFromTeamStructure(item.TeamStructureId, ContentAccessModel.EditCurrentLevel),
+                () => UpdateModel(DB.TeamGroups, model, item)
+            });
         }
     
         [HttpPut, Route("UpdateTeamGroupLocalization")]
         public async Task<RequestResult<TeamGroupLocalization>> UpdateTeamGroupLocalization(TeamGroupLocalizationEditModel model)
         {
-            var res = new RequestResult<TeamGroupLocalization>();
-
             var localization = DB.TeamGroupLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            if (localization == null)
+            return TryFinishAllRequestes<TeamGroupLocalization>(new[]
             {
-                return res.SetError(404, "Локализация с данным id не найдена");
-            }
-
-            var checkRes = CheckFromTeamGroup(localization.TeamGroupId);
-            if (!checkRes.Success)
-            {
-                return new RequestResult<TeamGroupLocalization>().FillFromRequestResult(checkRes);
-            }
-
-            return UpdateModel(DB.TeamGroupLocalizations, model, localization);
+                () => RequestResult.FromBoolean(localization != null , 404, "Сущность с данным id не найдена"),
+                () => CheckFromTeamGroup(localization.TeamGroupId, ContentAccessModel.EditLocalizationsLevel),
+                () => UpdateModel(DB.TeamGroupLocalizations, model, localization)
+            });
         }
 
 
@@ -223,45 +184,25 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpDelete, Route("DeleteTeamGroup")]
         public async Task<RequestResult> DeleteTeamGroup(int id)
         {
-            var res = new RequestResult();
-
             var group = GetTeamGroupsList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (group == null)
+            return TryFinishAllRequestes(new[]
             {
-                return res.SetError(404, "Запись по данному id не найдена");
-            }
-
-            var checkRes = CheckFromTeamStructure(group.TeamStructureId);
-            if (!checkRes.Success)
-            {
-                return new RequestResult<TeamMember>().FillFromRequestResult(checkRes);
-            }
-
-
-            group.IsDeleted = true;
-            DB.TeamGroups.Update(group);
-            DB.SaveChanges();
-            return RequestResult.AsSuccess();
+                () => RequestResult.FromBoolean(group != null , 404, "Сущность с данным id не найдена"),
+                () => CheckFromTeamStructure(group.TeamStructureId, ContentAccessModel.DeleteLevel),
+                () => DeleteModel(DB.TeamGroups,group)
+            });
         }
 
         [HttpDelete, Route("DeleteTeamGroupLocalization")]
         public async Task<RequestResult> DeleteTeamGroupLocalization(int id)
         {
-            var res = new RequestResult();
-
             var localization = DB.TeamGroupLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null)
+            return TryFinishAllRequestes(new[]
             {
-                return res.SetError(404, "Запись по данному id не найдена");
-            }
-
-            var checkRes = CheckFromTeamGroup(localization.TeamGroupId);
-            if (!checkRes.Success)
-            {
-                return new RequestResult<TeamMemberLocalization>().FillFromRequestResult(checkRes);
-            }
-
-            return DeleteModel(DB.TeamGroupLocalizations, localization, false);
+                () => RequestResult.FromBoolean(localization != null , 404, "Сущность с данным id не найдена"),
+                () => CheckFromTeamGroup(localization.TeamGroupId, ContentAccessModel.DeleteLevel),
+                () => DeleteModel(DB.TeamGroupLocalizations, localization, false)
+            });
         }
 
 
@@ -273,37 +214,24 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<RequestResult<TeamMember>> GetTeamMember(int id)
         {
             var member = GetTeamMembersList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (member == null)
+            return TryFinishAllRequestes<TeamMember>(new[]
             {
-                return RequestResult<TeamMember>.AsError(404, "Сущность с данным id не найдена");
-            }
-
-            var checkRes = CheckFromTeamGroup(member.TeamGroupId);
-            if (!checkRes.Success)
-            {
-                return new RequestResult<TeamMember>().FillFromRequestResult(checkRes);
-            }
-
-            return RequestResult<TeamMember>.AsSuccess(member);
+                () => RequestResult.FromBoolean(member != null , 404, "Сущность с данным id не найдена"),
+                () => CheckFromTeamGroup(member.TeamGroupId, ContentAccessModel.WatchLevel),
+                () => RequestResult<TeamMember>.AsSuccess(member)
+            });
         }
 
         [HttpGet, Route("GetTeamMemberLocalization")]
         public async Task<RequestResult<TeamMemberLocalization>> GetTeamMemberLocalization(int id)
         {
-            var localization = DB.TeamMemberLocalizations.Include(o => o.Language)
-                                                         .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null)
+            var localization = DB.TeamMemberLocalizations.Include(o => o.Language).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            return TryFinishAllRequestes<TeamMemberLocalization>(new[]
             {
-                return new RequestResult<TeamMemberLocalization>().SetError(404, "Локализация с данным id не найдена");
-            }
-
-            var checkRes = CheckFromMember(localization.TeamMemberId);
-            if (!checkRes.Success)
-            {
-                return new RequestResult<TeamMemberLocalization>().FillFromRequestResult(checkRes);
-            }
-
-            return new RequestResult<TeamMemberLocalization>().SetSuccess(localization);
+                () => RequestResult.FromBoolean(localization != null , 404, "Сущность с данным id не найдена"),
+                () => CheckFromMember(localization.TeamMemberId, ContentAccessModel.WatchLevel),
+                () => new RequestResult<TeamMemberLocalization>().SetSuccess(localization)
+            });
         }
 
 
@@ -313,59 +241,37 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("AddTeamMember")]
         public async Task<RequestResult<TeamMember>> AddTeamMember(int groupId,TeamMember item)
         {
-
-            //Получаем группу, чтобы потом проверить права доступа
             var group = GetTeamGroupsList().FirstOrDefault(o => o.Id == groupId && !o.IsDeleted);
-            if (group == null)
+            return TryFinishAllRequestes<TeamMember>(new[]
             {
-                return RequestResult<TeamMember>.AsError(500, "Внутренняя ошибка");
-            }
-
-            //Проверяем, есть ли доступ у пользователя к главной сущности
-            var checkAccessResult = TryGetOne(GetTeamStructuresList(), group.TeamStructureId, ContentAccessModelType.Team);
-            if (!checkAccessResult.Success)
-            {
-                return new RequestResult<TeamMember>().FillFromRequestResult(checkAccessResult);
-            }
-
-            var сheckRes = CheckBasePropsBeforeCreate(item);
-            if (!сheckRes.Success)
-            {
-                return new RequestResult<TeamMember>().FillFromRequestResult(сheckRes);
-            }
-
-            //Загрузка фото сотрудника
-            var imgUploadResult = await TryUploadFile("mainImg", FileType.Image);
-            if (!imgUploadResult.Success)
-            {
-                return new RequestResult<TeamMember>().FillFromRequestResult(imgUploadResult);
-            }
-            item.ImgPath = imgUploadResult.Value;
-
-
-            group.Members.Add(item);
-            DB.TeamGroups.Update(group);
-            DB.SaveChanges();
-            return new RequestResult<TeamMember>().SetSuccess(item);
-
+                () => RequestResult.FromBoolean(group != null , 404, "Сущность с данным id не найдена"),
+                () => CheckFromTeamGroup(groupId,ContentAccessModel.CreateNewLevel),
+                () => CheckBasePropsBeforeCreate(item),
+                () => PrepareTeamMemberBeforeCreate(item).Result,
+                () =>
+                {
+                    group.Members.Add(item);
+                    UpdateModel(DB.TeamGroups,group);
+                    return new RequestResult<TeamMember>().SetSuccess(item);
+                }
+            });
         }
 
         [HttpPost, Route("AddTeamMemberLocalization")]
         public async Task<RequestResult<TeamMemberLocalization>> AddTeamMemberLocalization(int itemId, TeamMemberLocalization localization)
         {
             var mainEntity = GetTeamMembersList().FirstOrDefault(o => o.Id == itemId);
-
-            var checkRes = CheckFromTeamGroup(mainEntity.TeamGroupId);
-            if (!checkRes.Success)
+            return TryFinishAllRequestes<TeamMemberLocalization>(new[]
             {
-                return new RequestResult<TeamMemberLocalization>().FillFromRequestResult(checkRes);
-            }
-
-            mainEntity.Localizations.Add(localization);
-            DB.TeamMembers.Update(mainEntity);
-            DB.SaveChanges();
-
-            return new RequestResult<TeamMemberLocalization>().SetSuccess(localization);
+                () => RequestResult.FromBoolean(mainEntity != null , 404, "Сущность с данным id не найдена"),
+                () => CheckFromTeamGroup(mainEntity.TeamGroupId, ContentAccessModel.CreateNewLevel),
+                () => 
+                {
+                    mainEntity.Localizations.Add(localization);
+                    UpdateModel(DB.TeamMembers,mainEntity);
+                    return RequestResult<TeamMemberLocalization>.AsSuccess(localization);
+                }
+            });
         }
 
 
@@ -373,56 +279,26 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("UpdateTeamMemberMain")]
         public async Task<RequestResult<TeamMember>> UpdateTeamMemberMain(TeamMemberMainEditModel model)
         {
-            var res = new RequestResult<TeamMember>();
-
             var item = GetTeamMembersList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            if (item == null)
+            return TryFinishAllRequestes<TeamMember>(new[]
             {
-                return res.SetError(404, "Запись по данному id не найдена");
-            }
-
-            var checkRes = CheckFromTeamGroup(item.TeamGroupId);
-            if (!checkRes.Success)
-            {
-                return new RequestResult<TeamMember>().FillFromRequestResult(checkRes);
-            }
-
-
-            //Загрузка фото сотрудника
-            if (item.ImgPath != model.ImgPath)
-            {
-                var imgUploadResult = await TryUploadFile("mainImg", FileType.Image);
-                if (!imgUploadResult.Success)
-                {
-                    return new RequestResult<TeamMember>().FillFromRequestResult(imgUploadResult);
-                }
-                item.ImgPath = imgUploadResult.Value;
-            }
-
-
-
-            return UpdateModel(DB.TeamMembers, model, item);
+                () => RequestResult.FromBoolean(item != null,404, "Запись по данному id не найдена"),
+                () => CheckFromTeamGroup(item.TeamGroupId, ContentAccessModel.EditCurrentLevel),
+                () => PrepareTeamMemberBeforeUpdate(item).Result,
+                () => UpdateModel(DB.TeamMembers, model, item)
+            });
         }
 
         [HttpPut, Route("UpdateTeamMemberLocalization")]
         public async Task<RequestResult<TeamMemberLocalization>> UpdateTeamMemberLocalization(TeamMemberLocalizationEditModel model)
         {
-            var res = new RequestResult<TeamMemberLocalization>();
-
             var localization = DB.TeamMemberLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            if (localization == null)
+            return TryFinishAllRequestes<TeamMemberLocalization>(new[]
             {
-                return res.SetError(404, "Локализация с данным id не найдена");
-            }
-
-            var checkRes = CheckFromMember(localization.TeamMemberId);
-            if (!checkRes.Success)
-            {
-                return new RequestResult<TeamMemberLocalization>().FillFromRequestResult(checkRes);
-            }
-
-
-            return UpdateModel(DB.TeamMemberLocalizations, model, localization);
+                () => RequestResult.FromBoolean(localization != null,404, "Локализация с данным id не найдена"),
+                () => CheckFromMember(localization.TeamMemberId, ContentAccessModel.EditLocalizationsLevel),
+                () => UpdateModel(DB.TeamMemberLocalizations, model, localization)
+            });
         }
 
 
@@ -432,45 +308,25 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpDelete, Route("DeleteTeamMember")]
         public async Task<RequestResult> DeleteTeamMember(int id)
         {
-            var res = new RequestResult();
-
             var member = GetTeamMembersList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (member == null)
+            return TryFinishAllRequestes(new[]
             {
-                return res.SetError(404, "Запись по данному id не найдена");
-            }
-
-            var checkRes = CheckFromTeamGroup(member.TeamGroupId);
-            if (!checkRes.Success)
-            {
-                return new RequestResult<TeamMember>().FillFromRequestResult(checkRes);
-            }
-
-
-            member.IsDeleted = true;
-            DB.TeamMembers.Update(member);
-            DB.SaveChanges();
-            return RequestResult.AsSuccess();
+                () => RequestResult.FromBoolean(member != null,404, "Запись по данному id не найдена"),
+                () => CheckFromTeamGroup(member.TeamGroupId, ContentAccessModel.DeleteLevel),
+                () => DeleteModel(DB.TeamMembers,member)
+            });
         }
 
         [HttpDelete, Route("DeleteTeamMemberLocalization")]
         public async Task<RequestResult> DeleteTeamMemberLocalization(int id)
         {
-            var res = new RequestResult();
-
             var localization = DB.TeamMemberLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null)
+            return TryFinishAllRequestes(new[]
             {
-                return res.SetError(404, "Запись по данному id не найдена");
-            }
-
-            var checkRes = CheckFromMember(localization.TeamMemberId);
-            if (!checkRes.Success)
-            {
-                return new RequestResult<TeamMemberLocalization>().FillFromRequestResult(checkRes);
-            }
-
-            return DeleteModel(DB.TeamMemberLocalizations, localization, false);
+                () => RequestResult.FromBoolean(localization != null,404, "Запись по данному id не найдена"),
+                () => CheckFromMember(localization.TeamMemberId, ContentAccessModel.DeleteLevel),
+                () => DeleteModel(DB.TeamMemberLocalizations, localization, false)
+            });
         }
 
         #endregion
@@ -480,7 +336,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityEditModel model)
         {
             bool hasThisModel = false;
-            hasThisModel |= DB.TeamStructures.Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+
+            var user = GetSessionWithRoleInclude().User;
+            hasThisModel |= GetAvailableModels(user, DB.TeamStructures.IncludeAvailability()).Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
 
             if (!hasThisModel)
             {
@@ -491,10 +349,69 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
 
-        #region Private Check methods
 
-        //TODO: уровни доступа !!!!
-        private RequestResult CheckFromMember(int memberId)
+
+
+        #region Private prepare methods
+
+        private async Task<RequestResult> PrepareTeamStructureBeforeCreate(TeamStructure structure)
+        {
+            foreach(var group in structure.Groups)
+            {
+                var groupPrepareResult = await PrepareTeamGroupBeforeCreate(group);
+                if (!groupPrepareResult.Success)
+                {
+                    return groupPrepareResult;
+                }
+            }
+            return RequestResult.AsSuccess();
+        }
+        private async Task<RequestResult> PrepareTeamGroupBeforeCreate(TeamGroup group)
+        {
+            foreach(var member in group.Members)
+            {
+                var memberPrepareResult = await PrepareTeamMemberBeforeCreate(member);
+                if (!memberPrepareResult.Success)
+                {
+                    return memberPrepareResult;
+                }
+            }
+            return RequestResult.AsSuccess();
+        }
+
+
+        private async Task<RequestResult> PrepareTeamMemberBeforeCreate(TeamMember item)
+        {
+            //Загрузка фото сотрудника
+            var imgUploadResult = await TryUploadFile("mainImg", FileType.Image);
+            if (!imgUploadResult.Success)
+            {
+                return imgUploadResult;
+            }
+            item.ImgPath = imgUploadResult.Value;
+            return RequestResult.AsSuccess();
+        }
+        private async Task<RequestResult> PrepareTeamMemberBeforeUpdate(TeamMember item)
+        {
+            //Загрузка фото сотрудника
+            if (Request.Form.Files.Any(o => o.Name == "mainImg"))
+            {
+                var imgUploadResult = await TryUploadFile("mainImg", FileType.Image);
+                if (!imgUploadResult.Success)
+                {
+                    return imgUploadResult;
+                }
+                item.ImgPath = imgUploadResult.Value;
+            }
+            return RequestResult.AsSuccess();
+        }
+
+
+
+        #endregion
+
+        #region Private Check methods
+        private RequestResult CheckFromMember(int memberId, int requiredLevel)
         {
             //Получаем члена команды, чтобы потом проверить права доступа
             var member = GetTeamMembersList().FirstOrDefault(o => o.Id == memberId && !o.IsDeleted);
@@ -502,22 +419,10 @@ namespace Alfateam.Website.API.Controllers.Admin
             {
                 return RequestResult.AsError(404, "Сущность с данным id не найдена");
             }
-            //Получаем группу, чтобы потом проверить права доступа
-            var group = GetTeamGroupsList().FirstOrDefault(o => o.Id == member.TeamGroupId && !o.IsDeleted);
-            if (group == null)
-            {
-                return RequestResult.AsError(500, "Внутренняя ошибка");
-            }
-            //Проверяем, есть ли доступ у пользователя к главной сущности
-            var checkAccessResult = TryGetOne(GetTeamStructuresList(), group.TeamStructureId, ContentAccessModelType.Team);
-            if (!checkAccessResult.Success)
-            {
-                return new RequestResult().FillFromRequestResult(checkAccessResult);
-            }
 
-            return RequestResult.AsSuccess();
+            return CheckFromTeamGroup(member.TeamGroupId, requiredLevel);
         }
-        private RequestResult CheckFromTeamGroup(int groupId)
+        private RequestResult CheckFromTeamGroup(int groupId, int requiredLevel)
         {
             //Получаем группу, чтобы потом проверить права доступа
             var group = GetTeamGroupsList().FirstOrDefault(o => o.Id == groupId && !o.IsDeleted);
@@ -525,25 +430,18 @@ namespace Alfateam.Website.API.Controllers.Admin
             {
                 return RequestResult.AsError(500, "Внутренняя ошибка");
             }
-            //Проверяем, есть ли доступ у пользователя к главной сущности
-            var checkAccessResult = TryGetOne(GetTeamStructuresList(), group.TeamStructureId, ContentAccessModelType.Team);
-            if (!checkAccessResult.Success)
-            {
-                return new RequestResult().FillFromRequestResult(checkAccessResult);
-            }
 
-            return RequestResult.AsSuccess();
+            return CheckFromTeamStructure(group.TeamStructureId, requiredLevel);
         }
-        private RequestResult CheckFromTeamStructure(int structureId)
+        private RequestResult CheckFromTeamStructure(int structureId,int requiredLevel)
         {
-            //Проверяем, есть ли доступ у пользователя к главной сущности
-            var checkAccessResult = TryGetOne(GetTeamStructuresList(), structureId, ContentAccessModelType.Team);
-            if (!checkAccessResult.Success)
+            var item = GetTeamStructuresList().FirstOrDefault(o => o.Id == structureId && !o.IsDeleted);
+            return TryFinishAllRequestes(new[]
             {
-                return new RequestResult().FillFromRequestResult(checkAccessResult);
-            }
-
-            return RequestResult.AsSuccess();
+                () => RequestResult.FromBoolean(item != null,404, "Структура по данному id не найдена"),
+                () => CheckContentAreaRights(GetSessionWithRoleInclude(), item, ContentAccessModelType.Team, requiredLevel),
+                () => RequestResult.AsSuccess()
+            });
         }
         #endregion
 

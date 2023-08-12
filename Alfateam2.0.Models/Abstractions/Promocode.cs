@@ -1,5 +1,7 @@
 ﻿using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
+using Alfateam2._0.Models.Promocodes;
+using JsonKnownTypes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -10,6 +12,12 @@ using System.Threading.Tasks;
 
 namespace Alfateam2._0.Models.Abstractions
 {
+
+
+    [JsonConverter(typeof(JsonKnownTypesConverter<Promocode>))]
+    [JsonDiscriminator(Name = "Discriminator")]
+    [JsonKnownType(typeof(PricePromocode), "PricePromocode")]
+    [JsonKnownType(typeof(UsedPromocode), "UsedPromocode")]
     /// <summary>
     /// Базовая сущность промокода
     /// </summary>
@@ -17,8 +25,8 @@ namespace Alfateam2._0.Models.Abstractions
     {
         [NotMapped]
         public abstract PromocodeType Type { get; }
+        public string Discriminator { get; set; }
 
-        //TODO: посмотреть по коду доступность промокода
         public string Code { get; set; }
 
 
@@ -43,10 +51,32 @@ namespace Alfateam2._0.Models.Abstractions
 
 
 
-        public bool IsCostInRange(Cost cost)
+        public bool IsCostInRange(Cost cost,int? countryId)
         {
-            //TODO: реализовать логику
-            return true;
+            bool isInRange = true;
+
+            double? fromCost = PriceFrom?.GetPrice(countryId, cost.CurrencyId)?.Value;
+            double? toCost = PriceTo?.GetPrice(countryId, cost.CurrencyId)?.Value;
+
+            if(PriceFrom != null)
+            {
+                if(fromCost != null)
+                {
+                    isInRange &= cost.Value >= fromCost;
+                }
+                else return false;
+            }
+
+            if (PriceTo != null)
+            {
+                if (toCost != null)
+                {
+                    isInRange &= cost.Value <= toCost;
+                }
+                else return false;
+            }
+
+            return isInRange;
         }
 
     }

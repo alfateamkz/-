@@ -19,5 +19,6 @@ namespace Alfateam2._0.Models.Enums
         Events = 6, //События
         Team = 7, //Раздел "Команда"
         General = 8, // Раздел в админке "Основное"
+        Partners = 9, //Раздел "Партнеры"
     }
 }

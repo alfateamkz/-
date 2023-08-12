@@ -16,6 +16,7 @@ using Alfateam2._0.Models.Localization.Outstaff;
 using Alfateam2._0.Models.Outstaff;
 using Alfateam2._0.Models.Portfolios;
 using Alfateam2._0.Models.Posts;
+using Alfateam2._0.Models.Promocodes;
 using Alfateam2._0.Models.Reviews;
 using Alfateam2._0.Models.Roles;
 using Alfateam2._0.Models.Shop;
@@ -154,6 +155,10 @@ namespace Alfateam.DB
         public DbSet<PostIndustry> PostIndustries { get; set; }
         #endregion
 
+        #region Promocodes
+        public DbSet<UsedPromocode> UsedPromocodes { get; set; }
+        #endregion
+
         #region Reviews
         public DbSet<Review> Reviews { get; set; }
         #endregion
@@ -199,6 +204,22 @@ namespace Alfateam.DB
 
 
 
+        #region Initial methods
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            //optionsBuilder.UseMySql(DatabaseSettings.ConnectionString,
+            //           new MySqlServerVersion(new Version(8, 0, 11)));
+
+        }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Country>().HasMany(o => o.Languages).WithMany(o => o.CountryManyToManyRefs);
+            modelBuilder.Entity<Country>().HasMany(o => o.Currencies).WithMany(o => o.CountryManyToManyRefs);
+            modelBuilder.Entity<Language>().HasMany(o => o.Localizations).WithOne(o => o.LanguageMainModel);
+        }
+
+        #endregion
 
 
         #region Public methods

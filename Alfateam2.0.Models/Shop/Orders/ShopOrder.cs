@@ -67,6 +67,8 @@ namespace Alfateam2._0.Models.Shop.Orders
 
         [JsonIgnore]
         public Promocode? UsedPromocode { get; set; }
+        [JsonIgnore]
+        public int? UsedPromocodeId { get; set; }
 
         /// <summary>
         /// Сохраняем значение на момент применения промокода, т.к. может измениться тип промокода в будущем

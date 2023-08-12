@@ -24,12 +24,31 @@ namespace Alfateam.Website.API.Models.EditModels.General
         public List<int> Currencies { get; set; } = new List<int>();
 
 
-
         public override void Fill(Country item)
+        {
+            throw new NotSupportedException("Use Fill(Country item, List<Language> allLanguages) instead");
+        }
+        public void Fill(Country item, List<Language> allLanguages)
         {
             base.Fill(item);
 
-            //TODO: заполнение, удаление языков из модельки
+            //Удаляем удаленные на фронте
+            for(int i = item.Languages.Count-1;i > -1; i--)
+            {
+                var lang = item.Languages[i];
+                if (!LanguagesIds.Any(o => o == lang.Id))
+                {
+                    item.Languages.Remove(lang);
+                }
+            }
+
+            foreach(var id in LanguagesIds)
+            {
+                if(!item.Languages.Any(o => o.Id == id))
+                {
+                    item.Languages.Add(allLanguages.FirstOrDefault(o => o.Id == id));
+                }
+            }
         }
     }
 }

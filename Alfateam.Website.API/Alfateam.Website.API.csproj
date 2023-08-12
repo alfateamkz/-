@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="JsonKnownTypes" Version="0.5.5" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.8" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
@@ -19,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alfateam.DB\Alfateam.DB.csproj" />
+    <ProjectReference Include="..\Alfateam.Gateways\Alfateam.Gateways.csproj" />
     <ProjectReference Include="..\Alfateam2.0.Models\Alfateam2.0.Models.csproj" />
   </ItemGroup>
 

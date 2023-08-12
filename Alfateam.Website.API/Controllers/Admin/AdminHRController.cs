@@ -259,7 +259,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityEditModel model)
         {
             bool hasThisModel = false;
-            hasThisModel |= DB.JobVacancies.Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+
+            var user = GetSessionWithRoleInclude().User;
+            hasThisModel |= GetAvailableModels(user, DB.JobVacancies.IncludeAvailability()).Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
 
             if (!hasThisModel)
             {

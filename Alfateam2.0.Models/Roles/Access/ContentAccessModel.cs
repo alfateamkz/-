@@ -18,14 +18,21 @@ namespace Alfateam2._0.Models.Roles.Access
 
 
         [NotMapped]
-        public bool CanWatch => AccessLevel >= 1;
+        public bool CanWatch => AccessLevel >= WatchLevel;
         [NotMapped]
-        public bool CanEditCurrent => AccessLevel >= 2;
+        public bool CanEditCurrent => AccessLevel >= EditCurrentLevel;
         [NotMapped]
-        public bool CanEditLocalizations => AccessLevel >= 3;
+        public bool CanEditLocalizations => AccessLevel >= EditLocalizationsLevel;
         [NotMapped]
-        public bool CanCreateNew => AccessLevel >= 4;
+        public bool CanCreateNew => AccessLevel >= CreateNewLevel;
         [NotMapped]
-        public bool CanDelete => AccessLevel >= 5;
+        public bool CanDelete => AccessLevel >= DeleteLevel;
+
+
+        public static int WatchLevel => 1;
+        public static int EditCurrentLevel => 2;
+        public static int EditLocalizationsLevel => 3;
+        public static int CreateNewLevel => 4;
+        public static int DeleteLevel => 5;
     }
 }

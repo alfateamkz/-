@@ -3,6 +3,7 @@ using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Enums;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Models;
+using Alfateam.Website.API.Models.ClientModels;
 using Alfateam.Website.API.Models.ClientModels.General;
 using Alfateam.Website.API.Models.ClientModels.Posts;
 using Alfateam.Website.API.Models.ClientModels.Shop;
@@ -10,6 +11,7 @@ using Alfateam.Website.API.Models.ClientModels.Shop.Orders;
 using Alfateam.Website.API.Models.Core;
 using Alfateam.Website.API.Models.EditModels.Events;
 using Alfateam.Website.API.Models.EditModels.General;
+using Alfateam.Website.API.Models.EditModels.Promocodes;
 using Alfateam.Website.API.Models.EditModels.Shop;
 using Alfateam.Website.API.Models.LocalizationEditModels.Events;
 using Alfateam.Website.API.Models.LocalizationEditModels.Shop;
@@ -97,6 +99,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                 () => CreateModel(DB.ShopProducts,item)
              });
         }
+
         [HttpPost, Route("CreateProductLocalization")]
         public async Task<RequestResult<ShopProductLocalization>> CreateProductCategoryLocalization(int itemId, ShopProductLocalization localization)
         {
@@ -138,6 +141,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                  () => UpdateModel(DB.ShopProducts, model, item)
             });
         }
+
         [HttpPut, Route("UpdateProductLocalization")]
         public async Task<RequestResult<ShopProductLocalization>> UpdateProductLocalization(ShopProductLocalizationEditModel model)
         {
@@ -627,10 +631,8 @@ namespace Alfateam.Website.API.Controllers.Admin
                 return new RequestResult<IEnumerable<ShopOrderClientModel>>().FillFromRequestResult(checkAccessResult);
             }
 
-            //var user = checkAccessResult.Value;
-
-            //TODO: сделать выборку по заказам, которые доступны конкретному админу, в зависимости от стран
-            var orders = GetOrdersList().Skip(offset).Take(count);
+            var user = GetSessionWithRoleInclude().User;
+            var orders = GetAvailableOrders(user,offset,count);
             var models = ShopOrderClientModel.CreateItems(orders, LanguageId, CountryId);
             return new RequestResult<IEnumerable<ShopOrderClientModel>>().SetSuccess(models);
         }
@@ -638,20 +640,24 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("UpdateOrderData")]
         public async Task<RequestResult> UpdateOrderData(EditOrderAdminModel model)
         {
-            var res = new RequestResult();
-
             var item = GetOrdersList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             if (item == null)
             {
-                return res.SetError(404, "Запись по данному id не найдена");
+                return RequestResult.AsError(404, "Запись по данному id не найдена");
             }
 
             var checkAccessResult = CheckAccess(3);
             if (!checkAccessResult.Success)
             {
-                return new RequestResult().FillFromRequestResult(checkAccessResult);
+                return checkAccessResult;
             }
-            //TODO: сделать проверку доступа к заказу по стране
+
+            var user = GetSessionWithRoleInclude().User;
+            var orders = GetAvailableOrders(user);
+            if(!orders.Any(o => o.Id == item.Id))
+            {
+                return RequestResult.AsError(403, "У пользователя нет доступа к данному заказы");
+            }
 
 
             if (model.Status == ShopOrderStatus.Basket
@@ -660,7 +666,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                 || model.Status == ShopOrderStatus.ReturnedByCustomer
                 || model.Status == ShopOrderStatus.ReturnedByDeliveryService)
             {
-                return res.SetError(400, "Неправильный статус");
+                return RequestResult.AsError(400, "Неправильный статус");
             }
 
 
@@ -670,12 +676,10 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("CancelOrder")]
         public async Task<RequestResult> CancelOrder(int orderId, ShopOrderStatus status, ShopOrderReturn returnInfo)
         {
-            var res = new RequestResult();
-
             var item = GetOrdersList().FirstOrDefault(o => o.Id == orderId && !o.IsDeleted);
             if (item == null)
             {
-                return res.SetError(404, "Запись по данному id не найдена");
+                return RequestResult.AsError(404, "Запись по данному id не найдена");
             }
 
             var checkAccessResult = CheckAccess(4);
@@ -684,13 +688,18 @@ namespace Alfateam.Website.API.Controllers.Admin
                 return new RequestResult().FillFromRequestResult(checkAccessResult);
             }
 
-            //TODO: сделать проверку доступа к заказу по стране
+            var user = GetSessionWithRoleInclude().User;
+            var orders = GetAvailableOrders(user);
+            if (!orders.Any(o => o.Id == item.Id))
+            {
+                return RequestResult.AsError(403, "У пользователя нет доступа к данному заказы");
+            }
 
             if (status != ShopOrderStatus.Canceled 
                 && status != ShopOrderStatus.ReturnedByCustomer
                 && status != ShopOrderStatus.ReturnedByDeliveryService)
             {
-                return res.SetError(400, "Неправильный статус");
+                return RequestResult.AsError(400, "Неправильный статус");
             }
 
 
@@ -699,6 +708,86 @@ namespace Alfateam.Website.API.Controllers.Admin
             return UpdateModel(DB.ShopOrders, item);
         }
 
+
+        #endregion
+
+        #region Промокоды
+
+        [HttpGet, Route("GetPromocodes")]
+        public async Task<RequestResult<IEnumerable<PromocodeClientModel>>> GetPromocodes(int offset, int count = 20)
+        {
+            var session = GetSessionWithRoleInclude();
+            return TryFinishAllRequestes<IEnumerable<PromocodeClientModel>>(new Func<RequestResult>[]
+            {
+                () => CheckAccess(1),
+                () => {
+                    var items = GetAvailableModels(GetSessionWithRoleInclude().User, GetPromocodesList(), offset, count);
+                    var models = PromocodeClientModel.CreateItems(items.Cast<Promocode>(), LanguageId,(int)CurrencyId);
+                    return RequestResult<IEnumerable<PromocodeClientModel>>.AsSuccess(models);
+                }
+            });
+        }
+
+        [HttpGet, Route("GetPromocode")]
+        public async Task<RequestResult<Promocode>> GetPromocode(int id)
+        {
+            var item = GetPromocodesFullIncludedList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var user = GetSessionWithRoleInclude()?.User;
+            return TryFinishAllRequestes<Promocode>(new Func<RequestResult>[]
+            {
+                () => CheckAccess(1),
+                () => RequestResult.FromBoolean(item != null, 404, "Сущность по данному id не найдена"),
+                () => RequestResult.FromBoolean(this.CheckBasePermissions(user, item),403, "У данного пользователя нет доступа к записи"),
+                () => RequestResult<Promocode>.AsSuccess(item)
+            });
+        }
+
+
+
+        [HttpPost, Route("CreatePromocode")]
+        public async Task<RequestResult<ShopProduct>> CreatePromocode(Promocode item)
+        {
+            return TryFinishAllRequestes<ShopProduct>(new[]
+            {
+                () => CheckAccess(8),
+                () => RequestResult.FromBoolean(item.IsValid(), 400, "Проверьте корректность заполнения полей"),
+                () => CreateModel(DB.Promocodes,item)
+             });
+        }
+
+
+
+        [HttpPut, Route("UpdatePromocode")]
+        public async Task<RequestResult<Promocode>> UpdatePromocode(PromocodeEditModel model)
+        {
+            var item = GetPromocodesList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            var user = GetSessionWithRoleInclude()?.User;
+            return TryFinishAllRequestes<Promocode>(new Func<RequestResult>[]
+            {
+                 () => CheckAccess(5),
+                 () => RequestResult.FromBoolean(item != null, 404,  "Запись по данному id не найдена"),
+                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, item), 403, "У данного пользователя нет доступа к записи"),
+                 () => RequestResult.FromBoolean(model.IsValid(),400,"Проверьте корректность заполнения данных"),
+                 () => UpdateModel(DB.Promocodes, model, item)
+            });
+        }
+
+
+
+        [HttpDelete, Route("DeletePromocode")]
+        public async Task<RequestResult> DeletePromocode(int id)
+        {
+            var item = GetPromocodesList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var user = GetSessionWithRoleInclude()?.User;
+
+            return TryFinishAllRequestes(new[]
+            {
+                 () => CheckAccess(9),
+                 () => RequestResult.FromBoolean(item != null, 404, "Сущность по данному id не найдена"),
+                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, item), 403, "У данного пользователя нет доступа к записи"),
+                 () => DeleteModel(DB.Promocodes, item)
+            });
+        }
 
         #endregion
 
@@ -763,8 +852,10 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityEditModel model)
         {
             bool hasThisModel = false;
-            hasThisModel |= DB.ShopProducts.Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
-            hasThisModel |= DB.ShopProductCategories.Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+
+            var user = GetSessionWithRoleInclude().User;
+            hasThisModel |= GetAvailableModels(user, DB.ShopProducts.IncludeAvailability()).Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            hasThisModel |= GetAvailableModels(user, DB.ShopProductCategories.IncludeAvailability()).Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
 
             if (!hasThisModel)
             {
@@ -783,6 +874,57 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
 
+
+
+        #region Private get available orders
+        private List<ShopOrder> GetAvailableOrders(User user, int offset, int count = 20)
+        {
+            return GetAvailableOrders(user).Skip(offset).Take(count).ToList();
+        }
+        private List<ShopOrder> GetAvailableOrders(User user)
+        {
+            var allOrders = GetOrdersList();
+            var availableOrders = new List<ShopOrder>();
+
+            foreach(var order in allOrders)
+            {
+                if (user.RoleModel.IsAllCountriesAccess)
+                {
+                    bool isForbidden = false;
+
+                    foreach(var country in user.RoleModel.ForbiddenCountries)
+                    {
+                        if(order.CountryId == country.Id)
+                        {
+                            isForbidden = true;
+                            break;
+                        }
+                    }
+
+                    if (!isForbidden)
+                    {
+                        availableOrders.Add(order);
+                    }                 
+                }
+                else
+                {
+                    foreach (var country in user.RoleModel.AvailableCountries)
+                    {
+                        if (order.CountryId == country.Id)
+                        {
+                            availableOrders.Add(order);
+                            break;
+                        }
+                    }
+
+                }
+            }
+
+
+            return availableOrders;
+        }
+
+        #endregion
 
         #region Private check access methods
 
@@ -884,10 +1026,8 @@ namespace Alfateam.Website.API.Controllers.Admin
                     return mainFileUploadResult;
                 }
 
-                if (localization.MainImage is null)
-                {
-                    localization.MainImage = new ShopProductImage();
-                }
+
+                localization.MainImage ??= new ShopProductImage();
                 localization.MainImage.ImgPath = mainFileUploadResult.Value;
 
 
@@ -1084,6 +1224,26 @@ namespace Alfateam.Website.API.Controllers.Admin
 
             return orders;
         }
+
+
+
+        private IQueryable<Promocode> GetPromocodesList()
+        {
+            return DB.Promocodes.IncludeAvailability()
+                                .Include(o => o.PriceFrom).ThenInclude(o => o.Costs)
+                                .Include(o => o.PriceTo).ThenInclude(o => o.Costs)
+                                .Where(o => !o.IsDeleted);
+        }
+        private IQueryable<Promocode> GetPromocodesFullIncludedList()
+        {
+            return DB.Promocodes.IncludeAvailability()
+                                .Include(o => o.PriceFrom).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
+                                .Include(o => o.PriceFrom).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
+                                .Include(o => o.PriceTo).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
+                                .Include(o => o.PriceTo).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
+                                .Where(o => !o.IsDeleted);
+        }
+
 
         #endregion
     }

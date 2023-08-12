@@ -49,6 +49,27 @@ namespace Alfateam2._0.Models.Roles
 
 
 
+        public List<Country> GetAvailableCountries(List<Country> fromAll)
+        {
+            var countries = new List<Country>();
+            if (IsAllCountriesAccess)
+            {
+                countries = new List<Country>(fromAll);
+                foreach (var forbidden in ForbiddenCountries)
+                {
+                    var found = countries.FirstOrDefault(o => o.Id == forbidden.Id);
+                    countries.Remove(found);
+                }
+            }
+            else
+            {
+                countries = new List<Country>(AvailableCountries);
+            }
+            return countries;
+        }
+
+
+
       
     }
 }

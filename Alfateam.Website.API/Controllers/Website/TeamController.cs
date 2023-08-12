@@ -9,8 +9,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Alfateam.Website.API.Controllers.Website
 {
 
-    //TODO: в целом проверить инклюды локализаций и прочего
-
     public class TeamController : AbsController
     {
         public TeamController(WebsiteDBContext db) : base(db)

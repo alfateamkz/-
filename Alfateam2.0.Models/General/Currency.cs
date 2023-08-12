@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Alfateam2._0.Models.General
@@ -28,5 +29,9 @@ namespace Alfateam2._0.Models.General
         public Language MainLanguage { get; set; }
         public int MainLanguageId { get; set; }
         public List<CurrencyLocalization> Localizations { get; set; } = new List<CurrencyLocalization>();
+
+
+        [JsonIgnore]
+        public List<Country> CountryManyToManyRefs { get; set; } = new List<Country>();
     }
 }

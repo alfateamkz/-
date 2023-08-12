@@ -1,28 +1,26 @@
 ﻿using Alfateam.Website.API.Abstractions;
-using Alfateam.Website.API.Models.ClientModels.Posts;
 using Alfateam2._0.Models;
-using Alfateam2._0.Models.Posts;
+using Alfateam2._0.Models.ContentItems;
 
 namespace Alfateam.Website.API.Models.ClientModels
 {
-    public class MassMediaPostClientModel : ClientModel
+    public class PartnerClientModel : ClientModel
     {
-        protected MassMediaPostClientModel() { }
-
         public string Title { get; set; }
-        public string ShortDescription { get; set; }
+        public string LogoPath { get; set; }
+
+        public Content Content { get; set; }
 
 
-
-
-        public static MassMediaPostClientModel Create(MassMediaPost item, int? langId)
+        public static PartnerClientModel Create(Partner item, int? langId)
         {
 
-            var model = new MassMediaPostClientModel();
+            var model = new PartnerClientModel();
 
             model.Id = item.Id;
             model.Title = item.Title;
-            model.ShortDescription = item.ShortDescription;
+            model.LogoPath = item.LogoPath;
+            model.Content = item.Content;
 
             if (item.MainLanguageId != langId)
             {
@@ -30,15 +28,15 @@ namespace Alfateam.Website.API.Models.ClientModels
                 if (localization != null)
                 {
                     model.Title = GetActualValue(model.Title, localization.Title);
-                    model.ShortDescription = GetActualValue(model.ShortDescription, localization.ShortDescription);
+                    model.Content = GetActualValue(model.Content, localization.Content);
                 }
             }
 
             return model;
         }
-        public static List<MassMediaPostClientModel> CreateItems(IEnumerable<MassMediaPost> items, int? langId)
+        public static List<PartnerClientModel> CreateItems(IEnumerable<Partner> items, int? langId)
         {
-            var models = new List<MassMediaPostClientModel>();
+            var models = new List<PartnerClientModel>();
             foreach (var item in items)
             {
                 models.Add(Create(item, langId));

@@ -48,13 +48,20 @@ namespace Alfateam2._0.Models.General
                                   && o.Costs.Any(o => o.CurrencyId == currencyId));
             }
 
-            if(countryItem == null)
+
+            if (countryItem == null)
             {
                 countryItem = Costs.FirstOrDefault(o => o.CountryId == null
                                   && o.Costs.Any(o => o.CurrencyId == currencyId));
+
+                if (countryItem == null)
+                {
+                    countryItem = Costs.FirstOrDefault(o => o.Costs.Any(o => o.CurrencyId == currencyId));
+                }
             }
-            
-            if(countryItem != null)
+
+
+            if (countryItem != null)
             {
                 return countryItem.Costs.FirstOrDefault(o => o.CurrencyId == currencyId);
             }

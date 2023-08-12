@@ -35,7 +35,7 @@ namespace Alfateam.Website.API.Models.ClientModels.Events
 
             return model;
         }
-        public static List<EventFormatClientModel> CreateItems(List<EventFormat> items, int? langId)
+        public static List<EventFormatClientModel> CreateItems(IEnumerable<EventFormat> items, int? langId)
         {
             var models = new List<EventFormatClientModel>();
             foreach (var item in items)

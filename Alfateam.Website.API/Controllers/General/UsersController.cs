@@ -1,4 +1,6 @@
 ﻿using Alfateam.DB;
+using Alfateam.Gateways.Abstractions;
+using Alfateam.Gateways.Models.Messages;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Helpers;
 using Alfateam.Website.API.Models;
@@ -14,8 +16,10 @@ namespace Alfateam.Website.API.Controllers.General
 {
     public class UsersController : AbsController
     {
-        public UsersController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
+        private readonly IMailGateway MailGateway;
+        public UsersController(WebsiteDBContext db, IWebHostEnvironment appEnv, IMailGateway mailGateway) : base(db, appEnv)
         {
+            MailGateway = mailGateway;
         }
 
         [HttpGet, Route("Login")]
@@ -259,8 +263,15 @@ namespace Alfateam.Website.API.Controllers.General
                 DB.Users.Update(found);
                 DB.SaveChanges();
 
+                //TODO: 1. Красиво оформить письмо. 2. Локализации писем
+                MailGateway.SendRestoreMail(new EmailMessage
+                {
+                    Subject = "Восстановление пароля",
+                    Body = $"Ваш новый пароль : {pwd}",
+                    ToDisplayName = $"{found.Name} {found.Surname}",
+                    ToEmail = found.Email
 
-                //TODO: логика отправки письма на почту
+                });
 
                 res.Success = true;
             }

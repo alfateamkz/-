@@ -40,7 +40,7 @@ namespace Alfateam.Website.API.Models.ClientModels
 
             return model;
         }
-        public static List<ComplianceDocumentClientModel> CreateItems(List<ComplianceDocument> items, int? langId)
+        public static List<ComplianceDocumentClientModel> CreateItems(IEnumerable<ComplianceDocument> items, int? langId)
         {
             var models = new List<ComplianceDocumentClientModel>();
             foreach (var item in items)

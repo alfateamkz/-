@@ -23,8 +23,6 @@ namespace Alfateam.Website.API.Controllers.Admin
     public class AdminPostsController : AbsAdminController
     {
 
-        //TODO: проход по свойству контента и заливка медиа
-
         public AdminPostsController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
         {
         }
@@ -34,16 +32,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpGet, Route("GetPosts")]
         public async Task<RequestResult<IEnumerable<PostClientModel>>> GetPosts(int offset, int count = 20)
         {
-            var res = new RequestResult<IEnumerable<PostClientModel>>();
-
-            var tryGetManyResponse = TryGetMany(GetPosts(), ContentAccessModelType.Posts, offset, count);
-            if (!tryGetManyResponse.Success)
+            var session = GetSessionWithRoleInclude();
+            return TryFinishAllRequestes<IEnumerable<PostClientModel>>(new Func<RequestResult>[]
             {
-                return res.FillFromRequestResult(tryGetManyResponse);
-            }
-
-            var models = PostClientModel.CreateItems(tryGetManyResponse.Value.ToList(), LanguageId);
-            return res.SetSuccess(models);
+                () => CheckContentAreaRights(session, ContentAccessModelType.Posts, 1),
+                () => {
+                    var items = GetAvailableModels(session.User, GetPosts(), offset, count);
+                    var models = PostClientModel.CreateItems(items.Cast<Post>(), LanguageId);
+                    return RequestResult<IEnumerable<PostClientModel>>.AsSuccess(models);
+                }
+            });
         }
 
         [HttpGet, Route("GetPost")]
@@ -55,21 +53,17 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpGet, Route("GetPostLocalization")]
         public async Task<RequestResult<PostLocalization>> GetPostLocalization(int id)
         {
-            var localization = DB.PostLocalizations.Include(o => o.Language)
-                                                   .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null)
-            {
-                return new RequestResult<PostLocalization>().SetError(404, "Локализация с данным id не найдена");
-            }
+            var localization = DB.PostLocalizations.Include(o => o.Language).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (localization == null) return RequestResult<PostLocalization>.AsError(404, "Сущность с данным id не найдена");
 
-            //Проверяем, есть ли доступ у пользователя к главной сущности
-            var checkAccessResult = TryGetOne(GetPosts(), localization.PostId, ContentAccessModelType.Posts);
-            if (!checkAccessResult.Success)
+            var mainEntity = GetPosts().FirstOrDefault(o => o.Id == localization.PostId && !o.IsDeleted);
+            var session = GetSessionWithRoleInclude();
+            return TryFinishAllRequestes<PostLocalization>(new Func<RequestResult>[]
             {
-                return new RequestResult<PostLocalization>().FillFromRequestResult(checkAccessResult);
-            }
-
-            return new RequestResult<PostLocalization>().SetSuccess(localization);
+                () => RequestResult.FromBoolean(mainEntity != null, 500, "Внутренняя ошибка"),
+                () => CheckContentAreaRights(session, mainEntity, ContentAccessModelType.Posts, 1),
+                () => RequestResult<PostLocalization>.AsSuccess(localization)
+            });
         }
 
 
@@ -80,25 +74,24 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreatePost")]
         public async Task<RequestResult<Post>> CreatePost(Post item)
         {
-            return await TryCreate(DB.Posts, item, ContentAccessModelType.Posts, () => ValidateAndPreparePost(item));
+            return await TryCreate(DB.Posts, item, ContentAccessModelType.Posts, () => PreparePostMainBeforeCreate(item));
         }
 
         [HttpPost, Route("CreatePostLocalization")]
         public async Task<RequestResult<PostLocalization>> CreatePostLocalization(int itemId, PostLocalization localization)
         {
             var mainEntity = GetPosts().FirstOrDefault(o => o.Id == itemId);
-
-            var checkResult = CheckLocalizationModelBeforeCreate(localization, mainEntity, ContentAccessModelType.Posts);
-            if (!checkResult.Success)
+            return TryFinishAllRequestes<PostLocalization>(new[]
             {
-                return new RequestResult<PostLocalization>().FillFromRequestResult(checkResult);
-            }
-
-            mainEntity.Localizations.Add(localization);
-            DB.Posts.Update(mainEntity);
-            DB.SaveChanges();
-
-            return new RequestResult<PostLocalization>().SetSuccess(localization);
+                () => CheckLocalizationModelBeforeCreate(localization, mainEntity, ContentAccessModelType.Posts),
+                () => PreparePostLocalizationBeforeCreate(localization).Result,
+                () =>
+                {
+                    mainEntity.Localizations.Add(localization);
+                    UpdateModel(DB.Posts,mainEntity);
+                    return RequestResult<PostLocalization>.AsSuccess(localization);
+                }
+            });
         }
 
 
@@ -107,88 +100,33 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("UpdatePostMain")]
         public async Task<RequestResult<Post>> UpdatePostMain(PostMainEditModel model)
         {
-            var res = new RequestResult<Post>();
-
             var post = GetPosts().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            if (post == null)
-            {
-                return res.SetError(404, "Новость по данному id не найдена");
-            }
-
-
             var session = GetSessionWithRoleInclude();
-            var contentRightsCheck = CheckContentAreaRights(session, post, ContentAccessModelType.Posts, 2);
-            if (!contentRightsCheck.Success)
+            return TryFinishAllRequestes<Post>(new[]
             {
-                res.FillFromRequestResult(contentRightsCheck);
-                return res;
-            }
+                () => RequestResult.FromBoolean(post != null,404, "Сущность по данному id не найдена"),
+                () => CheckContentAreaRights(session, post, ContentAccessModelType.Posts, 2),
+                () => RequestResult.FromBoolean(model.IsValid(), 400, "Не заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз"),
+                () => RequestResult.FromBoolean(DB.PostCategories.Any(o => o.Id == model.CategoryId && !o.IsDeleted), 404, "Категории с данным id не существует"),
+                () => RequestResult.FromBoolean(DB.PostIndustries.Any(o => o.Id == model.IndustryId && !o.IsDeleted), 404, "Индустрия с данным id не найдена"),
+                () => RequestResult.FromBoolean(DB.Languages.Any(o => o.Id == model.MainLanguageId && !o.IsDeleted), 404,  "Языка с данным id не существует"),
+                () => PreparePostMainBeforeUpdate(post, model).Result,
+                () => UpdateModel(DB.Posts, model, post)
+            });
 
-
-
-            if (!model.IsValid())
-            {
-                return res.SetError(400, "Не заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз");
-            }
-            else if (!DB.PostCategories.Any(o => o.Id == model.CategoryId && !o.IsDeleted))
-            {
-                return res.SetError(404, "Категории с данным id не существует");
-            }
-            else if (!DB.PostIndustries.Any(o => o.Id == model.IndustryId && !o.IsDeleted))
-            {
-                return res.SetError(404, "Индустрии с данным id не существует");
-            }
-            else if (!DB.Languages.Any(o => o.Id == model.MainLanguageId && !o.IsDeleted))
-            {
-                return res.SetError(404, "Языка с данным id не существует");
-            }
-            else
-            {
-                if(post.ImgPath != model.ImgPath)
-                {
-                    //Загрузка главной картинки
-                    var mainFileUploadResult = await TryUploadFile("mainImg", FileType.Image);
-                    if (!mainFileUploadResult.Success) return res.FillFromRequestResult(mainFileUploadResult);
-
-                    post.ImgPath = mainFileUploadResult.Value;
-                }
-
-                model.Fill(post);
-
-                DB.Posts.Update(post);
-                DB.SaveChanges();
-
-                return res.SetSuccess(post);
-            }
         }
 
         [HttpPut, Route("UpdatePostLocalization")]
         public async Task<RequestResult<PostLocalization>> UpdatePostLocalization(PostLocalizationEditModel model)
         {
-            var res = new RequestResult<PostLocalization>();
-
             var localization = DB.PostLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            if (localization == null)
+            return TryFinishAllRequestes<PostLocalization>(new[]
             {
-                return res.SetError(404, "Локализация с данным id не найдена");
-            }
-
-            var checkResult = CheckLocalizationModelBeforeUpdate(GetPosts(), model, localization.PostId, ContentAccessModelType.Posts);
-            if (!checkResult.Success)
-            {
-                return res.FillFromRequestResult(checkResult);
-            }
-
-
-            if (localization.ImgPath != model.ImgPath)
-            {
-                var localizationFileUploadResult = await TryUploadFile($"{localization.LanguageId}_Img", FileType.Image);
-                if (!localizationFileUploadResult.Success) return res.FillFromRequestResult(localizationFileUploadResult);
-
-                localization.ImgPath = localizationFileUploadResult.Value;
-            }
-
-            return UpdateModel(DB.PostLocalizations, model, localization);
+                () => RequestResult.FromBoolean(localization != null, 404, "Локализация с данным id не найдена"),
+                () => CheckLocalizationModelBeforeUpdate(GetPosts(), model, localization.PostId, ContentAccessModelType.Posts),
+                () => PreparePostLocalizationBeforeUpdate(localization,model).Result,
+                () => UpdateModel(DB.PostLocalizations, model, localization)
+            });
         }
 
 
@@ -196,36 +134,26 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpDelete,Route("DeletePost")]
-        public async Task<RequestResult> DeletePost(int postId)
+        public async Task<RequestResult> DeletePost(int id)
         {
-            var res = new RequestResult();
-
-            var post = GetPosts().FirstOrDefault(o => o.Id == postId && !o.IsDeleted);
-            if (post == null)
+            var item = GetPosts().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            return TryFinishAllRequestes(new[]
             {
-                return res.SetError(404, "Новость по данному id не найдена");
-            }
-
-            return TryDelete(DB.Posts, post, ContentAccessModelType.Posts);
+                () => RequestResult.FromBoolean(item != null,404, "Категория по данному id не найдена"),
+                () => TryDelete(DB.Posts, item, ContentAccessModelType.Posts)
+            });
         }
 
         [HttpDelete, Route("DeletePostLocalization")]
         public async Task<RequestResult> DeletePostLocalization(int id)
         {
-            var res = new RequestResult();
-
             var item = DB.PostLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (item == null)
+            return TryFinishAllRequestes(new[]
             {
-                return res.SetError(404, "Запись по данному id не найдена");
-            }
-            var checkResult = CheckLocalizationModelBeforeDelete(GetPosts(), item.PostId, ContentAccessModelType.Posts);
-            if (!checkResult.Success)
-            {
-                return checkResult;
-            }
-
-            return DeleteModel(DB.PostLocalizations, item, false);
+                () => RequestResult.FromBoolean(item != null,404, "Запись по данному id не найдена"),
+                () => CheckLocalizationModelBeforeDelete(GetPostCategoriesList(), item.PostId, ContentAccessModelType.Posts),
+                () => DeleteModel(DB.PostLocalizations, item, false)
+            });
         }
 
         #endregion
@@ -235,16 +163,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpGet, Route("GetPostCategories")]
         public async Task<RequestResult<IEnumerable<PostCategoryClientModel>>> GetPostCategories(int offset, int count = 20)
         {
-            var res = new RequestResult<IEnumerable<PostCategoryClientModel>>();
-
-            var tryGetManyResponse = TryGetMany(GetPostCategoriesList(), ContentAccessModelType.Posts, offset, count);
-            if (!tryGetManyResponse.Success)
+            var session = GetSessionWithRoleInclude();
+            return TryFinishAllRequestes<IEnumerable<PostCategoryClientModel>>(new Func<RequestResult>[]
             {
-                return res.FillFromRequestResult(tryGetManyResponse);
-            }
-
-            var models = PostCategoryClientModel.CreateItems(tryGetManyResponse.Value.ToList(), LanguageId);
-            return res.SetSuccess(models);
+                () => CheckContentAreaRights(session, ContentAccessModelType.Posts, 1),
+                () => {
+                    var items = GetAvailableModels(session.User, GetPostCategoriesList(), offset, count);
+                    var models = PostCategoryClientModel.CreateItems(items.Cast<PostCategory>(), LanguageId);
+                    return RequestResult<IEnumerable<PostCategoryClientModel>>.AsSuccess(models);
+                }
+            });
         }
 
         [HttpGet, Route("GetPostCategory")]
@@ -252,24 +180,21 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return TryGetOne(GetPostCategoriesList(), id, ContentAccessModelType.Posts);
         }
+    
         [HttpGet, Route("GetPostCategoryLocalization")]
         public async Task<RequestResult<PostCategoryLocalization>> GetPostCategoryLocalization(int id)
         {
-            var localization = DB.PostCategoryLocalizations.Include(o => o.Language)
-                                                           .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null)
-            {
-                return new RequestResult<PostCategoryLocalization>().SetError(404, "Локализация с данным id не найдена");
-            }
+            var localization = DB.PostCategoryLocalizations.Include(o => o.Language).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (localization == null) return RequestResult<PostCategoryLocalization>.AsError(404, "Сущность с данным id не найдена");
 
-            //Проверяем, есть ли доступ у пользователя к главной сущности
-            var checkAccessResult = TryGetOne(GetPostCategoriesList(), localization.PostCategoryId, ContentAccessModelType.Posts);
-            if (!checkAccessResult.Success)
+            var mainEntity = GetPostCategoriesList().FirstOrDefault(o => o.Id == localization.PostCategoryId && !o.IsDeleted);
+            var session = GetSessionWithRoleInclude();
+            return TryFinishAllRequestes<PostCategoryLocalization>(new Func<RequestResult>[]
             {
-                return new RequestResult<PostCategoryLocalization>().FillFromRequestResult(checkAccessResult);
-            }
-
-            return new RequestResult<PostCategoryLocalization>().SetSuccess(localization);
+                () => RequestResult.FromBoolean(mainEntity != null, 500, "Внутренняя ошибка"),
+                () => CheckContentAreaRights(session, mainEntity, ContentAccessModelType.Posts, 1),
+                () => RequestResult<PostCategoryLocalization>.AsSuccess(localization)
+            });
         }
 
 
@@ -280,22 +205,21 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return TryCreate(DB.PostCategories, item, ContentAccessModelType.Posts);
         }
+    
         [HttpPost, Route("CreatePostCategoryLocalization")]
         public async Task<RequestResult<PostCategoryLocalization>> CreatePostCategoryLocalization(int itemId, PostCategoryLocalization localization)
         {
             var mainEntity = GetPostCategoriesList().FirstOrDefault(o => o.Id == itemId);
-
-            var checkResult = CheckLocalizationModelBeforeCreate(localization, mainEntity, ContentAccessModelType.Posts);
-            if (!checkResult.Success)
+            return TryFinishAllRequestes<PostCategoryLocalization>(new[]
             {
-                return new RequestResult<PostCategoryLocalization>().FillFromRequestResult(checkResult);
-            }
-
-            mainEntity.Localizations.Add(localization);
-            DB.PostCategories.Update(mainEntity);
-            DB.SaveChanges();
-
-            return new RequestResult<PostCategoryLocalization>().SetSuccess(localization);
+                () => CheckLocalizationModelBeforeCreate(localization, mainEntity, ContentAccessModelType.Posts),
+                () =>
+                {
+                    mainEntity.Localizations.Add(localization);
+                    UpdateModel(DB.PostCategories,mainEntity);
+                    return RequestResult<PostCategoryLocalization>.AsSuccess(localization);
+                }
+            });
         }
 
 
@@ -305,42 +229,26 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("UpdatePostCategoryMain")]
         public async Task<RequestResult<PostCategory>> UpdatePostCategoryMain(PostCategoryMainEditModel model)
         {
-            var res = new RequestResult<PostCategory>();
-
-            var baseCheckResult = CheckMainModelBeforeUpdate(GetPostCategoriesList(), model,ContentAccessModelType.Posts);
-            if (!baseCheckResult.Success) return baseCheckResult;
-            var item = baseCheckResult.Value;
-
-
-            if (!DB.Languages.Any(o => o.Id == model.MainLanguageId && !o.IsDeleted))
+            var item = GetPostCategoriesList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return TryFinishAllRequestes<PostCategory>(new[]
             {
-                return res.SetError(404, "Языка с данным id не существует");
-            }
-            else
-            {
-                return UpdateModel(DB.PostCategories, model, item);
-            }
+                () => CheckMainModelBeforeUpdate(item, model,ContentAccessModelType.Posts),
+                () => RequestResult.FromBoolean(DB.Languages.Any(o => o.Id == model.MainLanguageId && !o.IsDeleted),
+                                                    404, "Языка с данным id не существует"),
+                () => UpdateModel(DB.PostCategories, model, item)
+            });
         }
-
 
         [HttpPut, Route("UpdatePostCategoryLocalization")]
         public async Task<RequestResult<PostCategoryLocalization>> UpdatePostCategoryLocalization(PostCategoryLocalizationEditModel model)
         {
-            var res = new RequestResult<PostCategoryLocalization>();
-
             var localization = DB.PostCategoryLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            if (localization == null)
+            return TryFinishAllRequestes<PostCategoryLocalization>(new[]
             {
-                return res.SetError(404, "Локализация с данным id не найдена");
-            }
-
-            var checkResult = CheckLocalizationModelBeforeUpdate(GetPostCategoriesList(), model, localization.PostCategoryId, ContentAccessModelType.Posts);
-            if (!checkResult.Success)
-            {
-                return res.FillFromRequestResult(checkResult);
-            }
-
-            return UpdateModel(DB.PostCategoryLocalizations, model, localization);    
+                () => RequestResult.FromBoolean(localization != null,404, "Локализация с данным id не найдена"),
+                () => CheckLocalizationModelBeforeUpdate(GetPostCategoriesList(), model, localization.PostCategoryId, ContentAccessModelType.Posts),
+                () => UpdateModel(DB.PostCategoryLocalizations, model, localization)
+            });
         }
 
 
@@ -350,34 +258,24 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpDelete, Route("DeletePostCategory")]
         public async Task<RequestResult> DeletePostCategory(int id)
         {
-            var res = new RequestResult();
-
             var item = GetPostCategoriesList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (item == null)
+            return TryFinishAllRequestes(new[]
             {
-                return res.SetError(404, "Категория по данному id не найдена");
-            }
-
-            return TryDelete(DB.PostCategories, item, ContentAccessModelType.Posts);
+                () => RequestResult.FromBoolean(item != null,404, "Категория по данному id не найдена"),
+                () => TryDelete(DB.PostCategories, item, ContentAccessModelType.Posts)
+            });
         }
 
         [HttpDelete, Route("DeletePostCategoryLocalization")]
         public async Task<RequestResult> DeletePostCategoryLocalization(int id)
         {
-            var res = new RequestResult();
-
             var item = DB.PostCategoryLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (item == null)
+            return TryFinishAllRequestes(new[]
             {
-                return res.SetError(404, "Запись по данному id не найдена");
-            }
-            var checkResult = CheckLocalizationModelBeforeDelete(GetPostCategoriesList(), item.PostCategoryId, ContentAccessModelType.Posts);
-            if (!checkResult.Success)
-            {
-                return checkResult;
-            }
-
-            return DeleteModel(DB.PostCategoryLocalizations, item, false);
+                () => RequestResult.FromBoolean(item != null,404, "Запись по данному id не найдена"),
+                () => CheckLocalizationModelBeforeDelete(GetPostCategoriesList(), item.PostCategoryId, ContentAccessModelType.Posts),
+                () => DeleteModel(DB.PostCategoryLocalizations, item, false)
+            });
         }
 
 
@@ -388,16 +286,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpGet, Route("GetPostIndustries")]
         public async Task<RequestResult<IEnumerable<PostIndustryClientModel>>> GetPostIndustries(int offset, int count = 20)
         {
-            var res = new RequestResult<IEnumerable<PostIndustryClientModel>>();
-
-            var tryGetManyResponse = TryGetMany(GetPostPostIndustriesList(), ContentAccessModelType.Posts, offset, count);
-            if (!tryGetManyResponse.Success)
+            var session = GetSessionWithRoleInclude();
+            return TryFinishAllRequestes<IEnumerable<PostIndustryClientModel>>(new Func<RequestResult>[]
             {
-                return res.FillFromRequestResult(tryGetManyResponse);
-            }
-
-            var models = PostIndustryClientModel.CreateItems(tryGetManyResponse.Value.ToList(), LanguageId);
-            return res.SetSuccess(models);
+                () => CheckContentAreaRights(session, ContentAccessModelType.Posts, 1),
+                () => {
+                    var items = GetAvailableModels(session.User, GetPostCategoriesList(), offset, count);
+                    var models = PostIndustryClientModel.CreateItems(items.Cast<PostIndustry>(), LanguageId);
+                    return RequestResult<IEnumerable<PostIndustryClientModel>>.AsSuccess(models);
+                }
+            });
         }
 
         [HttpGet, Route("GetPostIndustry")]
@@ -405,24 +303,21 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return TryGetOne(GetPostPostIndustriesList(), id, ContentAccessModelType.Posts);
         }
+
         [HttpGet, Route("GetPostIndustryLocalization")]
         public async Task<RequestResult<PostIndustryLocalization>> GetPostIndustryLocalization(int id)
         {
-            var localization = DB.PostIndustryLocalizations.Include(o => o.Language)
-                                                           .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null)
-            {
-                return new RequestResult<PostIndustryLocalization>().SetError(404, "Локализация с данным id не найдена");
-            }
+            var localization = DB.PostIndustryLocalizations.Include(o => o.Language).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (localization == null) return RequestResult<PostIndustryLocalization>.AsError(404, "Сущность с данным id не найдена");
 
-            //Проверяем, есть ли доступ у пользователя к главной сущности
-            var checkAccessResult = TryGetOne(GetPostPostIndustriesList(), localization.PostIndustryId, ContentAccessModelType.Posts);
-            if (!checkAccessResult.Success)
+            var mainEntity = GetPostCategoriesList().FirstOrDefault(o => o.Id == localization.PostIndustryId && !o.IsDeleted);
+            var session = GetSessionWithRoleInclude();
+            return TryFinishAllRequestes<PostIndustryLocalization>(new Func<RequestResult>[]
             {
-                return new RequestResult<PostIndustryLocalization>().FillFromRequestResult(checkAccessResult);
-            }
-
-            return new RequestResult<PostIndustryLocalization>().SetSuccess(localization);
+                () => RequestResult.FromBoolean(mainEntity != null, 500, "Внутренняя ошибка"),
+                () => CheckContentAreaRights(session, mainEntity, ContentAccessModelType.Posts, 1),
+                () => RequestResult<PostIndustryLocalization>.AsSuccess(localization)
+            });
         }
 
 
@@ -433,22 +328,21 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return TryCreate(DB.PostIndustries,item, ContentAccessModelType.Posts);    
         }
+   
         [HttpPost, Route("CreatePostIndustryLocalization")]
         public async Task<RequestResult<PostIndustryLocalization>> CreatePostIndustryLocalization(int itemId, PostIndustryLocalization localization)
         {
             var mainEntity = GetPostPostIndustriesList().FirstOrDefault(o => o.Id == itemId);
-
-            var checkResult = CheckLocalizationModelBeforeCreate(localization, mainEntity, ContentAccessModelType.Posts);
-            if (!checkResult.Success)
+            return TryFinishAllRequestes<PostIndustryLocalization>(new[]
             {
-                return new RequestResult<PostIndustryLocalization>().FillFromRequestResult(checkResult);
-            }
-
-            mainEntity.Localizations.Add(localization);
-            DB.PostIndustries.Update(mainEntity);
-            DB.SaveChanges();
-
-            return new RequestResult<PostIndustryLocalization>().SetSuccess(localization);
+                () => CheckLocalizationModelBeforeCreate(localization, mainEntity, ContentAccessModelType.Posts),
+                () =>
+                {
+                    mainEntity.Localizations.Add(localization);
+                    UpdateModel(DB.PostIndustries,mainEntity);
+                    return RequestResult<PostIndustryLocalization>.AsSuccess(localization);
+                }
+            });
         }
 
 
@@ -457,41 +351,26 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("UpdatePostIndustryMain")]
         public async Task<RequestResult<PostIndustry>> UpdatePostIndustryMain(PostIndustryMainEditModel model)
         {
-            var res = new RequestResult<PostIndustry>();
-
-            var baseCheckResult = CheckMainModelBeforeUpdate(GetPostPostIndustriesList(), model, ContentAccessModelType.Posts);
-            if (!baseCheckResult.Success) return baseCheckResult;
-            var item = baseCheckResult.Value;
-
-
-            if (!DB.Languages.Any(o => o.Id == model.MainLanguageId && !o.IsDeleted))
+            var item = GetPostPostIndustriesList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return TryFinishAllRequestes<PostIndustry>(new[]
             {
-                return res.SetError(404, "Языка с данным id не существует");
-            }
-            else
-            {
-                return UpdateModel(DB.PostIndustries, model, item);
-            }
+                () => CheckMainModelBeforeUpdate(item, model,ContentAccessModelType.Posts),
+                () => RequestResult.FromBoolean(DB.Languages.Any(o => o.Id == model.MainLanguageId && !o.IsDeleted),
+                                                    404, "Языка с данным id не существует"),
+                () => UpdateModel(DB.PostIndustries, model, item)
+            });
         }
 
         [HttpPut, Route("UpdatePostIndustryLocalization")]
         public async Task<RequestResult<PostIndustryLocalization>> UpdatePostIndustryLocalization(PostIndustryLocalizationEditModel model)
         {
-            var res = new RequestResult<PostIndustryLocalization>();
-
             var localization = DB.PostIndustryLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            if (localization == null)
+            return TryFinishAllRequestes<PostIndustryLocalization>(new[]
             {
-                return res.SetError(404, "Локализация с данным id не найдена");
-            }
-
-            var checkResult = CheckLocalizationModelBeforeUpdate(GetPostPostIndustriesList(), model, localization.PostIndustryId, ContentAccessModelType.Posts);
-            if (!checkResult.Success)
-            {
-                return res.FillFromRequestResult(checkResult);
-            }
-
-            return UpdateModel(DB.PostIndustryLocalizations, model, localization);
+                () => RequestResult.FromBoolean(localization != null,404, "Локализация с данным id не найдена"),
+                () => CheckLocalizationModelBeforeUpdate(GetPostCategoriesList(), model, localization.PostIndustryId, ContentAccessModelType.Posts),
+                () => UpdateModel(DB.PostIndustryLocalizations, model, localization)
+            });
         }
 
 
@@ -502,34 +381,24 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpDelete, Route("DeletePostIndustry")]
         public async Task<RequestResult> DeletePostIndustry(int id)
         {
-            var res = new RequestResult();
-
             var item = GetPostPostIndustriesList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (item == null)
+            return TryFinishAllRequestes(new[]
             {
-                return res.SetError(404, "Индустрия по данному id не найдена");
-            }
-
-            return TryDelete(DB.PostIndustries, item, ContentAccessModelType.Posts);
+                () => RequestResult.FromBoolean(item != null,404, "Категория по данному id не найдена"),
+                () => TryDelete(DB.PostIndustries, item, ContentAccessModelType.Posts)
+            });
         }
 
         [HttpDelete, Route("DeletePostIndustryLocalization")]
         public async Task<RequestResult> DeletePostIndustryLocalization(int id)
         {
-            var res = new RequestResult();
-
             var item = DB.PostIndustryLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (item == null)
+            return TryFinishAllRequestes(new[]
             {
-                return res.SetError(404, "Запись по данному id не найдена");
-            }
-            var checkResult = CheckLocalizationModelBeforeDelete(GetPostPostIndustriesList(), item.PostIndustryId, ContentAccessModelType.Posts);
-            if (!checkResult.Success)
-            {
-                return checkResult;
-            }
-
-            return DeleteModel(DB.PostIndustryLocalizations, item, false);
+                () => RequestResult.FromBoolean(item != null,404, "Запись по данному id не найдена"),
+                () => CheckLocalizationModelBeforeDelete(GetPostCategoriesList(), item.PostIndustryId, ContentAccessModelType.Posts),
+                () => DeleteModel(DB.PostIndustryLocalizations, item, false)
+            });
         }
 
 
@@ -540,20 +409,147 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityEditModel model)
         {
             bool hasThisModel = false;
-            hasThisModel |= DB.Posts.Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
-            hasThisModel |= DB.PostCategories.Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
-            hasThisModel |= DB.PostIndustries.Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+
+            var user = GetSessionWithRoleInclude().User;
+            hasThisModel |= GetAvailableModels(user, DB.Posts.IncludeAvailability()).Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            hasThisModel |= GetAvailableModels(user, DB.PostCategories.IncludeAvailability()).Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            hasThisModel |= GetAvailableModels(user, DB.PostIndustries.IncludeAvailability()).Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
 
             if (!hasThisModel)
             {
                 return new RequestResult<Availability>().SetError(403, "У данного пользователя нет прав на редактирование матрицы доступности");
             }
 
-            return TryUpdateAvailability(model, ContentAccessModelType.Compliance);
+            return TryUpdateAvailability(model, ContentAccessModelType.Posts);
         }
 
 
-        #region Private methods
+
+
+
+        #region Private prepare methods
+
+        private async Task<RequestResult> PreparePostMainBeforeCreate(Post item)
+        {
+            var res = new RequestResult();
+
+            if (!DB.PostCategories.Any(o => o.Id == item.CategoryId && !o.IsDeleted))
+            {
+                return res.SetError(404, "Категории с данным id не существует");
+            }
+            else if (!DB.PostIndustries.Any(o => o.Id == item.IndustryId && !o.IsDeleted))
+            {
+                return res.SetError(404, "Индустрии с данным id не существует");
+            }
+            else
+            {
+                //Загрузка главной картинки
+                var mainFileUploadResult = await TryUploadFile("mainImg", FileType.Image);
+                if (!mainFileUploadResult.Success)
+                {
+                    return mainFileUploadResult;
+                }
+                item.ImgPath = mainFileUploadResult.Value;
+
+
+                //Загрузка картинки по локализациям
+                foreach (var localization in item.Localizations)
+                {
+                    var localizationPrepareResult = await PreparePostLocalizationBeforeCreate(localization);
+                    if (!localizationPrepareResult.Success)
+                    {
+                        return localizationPrepareResult;
+                    }
+                }
+
+
+                //Предотвращаем записывание неверных данных
+                item.Watches = 0;
+                item.WatchesList = new List<Watch>();
+                item.Category = null;
+                item.Industry = null;
+
+                res.SetSuccess();
+            }
+
+            return res;
+        }
+        private async Task<RequestResult> PreparePostLocalizationBeforeCreate(PostLocalization localization)
+        {
+
+            var localizationFileUploadResult = TryUploadFile($"{localization.LanguageId}_img", FileType.Image).Result;
+            if (!localizationFileUploadResult.Success)
+            {
+                return localizationFileUploadResult;
+            }
+            localization.ImgPath = localizationFileUploadResult.Value;
+
+
+            var uploadRes = await UploadContentMedia(localization.Content);
+            if (!uploadRes.Success)
+            {
+                return uploadRes;
+            }
+
+            return RequestResult.AsSuccess();
+        }
+
+
+        private async Task<RequestResult> PreparePostMainBeforeUpdate(Post post, PostMainEditModel model)
+        {
+            if (Request.Form.Files.Any(o => o.Name == $"mainImg"))
+            {
+                //Загрузка главной картинки
+                var mainFileUploadResult = await TryUploadFile("mainImg", FileType.Image);
+                if (!mainFileUploadResult.Success)
+                {
+                    return mainFileUploadResult;
+                }
+                post.ImgPath = mainFileUploadResult.Value;
+            }
+
+            if (!post.Content.AreSame(model.Content))
+            {
+                var uploadRes = await UploadContentMedia(model.Content);
+                if (!uploadRes.Success)
+                {
+                    return uploadRes;
+                }
+                post.Content = model.Content;
+            }
+
+            return RequestResult.AsSuccess();
+        }
+        private async Task<RequestResult> PreparePostLocalizationBeforeUpdate(PostLocalization localization, PostLocalizationEditModel model)
+        {
+            if (Request.Form.Files.Any(o => o.Name == $"{localization.LanguageId}_img"))
+            {
+                var localizationFileUploadResult = TryUploadFile($"{localization.LanguageId}_img", FileType.Image).Result;
+                if (!localizationFileUploadResult.Success)
+                {
+                    return localizationFileUploadResult;
+                }
+                localization.ImgPath = localizationFileUploadResult.Value;
+            }
+
+            if (!localization.Content.AreSame(model.Content))
+            {
+                var uploadRes = await UploadContentMedia(model.Content);
+                if (!uploadRes.Success)
+                {
+                    return uploadRes;
+                }
+                localization.Content = model.Content;
+            }
+
+
+            return RequestResult.AsSuccess();
+        }
+        
+
+        #endregion
+
+        #region Private get included methods 
         public IQueryable<Post> GetPosts()
         {
             return DB.Posts.IncludeAvailability()
@@ -589,51 +585,6 @@ namespace Alfateam.Website.API.Controllers.Admin
                                     .Include(o => o.Localizations).ThenInclude(o => o.Language)
                                     .Include(o => o.MainLanguage)
                                     .Where(o => !o.IsDeleted);
-        }
-
-
-
-        private async Task<RequestResult> ValidateAndPreparePost(Post item)
-        {
-            var res = new RequestResult();
-
-            if (!DB.PostCategories.Any(o => o.Id == item.CategoryId && !o.IsDeleted))
-            {
-                return res.SetError(404, "Категории с данным id не существует");
-            }
-            else if (!DB.PostIndustries.Any(o => o.Id == item.IndustryId && !o.IsDeleted))
-            {
-                return res.SetError(404, "Индустрии с данным id не существует");
-            }
-            else
-            {
-                //Загрузка главной картинки
-                var mainFileUploadResult = await TryUploadFile("mainImg", FileType.Image);
-                if (!mainFileUploadResult.Success) return mainFileUploadResult;
-
-                item.ImgPath = mainFileUploadResult.Value;
-             
-
-                //Загрузка картинки по локализациям
-                foreach (var localization in item.Localizations)
-                {
-                    var localizationFileUploadResult = await TryUploadFile($"{localization.LanguageId}_Img", FileType.Image);
-                    if (!localizationFileUploadResult.Success) return localizationFileUploadResult;
-
-                    localization.ImgPath = localizationFileUploadResult.Value;
-                }
-
-
-                //Предотвращаем записывание неверных данных
-                item.Watches = 0;
-                item.WatchesList = new List<Watch>();
-                item.Category = null;
-                item.Industry = null;
-
-                res.SetSuccess();
-            }
-
-            return res;
         }
 
         #endregion

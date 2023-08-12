@@ -1,6 +1,7 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Extensions;
+using Alfateam.Website.API.Models.ClientModels;
 using Alfateam.Website.API.Models.ClientModels.Shop;
 using Alfateam.Website.API.Models.Core;
 using Alfateam.Website.API.Models.EditModels.Shop;
@@ -148,6 +149,51 @@ namespace Alfateam.Website.API.Controllers.Website
 
         
         }
+
+
+        [HttpPut, Route("UsePromocode")]
+        public async Task<RequestResult> UsePromocode(string code)
+        {
+
+            var session = GetSessionWithPromocodesInclude();
+            var checkSessionRes = CheckSession(session);
+            if (!checkSessionRes.Success)
+            {
+                return checkSessionRes;
+            }
+
+            var user = session.User;
+            var promocode = DB.Promocodes.IncludeAvailability()
+                                         .FirstOrDefault(o => o.Code == code && !o.IsDeleted 
+                                                       && o.Availability.IsAvailable(CountryId));
+            if(promocode == null)
+            {
+                return RequestResult.AsError(404, "Данный промокод не найден");
+            }
+            if (promocode.IsExpired)
+            {
+                return RequestResult.AsError(403, "Данный промокод уже не активен");
+            }
+            if(user.UsedPromocodes.Any(o => o.PromocodeId == promocode.Id) && !promocode.IsReusable)
+            {
+                return RequestResult.AsError(403, "Данный промокод уже был использован Вами ранее");
+            }
+            if (user.Basket.UsedPromocodeId != null)
+            {
+                return RequestResult.AsError(403, "Промокод на данную покупку уже активирован");
+            }
+
+            user.Basket.UsedPromocodeId = promocode.Id;
+            user.UsedPromocodes.Add(new UsedPromocode
+            {
+                PromocodeId = promocode.Id,
+            });
+
+            DB.Users.Update(user);
+            DB.SaveChanges();
+            return RequestResult.AsSuccess();
+        }
+
 
 
         [HttpPut, Route("AddToBasket")]
@@ -464,8 +510,6 @@ namespace Alfateam.Website.API.Controllers.Website
 
         #endregion
 
-
-
         #region Оплата заказа
 
         //TODO: пока нету, будем прикручивать юкассу и КЗ эквайринг
@@ -497,7 +541,7 @@ namespace Alfateam.Website.API.Controllers.Website
             {
                 var sum = order.SumWithoutDiscount;
 
-                if(order.UsedPromocode != null && order.UsedPromocode.IsCostInRange(new Cost(order.Currency, sum)))
+                if(order.UsedPromocode != null && order.UsedPromocode.IsCostInRange(new Cost(order.Currency, sum), order.CountryId))
                 {
                     if(order.UsedPromocode is PercentPromocode percentPromocode)
                     {
@@ -506,7 +550,8 @@ namespace Alfateam.Website.API.Controllers.Website
                     }
                     else if (order.UsedPromocode is PricePromocode pricePromocode)
                     {
-                        //TODO: реализовать промокод
+                        var price = pricePromocode.Discount.GetPrice(order.CountryId, (int)order.CurrencyId);
+                        sum -= price.Value;
                     }
                 }
 
@@ -545,6 +590,28 @@ namespace Alfateam.Website.API.Controllers.Website
         }
 
         #endregion
+
+
+        [HttpGet, Route("GetPromocodeInfo")]
+        public async Task<RequestResult<PromocodeClientModel>> GetPromocodeInfo(string code)
+        {
+            var promocode = DB.Promocodes.IncludeAvailability()
+                                        .FirstOrDefault(o => o.Code == code && !o.IsDeleted
+                                                      && o.Availability.IsAvailable(CountryId));
+            if (promocode == null)
+            {
+                return RequestResult<PromocodeClientModel>.AsError(404, "Данный промокод не найден");
+            }
+            if (promocode.IsExpired)
+            {
+                return RequestResult<PromocodeClientModel>.AsError(403, "Данный промокод уже не активен");
+            }
+
+            var clientModel = PromocodeClientModel.Create(promocode, CountryId, (int)CurrencyId);
+            return RequestResult<PromocodeClientModel>.AsSuccess(clientModel);
+        }
+
+
 
 
         #region Private methods
@@ -663,7 +730,13 @@ namespace Alfateam.Website.API.Controllers.Website
 
             return session;
         }
-
+        private Session GetSessionWithPromocodesInclude()
+        {
+            var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.UsedPromocodes)
+                                     .Include(o => o.User).ThenInclude(o => o.Basket)
+                                     .FirstOrDefault(o => o.SessID == this.UserSessid);
+            return session;
+        }
         #endregion
     }
 }

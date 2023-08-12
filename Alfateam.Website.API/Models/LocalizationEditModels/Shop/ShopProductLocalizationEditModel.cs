@@ -6,8 +6,6 @@ namespace Alfateam.Website.API.Models.LocalizationEditModels.Shop
 {
     public class ShopProductLocalizationEditModel : LocalizationEditModel<ShopProductLocalization>
     {
-        //TODO: сделать модель
-
         public string Title { get; set; }
         public string Description { get; set; }
 

@@ -20,8 +20,6 @@ namespace Alfateam.Website.API.Controllers.Admin
     public class AdminGeneralController : AbsAdminController
     {
 
-        //TODO: Сделать рефакторинг хуйни по красоте (TryFinishAllRequestes)
-
         public AdminGeneralController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
         {
         }
@@ -119,7 +117,12 @@ namespace Alfateam.Website.API.Controllers.Admin
                 () => CheckContentAreaRights(session,ContentAccessModelType.General,2),
                 () => RequestResult.FromBoolean(item.IsValid(), 400, "Проверьте корректность заполненных значений"),
                 () => RequestResult.FromBoolean(DB.Languages.Any(o => o.Id == model.MainLanguageId && !o.IsDeleted), 400, "Языка с данным id не существует"),
-                () => UpdateModel(DB.Countries,model,item)
+                () =>
+                {
+                    model.Fill(item,GetLanguagesList().ToList());
+                    return RequestResult.AsSuccess();
+                },
+                () => UpdateModel(DB.Countries, item)
             });
         }
      

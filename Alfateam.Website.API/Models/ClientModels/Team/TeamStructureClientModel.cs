@@ -13,7 +13,7 @@ namespace Alfateam.Website.API.Models.ClientModels.Team
             model.Groups = TeamGroupClientModel.CreateItems(item.Groups, langId);
             return model;
         }
-        public static List<TeamStructureClientModel> CreateItems(List<TeamStructure> items, int? langId)
+        public static List<TeamStructureClientModel> CreateItems(IEnumerable<TeamStructure> items, int? langId)
         {
             var models = new List<TeamStructureClientModel>();
             foreach (var item in items)

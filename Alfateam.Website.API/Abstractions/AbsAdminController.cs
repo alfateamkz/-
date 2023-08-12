@@ -23,10 +23,8 @@ namespace Alfateam.Website.API.Abstractions
             
         }
 
-        //TODO: Рефакторинг методов создания и апдейта, слишком много входных параметров
+        //TODO: Клиентские модели: сделать валюту, страну и язык
         //TODO: В будущем: таблица файлов, удаление невостребованных(например файл был загружен на сервер, но дальше вышла ошибка и по факту моделька не сохранилась)
-        //TODO: UpdateAvailability - проверка через GetAvailableModels()
-        //TODO: Чекнуть, что возвращают методы создания локализаций
 
         [NonAction]
         protected Session GetSessionWithRoleInclude()
@@ -44,36 +42,19 @@ namespace Alfateam.Website.API.Abstractions
         {
             var allowedModels = new List<AvailabilityModel>();
 
-            //TODO: внимательно изучить и доработаь
+            var allCountries = DB.Countries.Where(o => !o.IsDeleted).ToList();
+            var availableUserCountries = user.RoleModel.GetAvailableCountries(allCountries);
 
-            if (user.RoleModel.IsAllCountriesAccess)
+            foreach (var model in allModels)
             {
-                //кроме запрещенных стран6
-                return allModels;
-            }
-            else
-            {
-                foreach (var model in allModels)
+                var availableModelCountries = model.Availability.GetAvailableCountries(allCountries);
+
+                bool isAvailable = availableModelCountries.Intersect(availableUserCountries).Any();
+                if (isAvailable)
                 {
-                    if (model.Availability.AvailableInAllCountries)
-                    {
-                        allowedModels.Add(model);
-                    }
-                    else
-                    {
-                        foreach(var country in user.RoleModel.AvailableCountries)
-                        {
-                            bool isAvailable = model.Availability.IsAvailable(country.Id);
-                            if (isAvailable)
-                            {
-                                allowedModels.Add(model);
-                                break;
-                            }
-                        }
-                    }
+                    allowedModels.Add(model);
                 }
             }
-
             return allowedModels;
         }
         protected IEnumerable<AvailabilityModel> GetAvailableModels(User user, IEnumerable<AvailabilityModel> allModels,int offset, int count)
@@ -192,63 +173,21 @@ namespace Alfateam.Website.API.Abstractions
         {
             return user.RoleModel.Role == UserRole.Admin || user.RoleModel.Role == UserRole.Owner;
         }
-        protected bool CheckBasePermissions(User user, AvailabilityModel model/*, AdminActionType type*/)
+        protected bool CheckBasePermissions(User user, AvailabilityModel model)
         {
             if (user == null) return false;
+            if (user.RoleModel.Role == UserRole.Owner) return true;
+            if (!IsInAdminRole(user)) return false;
 
-            bool success = IsInAdminRole(user);
-            if (!success) return success;
+            var allCountries = DB.Countries.Where(o => !o.IsDeleted).ToList();
+            var availableModelCountries = model.Availability.GetAvailableCountries(allCountries);
+            var availableUserCountries = user.RoleModel.GetAvailableCountries(allCountries);
 
-            if(user.RoleModel.Role == UserRole.Owner) return true;
-
-
-            //TODO: доработать пермишены
-
-            if (!user.RoleModel.IsAllCountriesAccess)
-            {
-                bool isAvailable = model.Availability.IsAvailable(user.RoleModel.AvailableCountries);
-
-                success &= isAvailable;
-            }
-            else
-            {
-                bool isAvailable = true;
-
-
-                bool hasForbiddenCountry = false;
-                if (model.Availability.AvailableInAllCountries)
-                {
-                    hasForbiddenCountry = user.RoleModel.ForbiddenCountries.Any();
-                }
-                else
-                {
-                    foreach (var country in user.RoleModel.ForbiddenCountries)
-                    {
-                        hasForbiddenCountry = model.Availability.AllowedCountries.Any(o => o.Id == country.Id);
-                        if (hasForbiddenCountry) break;
-                    }
-                }
-
- 
-
-                if (hasForbiddenCountry)
-                {
-                    if (model.Availability.AvailableInAllCountries)
-                    {
-
-                    }
-                }
-                else
-                {
-                    isAvailable = true;
-                }
-               
-               
-            }
-    
-
-            return success;
+            return availableModelCountries.Intersect(availableUserCountries).Any();
         }
+
+
+
         private RequestResult SetCheckContentAreaRights(Session session, ContentAccessModelType type, int requiredLevel)
         {
             var res = new RequestResult();
@@ -362,9 +301,7 @@ namespace Alfateam.Website.API.Abstractions
 
 
 
-        protected RequestResult CheckLocalizationModelBeforeCreate<T>(LocalizableModel model,
-                                                                      T mainEntity,
-                                                                      ContentAccessModelType accessType) where T : AvailabilityModel
+        protected RequestResult CheckLocalizationModelBeforeCreate<T>(LocalizableModel model,T mainEntity,ContentAccessModelType accessType) where T : AvailabilityModel
         {
             var session = GetSessionWithRoleInclude();
             return TryFinishAllRequestes<T>(new[]
@@ -420,9 +357,17 @@ namespace Alfateam.Website.API.Abstractions
         #region Обобщенные методы редактирования объекта
 
 
-        protected RequestResult<T> CheckMainModelBeforeUpdate<T>(IQueryable<T> dbSet, 
-                                                                 EditModel<T> model, 
-                                                                 ContentAccessModelType accessType) where T : AvailabilityModel
+
+        protected RequestResult<T> CheckMainModelBeforeUpdate<T>(T model,EditModel<T> editModel,ContentAccessModelType accessType) where T : AvailabilityModel
+        {
+            return TryFinishAllRequestes<T>(new[]
+            {
+                () => RequestResult.FromBoolean(model != null, 400, "Запись по данному id не найдена"),
+                () => CheckContentAreaRights(GetSessionWithRoleInclude(), model, accessType, 3),
+                () => RequestResult.FromBoolean(editModel.IsValid(), 400, "Некорректно заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз")
+            });
+        }
+        protected RequestResult<T> CheckMainModelBeforeUpdate<T>(IQueryable<T> dbSet, EditModel<T> model, ContentAccessModelType accessType) where T : AvailabilityModel
         {
 
             var item = dbSet.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
@@ -433,10 +378,7 @@ namespace Alfateam.Website.API.Abstractions
                 () => RequestResult.FromBoolean(model.IsValid(), 400, "Некорректно заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз")
             });
         }
-        protected RequestResult CheckLocalizationModelBeforeUpdate<T>(IQueryable<T> dbSet,
-                                                                     LocalizationEditModel model, 
-                                                                     int mainEntityId, 
-                                                                     ContentAccessModelType accessType) where T: AvailabilityModel
+        protected RequestResult CheckLocalizationModelBeforeUpdate<T>(IQueryable<T> dbSet, LocalizationEditModel model, int mainEntityId, ContentAccessModelType accessType) where T: AvailabilityModel
         {
             var category = dbSet.FirstOrDefault(o => o.Id == mainEntityId && !o.IsDeleted);
             return TryFinishAllRequestes<T>(new[]
@@ -493,9 +435,7 @@ namespace Alfateam.Website.API.Abstractions
            });
         }
 
-        protected RequestResult CheckLocalizationModelBeforeDelete<T>(IQueryable<T> mainEntityDbSet,
-                                                                     int mainEntityId,
-                                                                     ContentAccessModelType accessType) where T : AvailabilityModel
+        protected RequestResult CheckLocalizationModelBeforeDelete<T>(IQueryable<T> mainEntityDbSet,int mainEntityId,ContentAccessModelType accessType) where T : AvailabilityModel
         {
            var mainModel = mainEntityDbSet.FirstOrDefault(o => o.Id == mainEntityId && !o.IsDeleted);
            return TryFinishAllRequestes<T>(new[]
@@ -505,9 +445,7 @@ namespace Alfateam.Website.API.Abstractions
            });
         }
 
-        protected RequestResult CheckLocalizationBeforeDelete<T>(IQueryable<T> mainEntityDbSet,
-                                                                 int mainEntityId,
-                                                                 ContentAccessModelType accessType) where T : AbsModel
+        protected RequestResult CheckLocalizationBeforeDelete<T>(IQueryable<T> mainEntityDbSet,int mainEntityId, ContentAccessModelType accessType) where T : AbsModel
         {
             var mainModel = mainEntityDbSet.FirstOrDefault(o => o.Id == mainEntityId && !o.IsDeleted);
             return TryFinishAllRequestes<T>(new[]

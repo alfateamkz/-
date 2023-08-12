@@ -35,7 +35,7 @@ namespace Alfateam.Website.API.Models.ClientModels.Portfolios
 
             return model;
         }
-        public static List<PortfolioCategoryClientModel> CreateItems(List<PortfolioCategory> items, int? langId)
+        public static List<PortfolioCategoryClientModel> CreateItems(IEnumerable<PortfolioCategory> items, int? langId)
         {
             var models = new List<PortfolioCategoryClientModel>();
             foreach (var item in items)

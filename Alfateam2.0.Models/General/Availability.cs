@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -40,6 +41,27 @@ namespace Alfateam2._0.Models.General
                     return true;
             }
             return false;
+        }
+
+
+
+        public List<Country> GetAvailableCountries(List<Country> fromAll)
+        {
+            var countries = new List<Country>();
+            if (AvailableInAllCountries)
+            {
+                countries = new List<Country>(fromAll);
+                foreach (var forbidden in DisallowedCountries)
+                {
+                    var found = countries.FirstOrDefault(o => o.Id == forbidden.Id);
+                    countries.Remove(found);
+                }
+            }
+            else
+            {
+                countries = new List<Country>(AllowedCountries);
+            }
+            return countries;
         }
 
     }

@@ -1,4 +1,5 @@
 ﻿using Alfateam2._0.Models.Abstractions;
+using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.Localization.Items;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,8 @@ namespace Alfateam2._0.Models
     {
         public string Title { get; set; }
         public string LogoPath { get; set; }
+
+        public Content Content { get; set; }
 
 
         public List<PartnerLocalization> Localizations { get; set; } = new List<PartnerLocalization>();
