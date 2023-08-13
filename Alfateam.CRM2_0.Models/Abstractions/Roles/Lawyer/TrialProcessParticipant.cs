@@ -1,4 +1,9 @@
-﻿using Alfateam.CRM2_0.Models.Roles.Lawyer.Trial;
+﻿using Alfateam.CRM2_0.Models.Enums.Roles.Lawyer.Trial;
+using Alfateam.CRM2_0.Models.Roles.Lawyer.Trial;
+using Alfateam.CRM2_0.Models.Roles.Lawyer.Trial.Litigations;
+using Alfateam.CRM2_0.Models.Roles.Lawyer.Trial.Participants;
+using JsonKnownTypes;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +12,12 @@ using System.Threading.Tasks;
 
 namespace Alfateam.CRM2_0.Models.Abstractions.Roles.Lawyer
 {
+
+
+    [JsonConverter(typeof(JsonKnownTypesConverter<TrialProcessParticipant>))]
+    [JsonDiscriminator(Name = "Discriminator")]
+    [JsonKnownType(typeof(CRMTrialProcessParticipant), "CRMTrialProcessParticipant")]
+    [JsonKnownType(typeof(InfoTrialProcessParticipant), "InfoTrialProcessParticipant")]
     /// <summary>
     /// Базовая сущность участника судебного процесса
     /// </summary>

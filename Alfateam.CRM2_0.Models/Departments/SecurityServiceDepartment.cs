@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace Alfateam.CRM2_0.Models.Departments
 {
+    /// <summary>
+    /// Отдел службы безопасности
+    /// </summary>
     public class SecurityServiceDepartment : Department
     {
 

@@ -1,6 +1,11 @@
 ﻿using Alfateam.CRM2_0.Models.Enums.Roles.Accountance;
 using Alfateam.CRM2_0.Models.General;
 using Alfateam.CRM2_0.Models.Roles.Accountance;
+using Alfateam.CRM2_0.Models.Roles.Accountance.Loans.Pledges;
+using Alfateam.CRM2_0.Models.Roles.Accountance.Transactions;
+using Alfateam.CRM2_0.Models.Roles.Accountance.Transactions.InvestProject;
+using JsonKnownTypes;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +15,19 @@ using System.Threading.Tasks;
 namespace Alfateam.CRM2_0.Models.Abstractions.Roles.Accountance.Transactions
 {
 
+
+
+
+    [JsonConverter(typeof(JsonKnownTypesConverter<Transaction>))]
+    [JsonDiscriminator(Name = "Discriminator")]
+    [JsonKnownType(typeof(AdmissionInvestProjectTransaction), "AdmissionInvestProjectTransaction")]
+    [JsonKnownType(typeof(DividendInvestProjectTransaction), "DividendInvestProjectTransaction")]
+
+    [JsonKnownType(typeof(FranchiseTransaction), "FranchiseTransaction")]
+    [JsonKnownType(typeof(MarketingTransaction), "MarketingTransaction")]
+    [JsonKnownType(typeof(OrderTransaction), "OrderTransaction")]
+    [JsonKnownType(typeof(SimpleTransaction), "SimpleTransaction")]
+    [JsonKnownType(typeof(WorkerTransaction), "WorkerTransaction")]
     /// <summary>
     /// Базовая модель бухгалтерской транзакции
     /// </summary>

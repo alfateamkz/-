@@ -1,4 +1,8 @@
-﻿using Alfateam.CRM2_0.Models.General;
+﻿using Alfateam.CRM2_0.Models.Departments;
+using Alfateam.CRM2_0.Models.General;
+using Alfateam.CRM2_0.Models.General.Taxes;
+using JsonKnownTypes;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +11,13 @@ using System.Threading.Tasks;
 
 namespace Alfateam.CRM2_0.Models.Abstractions
 {
+
+
+    [JsonConverter(typeof(JsonKnownTypesConverter<TaxSystem>))]
+    [JsonDiscriminator(Name = "Discriminator")]
+    [JsonKnownType(typeof(ProgressiveTaxSystem), "ProgressiveTaxSystem")]
+    [JsonKnownType(typeof(SimpleFixedTaxSystem), "SimpleFixedTaxSystem")]
+    [JsonKnownType(typeof(SimplePercentTaxSystem), "SimplePercentTaxSystem")]
     /// <summary>
     /// Базовая сущность системы налогообложения
     /// </summary>

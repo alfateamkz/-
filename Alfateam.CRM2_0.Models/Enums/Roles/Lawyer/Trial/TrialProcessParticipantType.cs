@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Alfateam.CRM2_0.Models.Abstractions.Roles.Lawyer
+namespace Alfateam.CRM2_0.Models.Enums.Roles.Lawyer.Trial
 {
     /// <summary>
     /// Тип участника судебного процесса

@@ -3,10 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Alfateam.CRM2_0.Models.Communication.Messenger.Chats;
+using Alfateam.CRM2_0.Models.Communication.Messenger.Messages;
 using Alfateam.CRM2_0.Models.General;
+using JsonKnownTypes;
+using Newtonsoft.Json;
 
 namespace Alfateam.CRM2_0.Models.Abstractions.Communication.Messenger
 {
+
+    [JsonConverter(typeof(JsonKnownTypesConverter<Message>))]
+    [JsonDiscriminator(Name = "Discriminator")]
+    [JsonKnownType(typeof(CommonMessage), "CommonMessage")]
+    [JsonKnownType(typeof(VoiceMessage), "VoiceMessage")]
     /// <summary>
     /// Базовая модель сообщения в чате
     /// </summary>

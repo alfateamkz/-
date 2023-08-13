@@ -1,5 +1,6 @@
 ﻿using Alfateam.CRM2_0.Models.Content.Tests;
 using Alfateam.CRM2_0.Models.Content.Tests.QuestionOptions;
+using Alfateam.CRM2_0.Models.Content.Tests.Questions;
 using JsonKnownTypes;
 using Newtonsoft.Json;
 using System;
@@ -18,6 +19,7 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Content.Tests
     [JsonDiscriminator(Name = "Discriminator")]
     [JsonKnownType(typeof(EmojiQuestionOption), "EmojiQuestionOption")]
     [JsonKnownType(typeof(PictureQuestionOption), "PictureQuestionOption")]
+    [JsonKnownType(typeof(SimplePicturedQuestion), "SimplePicturedQuestion")]
     [JsonKnownType(typeof(SimpleQuestionOption), "SimpleQuestionOption")]
     public class QuestionOption : AbsModel
     {

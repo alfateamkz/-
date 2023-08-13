@@ -1,5 +1,10 @@
 ﻿using Alfateam.CRM2_0.Models.General;
 using Alfateam.CRM2_0.Models.Roles.Staff;
+using Alfateam.CRM2_0.Models.Roles.Staff.Counterparties;
+using Alfateam.CRM2_0.Models.Roles.Staff.Counterparties.Subparties;
+using Alfateam.CRM2_0.Models.Roles.Staff.Employess;
+using JsonKnownTypes;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +13,12 @@ using System.Threading.Tasks;
 
 namespace Alfateam.CRM2_0.Models.Abstractions.Roles.Staff
 {
+
+
+    [JsonConverter(typeof(JsonKnownTypesConverter<Worker>))]
+    [JsonDiscriminator(Name = "Discriminator")]
+    [JsonKnownType(typeof(Employee), "Employee")]
+    [JsonKnownType(typeof(Counterparty), "Counterparty")]
     /// <summary>
     /// Базовая модель пользователя, который может учавствовать в разработке проектов
     /// От данного класса наследуются Employee (сотрудник фирмы) и Counterparty(контрагент)

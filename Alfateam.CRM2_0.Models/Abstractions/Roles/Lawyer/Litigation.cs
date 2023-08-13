@@ -1,4 +1,9 @@
-﻿using Alfateam.CRM2_0.Models.Roles.Lawyer.Trial;
+﻿using Alfateam.CRM2_0.Models.Abstractions.Roles.HR;
+using Alfateam.CRM2_0.Models.Roles.HR.Questionnaires.Questions;
+using Alfateam.CRM2_0.Models.Roles.Lawyer.Trial;
+using Alfateam.CRM2_0.Models.Roles.Lawyer.Trial.Litigations;
+using JsonKnownTypes;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +12,15 @@ using System.Threading.Tasks;
 
 namespace Alfateam.CRM2_0.Models.Abstractions.Roles.Lawyer
 {
+
+
+    [JsonConverter(typeof(JsonKnownTypesConverter<Litigation>))]
+    [JsonDiscriminator(Name = "Discriminator")]
+    [JsonKnownType(typeof(AdministrativeLitigation), "AdministrativeLitigation")]
+    [JsonKnownType(typeof(ArbitrationLitigation), "ArbitrationLitigation")]
+    [JsonKnownType(typeof(CivilLitigation), "CivilLitigation")]
+    [JsonKnownType(typeof(ConstitutionalLitigation), "ConstitutionalLitigation")]
+    [JsonKnownType(typeof(CriminalLitigation), "CriminalLitigation")]
     /// <summary>
     /// Базовая сущность судебного разбирательства
     /// Наследуемые классы описывают конституционный, уголовный, гражданский, арбитражный и административный судебный процесс

@@ -1,5 +1,9 @@
-﻿using Alfateam2._0.Models.General;
+﻿using Alfateam2._0.Models.ContentItems;
+using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Localization.Items.Shop.Modifiers;
+using Alfateam2._0.Models.Shop.Modifiers.Items;
+using JsonKnownTypes;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +12,11 @@ using System.Threading.Tasks;
 
 namespace Alfateam2._0.Models.Abstractions
 {
+
+    [JsonConverter(typeof(JsonKnownTypesConverter<ProductModifierItem>))]
+    [JsonDiscriminator(Name = "Discriminator")]
+    [JsonKnownType(typeof(ColorModifierItem), "ColorModifierItem")]
+    [JsonKnownType(typeof(SimpleModifierItem), "SimpleModifierItem")]
     /// <summary>
     /// Сущность варианта выбора модификатора товара
     /// </summary>

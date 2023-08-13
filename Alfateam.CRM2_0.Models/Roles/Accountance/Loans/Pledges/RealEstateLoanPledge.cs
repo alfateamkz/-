@@ -12,7 +12,7 @@ namespace Alfateam.CRM2_0.Models.Roles.Accountance.Loans.Pledges
     /// <summary>
     /// Модель залога недвижимого имущества
     /// </summary>
-    public class RealEstateLoanPledgee : LoanObligationPledge
+    public class RealEstateLoanPledge : LoanObligationPledge
     {
         public Currency Currency { get; set; }
         public double EstimatedCost { get; set; }
