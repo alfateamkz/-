@@ -13,7 +13,7 @@ namespace Alfateam.Website.API.Models.EditModels.Shop
 
 
         public ShopProductImage MainImage { get; set; }
-        public List<ShopProductImage> Images { get; set; } = new List<ShopProductImage>();
+        //public List<ShopProductImage> Images { get; set; } = new List<ShopProductImage>();
 
 
 

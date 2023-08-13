@@ -15,7 +15,6 @@ namespace Alfateam.Website.API.Models.EditModels.Promocodes
     [JsonKnownType(typeof(PercentPromocodeEditModel), "PercentPromocode")]
     public abstract class PromocodeEditModel : EditModel<Promocode>
     {
-        //TODO: Реализовать получение типа по Discriminator
         public abstract string Discriminator { get; }
 
         public string Code { get; set; }

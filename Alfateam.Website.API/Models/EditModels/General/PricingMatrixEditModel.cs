@@ -1,7 +1,7 @@
 ﻿using Alfateam.Website.API.Abstractions;
 using Alfateam2._0.Models.General;
 
-namespace Alfateam.Website.API.Models.ClientModels.General
+namespace Alfateam.Website.API.Models.EditModels.General
 {
     public class PricingMatrixEditModel : EditModel<PricingMatrix>
     {

@@ -1,5 +1,6 @@
 ﻿using Alfateam.Models.Helpers;
 using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Models.ClientModels.General;
 using Alfateam2._0.Models.Events;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -23,6 +24,7 @@ namespace Alfateam.Website.API.Models.ClientModels.Events
 
         public EventCategoryClientModel Category { get; set; }
         public EventFormatClientModel Format { get; set; }
+        public TimezoneClientModel Timezone { get; set; }
 
 
         public static EventClientModel Create(Event item, int? langId)
@@ -52,6 +54,7 @@ namespace Alfateam.Website.API.Models.ClientModels.Events
 
             model.Category = EventCategoryClientModel.Create(item.Category, langId);
             model.Format = EventFormatClientModel.Create(item.Format, langId);
+            model.Timezone = TimezoneClientModel.Create(item.TimeZone, langId);
 
             return model;
         }

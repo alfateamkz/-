@@ -1,5 +1,6 @@
 ﻿using Alfateam.Models.Helpers;
 using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Models.ClientModels.General;
 using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.General;
@@ -22,7 +23,7 @@ namespace Alfateam.Website.API.Models.ClientModels.Shop
         /// <summary>
         /// Стоимость без учета модификаторов
         /// </summary>
-        public List<Cost> BasePrices { get; set; } = new List<Cost>();
+        public List<CostClientModel> BasePrices { get; set; } = new List<CostClientModel>();
         public List<ProductModifierClientModel> Modifiers { get; set; } = new List<ProductModifierClientModel>();
 
         public ShopProductImage MainImage { get; set; }
@@ -40,7 +41,8 @@ namespace Alfateam.Website.API.Models.ClientModels.Shop
             model.MainImage = item.MainImage;
             model.Images = item.Images;
 
-            model.BasePrices = GetLocalCosts(item.BasePricing, countryId);
+            var prices = GetLocalCosts(item.BasePricing, countryId);
+            model.BasePrices = CostClientModel.CreateItems(prices, langId);
 
             if (item.MainLanguageId != langId)
             {

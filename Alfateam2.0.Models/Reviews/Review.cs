@@ -14,6 +14,8 @@ namespace Alfateam2._0.Models.Reviews
     public class Review : AbsModel
     {
         public DateTime PublishedAt { get; set; } = DateTime.UtcNow;
+        public bool IsHidden { get; set; }
+
 
         /// <summary>
         /// Количество звезд от 0 до 5

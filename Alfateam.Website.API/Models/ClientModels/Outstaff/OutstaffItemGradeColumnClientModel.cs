@@ -1,4 +1,5 @@
 ﻿using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Models.ClientModels.General;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Outstaff;
 
@@ -7,7 +8,7 @@ namespace Alfateam.Website.API.Models.ClientModels.Outstaff
     public class OutstaffItemGradeColumnClientModel : ClientModel
     {
         public OutstaffColumnClientModel Column { get; set; }
-        public List<Cost> CostsPerHour { get; set; } = new List<Cost>();
+        public List<CostClientModel> CostsPerHour { get; set; } = new List<CostClientModel>();
 
 
         public static OutstaffItemGradeColumnClientModel Create(OutstaffItemGradeColumn item, int? langId, int? countryId)
@@ -17,8 +18,9 @@ namespace Alfateam.Website.API.Models.ClientModels.Outstaff
             model.Id = item.Id;
 
             model.Column = OutstaffColumnClientModel.Create(item.Column,langId);
-            model.CostsPerHour = GetLocalCosts(item.CostPerHour, countryId);
 
+            var costs = GetLocalCosts(item.CostPerHour, countryId);
+            model.CostsPerHour = CostClientModel.CreateItems(costs,langId);
 
             return model;
         }

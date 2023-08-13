@@ -83,10 +83,13 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreateJobVacancy")]
         public async Task<RequestResult<JobVacancy>> CreateProduct(JobVacancy item)
         {
+            var session = GetSessionWithRoleInclude();
             return TryFinishAllRequestes<JobVacancy>(new[]
             {
+                () => CheckSession(session),
                 () => CheckAccess(6),
                 () => RequestResult.FromBoolean(item.IsValid(), 400, "Проверьте корректность заполнения полей"),
+                () => CanSetAvailabilityCountries(session.User, item.Availability),
                 () => PrepareVacancyBeforeCreate(item).Result,
                 () => CreateModel(DB.JobVacancies,item)
              });
@@ -273,6 +276,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             {
                 () => RequestResult.FromBoolean(availability != null, 404, "Запись по данному id не найдена"),
                 () => CheckAccess(4),
+                () => CanSetAvailabilityCountries(user, availability),
                 () => UpdateModel(DB.Availabilities, model, availability)
             });
         }
@@ -287,9 +291,10 @@ namespace Alfateam.Website.API.Controllers.Admin
             var session = GetSessionWithRoleInclude();
             return TryFinishAllRequestes(new Func<RequestResult>[]
             {
+                () => CheckSession(session),
+                () => CheckForBan(session.User,BanType.AdminPanel),
                 () => RequestResult.FromBoolean(session.User.RoleModel.Role != UserRole.User,
                         403, "У данного пользователя нет доступа в администраторскую панель"),
-                () => CheckSession(session),
                 () => RequestResult.FromBoolean(session.User.RoleModel.HRAccess.AccessLevel >= requiredLevel || session.User.RoleModel.Role == UserRole.Owner,
                        403, "У данного пользователя нет прав на выполнение данного действия")
              });

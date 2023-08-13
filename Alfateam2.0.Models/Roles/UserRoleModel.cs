@@ -37,7 +37,7 @@ namespace Alfateam2._0.Models.Roles
 
 
 
-
+        public ReviewsAccessModel ReviewsAccess { get; set; }
         public HRAccessModel HRAccess { get; set; }
         public ShopAccessModel ShopAccess { get; set; }
         public OutstaffAccessModel OutstaffAccess { get; set; }
@@ -68,7 +68,17 @@ namespace Alfateam2._0.Models.Roles
             return countries;
         }
 
+        public static UserRoleModel CreateDefault()
+        {
+            var model = new UserRoleModel();
 
+            model.ReviewsAccess = new ReviewsAccessModel();
+            model.HRAccess = new HRAccessModel();
+            model.ShopAccess = new ShopAccessModel();
+            model.OutstaffAccess = new OutstaffAccessModel();
+
+            return model;
+        }
 
       
     }

@@ -1,6 +1,7 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Extensions;
+using Alfateam.Website.API.Filters;
 using Alfateam.Website.API.Models.ClientModels;
 using Alfateam.Website.API.Models.ClientModels.Posts;
 using Alfateam.Website.API.Models.Core;
@@ -15,17 +16,21 @@ using Alfateam2._0.Models.Localization.Items;
 using Alfateam2._0.Models.Localization.Items.Events;
 using Alfateam2._0.Models.Localization.Items.Posts;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
+    
     public class AdminComplianceController : AbsAdminController
     {
         public AdminComplianceController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
         {
-            
+         
         }
+       
+   
 
         #region Комплаенс-документы
 

@@ -1,4 +1,5 @@
 ﻿using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Models.ClientModels.General;
 using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Shop.Modifiers;
@@ -8,7 +9,7 @@ namespace Alfateam.Website.API.Models.ClientModels.Shop
     public class ProductModifierItemClientModel : ClientModel
     {
         public string Title { get; set; }
-        public List<Cost> Costs { get; set; } = new List<Cost>();
+        public List<CostClientModel> Costs { get; set; } = new List<CostClientModel>();
 
         public static ProductModifierItemClientModel Create(ProductModifierItem item, int? langId, int? countryId)
         {
@@ -18,7 +19,8 @@ namespace Alfateam.Website.API.Models.ClientModels.Shop
             model.Id = item.Id;
             model.Title = item.Title;
 
-            model.Costs = GetLocalCosts(item.Pricing, countryId);
+            var costs = GetLocalCosts(item.Pricing, countryId);
+            model.Costs = CostClientModel.CreateItems(costs,langId);
 
             if (item.MainLanguageId != langId)
             {

@@ -1,4 +1,5 @@
 ﻿using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Models.ClientModels.General;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
 
@@ -7,7 +8,7 @@ namespace Alfateam.Website.API.Models.ClientModels.Shop.Orders
     public class ShopOrderPaymentClientModel : ClientModel
     {
         public double Sum { get; set; }
-        public Currency Currency { get; set; }
+        public CurrencyClientModel Currency { get; set; }
 
 
 

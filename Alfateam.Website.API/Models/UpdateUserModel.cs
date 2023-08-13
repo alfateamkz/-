@@ -2,7 +2,7 @@
 
 namespace Alfateam.Website.API.Models
 {
-    public class UpdateUserModel
+    public class UpdateUserModel 
     {
         public int Id { get; set; }
 

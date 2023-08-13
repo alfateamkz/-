@@ -1,5 +1,6 @@
 ﻿using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.Promocodes;
+using Alfateam2._0.Models.Reviews;
 using Alfateam2._0.Models.Roles;
 using Alfateam2._0.Models.Shop.Orders;
 using Alfateam2._0.Models.Shop.Wishes;
@@ -24,7 +25,16 @@ namespace Alfateam2._0.Models.General
 
 
         public string Email { get; set; }
+        public string? Phone { get; set; }
         public string Password { get; set; }
+
+
+        /// <summary>
+        /// Причина, по которой пользователь заблокирован
+        /// Если BanInfo == null, то значит пользователь не заблокирован
+        /// </summary>
+        public BanInfo? BanInfo { get; set; }
+        public int? BanInfoId { get; set; }
 
 
 
@@ -40,6 +50,11 @@ namespace Alfateam2._0.Models.General
 
         public Country? RegisteredFromCountry { get; set; }
         public int? RegisteredFromCountryId { get; set; }
+
+
+
+        public List<Review> Reviews { get; set; } = new List<Review>();
+
 
 
         /// <summary>

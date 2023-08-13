@@ -14,6 +14,18 @@ namespace Alfateam2._0.Models.General
     /// </summary>
     public class Currency : AbsModel
     {
+        public Currency()
+        {
+
+        }
+
+        public Currency(string title,string code,string symbol)
+        {
+            Title = title;
+            Code = code;
+            Symbol = symbol;
+        }
+
         public string Title { get; set; }   
         public string Code { get; set; }
         public string Symbol { get; set; }

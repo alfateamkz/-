@@ -1,5 +1,6 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Enums;
+using Alfateam.Website.API.Filters;
 using Alfateam.Website.API.Models.ClientModels.Posts;
 using Alfateam.Website.API.Models.Core;
 using Alfateam.Website.API.Models.EditModels.General;
@@ -16,6 +17,7 @@ using System.Collections.Generic;
 
 namespace Alfateam.Website.API.Abstractions
 {
+    [AdminActionsFilter]
     public abstract class AbsAdminController : AbsController
     {
         protected AbsAdminController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
@@ -23,47 +25,31 @@ namespace Alfateam.Website.API.Abstractions
             
         }
 
-        //TODO: Клиентские модели: сделать валюту, страну и язык
         //TODO: В будущем: таблица файлов, удаление невостребованных(например файл был загружен на сервер, но дальше вышла ошибка и по факту моделька не сохранилась)
 
-        [NonAction]
-        protected Session GetSessionWithRoleInclude()
+        
+        public Session GetSessionWithRoleInclude()
         {
             var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.RoleModel).ThenInclude(o => o.AvailableCountries)
                                      .Include(o => o.User).ThenInclude(o => o.RoleModel).ThenInclude(o => o.ForbiddenCountries)
                                      .Include(o => o.User).ThenInclude(o => o.RoleModel).ThenInclude(o => o.ContentAccessTypes)
+                                     .Include(o => o.User).ThenInclude(o => o.RoleModel).ThenInclude(o => o.ReviewsAccess)
+                                     .Include(o => o.User).ThenInclude(o => o.RoleModel).ThenInclude(o => o.HRAccess)
+                                     .Include(o => o.User).ThenInclude(o => o.RoleModel).ThenInclude(o => o.ShopAccess)
+                                     .Include(o => o.User).ThenInclude(o => o.RoleModel).ThenInclude(o => o.OutstaffAccess)
+                                     .Include(o => o.User).ThenInclude(o => o.BanInfo)
                                      .FirstOrDefault(o => o.SessID == this.UserSessid);
             return session;
         }
 
 
-
-        protected IEnumerable<AvailabilityModel> GetAvailableModels(User user,IEnumerable<AvailabilityModel> allModels)
-        {
-            var allowedModels = new List<AvailabilityModel>();
-
-            var allCountries = DB.Countries.Where(o => !o.IsDeleted).ToList();
-            var availableUserCountries = user.RoleModel.GetAvailableCountries(allCountries);
-
-            foreach (var model in allModels)
-            {
-                var availableModelCountries = model.Availability.GetAvailableCountries(allCountries);
-
-                bool isAvailable = availableModelCountries.Intersect(availableUserCountries).Any();
-                if (isAvailable)
-                {
-                    allowedModels.Add(model);
-                }
-            }
-            return allowedModels;
-        }
-        protected IEnumerable<AvailabilityModel> GetAvailableModels(User user, IEnumerable<AvailabilityModel> allModels,int offset, int count)
-        {
-            return GetAvailableModels(user,allModels).Skip(offset).Take(count);
-        }
-
-
         //TODO: Сделать метод UpdateContentMedia и применить его по проекту
+
+        protected async Task<RequestResult> UpdateContentMedia(Content oldContent,Content newContent)
+        {
+          
+            throw new NotImplementedException();
+        }
         protected async Task<RequestResult> UploadContentMedia(Content content)
         {
             foreach(var item in content.Items)
@@ -103,9 +89,6 @@ namespace Alfateam.Website.API.Abstractions
 
             return RequestResult.AsSuccess();
         }
-
-
-
         protected PricingMatrix CreateDefaultPricingMatrix()
         {
             var matrix = new PricingMatrix();
@@ -171,7 +154,7 @@ namespace Alfateam.Website.API.Abstractions
 
         protected bool IsInAdminRole(User user)
         {
-            return user.RoleModel.Role == UserRole.Admin || user.RoleModel.Role == UserRole.Owner;
+            return user.RoleModel.Role != UserRole.User;
         }
         protected bool CheckBasePermissions(User user, AvailabilityModel model)
         {
@@ -196,6 +179,12 @@ namespace Alfateam.Website.API.Abstractions
             {
                 return res.SetError(403, "У пользователя нет доступа в администраторскую часть");
             }
+            if(session.User.RoleModel.Role == UserRole.Owner 
+                || session.User.RoleModel.Role == UserRole.LocalDirector)
+            {
+                return res.SetSuccess();
+            }
+
 
             var userAccess = session.User.RoleModel.GetContentAccess(type);
             if (userAccess == null)
@@ -208,7 +197,7 @@ namespace Alfateam.Website.API.Abstractions
             }
 
 
-            if (userAccess.AccessLevel < requiredLevel && session.User.RoleModel.Role != UserRole.Owner)
+            if (userAccess.AccessLevel < requiredLevel)
             {
                 switch (requiredLevel)
                 {
@@ -232,6 +221,87 @@ namespace Alfateam.Website.API.Abstractions
 
 
         #endregion
+
+        #region Availability 
+        protected IEnumerable<AvailabilityModel> GetAvailableModels(User user, IEnumerable<AvailabilityModel> allModels)
+        {
+            var allowedModels = new List<AvailabilityModel>();
+
+            if (user.RoleModel.Role == UserRole.Owner)
+            {
+                return allModels.ToList();
+            }
+
+            var allCountries = DB.Countries.Where(o => !o.IsDeleted).ToList();
+            var availableUserCountries = user.RoleModel.GetAvailableCountries(allCountries);
+
+            foreach (var model in allModels)
+            {
+                var availableModelCountries = model.Availability.GetAvailableCountries(allCountries);
+
+                bool isAvailable = availableModelCountries.Intersect(availableUserCountries).Any();
+                if (isAvailable)
+                {
+                    allowedModels.Add(model);
+                }
+            }
+            return allowedModels;
+        }
+        protected IEnumerable<AvailabilityModel> GetAvailableModels(User user, IEnumerable<AvailabilityModel> allModels, int offset, int count)
+        {
+            return GetAvailableModels(user, allModels).Skip(offset).Take(count);
+        }
+
+
+        protected RequestResult CanSetAvailabilityCountries(User user, Availability availability)
+        {
+            var allCountries = DB.Countries.Where(o => !o.IsDeleted).ToList();
+            var session = GetSessionWithRoleInclude();
+
+
+            var userAvailableCountries = user.RoleModel.GetAvailableCountries(allCountries);
+            var availabilityAllowedCountries = availability.GetAvailableCountries(allCountries);
+
+            if (!availabilityAllowedCountries.Any())
+            {
+                return RequestResult.AsError(400, "Не указано ни одной доступной страны в модели доступности");
+            }
+
+
+            bool success = true;
+            string errorText = "Страны, указанные в модели доступности недоступны для данного пользователя: \r\n";
+            foreach (var country in availabilityAllowedCountries)
+            {
+                if (!userAvailableCountries.Any(o => o.Id == country.Id))
+                {
+                    success = false;
+                    errorText += $"{country.Title} \r\n";
+                }
+            }
+
+            if (!success)
+            {
+                return RequestResult.AsError(403, errorText);
+            }
+
+            return RequestResult.AsSuccess();
+        }
+        protected RequestResult<Availability> TryUpdateAvailability(AvailabilityEditModel model, ContentAccessModelType accessType)
+        {
+            var availability = DB.GetIncludedAvailability(model.Id);
+            var session = GetSessionWithRoleInclude();
+            return TryFinishAllRequestes<Availability>(new[]
+            {
+                () => RequestResult.FromBoolean(availability != null, 404, "Запись по данному id не найдена"),
+                () => CheckContentAreaRights(session, accessType, 2),
+                () => CanSetAvailabilityCountries(session.User, availability),
+                () => UpdateModel(DB.Availabilities, model, availability)
+            });
+        }
+     
+        #endregion
+
+
 
 
         #region Обобщенные методы получения объектов
@@ -320,6 +390,7 @@ namespace Alfateam.Website.API.Abstractions
             return TryFinishAllRequestes<T>(new[]
             {
                 () => CheckContentAreaRights(session, item, accessType, 4),
+                () => CanSetAvailabilityCountries(session.User, item.Availability),
                 () => CheckBasePropsBeforeCreate(item)
             });
         }
@@ -355,8 +426,6 @@ namespace Alfateam.Website.API.Abstractions
         #endregion
 
         #region Обобщенные методы редактирования объекта
-
-
 
         protected RequestResult<T> CheckMainModelBeforeUpdate<T>(T model,EditModel<T> editModel,ContentAccessModelType accessType) where T : AvailabilityModel
         {
@@ -410,17 +479,7 @@ namespace Alfateam.Website.API.Abstractions
         }
 
 
-        protected RequestResult<Availability> TryUpdateAvailability(AvailabilityEditModel model, ContentAccessModelType accessType)
-        {
-           var availability = DB.GetIncludedAvailability(model.Id);
-           return TryFinishAllRequestes<Availability>(new[]
-           {
-                () => RequestResult.FromBoolean(availability != null, 404, "Запись по данному id не найдена"),
-                () => CheckContentAreaRights(GetSessionWithRoleInclude(), accessType, 2),
-                () => UpdateModel(DB.Availabilities, model, availability)
-            });
-        }
-
+ 
 
 
         #endregion

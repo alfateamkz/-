@@ -14,6 +14,17 @@ namespace Alfateam2._0.Models.General
     /// </summary>
     public class Country : AbsModel
     {
+        public Country()
+        {
+
+        }
+
+        public Country(string title,string code)
+        {
+            Title = title;
+            Code = code;    
+        }
+
         public string Title { get; set; }
         public string Code { get; set; }
 

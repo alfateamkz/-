@@ -6,6 +6,7 @@ using Alfateam.Website.API.Models.ClientModels;
 using Alfateam.Website.API.Models.ClientModels.General;
 using Alfateam.Website.API.Models.Navigation;
 using Alfateam2._0.Models.General;
+using Alfateam2._0.Models.Stats;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Xml;
@@ -48,6 +49,17 @@ namespace Alfateam.Website.API.Controllers.General
 
 
 
+
+        [HttpPut, Route("AddSiteVisit")]
+        public async Task<bool> AddSiteVisit(SiteVisit info)
+        {
+            if (!info.IsValid()) return false;
+
+            DB.SiteVisits.Add(info);
+            DB.SaveChanges();
+
+            return true;
+        }
 
 
 
@@ -134,10 +146,21 @@ namespace Alfateam.Website.API.Controllers.General
 
 
 
+
+
             var teamBlock = new SitemapItem("Komanda", "");
             root.Sublelements.Add(teamBlock);
 
-            //TODO: добавить команду
+            var structure = DB.TeamStructures
+                .Include(o => o.Groups).ThenInclude(o => o.Members)
+                .FirstOrDefault();
+
+            foreach(var member in structure.Groups.SelectMany(o => o.Members))
+            {
+                teamBlock.Sublelements.Add(new SitemapItem($"{member.Name} {member.Surname} - {member.Position}", ""));
+            }
+
+    
 
 
             root.Sublelements.Add(new SitemapItem("Rabota-menedjerom", ""));

@@ -1,4 +1,5 @@
 ﻿using Alfateam2._0.Models.Abstractions;
+using Alfateam2._0.Models.Localization.General;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,5 +22,10 @@ namespace Alfateam2._0.Models.General
         /// Отступ времени от Гринвича 
         /// </summary>
         public TimeSpan Offset { get; set; }
+
+
+        public Language MainLanguage { get; set; }
+        public int MainLanguageId { get; set; }
+        public List<TimezoneLocalization> Localizations { get; set; } = new List<TimezoneLocalization>();
     }
 }

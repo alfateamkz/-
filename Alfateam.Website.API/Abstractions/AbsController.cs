@@ -2,6 +2,7 @@
 using Alfateam.Website.API.Enums;
 using Alfateam.Website.API.Models.Core;
 using Alfateam2._0.Models.Abstractions;
+using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +14,11 @@ namespace Alfateam.Website.API.Abstractions
     [Route("[controller]")]
     public abstract class AbsController : ControllerBase
     {
-        protected WebsiteDBContext DB { get; set; }
+        //TODO: глобально! Рефакторинг в угоду ActionFilter
+        //TODO: Задачка на рефакторинг номер 2: ClientModel, автомаппинг
+
+
+        public WebsiteDBContext DB { get; set; }
         protected IWebHostEnvironment AppEnvironment { get; set; }
 
         protected string UserSessid => Request.Headers["Sessid"];
@@ -32,7 +37,7 @@ namespace Alfateam.Website.API.Abstractions
             DB = db;
         }
 
-        [NonAction]
+
         protected SessionUser GetUserBySessid()
         {
             var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.RoleModel).ThenInclude(o => o.AvailableCountries)
@@ -47,29 +52,33 @@ namespace Alfateam.Website.API.Abstractions
             };
         }
 
-        [NonAction]
-        protected RequestResult CheckSession(Session session)
+
+        public Session GetUserSession()
         {
-            RequestResult res = new RequestResult();
-
-            if (session == null)
-            {
-                res.Code = 404;
-                res.Error = "Токен в системе не найден";
-            }
-            else if (session.IsExpired)
-            {
-                res.Code = 401;
-                res.Error = "Вышел срок действия токена";
-            }
-            else
-            {
-                res.Success = true;
-            }
-
-            return res;
+            var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.BanInfo)
+                                     .FirstOrDefault(o => o.SessID == this.UserSessid);
+            return session;
         }
+        public RequestResult CheckSession(Session session)
+        {
+            return TryFinishAllRequestes(new[]
+            {
+                () => RequestResult.FromBoolean(session != null, 404, "Токен в системе не найден"),
+                () => RequestResult.FromBoolean(!session.IsExpired, 401, "Вышел срок действия токена"),
+                () => RequestResult.FromBoolean(!session.IsDeactivated, 401, "Токен был деактивирован"),
+            });
+        }
+        public RequestResult<BanInfo> CheckForBan(User user, BanType type)
+        {
+            if(user.BanInfo?.Type == type || user.BanInfo?.Type == BanType.All)
+            {
+                var res = new RequestResult<BanInfo>();
+                res.Value = user.BanInfo;
+                return res.SetError(403, "Пользователь забанен. Дополнительно в свойстве Value");
+            }
 
+            return RequestResult<BanInfo>.AsSuccess(null);
+        }
 
         #region File check
         protected RequestResult CheckImageFile(IFormFile file)

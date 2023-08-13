@@ -14,9 +14,11 @@ namespace Alfateam2._0.Models.General
     public class Session : AbsModel
     {
         public User User { get; set; }
+        public int UserId { get; set; }
+
         public string SessID { get; set; } = Guid.NewGuid().ToString();
         public DateTime ExpiresAt { get; set; } = DateTime.UtcNow.AddHours(12);
-
+        public bool IsDeactivated { get; set; }
 
 
         [JsonIgnore]

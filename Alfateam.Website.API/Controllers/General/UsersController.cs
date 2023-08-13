@@ -129,77 +129,47 @@ namespace Alfateam.Website.API.Controllers.General
 
 
         [HttpPut, Route("UpdateUser")]
-        public RequestResult<User> UpdateUser(UpdateUserModel model)
+        public async Task<RequestResult<User>> UpdateUser(UpdateUserModel model)
         {
-            var res = new RequestResult<User>();
-
-            var found = DB.Users.FirstOrDefault(o => o.Id == model.Id);
-            if (found == null)
+            var session = DB.Sessions.Include(o => o.User).FirstOrDefault(o => o.SessID == this.UserSessid);
+            return TryFinishAllRequestes<User>(new[]
             {
-                res.Code = 404;
-                res.Error = "Пользователь не найден";
-            }
-            else if (!model.ValidateModel())
-            {
-                res.Code = 400;
-                res.Error = "Заполните необходимые данные";
-            }
-            else
-            {
-                model.SetData(found);
-
-                DB.Users.Update(found);
-                DB.SaveChanges();
-
-                res.Success = true;
-            }
-
-            return res;
+                () => CheckSession(session),
+                () => RequestResult.FromBoolean(session.User != null,404,"Пользователь не найден"),
+                () => RequestResult.FromBoolean(model.ValidateModel(),400,"Заполните необходимые данные"),
+                () =>
+                {
+                    model.SetData(session.User);
+                    DB.Users.Update(session.User);
+                    DB.SaveChanges();
+                    return RequestResult<User>.AsSuccess(session.User);
+                }
+            });
         }
 
 
         [HttpPut, Route("UploadAvatar")]
         public async Task<RequestResult<User>> UploadAvatar()
         {
-            var res = new RequestResult<User>();
-
             var session = DB.Sessions.Include(o => o.User).FirstOrDefault(o => o.SessID == this.UserSessid);
-
             var checkSessionRes = CheckSession(session);
             if (!checkSessionRes.Success)
             {
-                res.FillFromRequestResult(checkSessionRes);
+                return new RequestResult<User>().FillFromRequestResult(checkSessionRes);
             }
             else
             {
-                var file = Request.Form.Files.FirstOrDefault();
-                if(file == null)
+                var uploadRes = await TryUploadFile("avatar", Enums.FileType.Image);
+                if(!uploadRes.Success)
                 {
-                    res.Code = 400;
-                    res.Error = "Необходимо загрузить аватар";
+                    return new RequestResult<User>().FillFromRequestResult(uploadRes);
                 }
-                else if (file.Length == 0)
-                {
-                    res.Code = 400;
-                    res.Error = "Пустой файл";
-                }
-                else if (!this.IsImageFileExtension(file.FileName))
-                {
-                    res.Code = 400;
-                    res.Error = "Неподдерживаемый формат файла";
-                }
-                else
-                {
-                    session.User.AvatarPath = await this.UploadFile(file);
 
-                    DB.Users.Update(session.User);
-                    DB.SaveChanges();
-
-                    res.Success = true;
-                }         
+                session.User.AvatarPath = uploadRes.Value;
+                DB.Users.Update(session.User);
+                DB.SaveChanges();
+                return RequestResult<User>.AsSuccess(session.User);
             }
-
-            return res;
         }
 
 
@@ -207,76 +177,67 @@ namespace Alfateam.Website.API.Controllers.General
 
 
         [HttpPut, Route("ChangePassword")]
-        public RequestResult<User> ChangePassword(int id, string oldPwd, string newPwd)
+        public RequestResult ChangePassword(string oldPwd, string newPwd)
         {
-            var res = new RequestResult<User>();
+            var session = DB.Sessions.Include(o => o.User).FirstOrDefault(o => o.SessID == this.UserSessid);
+            return TryFinishAllRequestes(new[]
+            {
+                () => CheckSession(session),
+                () => RequestResult.FromBoolean(PasswordHelper.CheckEncryptedPassword(oldPwd, session.User.Password),
+                                                   403, "Старый пароль не совпадает"),
+                () => RequestResult.FromBoolean(newPwd != null ,400, "Укажите новый пароль"),
+                () => RequestResult.FromBoolean(newPwd.Length < 8 ,400, "Длина пароля должна быть не менее 8 символов"),
+                () =>
+                {
+                    session.User.Password = PasswordHelper.EncryptPassword(newPwd);
+                    DB.Users.Update(session.User);
 
-            var found = DB.Users.FirstOrDefault(o => o.Id == id);
-            if (found == null)
-            {
-                res.Code = 404;
-                res.Error = "Пользователь не найден";
-            }
-            else if (!PasswordHelper.CheckEncryptedPassword(oldPwd, found.Password))
-            {
-                res.Code = 403;
-                res.Error = "Старый пароль не совпадает";
-            }
-            else if (newPwd == null)
-            {
-                res.Code = 400;
-                res.Error = "Укажите новый пароль";
-            }
-            else if (newPwd.Length < 8)
-            {
-                res.Code = 400;
-                res.Error = "Длина пароля должна быть не менее 8 символов";
-            }
-            else
-            {
-                found.Password = PasswordHelper.EncryptPassword(newPwd);
-                DB.Users.Update(found);
-                DB.SaveChanges();
+                    var otherSessions = DB.Sessions.Where(o => o.UserId == session.UserId && o.Id != session.Id);
+                    foreach(var otherSession in otherSessions)
+                    {
+                        otherSession.IsDeactivated = true;
+                    }
+                    DB.Sessions.UpdateRange(otherSessions);
 
-                res.Success = true;
-            }
-
-            return res;
+                    DB.SaveChanges();
+                    return RequestResult.AsSuccess();
+                }
+            });
         }
 
         [HttpPut, Route("ResetPassword")]
-        public RequestResult ResetPassword(int id)
+        public RequestResult ResetPassword(string email)
         {
-            var res = new RequestResult();
-
-            var found = DB.Users.FirstOrDefault(o => o.Id == id);
+            var found = DB.Users.FirstOrDefault(o => o.Email == email);
             if (found == null)
             {
-                res.Code = 404;
-                res.Error = "Пользователь не найден";
+                return RequestResult.AsError(404, "Пользователь не найден");
             }
-            else
+
+            var pwd = PasswordHelper.GeneratePassword(12);
+            found.Password = PasswordHelper.EncryptPassword(pwd);
+
+            var sessions = DB.Sessions.Where(o => o.UserId == found.Id);
+            foreach (var session in sessions)
             {
-                var pwd = PasswordHelper.GeneratePassword(12);
-                found.Password = PasswordHelper.EncryptPassword(pwd);
-
-                DB.Users.Update(found);
-                DB.SaveChanges();
-
-                //TODO: 1. Красиво оформить письмо. 2. Локализации писем
-                MailGateway.SendRestoreMail(new EmailMessage
-                {
-                    Subject = "Восстановление пароля",
-                    Body = $"Ваш новый пароль : {pwd}",
-                    ToDisplayName = $"{found.Name} {found.Surname}",
-                    ToEmail = found.Email
-
-                });
-
-                res.Success = true;
+                session.IsDeactivated = true;
             }
+            DB.Sessions.UpdateRange(sessions);
 
-            return res;
+            DB.Users.Update(found);
+            DB.SaveChanges();
+
+            //TODO: 1. Красиво оформить письмо. 2. Локализации писем
+            MailGateway.SendRestoreMail(new EmailMessage
+            {
+                Subject = "Восстановление пароля",
+                Body = $"Ваш новый пароль : {pwd}",
+                ToDisplayName = $"{found.Name} {found.Surname}",
+                ToEmail = found.Email
+
+            });
+
+            return RequestResult.AsSuccess();
         }
     }
 }

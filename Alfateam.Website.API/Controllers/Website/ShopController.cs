@@ -1,6 +1,7 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Extensions;
+using Alfateam.Website.API.Filters;
 using Alfateam.Website.API.Models.ClientModels;
 using Alfateam.Website.API.Models.ClientModels.Shop;
 using Alfateam.Website.API.Models.Core;
@@ -80,7 +81,7 @@ namespace Alfateam.Website.API.Controllers.Website
 
         #region Корзина
 
-        [HttpGet, Route("GetBasket")]
+        [HttpGet, Route("GetBasket"), UserActionsFilter]
         public async Task<RequestResult<ShopOrder>> GetBasket()
         {
             var res = new RequestResult<ShopOrder>();
@@ -110,7 +111,7 @@ namespace Alfateam.Website.API.Controllers.Website
         }
 
 
-        [HttpPut, Route("SetBasketCurrency")]
+        [HttpPut, Route("SetBasketCurrency"), UserActionsFilter]
         public async Task<RequestResult> SetBasketCurrency()
         {
             var res = new RequestResult();
@@ -151,7 +152,7 @@ namespace Alfateam.Website.API.Controllers.Website
         }
 
 
-        [HttpPut, Route("UsePromocode")]
+        [HttpPut, Route("UsePromocode"), UserActionsFilter]
         public async Task<RequestResult> UsePromocode(string code)
         {
 
@@ -196,7 +197,7 @@ namespace Alfateam.Website.API.Controllers.Website
 
 
 
-        [HttpPut, Route("AddToBasket")]
+        [HttpPut, Route("AddToBasket"), UserActionsFilter]
         public async Task<RequestResult> AddToBasket(ShopOrderItem item)
         {
             var res = new RequestResult();
@@ -237,7 +238,7 @@ namespace Alfateam.Website.API.Controllers.Website
             return res.SetSuccess();
         }
 
-        [HttpPut, Route("EditBasketItem")]
+        [HttpPut, Route("EditBasketItem"), UserActionsFilter]
         public async Task<RequestResult> EditBasketItem(ShopOrderItemEditModel model)
         {
             var res = new RequestResult();
@@ -276,7 +277,7 @@ namespace Alfateam.Website.API.Controllers.Website
             return res;
         }
 
-        [HttpDelete, Route("RemoveBasketItem")]
+        [HttpDelete, Route("RemoveBasketItem"), UserActionsFilter]
         public async Task<RequestResult> RemoveBasketItem(int basketItemId)
         {
             var res = new RequestResult();
@@ -321,7 +322,7 @@ namespace Alfateam.Website.API.Controllers.Website
 
         #region Избранное
 
-        [HttpGet, Route("GetWishlist")]
+        [HttpGet, Route("GetWishlist"), UserActionsFilter]
         public async Task<RequestResult<ShopWishlist>> GetWishlist()
         {
             var res = new RequestResult<ShopWishlist>();
@@ -346,7 +347,7 @@ namespace Alfateam.Website.API.Controllers.Website
             return res;
         }
 
-        [HttpPut, Route("ToggleWishlistItem")]
+        [HttpPut, Route("ToggleWishlistItem"), UserActionsFilter]
         public async Task<RequestResult<bool>> ToggleWishlistItem(int productId)
         {
             var res = new RequestResult<bool>();
@@ -396,7 +397,7 @@ namespace Alfateam.Website.API.Controllers.Website
 
         #region Заказы
 
-        [HttpGet, Route("GetOrders")]
+        [HttpGet, Route("GetOrders"), UserActionsFilter]
         public async Task<IEnumerable<ShopOrder>> GetOrders()
         {
             var res = new RequestResult<ShopWishlist>();
@@ -411,7 +412,7 @@ namespace Alfateam.Website.API.Controllers.Website
             return session.User.Orders.Where(o => !o.IsDeleted);
         }
 
-        [HttpGet, Route("GetOrder")]
+        [HttpGet, Route("GetOrder"), UserActionsFilter]
         public async Task<RequestResult<ShopOrder>> GetOrders(int orderId)
         {
             var res = new RequestResult<ShopOrder>();
@@ -436,7 +437,7 @@ namespace Alfateam.Website.API.Controllers.Website
             return res;
         }
 
-        [HttpPut, Route("CreateOrderFromBasket")]
+        [HttpPut, Route("CreateOrderFromBasket"), UserActionsFilter]
         public async Task<RequestResult> CreateOrderFromBasket()
         {
             var res = new RequestResult();
@@ -469,7 +470,7 @@ namespace Alfateam.Website.API.Controllers.Website
         }
 
 
-        [HttpDelete, Route("RemoveUnpaidOrder")]
+        [HttpDelete, Route("RemoveUnpaidOrder"), UserActionsFilter]
         public async Task<RequestResult> RemoveUnpaidOrder(int orderId)
         {
             var res = new RequestResult();
@@ -513,7 +514,7 @@ namespace Alfateam.Website.API.Controllers.Website
         #region Оплата заказа
 
         //TODO: пока нету, будем прикручивать юкассу и КЗ эквайринг
-
+        [HttpPut, Route("CreatePayment"), UserActionsFilter]
         public async Task<RequestResult> CreatePayment(int orderId, MerchantServiceType merchantType)
         {
             var res = new RequestResult();

@@ -1,5 +1,6 @@
 ﻿using Alfateam.Models.Helpers;
 using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Models.ClientModels.General;
 using Alfateam2._0.Models;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.HR;
@@ -15,8 +16,18 @@ namespace Alfateam.Website.API.Models.ClientModels.HR
         public Content InnerContent { get; set; }
 
 
-
         public string Slug => SlugHelper.GetLatynSlug(Title);
+
+
+        public CurrencyClientModel Currency { get; set; }
+        public double? SalaryFrom { get; set; }
+        public double? SalaryTo { get; set; }
+
+
+        public JobVacancyExpierence Expierence { get; set; }
+
+
+      
 
         public static JobVacancyClientModel Create(JobVacancy item, int? langId)
         {
@@ -26,6 +37,12 @@ namespace Alfateam.Website.API.Models.ClientModels.HR
             model.Id = item.Id;
             model.Title = item.Title;
             model.InnerContent = item.InnerContent;
+
+            model.Currency = CurrencyClientModel.Create(item.Currency, langId);
+            model.SalaryFrom = item.SalaryFrom;
+            model.SalaryTo = item.SalaryTo;
+
+            model.Expierence = item.Expierence;
 
             if (item.MainLanguageId != langId)
             {

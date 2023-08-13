@@ -1,5 +1,8 @@
-﻿using Alfateam2._0.Models;
+﻿using Alfateam.DB.Helpers;
+using Alfateam.Website.API.Helpers;
+using Alfateam2._0.Models;
 using Alfateam2._0.Models.Abstractions;
+using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.Events;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.HR;
@@ -19,10 +22,12 @@ using Alfateam2._0.Models.Posts;
 using Alfateam2._0.Models.Promocodes;
 using Alfateam2._0.Models.Reviews;
 using Alfateam2._0.Models.Roles;
+using Alfateam2._0.Models.Roles.Access;
 using Alfateam2._0.Models.Shop;
 using Alfateam2._0.Models.Shop.Modifiers;
 using Alfateam2._0.Models.Shop.Orders;
 using Alfateam2._0.Models.Shop.Wishes;
+using Alfateam2._0.Models.Stats;
 using Alfateam2._0.Models.Team;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -35,6 +40,21 @@ namespace Alfateam.DB
 {
     public class WebsiteDBContext : DbContext
     {
+        public WebsiteDBContext()
+        {
+            if (Database.EnsureCreated())
+            {
+                MakeDefaultEntities();
+            } 
+        }
+        public WebsiteDBContext(DbContextOptions<WebsiteDBContext> options)
+        {
+            if (Database.EnsureCreated())
+            {
+                MakeDefaultEntities();
+            }
+        }
+
 
 
 
@@ -54,6 +74,7 @@ namespace Alfateam.DB
         #region General
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Availability> Availabilities { get; set; }
+        public DbSet<BanInfo> BanInfos { get; set; }
         public DbSet<Cost> Costs { get; set; }
         public DbSet<Country> Countries { get; set; }
         public DbSet<CountrySite> CountrySites { get; set; }
@@ -80,6 +101,8 @@ namespace Alfateam.DB
         public DbSet<CountryLocalization> CountryLocalizations { get; set; }
         public DbSet<CurrencyLocalization> CurrencyLocalizations { get; set; }
         public DbSet<LanguageLocalization> LanguageLocalizations { get; set; }
+        public DbSet<TimezoneLocalization> TimezoneLocalizations { get; set; }
+
         #endregion
 
         #region Items
@@ -164,7 +187,18 @@ namespace Alfateam.DB
         #endregion
 
         #region Roles
+
+        #region Access
+        public DbSet<ContentAccessModel> ContentAccessModels { get; set; }
+        public DbSet<HRAccessModel> HRAccessModels { get; set; }
+        public DbSet<OutstaffAccessModel> OutstaffAccessModels { get; set; }
+        public DbSet<ReviewsAccessModel> ReviewsAccessModels { get; set; }
+        public DbSet<ShopAccessModel> ShopAccessModels { get; set; }
+
+        #endregion
+
         public DbSet<UserRoleModel> UserRoleModels { get; set; }
+
         #endregion
 
         #region Shop
@@ -192,6 +226,11 @@ namespace Alfateam.DB
         public DbSet<ShopProductImage> ShopProductImages { get; set; }
         #endregion
 
+        #region Stats
+        public DbSet<SiteVisit> SiteVisits { get; set; }
+
+        #endregion
+
         #region Team
         public DbSet<TeamGroup> TeamGroups { get; set; }
         public DbSet<TeamMember> TeamMembers { get; set; }
@@ -208,9 +247,7 @@ namespace Alfateam.DB
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //optionsBuilder.UseMySql(DatabaseSettings.ConnectionString,
-            //           new MySqlServerVersion(new Version(8, 0, 11)));
-
+            optionsBuilder.UseMySql(ConnectionStrings.Website, new MySqlServerVersion(new Version(8, 0, 11)));
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -221,10 +258,183 @@ namespace Alfateam.DB
 
         #endregion
 
+        #region Make default entities methods
+
+        private void MakeDefaultEntities()
+        {
+            MakeDefaultLanguages();
+            MakeDefaultCurrencies();
+            MakeDefaultCountries();
+
+            MakeDefaultUsers();
+
+            SaveChanges();
+        }
+
+
+        private void MakeDefaultLanguages()
+        {
+            if (Languages.Any()) return;
+
+            var russian = new Language
+            {
+                Title = "Русский",
+                Code = "RU",
+            };
+            russian.MainLanguage = russian;
+
+            var kazakh = new Language
+            {
+                Title = "Казахский",
+                Code = "KZ",
+                MainLanguage = russian,
+                IsHidden = true
+            };
+
+            var kyrgyz = new Language
+            {
+                Title = "Кыргызский",
+                Code = "KZ",
+                MainLanguage = russian,
+                IsHidden = true
+            };
+
+            var english = new Language
+            {
+                Title = "Английский",
+                Code = "EN",
+                MainLanguage = russian,
+                IsHidden = true
+            };
+
+            var mongolian = new Language
+            {
+                Title = "Монгольский",
+                Code = "MN",
+                MainLanguage = russian,
+                IsHidden = true
+            };
+
+            Languages.AddRange(russian, kazakh, kyrgyz, english, mongolian);
+        }
+        private void MakeDefaultCurrencies()
+        {
+            if (Currencies.Any()) return;
+
+            var rusMainLang = Languages.FirstOrDefault(o => o.Code == "RU");
+
+            var russianRuble = new Currency("Российский рубль", "RUB", "₽")
+            {
+                MainLanguage = rusMainLang
+            };
+            var kazakhTenge = new Currency("Казахстанский тенге", "KZT", "₸")
+            {
+                MainLanguage = rusMainLang
+            };
+            var usDollar = new Currency("Доллар США", "USD", "$")
+            {
+                MainLanguage = rusMainLang
+            };
+            var euro = new Currency("Евро", "EUR", "€")
+            {
+                MainLanguage = rusMainLang
+            };
+            var mongolianTugrik = new Currency("Монгольский тугрик", "MNT", "₮")
+            {
+                MainLanguage = rusMainLang
+            };
+            var kyrgyzSom = new Currency("Кыргызстанский сом", "KGS", "₮")
+            {
+                MainLanguage = rusMainLang
+            };
+
+            Currencies.AddRange(russianRuble, kazakhTenge, usDollar, euro, mongolianTugrik, kyrgyzSom);
+        }
+        private void MakeDefaultCountries()
+        {
+            if (Countries.Any()) return;
+
+            var rusMainLang = Languages.FirstOrDefault(o => o.Code == "RU");
+            var kazLang = Languages.FirstOrDefault(o => o.Code == "KZ");
+            var kyrgyzLang = Languages.FirstOrDefault(o => o.Code == "KG");
+            var mongolianLang = Languages.FirstOrDefault(o => o.Code == "MN");
+
+            var rusRuble = Currencies.FirstOrDefault(o => o.Code == "RUB");
+            var kazTenge = Currencies.FirstOrDefault(o => o.Code == "KZT");
+            var kyrgyzSom = Currencies.FirstOrDefault(o => o.Code == "KGS");
+            var mongTugrik = Currencies.FirstOrDefault(o => o.Code == "MNT");
+            var usDollar = Currencies.FirstOrDefault(o => o.Code == "USD");
+
+            var russia = new Country("Россия", "RU")
+            {
+                MainLanguage = rusMainLang,
+                OfficialMainLanguage = rusMainLang,
+                Languages = new List<Language> { rusMainLang},
+                MainCurrency = rusRuble,
+                Currencies = new List<Currency> { rusRuble },
+            };
+            var kazakhstan = new Country("Казахстан", "KZ")
+            {
+                MainLanguage = rusMainLang,
+                OfficialMainLanguage = kazLang,
+                Languages = new List<Language> { rusMainLang, kazLang },
+                MainCurrency = kazTenge,
+                Currencies = new List<Currency> { kazTenge },
+            };
+            var kyrgyzstan = new Country("Кыргызстан", "KG")
+            {
+                MainLanguage = rusMainLang,
+                OfficialMainLanguage = kyrgyzLang,
+                Languages = new List<Language> { rusMainLang, kyrgyzLang },
+                MainCurrency = kyrgyzSom,
+                Currencies = new List<Currency> { kyrgyzSom, usDollar },
+            };
+            var mongolia = new Country("Монголия", "MN")
+            {
+                MainLanguage = rusMainLang,
+                OfficialMainLanguage = mongolianLang,
+                Languages = new List<Language> { mongolianLang },
+                MainCurrency = mongTugrik,
+                Currencies = new List<Currency> { mongTugrik, usDollar },
+            };
+        }
+
+        private void MakeDefaultUsers()
+        {
+            if (Users.Any()) return;
+
+            var owner = new User()
+            {
+                RoleModel = UserRoleModel.CreateDefault(),
+                Email = "alfateamkz@yandex.kz",
+                Name = "Артур",
+                Surname = "Бондарев",
+                Patronymic = "Александрович",
+                Password = PasswordHelper.EncryptPassword("alfateam2_0!2023"),
+            };
+            owner.RoleModel.Role = UserRole.Owner;
+            owner.RoleModel.IsAllCountriesAccess = true;
+
+            var magzum = new User()
+            {
+                RoleModel = UserRoleModel.CreateDefault(),
+                Email = "magzhumtop@yandex.kz",
+                Name = "Мағзұм",
+                Surname = "Жаңабергенов",
+                Patronymic = "Өтегенұлы",
+                Password = PasswordHelper.EncryptPassword("magzhumtop_2022"),
+            };
+            magzum.RoleModel.Role = UserRole.Owner;
+            magzum.RoleModel.IsAllCountriesAccess = true;
+
+            Users.AddRange(owner, magzum);
+        }
+
+        #endregion
 
         #region Public methods
 
-        public Availability GetIncludedAvailability(int id)
+            public Availability GetIncludedAvailability(int id)
         {
             return this.Availabilities.Include(o => o.AllowedCountries)
                                       .Include(o => o.DisallowedCountries)

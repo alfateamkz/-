@@ -24,6 +24,7 @@ namespace Alfateam.Website.API.Controllers.Website
             var items = GetEvents().Skip(offset).Take(count).ToList();
             return EventClientModel.CreateItems(items, LanguageId);
         }
+  
         [HttpGet, Route("GetEventsByFilter")]
         public async Task<IEnumerable<EventClientModel>> GetEventsByFilter(EventsSearchFilter filter)
         {

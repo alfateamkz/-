@@ -4,7 +4,6 @@ using Alfateam.Website.API.Enums;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.ClientModels;
-using Alfateam.Website.API.Models.ClientModels.General;
 using Alfateam.Website.API.Models.ClientModels.Posts;
 using Alfateam.Website.API.Models.ClientModels.Shop;
 using Alfateam.Website.API.Models.ClientModels.Shop.Orders;
@@ -33,10 +32,9 @@ namespace Alfateam.Website.API.Controllers.Admin
 {
     public class AdminShopController : AbsAdminController
     {
-        //TODO: проверить методы валидности
         public AdminShopController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
         {
-            //TODO: доработать контроллер
+
         }
 
         #region Товары
@@ -91,13 +89,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreateProduct")]
         public async Task<RequestResult<ShopProduct>> CreateProduct(ShopProduct item)
         {
-             return TryFinishAllRequestes<ShopProduct>(new[]
-             {
+            var session = GetSessionWithRoleInclude();
+            return TryFinishAllRequestes<ShopProduct>(new[]
+            {
+                () => CheckSession(session),
                 () => CheckAccess(8),
                 () => CheckAndPrepareProductBeforeCreate(item).Result,
                 () => RequestResult.FromBoolean(item.IsValid(), 400, "Проверьте корректность заполнения полей"),
+                () => CanSetAvailabilityCountries(session.User, item.Availability),
                 () => CreateModel(DB.ShopProducts,item)
-             });
+            });
         }
 
         [HttpPost, Route("CreateProductLocalization")]
@@ -123,8 +124,6 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
 
-
-        //TODO: доработать внутрянку методов UpdateProductMain и UpdateProductLocalization
 
         [HttpPut, Route("UpdateProductMain")]
         public async Task<RequestResult<ShopProduct>> UpdateProductMain(ShopProductMainEditModel model)
@@ -163,8 +162,123 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
 
+        #region Фотки товара и локализаций  
 
 
+        [HttpPost, Route("AddProductPhoto")]
+        public async Task<RequestResult<ShopProductImage>> AddProductPhoto(int productId)
+        {
+            var product = GetProductsList().FirstOrDefault(o => o.Id == productId && !o.IsDeleted);
+            var user = GetSessionWithRoleInclude()?.User;
+
+            return TryFinishAllRequestes<ShopProductImage>(new Func<RequestResult>[]
+            {
+                 () => CheckAccess(5),
+                 () => RequestResult.FromBoolean(product != null, 404, "Сущность по данному id не найдена"),
+                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, product), 403, "У данного пользователя нет доступа к записи"),
+                 () =>
+                 {
+                     var photo = new ShopProductImage();
+
+                     var imgUploadResult = TryUploadFile("productPhoto", FileType.Image).Result;
+                     if (!imgUploadResult.Success)
+                     {
+                         return imgUploadResult;
+                     }
+
+                     product.Images.Add(photo);
+                     UpdateModel(DB.ShopProducts, product);
+                     return RequestResult<ShopProductImage>.AsSuccess(photo);
+                 }
+            });
+        }
+
+        [HttpPost, Route("AddProductLocalizationPhoto")]
+        public async Task<RequestResult<ShopProductImage>> AddProductLocalizationPhoto(int localizationId)
+        {
+            var localization = DB.ShopProductLocalizations.FirstOrDefault(o => o.Id == localizationId && !o.IsDeleted);
+            if (localization == null) return RequestResult<ShopProductImage>.AsError(404, "Сущность по данному id не найдена");
+
+            var product = GetProductsList().FirstOrDefault(o => o.Id == localization.ShopProductId && !o.IsDeleted);
+            var user = GetSessionWithRoleInclude()?.User;
+            return TryFinishAllRequestes<ShopProductImage>(new Func<RequestResult>[]
+            {
+                 () => CheckAccess(5),
+                 () => RequestResult.FromBoolean(product != null, 500, "Внутренняя ошибка"),
+                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, product), 403, "У данного пользователя нет доступа к записи"),
+                 () =>
+                 {
+                     var photo = new ShopProductImage();
+
+                     var imgUploadResult = TryUploadFile("productPhoto", FileType.Image).Result;
+                     if (!imgUploadResult.Success)
+                     {
+                         return imgUploadResult;
+                     }
+
+                     localization.Images.Add(photo);
+                     UpdateModel(DB.ShopProductLocalizations, localization);
+                     return RequestResult<ShopProductImage>.AsSuccess(photo);
+                 }
+            });
+        }
+
+
+
+
+        [HttpDelete, Route("DeleteProductPhoto")]
+        public async Task<RequestResult> DeleteProductPhoto(int productId,int photoId)
+        {
+            var product = GetProductsList().FirstOrDefault(o => o.Id == productId && !o.IsDeleted);
+            var user = GetSessionWithRoleInclude()?.User;
+
+            return TryFinishAllRequestes(new Func<RequestResult>[]
+            {
+                 () => CheckAccess(5),
+                 () => RequestResult.FromBoolean(product != null, 404, "Сущность по данному id не найдена"),
+                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, product), 403, "У данного пользователя нет доступа к записи"),
+                 () =>
+                 {
+                     var photo = product.Images.FirstOrDefault(o => o.Id == photoId);
+                     if(photo == null)
+                     {
+                         return RequestResult.AsError(404, "Фото по данному id не найдена");
+                     }
+                     DeleteFile(photo.ImgPath);
+                     product.Images.Remove(photo);
+                     return UpdateModel(DB.ShopProducts, product);
+                 }
+            });
+        }
+
+        [HttpDelete, Route("DeleteProductLocalizationPhoto")]
+        public async Task<RequestResult> DeleteProductLocalizationPhoto(int localizationId, int photoId)
+        {
+            var localization = DB.ShopProductLocalizations.FirstOrDefault(o => o.Id == localizationId && !o.IsDeleted);
+            if (localization == null) return RequestResult.AsError(404, "Сущность по данному id не найдена");
+
+            var product = GetProductsList().FirstOrDefault(o => o.Id == localization.ShopProductId && !o.IsDeleted);
+            var user = GetSessionWithRoleInclude()?.User;
+            return TryFinishAllRequestes(new Func<RequestResult>[]
+            {
+                 () => CheckAccess(5),
+                 () => RequestResult.FromBoolean(product != null, 500, "Внутренняя ошибка"),
+                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, product), 403, "У данного пользователя нет доступа к записи"),
+                 () =>
+                 {
+                     var photo = localization.Images.FirstOrDefault(o => o.Id == photoId);
+                     if(photo == null)
+                     {
+                         return RequestResult.AsError(404, "Фото по данному id не найдена");
+                     }
+                     DeleteFile(photo.ImgPath);
+                     localization.Images.Remove(photo);
+                     return UpdateModel(DB.ShopProductLocalizations, localization);
+                 }
+            });
+        }
+
+        #endregion
 
 
         [HttpDelete, Route("DeleteProduct")]
@@ -245,6 +359,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                 () => CreateModel(DB.ProductModifiers,item)
            });
         }
+
         [HttpPost, Route("CreateProductModifierLocalization")]
         public async Task<RequestResult<ProductModifierLocalization>> CreateProductCategoryLocalization(int itemId, ProductModifierLocalization localization)
         {
@@ -516,12 +631,15 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreateProductCategory")]
         public async Task<RequestResult<ShopProductCategory>> CreateProductCategory(ShopProductCategory item)
         {
-           return TryFinishAllRequestes<ShopProductCategory>(new[]
-           {
+            var session = GetSessionWithRoleInclude();
+            return TryFinishAllRequestes<ShopProductCategory>(new[]
+            {
+                () => CheckSession(session),
                 () => CheckAccess(8),
                 () => RequestResult.FromBoolean(item.IsValid(), 400, "Проверьте корректность заполнения полей"),
+                () => CanSetAvailabilityCountries(session.User, item.Availability),
                 () => CreateModel(DB.ShopProductCategories,item)
-           });
+            });
         }
 
         [HttpPost, Route("CreateProductCategoryLocalization")]
@@ -635,6 +753,19 @@ namespace Alfateam.Website.API.Controllers.Admin
             var orders = GetAvailableOrders(user,offset,count);
             var models = ShopOrderClientModel.CreateItems(orders, LanguageId, CountryId);
             return new RequestResult<IEnumerable<ShopOrderClientModel>>().SetSuccess(models);
+        }
+
+        [HttpGet, Route("GetOrder")]
+        public async Task<RequestResult<ShopOrder>> GetOrder(int id)
+        {
+            var user = GetSessionWithRoleInclude()?.User;
+            var item = GetAvailableOrders(user).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            return TryFinishAllRequestes<ShopOrder>(new Func<RequestResult>[]
+            {
+                () => CheckAccess(2),
+                () => RequestResult.FromBoolean(item != null, 404, "Сущность по данному id не найдена"),
+                () => RequestResult<ShopOrder>.AsSuccess(item)
+            });
         }
 
         [HttpPut, Route("UpdateOrderData")]
@@ -866,6 +997,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             return TryFinishAllRequestes<Availability>(new[]
             {
                 () => RequestResult.FromBoolean(availability != null, 404, "Запись по данному id не найдена"),
+                () => CanSetAvailabilityCountries(user, availability),
                 () => CheckAccess(5),
                 () => UpdateModel(DB.Availabilities, model, availability)
             });
@@ -885,6 +1017,11 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             var allOrders = GetOrdersList();
             var availableOrders = new List<ShopOrder>();
+
+            if (user.RoleModel.Role == UserRole.Owner)
+            {
+                return allOrders.ToList();
+            }
 
             foreach(var order in allOrders)
             {
@@ -933,10 +1070,12 @@ namespace Alfateam.Website.API.Controllers.Admin
            var session = GetSessionWithRoleInclude();
            return TryFinishAllRequestes(new Func<RequestResult>[]
            {
-                () => RequestResult.FromBoolean(session.User.RoleModel.Role != UserRole.User,
-                        403, "У данного пользователя нет доступа в администраторскую панель"),
                 () => CheckSession(session),
-                () => RequestResult.FromBoolean(session.User.RoleModel.ShopAccess.AccessLevel >= requiredLevel || session.User.RoleModel.Role == UserRole.Owner,
+                () => CheckForBan(session.User,BanType.AdminPanel),
+                () => RequestResult.FromBoolean(session.User.RoleModel.Role != UserRole.User,
+                        403, "У данного пользователя нет доступа в администраторскую панель"),  
+                () => RequestResult.FromBoolean(session.User.RoleModel.ShopAccess.AccessLevel >= requiredLevel 
+                            || session.User.RoleModel.Role == UserRole.Owner || session.User.RoleModel.Role == UserRole.LocalDirector,
                        403, "У данного пользователя нет прав на выполнение данного действия")
             });
         }
@@ -1064,8 +1203,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         private async Task<RequestResult> CheckAndPrepareProductBeforeUpdate(ShopProduct product, ShopProductMainEditModel model)
         {
             //Загрузка главной картинки
-
-            if (product.MainImage.ImgPath != model.MainImage?.ImgPath)
+            if (Request.Form.Files.Any(o => o.Name == "mainImg"))
             {
                 var mainFileUploadResult = await TryUploadFile($"mainImg", FileType.Image);
                 if (!mainFileUploadResult.Success)
@@ -1075,37 +1213,6 @@ namespace Alfateam.Website.API.Controllers.Admin
                 product.MainImage.ImgPath = mainFileUploadResult.Value;
             }
 
-
-
-            //TODO: здесь затык
-            //Загружаем остальные картинки
-            product.Images = new List<ShopProductImage>();
-            var files = Request.Form.Files.Where(o => o.Name.StartsWith("main_") && o.Name.EndsWith("_shopImg"));
-            foreach (var file in files)
-            {
-                var imgUploadResult = await TryUploadFile(file, FileType.Image);
-                if (!imgUploadResult.Success)
-                {
-                    return imgUploadResult;
-                }
-
-                product.Images.Add(new ShopProductImage
-                {
-                    ImgPath = imgUploadResult.Value
-                });
-            }
-
-
-            foreach (var localization in product.Localizations)
-            {
-                var localizationPrepareResult = await CheckAndPrepareProductLocalizationBeforeCreate(localization);
-                if (!localizationPrepareResult.Success)
-                {
-                    return localizationPrepareResult;
-                }
-            }
-
-
             return RequestResult.AsSuccess();
         }
         private async Task<RequestResult> CheckAndPrepareProductLocalizationBeforeUpdate(ShopProductLocalization localization, ShopProductLocalizationEditModel model)
@@ -1113,8 +1220,8 @@ namespace Alfateam.Website.API.Controllers.Admin
 
             if (model.UseLocalizationImages)
             {
-
-                if(localization.MainImage.ImgPath != model.MainImage?.ImgPath)
+                string formFileName = $"localization_{localization.LanguageId}_mainImg";
+                if (Request.Form.Files.Any(o => o.Name == formFileName))
                 {
                     //Загрузка главной картинки
                     var mainFileUploadResult = await TryUploadFile($"localization_{localization.LanguageId}_mainImg", FileType.Image);
@@ -1124,26 +1231,6 @@ namespace Alfateam.Website.API.Controllers.Admin
                     }
                     localization.MainImage.ImgPath = mainFileUploadResult.Value;
                 }
-
-
-                //TODO: и здесь затык
-                //Загружаем остальные картинки
-                localization.Images = new List<ShopProductImage>();
-                var files = Request.Form.Files.Where(o => o.Name.StartsWith("localization_") && o.Name.EndsWith("_shopImg"));
-                foreach (var file in files)
-                {
-                    var imgUploadResult = await TryUploadFile(file, FileType.Image);
-                    if (!imgUploadResult.Success)
-                    {
-                        return imgUploadResult;
-                    }
-
-                    localization.Images.Add(new ShopProductImage
-                    {
-                        ImgPath = imgUploadResult.Value
-                    });
-                }
-
             }
 
 
