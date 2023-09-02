@@ -1,5 +1,5 @@
 ﻿using Alfateam.Website.API.Abstractions;
-using Alfateam.Website.API.Models.Core;
+using Alfateam.Website.API.Core;
 using Alfateam2._0.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;

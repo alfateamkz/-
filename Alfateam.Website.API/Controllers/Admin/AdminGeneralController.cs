@@ -1,8 +1,8 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Models.ClientModels.General;
-using Alfateam.Website.API.Models.Core;
 using Alfateam.Website.API.Models.EditModels.Events;
 using Alfateam.Website.API.Models.EditModels.General;
 using Alfateam.Website.API.Models.LocalizationEditModels.General;

@@ -39,6 +39,6 @@ namespace Alfateam.CRM2_0.Models.General
         /// <summary>
         /// Свойства, описывающие транспорт
         /// </summary>
-        public List<TrasportProperty> Properties { get; set; } = new List<TrasportProperty>();
+        public List<TransportProperty> Properties { get; set; } = new List<TransportProperty>();
     }
 }

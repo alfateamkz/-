@@ -1,4 +1,5 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
+using Alfateam.CRM2_0.Models.Enums;
 using Alfateam.CRM2_0.Models.General.Info;
 using Alfateam.CRM2_0.Models.Security;
 using Newtonsoft.Json;
@@ -22,8 +23,16 @@ namespace Alfateam.CRM2_0.Models.General
         public Country Country { get; set; }
 
 
+        public UserRoleModel RoleModel { get; set; }
+
+
 
         public string Login { get; set; }
+        public string Email { get; set; }
+
+      
+
+
         [JsonIgnore]
         public string Password { get; set; }
 

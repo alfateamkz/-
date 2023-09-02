@@ -1,7 +1,7 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Filters;
-using Alfateam.Website.API.Models.Core;
 using Alfateam.Website.API.Models.EditModels.HR;
 using Alfateam.Website.API.Models.EditModels.Reviews;
 using Alfateam2._0.Models.General;

@@ -1,6 +1,7 @@
-﻿using Alfateam2._0.Models.General;
+﻿using Alfateam.CRM2_0.Models.General;
+using Alfateam.CRM2_0.Models.Security;
 
-namespace Alfateam.Website.API.Models.Core
+namespace Alfateam.CRM2_0.Core
 {
     public class SessionUser
     {

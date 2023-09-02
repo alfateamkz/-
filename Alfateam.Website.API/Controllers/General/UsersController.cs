@@ -2,9 +2,9 @@
 using Alfateam.Gateways.Abstractions;
 using Alfateam.Gateways.Models.Messages;
 using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Helpers;
 using Alfateam.Website.API.Models;
-using Alfateam.Website.API.Models.Core;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Roles;
 using Alfateam2._0.Models.Shop.Orders;

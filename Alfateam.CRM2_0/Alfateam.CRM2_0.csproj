@@ -14,9 +14,11 @@
   <ItemGroup>
     <Folder Include="Controllers\Roles\Management\" />
     <Folder Include="Controllers\Roles\Staff\" />
-    <Folder Include="Models\" />
     <Folder Include="Helpers\" />
-    <Folder Include="Filters\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Alfateam.DB\Alfateam.DB.csproj" />
   </ItemGroup>
 
 </Project>

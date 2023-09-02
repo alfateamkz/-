@@ -1,6 +1,6 @@
 ﻿using Alfateam.DB;
+using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Enums;
-using Alfateam.Website.API.Models.Core;
 using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;

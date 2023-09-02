@@ -1,8 +1,8 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Models.ClientModels.Posts;
-using Alfateam.Website.API.Models.Core;
 using Alfateam.Website.API.Models.Filters;
 using Alfateam2._0.Models;
 using Alfateam2._0.Models.General;

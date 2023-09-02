@@ -1,10 +1,10 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Enums;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Models.ClientModels.Portfolios;
 using Alfateam.Website.API.Models.ClientModels.Team;
-using Alfateam.Website.API.Models.Core;
 using Alfateam.Website.API.Models.EditModels;
 using Alfateam.Website.API.Models.EditModels.General;
 using Alfateam.Website.API.Models.EditModels.Team;

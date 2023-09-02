@@ -11,7 +11,7 @@ namespace Alfateam.CRM2_0.Models.General.Info
     /// Модель свойства транспорта
     /// Например: кол-во лошадиных сил или мест
     /// </summary>
-    public class TrasportProperty : AbsModel
+    public class TransportProperty : AbsModel
     {
         public string Title { get; set; }
         public string Description { get; set; }

@@ -1,4 +1,4 @@
-﻿namespace Alfateam.Website.API.Models.Core
+﻿namespace Alfateam.Website.API.Core
 {
     public class RequestResult
     {
@@ -10,7 +10,7 @@
         public static RequestResult FromBoolean(bool val, int errorCode, string errorText)
         {
             if (val) return AsSuccess();
-            return AsError(errorCode,errorText);
+            return AsError(errorCode, errorText);
         }
 
         public static RequestResult AsError(int code, string error)
@@ -39,7 +39,7 @@
         /// <summary>
         /// Задает значения Code и Error и возвращает ссылку на себя
         /// </summary>
-        public virtual RequestResult SetError(int code,string error)
+        public virtual RequestResult SetError(int code, string error)
         {
             Code = code;
             Error = error;
@@ -87,7 +87,7 @@
         /// </summary>
         public RequestResult<T> FillFromRequestResult(RequestResult<T> result)
         {
-            this.FillFromRequestResult(result);
+            FillFromRequestResult(result);
             Value = result.Value;
 
             return this;
