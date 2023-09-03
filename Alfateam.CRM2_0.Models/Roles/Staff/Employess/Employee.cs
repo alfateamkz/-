@@ -36,6 +36,11 @@ namespace Alfateam.CRM2_0.Models.Roles.Staff.Employess
         
 
 
+        /// <summary>
+        /// Автоматическое поле
+        /// Указывает на отдел
+        /// </summary>
+        public int? DepartmentsGroupingId { get; set; }
 
     }
 }

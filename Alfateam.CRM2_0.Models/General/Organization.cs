@@ -42,6 +42,13 @@ namespace Alfateam.CRM2_0.Models.General
         public DepartmentsGrouping Departments { get; set; }
 
 
+        /// <summary>
+        /// Автоматическое поле
+        /// Указывает на бизнес, которому принадлежит организация
+        /// </summary>
+        public int BusinessId { get; set; }
+
+
 
     }
 }

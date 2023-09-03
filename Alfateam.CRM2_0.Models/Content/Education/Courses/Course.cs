@@ -10,7 +10,7 @@ namespace Alfateam.CRM2_0.Models.Content.Education.Courses
     /// <summary>
     /// Сущность образовательного курса
     /// </summary>
-    public class Course : AbsModel
+    public class Course : ContentModel
     {
         public string Title { get; set; }
         public string Content { get; set; }

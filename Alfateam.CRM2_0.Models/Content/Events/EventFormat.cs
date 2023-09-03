@@ -10,7 +10,7 @@ namespace Alfateam.CRM2_0.Models.Content.Events
     /// <summary>
     /// Модель формата мероприятия
     /// </summary>
-    public class EventFormat : AbsModel
+    public class EventFormat : ContentModel
     {
         public string Title { get; set; }
     }

@@ -10,7 +10,7 @@ namespace Alfateam.CRM2_0.Models.Content.Events
     /// <summary>
     /// Модель категории мероприятия
     /// </summary>
-    public class EventCategory : AbsModel
+    public class EventCategory : ContentModel
     {
         public string Title { get; set; }
         public string? Description { get; set; }

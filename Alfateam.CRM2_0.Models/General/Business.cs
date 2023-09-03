@@ -21,5 +21,9 @@ namespace Alfateam.CRM2_0.Models.General
         public List<User> Owners { get; set; } = new List<User>();
         public BusinessType Type { get; set; } = BusinessType.Our;
         public List<Organization> Organizations { get; set; } = new List<Organization>();
+
+
+        public BusinessContent Content { get; set; }
+        public int ContentId { get; set; }
     }
 }

@@ -12,7 +12,7 @@ namespace Alfateam.CRM2_0.Models.Content.Tests
     /// <summary>
     /// Модель категории теста
     /// </summary>
-    public class TestCategory : AbsModel
+    public class TestCategory : ContentModel
     {
         public string Title { get; set; }
         public string Description { get; set; }

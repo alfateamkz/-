@@ -336,7 +336,9 @@ namespace Alfateam.DB
         #endregion
 
         public DbSet<Address> Addresses { get; set; }
+        public DbSet<Availability> Availabilities { get; set; }
         public DbSet<Business> Businesses { get; set; }
+        public DbSet<BusinessContent> BusinessContents { get; set; }
         public DbSet<Company> Companies { get; set; }
         public DbSet<Cost> Costs { get; set; }
         public DbSet<Country> Countries { get; set; }

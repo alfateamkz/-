@@ -14,6 +14,10 @@ namespace Alfateam.CRM2_0.Models.Content.Feedback
     public class FeedbackEntry : AbsModel
     {
         public User User { get; set; }
+        public int UserId { get; set; }
+
+
+
 
         /// <summary>
         /// При создании сущности(например, когда пользователь ставит лайк),
@@ -28,7 +32,42 @@ namespace Alfateam.CRM2_0.Models.Content.Feedback
 
 
         public DateTime? FirstFeedbackCanceledDate { get; set; }
-        public DateTime? LastFeedbackCanceledDate { get; set; } 
+        public DateTime? LastFeedbackCanceledDate { get; set; }
 
+
+
+        public static bool Toggle(List<FeedbackEntry> from, int userId)
+        {
+            FeedbackEntry entry = from.FirstOrDefault(o => o.UserId == userId);
+
+            if (entry == null)
+            {
+                entry = new FeedbackEntry
+                {
+                    UserId = userId,
+                };
+                from.Add(entry);
+                return true;
+            }
+            else
+            {
+                if (entry.IsActive)
+                {
+                    if (entry.FirstFeedbackCanceledDate == null)
+                    {
+                        entry.FirstFeedbackCanceledDate = DateTime.UtcNow;
+                    }
+                    entry.LastFeedbackCanceledDate = DateTime.UtcNow;
+                }
+                else
+                {
+                    entry.LastFeedbackEntryDate = DateTime.UtcNow;
+                }
+
+                entry.IsActive = !entry.IsActive;
+                return entry.IsActive;
+            }
+
+        }
     }
 }

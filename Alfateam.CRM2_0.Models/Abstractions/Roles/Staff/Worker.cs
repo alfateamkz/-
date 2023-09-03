@@ -36,5 +36,11 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Roles.Staff
         public List<Encouragement> Encouragements { get; set; } = new List<Encouragement>();
         public List<Fine> Fines { get; set; } = new List<Fine>();
 
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int? OrganizationOfficeStaffId { get; set; } 
+
     }
 }

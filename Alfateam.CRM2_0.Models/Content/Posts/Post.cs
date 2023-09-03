@@ -10,7 +10,7 @@ namespace Alfateam.CRM2_0.Models.Content.Posts
     /// <summary>
     /// Модель новостной записи
     /// </summary>
-    public class Post : AbsModel
+    public class Post : ContentModel
     {
         public string Title { get; set; }
         public string ShortDescription { get; set; }

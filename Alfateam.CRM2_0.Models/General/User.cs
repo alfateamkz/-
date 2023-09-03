@@ -43,5 +43,19 @@ namespace Alfateam.CRM2_0.Models.General
 
 
         public bool IsActive { get; set; }
+
+
+
+       
+        public Business Business { get; set; }
+        public int BusinessId { get; set; }
+
+
+        public Organization Organization { get; set; }
+        public int OrganizationId { get; set; }
+
+
+        public OrganizationOffice? Office { get; set; }
+        public int? OfficeId { get; set; }
     }
 }
