@@ -15,5 +15,6 @@ namespace Alfateam.CRM2_0.Models.General
     public class LegalForm : AbsModel
     {
         public string Title { get; set; }
+        public int CountryId { get; set; }
     }
 }

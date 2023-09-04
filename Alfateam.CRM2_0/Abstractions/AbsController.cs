@@ -1,6 +1,7 @@
 ﻿using Alfateam.CRM2_0.Core;
 using Alfateam.CRM2_0.Extensions;
 using Alfateam.CRM2_0.Filters;
+using Alfateam.CRM2_0.Enums;
 using Alfateam.CRM2_0.Models.Abstractions;
 using Alfateam.CRM2_0.Models.Abstractions.Roles.Staff;
 using Alfateam.CRM2_0.Models.Content.Videos;
@@ -162,8 +163,15 @@ namespace Alfateam.CRM2_0.Abstractions
 
 
 
-        #region Get available generic methods
-        protected RequestResult GetAvailableMany<T, ClModel>(DbSet<T> dbSet, int offset, int count = 20) where T : AvailabilityModel where ClModel : ClientModel<T>, new()
+        #region Get generic methods
+
+        protected RequestResult GetMany<T, ClModel>(IQueryable<T> dbSet, int offset, int count = 20) where T : AbsModel where ClModel : ClientModel<T>, new()
+        {
+            var items = dbSet.Where(o => !o.IsDeleted).Skip(offset).Take(count);
+            var models = new ClModel().CreateModels(items);
+            return RequestResult<IEnumerable<ClientModel<T>>>.AsSuccess(models);
+        }
+        protected RequestResult GetAvailableMany<T, ClModel>(IQueryable<T> dbSet, int offset, int count = 20) where T : AvailabilityModel where ClModel : ClientModel<T>, new()
         {
             var user = GetAuthorizedUser();
 
@@ -171,7 +179,7 @@ namespace Alfateam.CRM2_0.Abstractions
             var models = new ClModel().CreateModels(items);
             return RequestResult<IEnumerable<ClientModel<T>>>.AsSuccess(models);
         }
-        protected RequestResult GetAvailableEditableMany<T, ClModel>(DbSet<T> dbSet, int offset, int count = 20) where T : ContentModel where ClModel : ClientModel<T>, new()
+        protected RequestResult GetAvailableEditableMany<T, ClModel>(IQueryable<T> dbSet, int offset, int count = 20) where T : ContentModel where ClModel : ClientModel<T>, new()
         {
             var user = GetAuthorizedUser();
             var availableItems = new List<T>();
@@ -190,11 +198,21 @@ namespace Alfateam.CRM2_0.Abstractions
             return RequestResult<IEnumerable<ClientModel<T>>>.AsSuccess(models);
         }
 
+
+
+        protected RequestResult TryGetModel<T>(IQueryable<T> dbSet, int id) where T : AbsModel
+        {
+            var item = dbSet.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            return TryFinishAllRequestes(new[]
+            {
+                () => RequestResult.FromBoolean(item != null,404, "Сущность с данным id не существует"),
+                () => RequestResult<T>.AsSuccess(item)
+            });
+        }
         protected RequestResult TryGetContentModel<T>(IQueryable<T> dbSet, int id) where T : ContentModel
         {
-            var user = GetAuthorizedUser();
             var item = dbSet.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-
+            //TODO: TryGetContentModel, мб некорректно
             return TryFinishAllRequestes(new[]
             {
                 () => RequestResult.FromBoolean(item != null,404, "Сущность с данным id не существует"),
@@ -206,38 +224,69 @@ namespace Alfateam.CRM2_0.Abstractions
 
         #region Create generic methods
 
-        protected RequestResult TryCreateContentModel<T>(string contentPropName, EditModel<T> model) where T : ContentModel
+        protected RequestResult TryCreateModel<T>(DbSet<T> dbSet, EditModel<T> model, Func<T, RequestResult> prepareCallback = null) where T : AbsModel, new()
         {
-           var user = GetAuthorizedUser();
+            var user = GetAuthorizedUser();
 
-           return TryFinishAllRequestes(new[]
-           {
+            return TryFinishAllRequestes(new[]
+            {
+                () => RequestResult.FromBoolean(model.IsValid(),400, "Неверно заполнены поля"),
+                //TODO: тщательно проверить права доступа
+                () => prepareCallback?.Invoke(newItem),
+                () => CreateModel(dbSet,model)
+            });
+        }
+        protected RequestResult TryCreateContentModel<T>(string contentPropName, EditModel<T> model,Func<T, RequestResult> prepareCallback = null) where T : ContentModel, new()
+        {
+            var user = GetAuthorizedUser();
+
+            return TryFinishAllRequestes(new[]
+            {
                 () => RequestResult.FromBoolean(model.IsValid(),400, "Неверно заполнены поля"),
                 () => RequestResult.FromBoolean(user.BusinessId == BusinessId,403,"Нет доступа к данному бизнесу"),
-                () =>
-                {
-                    var business = DB.Businesses.Include(o => o.Content).FirstOrDefault(o => o.Id == BusinessId);
-
-                    var newItem = new T();
-                    model.Fill(newItem);
-                    model.Id = 0;
-
-                    var contentProp = business.Content.GetType().GetProperty(contentPropName);
-                    var propList = contentProp.GetValue(business.Content) as IList<T>;
-                    propList.Add(newItem);
-
-                    DB.Businesses.Update(business);
-                    DB.SaveChanges();
-                    return RequestResult<T>.AsSuccess(item);
-                }
+                () => CreateContentModel(contentPropName,model,prepareCallback)
             });
+        }
+
+
+
+        private RequestResult CreateContentModel<T>(string contentPropName, EditModel<T> model, Func<T, RequestResult> prepareCallback = null) where T : ContentModel, new()
+        {
+            var business = DB.Businesses.Include(o => o.Content).FirstOrDefault(o => o.Id == BusinessId);
+
+            var newItem = new T();
+            model.Fill(newItem);
+            newItem.Id = 0;
+
+            var contentProp = business.Content.GetType().GetProperty(contentPropName);
+            var propList = contentProp.GetValue(business.Content) as IList<T>;
+            propList.Add(newItem);
+
+            prepareCallback?.Invoke(newItem);
+
+            DB.Businesses.Update(business);
+            DB.SaveChanges();
+            return RequestResult<T>.AsSuccess(newItem);
         }
 
         #endregion
 
         #region Update generic methods
 
-        protected RequestResult TryUpdateContentModel<T>(DbSet<T> dbSet, EditModel<T> model) where T : ContentModel
+        protected RequestResult TryUpdateModel<T>(DbSet<T> dbSet, EditModel<T> model, Func<T, RequestResult> prepareCallback = null) where T : AbsModel
+        {
+            var user = GetAuthorizedUser();
+            var item = dbSet.FirstOrDefault(o => o.Id == model.Id);
+
+            return TryFinishAllRequestes(new[]
+            {
+                () => RequestResult.FromBoolean(item != null,404,"Сущность с данным id не найдена"),
+                () => RequestResult.FromBoolean(model.IsValid(),400, "Неверно заполнены поля"),
+                () => prepareCallback?.Invoke(item),
+                () => UpdateModel(dbSet,item,model)
+            });
+        }
+        protected RequestResult TryUpdateContentModel<T>(DbSet<T> dbSet, EditModel<T> model, Func<T, RequestResult> prepareCallback = null) where T : ContentModel
         {
             var user = GetAuthorizedUser();
             var item = dbSet.FirstOrDefault(o => o.Id == model.Id);
@@ -247,13 +296,8 @@ namespace Alfateam.CRM2_0.Abstractions
                 () => RequestResult.FromBoolean(item != null,404,"Сущность с данным id не найдена"),
                 () => RequestResult.FromBoolean(HasContentModelModifyAccess(user,item), 403, "Нет прав на редактирование сущности"),
                 () => RequestResult.FromBoolean(model.IsValid(),400, "Неверно заполнены поля"),
-                () =>
-                {
-                    model.Fill(item);
-                    dbSet.Update(item);
-                    DB.SaveChanges();
-                    return RequestResult<T>.AsSuccess(item);
-                }
+                () => prepareCallback?.Invoke(item),
+                () => UpdateModel(dbSet,item,model)
             });
         }
 
@@ -262,6 +306,16 @@ namespace Alfateam.CRM2_0.Abstractions
 
         #region Delete generic methods
 
+        protected RequestResult TryDeleteModel<T>(DbSet<T> dbSet, int id) where T : AbsModel
+        {
+            var item = dbSet.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return TryFinishAllRequestes(new[]
+            {
+                () => RequestResult.FromBoolean(item != null,404,"Сущность с данным id не найдена"),
+                () => DeleteModel(dbSet,item)
+            });
+        }
         protected RequestResult TryDeleteContentModel<T>(DbSet<T> dbSet,int id) where T : ContentModel
         {
             var user = GetAuthorizedUser();
@@ -271,19 +325,60 @@ namespace Alfateam.CRM2_0.Abstractions
             {
                 () => RequestResult.FromBoolean(item != null,404,"Сущность с данным id не найдена"),
                 () => RequestResult.FromBoolean(HasContentModelModifyAccess(user,item), 403, "Нет прав на удаление сущности"),
-                () =>
-                {
-                    item.IsDeleted = true;
-                    dbSet.Update(item);
-                    DB.SaveChanges();
-                    return RequestResult.AsSuccess();
-                }
+                () => DeleteModel(dbSet,item)
             });
         }
 
 
         #endregion
 
+
+        #region DB methods
+
+
+        protected RequestResult CreateModel<T>(DbSet<T> dbSet, EditModel<T> model) where T : AbsModel, new()
+        {
+            var item = new T();
+            model.Fill(item);
+            item.Id = 0;
+            return CreateModel(dbSet, item);
+        }
+        protected RequestResult CreateModel<T>(DbSet<T> dbSet, T item) where T : AbsModel
+        {
+            dbSet.Add(item);
+            DB.SaveChanges();
+            return RequestResult.AsSuccess();
+        }
+
+
+        protected RequestResult UpdateModel<T>(DbSet<T> dbSet, T item,EditModel<T> model) where T : AbsModel
+        {
+            model.Fill(item);
+            return UpdateModel(dbSet, item);
+        }
+        protected RequestResult UpdateModel<T>(DbSet<T> dbSet,T item) where T : AbsModel
+        {
+            dbSet.Update(item);
+            DB.SaveChanges();
+            return RequestResult.AsSuccess();
+        }
+        protected RequestResult DeleteModel<T>(DbSet<T> dbSet, T item, bool softDelete = true) where T : AbsModel
+        {
+            if (softDelete)
+            {
+                item.IsDeleted = true;
+                dbSet.Update(item);
+            }
+            else
+            {
+                dbSet.Remove(item);
+            }
+
+            DB.SaveChanges();
+            return RequestResult.AsSuccess();
+        }
+
+        #endregion
 
         protected bool HasContentModelModifyAccess(User user,ContentModel model)
         {

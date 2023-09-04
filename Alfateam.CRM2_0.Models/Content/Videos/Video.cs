@@ -20,6 +20,8 @@ namespace Alfateam.CRM2_0.Models.Content.Videos
         public string VideoPath { get; set; }
         public string? PosterImgPath { get; set; }
 
+        public bool AreCommentsEnabled { get; set; } = true;
+
 
         public List<Comment> CommentsList { get; set; } = new List<Comment>();
         public List<FeedbackEntry> LikesList { get; set; } = new List<FeedbackEntry>();

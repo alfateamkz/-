@@ -1,4 +1,7 @@
-﻿namespace Alfateam.CRM2_0.Abstractions
+﻿using Alfateam.CRM2_0.Models.Abstractions;
+using Alfateam.CRM2_0.Models.General;
+
+namespace Alfateam.CRM2_0.Abstractions
 {
     public abstract class EditModel
     {
@@ -39,7 +42,7 @@
     
     }
 
-    public abstract class EditModel<T> : EditModel
+    public abstract class EditModel<T> : EditModel where T: AbsModel, new()
     {
         public virtual void Fill(T item)
         {
@@ -59,6 +62,15 @@
                     itemSameProp.SetValue(item, prop.GetValue(this));
                 }
             }
+        }
+
+        public T Create()
+        {
+            var newItem = new T();
+            this.Fill(newItem);
+            newItem.Id = 0;
+
+            return newItem;
         }
     }
 }

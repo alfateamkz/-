@@ -9,5 +9,7 @@ namespace Alfateam.CRM2_0.Models.EditModels.Content.Videos
         public string? Description { get; set; }
 
         public int? CategoryId { get; set; }
+
+        public bool AreCommentsEnabled { get; set; } = true;
     }
 }

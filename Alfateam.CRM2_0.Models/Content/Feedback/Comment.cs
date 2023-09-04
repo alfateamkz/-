@@ -14,6 +14,9 @@ namespace Alfateam.CRM2_0.Models.Content.Feedback
     public class Comment : AbsModel
     {
         public User CreatedBy { get; set; }
+        public int CreatedById { get; set; }
+
+
 
         public string Text { get; set; }
         public List<CommentAttachment> Attachments { get; set; } = new List<CommentAttachment>();
@@ -23,6 +26,7 @@ namespace Alfateam.CRM2_0.Models.Content.Feedback
         public List<FeedbackEntry> LikesList { get; set; } = new List<FeedbackEntry>();
 
 
-        public List<Comment> Subcomments { get; set; } = new List<Comment>();
+        public int Subcomments { get; set; }
+        public List<Comment> SubcommentsList { get; set; } = new List<Comment>();
     }
 }
