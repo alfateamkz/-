@@ -20,7 +20,9 @@ namespace Alfateam.CRM2_0.Models.General
         public string Surname { get; set; }
         public string? Patronymic { get; set; }
 
+
         public Country Country { get; set; }
+        public int CountryId { get; set; }
 
 
         public UserRoleModel RoleModel { get; set; }
@@ -42,20 +44,23 @@ namespace Alfateam.CRM2_0.Models.General
         public List<UsedCredential> UsedCredentials { get; set; } = new List<UsedCredential>();
 
 
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
 
 
 
-       
+        [JsonIgnore]
         public Business Business { get; set; }
+        [JsonIgnore]
         public int BusinessId { get; set; }
 
+        [JsonIgnore]
+        public Organization? Organization { get; set; }
+        [JsonIgnore]
+        public int? OrganizationId { get; set; }
 
-        public Organization Organization { get; set; }
-        public int OrganizationId { get; set; }
-
-
+        [JsonIgnore]
         public OrganizationOffice? Office { get; set; }
+        [JsonIgnore]
         public int? OfficeId { get; set; }
     }
 }

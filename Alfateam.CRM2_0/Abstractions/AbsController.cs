@@ -32,6 +32,9 @@ namespace Alfateam.CRM2_0.Abstractions
 
 
 
+        internal int? DepartmentId => GetValueFromHeader("DepartmentId");
+
+
         public AbsController(ControllerParams @params)
         {
             DB = @params.DB;
@@ -81,6 +84,13 @@ namespace Alfateam.CRM2_0.Abstractions
         }
 
 
+        public int GetRoleHighestLevel(int userId)
+        {
+            var user = DB.Users.Include(o => o.RoleModel).ThenInclude(o => o.GivenRoles)
+                               .FirstOrDefault(o => o.Id == userId);
+            if(user == null) return int.MinValue;
+            return user.RoleModel.GetHighestRolePriority();
+        }
         public bool IsInRole(User user,UserRole role)
         {
             if (user.RoleModel.GivenRoles.Any(o => o.Role == UserRole.President)) return true;
@@ -558,59 +568,66 @@ namespace Alfateam.CRM2_0.Abstractions
             }
             return GetAllUsersFromBusiness(business).FirstOrDefault(o => o.Id == userId);
         }
-        private SortedSet<User> GetAllUsersFromBusiness(Business business)
+
+        private List<User> GetAllUsersFromBusiness(Business business)
         {
-            var users = new SortedSet<User>();
-
-            users.AddRange(business.Owners);
-
-            foreach(var organization in business.Organizations)
-            {
-                users.AddRange(GetUsersFromOffices(organization));
-            }
-
-            return users;
+            return business.Users;
         }
-        private SortedSet<User> GetUsersFromDepartments(DepartmentsGrouping departments)
-        {
-            var users = new SortedSet<User>();
 
-            users.Add(departments.Accountance.Head);
-            users.Add(departments.Compliance.Head);
-            users.Add(departments.Finance.Head);
-            users.Add(departments.HR.Head);
-            users.Add(departments.Law.Head);
-            users.Add(departments.Marketing.Head);
-            users.Add(departments.Sales.Head);
-            users.Add(departments.SecurityService.Head);
 
-            return users;
-        }
-        private SortedSet<User> GetUsersFromOffices(Organization organization)
-        {
-            var users = new SortedSet<User>();
+        //private SortedSet<User> GetAllUsersFromBusiness(Business business)
+        //{
+        //    var users = new SortedSet<User>();
 
-            users.AddRange(GetUsersFromDepartments(organization.Departments));
-            foreach (var office in organization.Offices)
-            {
-                users.AddRange(GetUsersFromOfficesRecurcively(office));
-            }
+        //    users.AddRange(business.Owners);
 
-            return users;
-        }
-        private SortedSet<User> GetUsersFromOfficesRecurcively(OrganizationOffice office)
-        {
-            var users = new SortedSet<User>();
+        //    foreach(var organization in business.Organizations)
+        //    {
+        //        users.AddRange(GetUsersFromOffices(organization));
+        //    }
 
-            users.AddRange(office.Staff.Employees);
-            users.AddRange(GetUsersFromDepartments(office.Departments));
-            foreach (var subOffice in office.SubOffices)
-            {
-                users.AddRange(GetUsersFromOfficesRecurcively(subOffice));
-            }
+        //    return users;
+        //}
+        //private SortedSet<User> GetUsersFromDepartments(DepartmentsGrouping departments)
+        //{
+        //    var users = new SortedSet<User>();
 
-            return users;
-        }
+        //    users.Add(departments.Accountance.Head);
+        //    users.Add(departments.Compliance.Head);
+        //    users.Add(departments.Finance.Head);
+        //    users.Add(departments.HR.Head);
+        //    users.Add(departments.Law.Head);
+        //    users.Add(departments.Marketing.Head);
+        //    users.Add(departments.Sales.Head);
+        //    users.Add(departments.SecurityService.Head);
+
+        //    return users;
+        //}
+        //private SortedSet<User> GetUsersFromOffices(Organization organization)
+        //{
+        //    var users = new SortedSet<User>();
+
+        //    users.AddRange(GetUsersFromDepartments(organization.Departments));
+        //    foreach (var office in organization.Offices)
+        //    {
+        //        users.AddRange(GetUsersFromOfficesRecurcively(office));
+        //    }
+
+        //    return users;
+        //}
+        //private SortedSet<User> GetUsersFromOfficesRecurcively(OrganizationOffice office)
+        //{
+        //    var users = new SortedSet<User>();
+
+        //    users.AddRange(office.Staff.Employees);
+        //    users.AddRange(GetUsersFromDepartments(office.Departments));
+        //    foreach (var subOffice in office.SubOffices)
+        //    {
+        //        users.AddRange(GetUsersFromOfficesRecurcively(subOffice));
+        //    }
+
+        //    return users;
+        //}
 
         #endregion
 

@@ -8,5 +8,11 @@ namespace Alfateam.CRM2_0.Controllers.Core
         public TaxSystemsController(ControllerParams @params) : base(@params)
         {
         }
+
+        #region Системы налогообложения
+
+        //TODO: системы налогообложения
+
+        #endregion
     }
 }

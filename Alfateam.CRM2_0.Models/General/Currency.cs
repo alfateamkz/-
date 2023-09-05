@@ -15,6 +15,7 @@ namespace Alfateam.CRM2_0.Models.General
     {
         public string Title { get; set; }
         public string Code { get; set; }
+        public string Symbol { get; set; }
         public CurrencyType Type { get; set; } = CurrencyType.Fiat;
     }
 }

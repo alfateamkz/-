@@ -33,5 +33,17 @@ namespace Alfateam.CRM2_0.Models.Abstractions
         /// Если нет отдельного руководителя, то руководителем является директор организации/филиала
         /// </summary>
         public Employee Head { get; set; }
+
+        /// <summary>
+        /// Штат
+        /// Head тоже входит в Employees
+        /// </summary>
+        public List<Employee> Employees { get; set; } = new List<Employee>();
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int DepartmentsGroupingId { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using Alfateam.CRM2_0.Models.Departments;
 using Alfateam.CRM2_0.Models.Enums;
 using Alfateam.CRM2_0.Models.Roles.Accountance;
 using Alfateam.CRM2_0.Models.Roles.Staff;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,6 +61,31 @@ namespace Alfateam.CRM2_0.Models.General
         /// </summary>
         public OrganizationOfficeStaff Staff { get; set; }
 
+
+
+
+        /// <summary>
+        /// Бизнес, в котором находится офис. 
+        /// Обязательное поле, нужно, чтобы навигацию было удобно делать
+        /// </summary>
+        [JsonIgnore]
+        public Business Business { get; set; }
+        [JsonIgnore]
+        public int BusinessId { get; set; }
+
+        /// <summary>
+        /// Автоматическое поле
+        /// Идентификатор родительского офиса, если он есть
+        /// </summary>
+        [JsonIgnore]
+        public int? OrganizationOfficeId { get; set; }
+
+        /// <summary>
+        /// Автоматическое поле
+        /// Идентификатор организации, если вышестоящих офисов нет
+        /// </summary>
+        [JsonIgnore]
+        public int? OrganizationId { get; set; }
 
     }
 }

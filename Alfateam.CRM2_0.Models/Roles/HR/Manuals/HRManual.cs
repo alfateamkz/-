@@ -17,5 +17,13 @@ namespace Alfateam.CRM2_0.Models.Roles.HR.Manuals
 
 
         public HRManualCategory Category { get; set; }
+        public int CategoryId { get; set; }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int HRDepartmentId { get; set; }
     }
 }

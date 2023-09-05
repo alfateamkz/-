@@ -19,6 +19,7 @@ using Alfateam.CRM2_0.Models.Content.Feedback;
 using Alfateam.CRM2_0.Models.Content.Posts;
 using Alfateam.CRM2_0.Models.Content.Tests;
 using Alfateam.CRM2_0.Models.Content.Videos;
+using Alfateam.CRM2_0.Models.Departments;
 using Alfateam.CRM2_0.Models.Gamification;
 using Alfateam.CRM2_0.Models.Gamification.Achievements;
 using Alfateam.CRM2_0.Models.Gamification.Contests;
@@ -72,6 +73,7 @@ using Alfateam.CRM2_0.Models.Roles.Staff.Counterparties;
 using Alfateam.CRM2_0.Models.Roles.Staff.Employess;
 using Alfateam.CRM2_0.Models.Security;
 using Alfateam.DB.Helpers;
+using Alfateam.DB.Methods.CRMDBContext;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -86,17 +88,15 @@ namespace Alfateam.DB
     {
         public CRMDBContext()
         {
+            InitDBMethods();
             if (Database.EnsureCreated())
             {
 
             }
         }
-        public CRMDBContext(DbContextOptions<CRMDBContext> options)
+        public CRMDBContext(DbContextOptions<CRMDBContext> options) : this()
         {
-            if (Database.EnsureCreated())
-            {
-        
-            }
+
         }
 
 
@@ -192,6 +192,7 @@ namespace Alfateam.DB
 
         #endregion
 
+        public DbSet<DepartmentsGrouping> DepartmentsGroupings { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<TaxSystem> TaxSystems { get; set; }
 
@@ -664,7 +665,21 @@ namespace Alfateam.DB
         public DbSet<Session> Sessions { get; set; }
         #endregion
 
+
+
+
+        #region Методы для работы с БД
+
+        public DepartmentsMethods DepartmentsMethods { get; private set; }
+
+        #endregion
+
         #region Initial methods
+
+        private void InitDBMethods()
+        {
+            DepartmentsMethods = new DepartmentsMethods(this);
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

@@ -45,7 +45,7 @@ namespace Alfateam.CRM2_0.Filters
             var user = controller.GetAuthorizedUser();
             if (user == null)
             {
-                context.Result = new JsonResult(RequestResult.AsError(404, "Пользователь с таким id не существует"));
+                context.Result = new JsonResult(RequestResult.AsError(401, "Не авторизован - прочее"));
                 return;
             }
 

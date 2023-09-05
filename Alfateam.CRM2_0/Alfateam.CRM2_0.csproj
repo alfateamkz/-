@@ -16,6 +16,7 @@
     <Folder Include="Controllers\Roles\Management\" />
     <Folder Include="Controllers\Roles\Staff\" />
     <Folder Include="Helpers\" />
+    <Folder Include="Models\ClientModels\Roles\HR\TestTasks\" />
   </ItemGroup>
 
   <ItemGroup>

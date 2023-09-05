@@ -15,6 +15,8 @@ namespace Alfateam.CRM2_0.Models.Roles.HR.TestTasks
     public class CandidateTestTask : AbsModel
     {
         public Candidate Candidate { get; set; }
+        public int CandidateId { get; set; }
+
         public CandidateTestTaskStatus Status { get; set; } = CandidateTestTaskStatus.Active;
 
         public DateTime Deadline { get; set; }
