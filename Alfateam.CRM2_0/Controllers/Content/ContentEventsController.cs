@@ -6,6 +6,7 @@ using Alfateam.CRM2_0.Models.ClientModels.Content.Events;
 using Alfateam.CRM2_0.Models.ClientModels.Content.Videos;
 using Alfateam.CRM2_0.Models.Content.Events;
 using Alfateam.CRM2_0.Models.Content.Videos;
+using Alfateam.CRM2_0.Models.CreateModels.Content.Events;
 using Alfateam.CRM2_0.Models.EditModels.Content.Events;
 using Alfateam.CRM2_0.Models.EditModels.Content.Videos;
 using Alfateam.CRM2_0.Models.Enums;
@@ -45,7 +46,7 @@ namespace Alfateam.CRM2_0.Controllers.Content
 
         [HttpPost, Route("CreateEvent")]
         [AccessActionFilter(roles: UserRole.ContentMaker)]
-        public async Task<RequestResult> CreateEvent(EventEditModel model)
+        public async Task<RequestResult> CreateEvent(EventCreateModel model)
         {
             return TryCreateContentModel("Events", model, PrepareEventBeforeCreate);
         }
@@ -100,7 +101,7 @@ namespace Alfateam.CRM2_0.Controllers.Content
 
         [HttpPost, Route("CreateEventCategory")]
         [AccessActionFilter(roles: UserRole.ContentMaker)]
-        public async Task<RequestResult> CreateEventCategory(EventCategoryEditModel model)
+        public async Task<RequestResult> CreateEventCategory(EventCategoryCreateModel model)
         {
             return TryCreateContentModel("EventCategories", model);
         }
@@ -151,7 +152,7 @@ namespace Alfateam.CRM2_0.Controllers.Content
 
         [HttpPost, Route("CreateEventFormat")]
         [AccessActionFilter(roles: UserRole.ContentMaker)]
-        public async Task<RequestResult> CreateEventFormat(EventFormatEditModel model)
+        public async Task<RequestResult> CreateEventFormat(EventFormatCreateModel model)
         {
             return TryCreateContentModel("EventFormats", model);
         }

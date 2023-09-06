@@ -24,7 +24,7 @@ namespace Alfateam.Website.API.Abstractions
                     int val = (int)prop.GetValue(this);
                     isValid &= val > 0;
                 }
-                else if (Nullable.GetUnderlyingType(typeof(int)) == typeof(int))
+                else if (Nullable.GetUnderlyingType(typeof(int)) == typeof(int) && prop.Name.Contains("Id"))
                 {
                     int? val = (int)prop.GetValue(this);
                     if (val.HasValue)

@@ -4,6 +4,7 @@ using Alfateam.CRM2_0.Filters;
 using Alfateam.CRM2_0.Models.ClientModels.Content.Videos;
 using Alfateam.CRM2_0.Models.ClientModels.Roles.HR.Manuals;
 using Alfateam.CRM2_0.Models.Content.Videos;
+using Alfateam.CRM2_0.Models.CreateModels.Roles.HR.Manuals;
 using Alfateam.CRM2_0.Models.EditModels.Content.Videos;
 using Alfateam.CRM2_0.Models.EditModels.Roles.HR.Manuals;
 using Alfateam.CRM2_0.Models.Enums;
@@ -42,9 +43,8 @@ namespace Alfateam.CRM2_0.Controllers.Roles.HR
 
 
         [HttpPost, Route("CreateHRManual")]
-        public async Task<RequestResult> CreateHRManual(HRManualEditModel model)
-        {
-            
+        public async Task<RequestResult> CreateHRManual(HRManualCreateModel model)
+        {         
             return TryCreateModel(DB.HRManuals, model, (item) =>
             {
                 item.HRDepartmentId = (int)this.DepartmentId;
@@ -92,7 +92,7 @@ namespace Alfateam.CRM2_0.Controllers.Roles.HR
 
 
         [HttpPost, Route("CreateHRManualCategory")]
-        public async Task<RequestResult> CreateHRManualCategory(HRManualCategoryEditModel model)
+        public async Task<RequestResult> CreateHRManualCategory(HRManualCategoryCreateModel model)
         {
             return TryCreateModel(DB.HRManualCategories, model, (item) =>
             {
@@ -121,5 +121,7 @@ namespace Alfateam.CRM2_0.Controllers.Roles.HR
         }
 
         #endregion
+
+        
     }
 }

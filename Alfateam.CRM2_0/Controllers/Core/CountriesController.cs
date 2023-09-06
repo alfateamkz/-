@@ -2,6 +2,7 @@
 using Alfateam.CRM2_0.Core;
 using Alfateam.CRM2_0.Filters;
 using Alfateam.CRM2_0.Models.ClientModels.General;
+using Alfateam.CRM2_0.Models.CreateModels.General;
 using Alfateam.CRM2_0.Models.EditModels.Content.Events;
 using Alfateam.CRM2_0.Models.EditModels.General;
 using Alfateam.CRM2_0.Models.Enums;
@@ -34,7 +35,7 @@ namespace Alfateam.CRM2_0.Controllers.Core
 
         [HttpPost, Route("CreateCountry")]
         [AccessActionFilter(roles: UserRole.President)]
-        public async Task<RequestResult> CreateCountry(CountryEditModel model)
+        public async Task<RequestResult> CreateCountry(CountryCreateModel model)
         {
             return TryCreateModel(DB.Countries, model);
         }

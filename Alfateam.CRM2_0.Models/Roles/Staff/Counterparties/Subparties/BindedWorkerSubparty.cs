@@ -14,5 +14,7 @@ namespace Alfateam.CRM2_0.Models.Roles.Staff.Counterparties.Subparties
     public class BindedWorkerSubparty : CounterpartySubparty
     {
         public Worker Worker { get; set; }
+        public int WorkerId { get; set; }
+
     }
 }

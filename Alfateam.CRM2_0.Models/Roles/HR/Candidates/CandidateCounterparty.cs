@@ -15,11 +15,12 @@ namespace Alfateam.CRM2_0.Models.Roles.HR.Candidates
     public class CandidateCounterparty : Candidate
     {
         public Company Company { get; set; }
+        public int CompanyId { get; set; }
 
 
         /// <summary>
         /// Информация о субподрячиках/работниках контрагента, которых можно изучить
-        /// Например: у работников - проверить резюме, у субподрядчиков - репутациюы
+        /// Например: у работников - проверить резюме, у субподрядчиков - репутацию
         /// </summary>
         public List<CounterpartySubparty> Subparties { get; set; } = new List<CounterpartySubparty>();
 

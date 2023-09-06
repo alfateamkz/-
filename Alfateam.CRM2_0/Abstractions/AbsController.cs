@@ -175,13 +175,13 @@ namespace Alfateam.CRM2_0.Abstractions
 
         #region Get generic methods
 
-        protected RequestResult GetMany<T, ClModel>(IQueryable<T> dbSet, int offset, int count = 20) where T : AbsModel where ClModel : ClientModel<T>, new()
+        protected RequestResult GetMany<T, ClModel>(IEnumerable<T> dbSet, int offset, int count = 20) where T : AbsModel where ClModel : ClientModel<T>, new()
         {
             var items = dbSet.Where(o => !o.IsDeleted).Skip(offset).Take(count);
             var models = new ClModel().CreateModels(items);
             return RequestResult<IEnumerable<ClientModel<T>>>.AsSuccess(models);
         }
-        protected RequestResult GetAvailableMany<T, ClModel>(IQueryable<T> dbSet, int offset, int count = 20) where T : AvailabilityModel where ClModel : ClientModel<T>, new()
+        protected RequestResult GetAvailableMany<T, ClModel>(IEnumerable<T> dbSet, int offset, int count = 20) where T : AvailabilityModel where ClModel : ClientModel<T>, new()
         {
             var user = GetAuthorizedUser();
 
@@ -234,7 +234,7 @@ namespace Alfateam.CRM2_0.Abstractions
 
         #region Create generic methods
 
-        protected RequestResult TryCreateModel<T>(DbSet<T> dbSet, EditModel<T> model, Func<T, RequestResult> prepareCallback = null) where T : AbsModel, new()
+        protected RequestResult TryCreateModel<T>(DbSet<T> dbSet, CreateModel<T> model, Func<T, RequestResult> prepareCallback = null) where T : AbsModel, new()
         {
             var user = GetAuthorizedUser();
 
@@ -246,7 +246,7 @@ namespace Alfateam.CRM2_0.Abstractions
                 () => CreateModel(dbSet,model)
             });
         }
-        protected RequestResult TryCreateContentModel<T>(string contentPropName, EditModel<T> model,Func<T, RequestResult> prepareCallback = null) where T : ContentModel, new()
+        protected RequestResult TryCreateContentModel<T>(string contentPropName, CreateModel<T> model,Func<T, RequestResult> prepareCallback = null) where T : ContentModel, new()
         {
             var user = GetAuthorizedUser();
 
@@ -260,7 +260,7 @@ namespace Alfateam.CRM2_0.Abstractions
 
 
 
-        private RequestResult CreateContentModel<T>(string contentPropName, EditModel<T> model, Func<T, RequestResult> prepareCallback = null) where T : ContentModel, new()
+        private RequestResult CreateContentModel<T>(string contentPropName, CreateModel<T> model, Func<T, RequestResult> prepareCallback = null) where T : ContentModel, new()
         {
             var business = DB.Businesses.Include(o => o.Content).FirstOrDefault(o => o.Id == BusinessId);
 
@@ -368,6 +368,7 @@ namespace Alfateam.CRM2_0.Abstractions
         }
         protected RequestResult UpdateModel<T>(DbSet<T> dbSet,T item) where T : AbsModel
         {
+            item.UpdatedAt = DateTime.UtcNow;
             dbSet.Update(item);
             DB.SaveChanges();
             return RequestResult.AsSuccess();
@@ -377,6 +378,7 @@ namespace Alfateam.CRM2_0.Abstractions
             if (softDelete)
             {
                 item.IsDeleted = true;
+                item.DeletedAt = DateTime.UtcNow;
                 dbSet.Update(item);
             }
             else

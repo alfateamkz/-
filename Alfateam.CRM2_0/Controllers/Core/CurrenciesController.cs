@@ -2,6 +2,7 @@
 using Alfateam.CRM2_0.Core;
 using Alfateam.CRM2_0.Filters;
 using Alfateam.CRM2_0.Models.ClientModels.General;
+using Alfateam.CRM2_0.Models.CreateModels.General;
 using Alfateam.CRM2_0.Models.EditModels.General;
 using Alfateam.CRM2_0.Models.Enums;
 using Alfateam.CRM2_0.Models.General;
@@ -33,7 +34,7 @@ namespace Alfateam.CRM2_0.Controllers.Core
 
         [HttpPost, Route("CreateCurrency")]
         [AccessActionFilter(roles: UserRole.President)]
-        public async Task<RequestResult> CreateCurrency(CurrencyEditModel model)
+        public async Task<RequestResult> CreateCurrency(CurrencyCreateModel model)
         {
             return TryCreateModel(DB.Currencies, model);
         }

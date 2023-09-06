@@ -13,7 +13,7 @@ namespace Alfateam.CRM2_0.Models.EditModels.General
         public int CountryId { get; set; }
 
         public string Login { get; set; }
-
+        public string Email { get; set; }
 
 
 

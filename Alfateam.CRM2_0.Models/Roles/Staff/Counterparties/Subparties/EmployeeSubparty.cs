@@ -24,5 +24,6 @@ namespace Alfateam.CRM2_0.Models.Roles.Staff.Counterparties.Subparties
 
 
         public Country Country { get; set; }
+        public int CountryId { get; set; }
     }
 }

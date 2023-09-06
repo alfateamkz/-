@@ -6,6 +6,5 @@ namespace Alfateam.CRM2_0.Models.EditModels.General
     public class BusinessEditModel : EditModel<Business>
     {
         public string Title { get; set; }
-        public string? LogoPath { get; set; }
     }
 }

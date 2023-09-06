@@ -2,6 +2,7 @@
 using Alfateam.CRM2_0.Core;
 using Alfateam.CRM2_0.Filters;
 using Alfateam.CRM2_0.Models.ClientModels.General;
+using Alfateam.CRM2_0.Models.CreateModels.General;
 using Alfateam.CRM2_0.Models.EditModels.General;
 using Alfateam.CRM2_0.Models.Enums;
 using Alfateam.CRM2_0.Models.General;
@@ -36,7 +37,7 @@ namespace Alfateam.CRM2_0.Controllers.Core
 
         [HttpPost, Route("CreateCountry")]
         [AccessActionFilter(roles: UserRole.President)]
-        public async Task<RequestResult> CreateLegalForm(int countryId, LegalFormEditModel model)
+        public async Task<RequestResult> CreateLegalForm(int countryId, LegalFormCreateModel model)
         {
             var country = DB.Countries.FirstOrDefault(o => o.Id == countryId && o.IsDeleted);
 

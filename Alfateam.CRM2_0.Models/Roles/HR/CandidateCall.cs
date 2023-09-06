@@ -15,6 +15,8 @@ namespace Alfateam.CRM2_0.Models.Roles.HR
     public class CandidateCall : AbsModel
     {
         public Candidate CallWith { get; set; }
+        public int CallWithId { get; set; }
+
 
         public CandidateCallStatus Status { get; set; } = CandidateCallStatus.Planned;
         public DateTime InitialPlannedTime { get; set; }

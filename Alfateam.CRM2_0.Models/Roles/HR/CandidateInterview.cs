@@ -13,9 +13,21 @@ namespace Alfateam.CRM2_0.Models.Roles.HR
     /// </summary>
     public class CandidateInterview : AbsModel
     {
+        public string Title { get; set; }
+        public string? Description { get; set; }
+
+
         public List<CandidateTestTask> TestTasks { get; set; } = new List<CandidateTestTask>();
         public CandidateCall Call { get; set; }
 
+
         public CandidateInterviewDecision? Decision { get; set; }
+        public int? DecisionId { get; set; }
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int CandidateId { get; set; }
     }
 }

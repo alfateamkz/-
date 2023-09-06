@@ -1,5 +1,6 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
 using Alfateam.CRM2_0.Models.General;
+using System.Collections;
 
 namespace Alfateam.CRM2_0.Abstractions
 {
@@ -25,7 +26,7 @@ namespace Alfateam.CRM2_0.Abstractions
                     int val = (int)prop.GetValue(this);
                     isValid &= val > 0;
                 }
-                else if (Nullable.GetUnderlyingType(typeof(int)) == typeof(int))
+                else if (Nullable.GetUnderlyingType(typeof(int)) == typeof(int) && prop.Name.Contains("Id"))
                 {
                     int? val = (int)prop.GetValue(this);
                     if (val.HasValue)
@@ -40,6 +41,7 @@ namespace Alfateam.CRM2_0.Abstractions
             return isValid;
         }
     
+
     }
 
     public abstract class EditModel<T> : EditModel where T: AbsModel, new()
@@ -59,18 +61,29 @@ namespace Alfateam.CRM2_0.Abstractions
                 var itemSameProp = itemProps.FirstOrDefault(o => o.Name == prop.Name);
                 if (itemSameProp != null && itemSameProp.CanWrite)
                 {
+                    ////TODO: ТЩАТЕЛЬНО ПРОВЕРИТЬ ЭТОТ КУСОК КОДА
+                    //if(prop.PropertyType == typeof(EditModel<>))
+                    //{
+                    //    var propValue = prop.GetValue(this);
+                    //    var createMethod = propValue.GetType().GetMethod("Create");
+                    //    itemSameProp.SetValue(item, createMethod.Invoke(propValue, new object[] {}));
+                    //}
+                    //else if(prop.PropertyType == typeof(IEnumerable) 
+                    //    && prop.PropertyType.GenericTypeArguments.Any(o => o == typeof(EditModel)))
+                    //{
+                    //    var propValueArray = prop.GetValue(this) as IEnumerable<EditModel<>>;
+                        
+                    //}
+                    //else
+                    //{
+                    //    itemSameProp.SetValue(item, prop.GetValue(this));
+                    //}
+
                     itemSameProp.SetValue(item, prop.GetValue(this));
                 }
             }
         }
 
-        public T Create()
-        {
-            var newItem = new T();
-            this.Fill(newItem);
-            newItem.Id = 0;
-
-            return newItem;
-        }
+       
     }
 }

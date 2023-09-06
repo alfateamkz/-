@@ -6,6 +6,8 @@ using Alfateam.CRM2_0.Models.Abstractions;
 using Alfateam.CRM2_0.Models.ClientModels.Content.Videos;
 using Alfateam.CRM2_0.Models.Content.Feedback;
 using Alfateam.CRM2_0.Models.Content.Videos;
+using Alfateam.CRM2_0.Models.CreateModels.Content.Feedback;
+using Alfateam.CRM2_0.Models.CreateModels.Content.Videos;
 using Alfateam.CRM2_0.Models.EditModels.Content.Feedback;
 using Alfateam.CRM2_0.Models.EditModels.Content.Videos;
 using Alfateam.CRM2_0.Models.Enums;
@@ -54,7 +56,7 @@ namespace Alfateam.CRM2_0.Controllers.Content
 
         [HttpPost, Route("CreateVideo")]
         [AccessActionFilter(roles: UserRole.ContentMaker)]
-        public async Task<RequestResult> CreateVideo(VideoEditModel model)
+        public async Task<RequestResult> CreateVideo(VideoCreateModel model)
         {
             return TryCreateContentModel("Videos", model,  PrepareVideoBeforeCreate);
         }
@@ -217,7 +219,7 @@ namespace Alfateam.CRM2_0.Controllers.Content
 
 
         [HttpPost, Route("CreateComment")]
-        public async Task<RequestResult> CreateComment(int videoId, CommentEditModel model)
+        public async Task<RequestResult> CreateComment(int videoId, CommentCreateModel model)
         {
             var user = GetAuthorizedUser();
             Video video = DB.Videos.FirstOrDefault(o => o.Id == videoId);
@@ -240,7 +242,7 @@ namespace Alfateam.CRM2_0.Controllers.Content
         }
 
         [HttpPost, Route("CreateSubcomment")]
-        public async Task<RequestResult> CreateSubcomment(int videoId, int commentId, CommentEditModel model)
+        public async Task<RequestResult> CreateSubcomment(int videoId, int commentId, CommentCreateModel model)
         {
             var user = GetAuthorizedUser();
 
@@ -350,7 +352,7 @@ namespace Alfateam.CRM2_0.Controllers.Content
 
         [HttpPost, Route("CreateVideoCategory")]
         [AccessActionFilter(roles: UserRole.ContentMaker)]
-        public async Task<RequestResult> CreateVideoCategory(VideoCategoryEditModel model)
+        public async Task<RequestResult> CreateVideoCategory(VideoCategoryCreateModel model)
         {
             return TryCreateContentModel("Videos", model);
         }

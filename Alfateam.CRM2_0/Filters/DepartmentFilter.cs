@@ -12,6 +12,7 @@ namespace Alfateam.CRM2_0.Filters
 {
     public class DepartmentFilter : Attribute, IActionFilter
     {
+        private const string HEADER = "DepartmentId";
         public void OnActionExecuted(ActionExecutedContext context)
         {
           
@@ -36,17 +37,17 @@ namespace Alfateam.CRM2_0.Filters
                 return;
             }
 
-            if (!controller.Request.Headers.ContainsKey("DepartmentId"))
+            if (!controller.Request.Headers.ContainsKey(HEADER))
             {
-                context.Result = new JsonResult(RequestResult.AsError(400, "Не передан Header DepartmentId"));
+                context.Result = new JsonResult(RequestResult.AsError(400, $"Не передан Header {HEADER}"));
                 return;
             }
 
             int departmentId = 0;
-            string hrDepartmentIdStr = controller.Request.Headers["DepartmentId"];    
+            string hrDepartmentIdStr = controller.Request.Headers[HEADER];    
             if(!int.TryParse(hrDepartmentIdStr,out departmentId))
             {
-                context.Result = new JsonResult(RequestResult.AsError(400, "Некорректное значение в Header DepartmentId"));
+                context.Result = new JsonResult(RequestResult.AsError(400, $"Некорректное значение в Header {HEADER}"));
                 return;
             }
 

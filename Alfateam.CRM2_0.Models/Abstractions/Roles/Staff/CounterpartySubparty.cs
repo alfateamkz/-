@@ -21,7 +21,22 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Roles.Staff
     /// <summary>
     /// Информация о ресурсе контрагента, который учавствует в разработке проектов
     /// </summary>
-    public abstract class CounterpartySubparty : AbsModel
+    public class CounterpartySubparty : AbsModel
     {
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        [JsonIgnore]
+        public int? CandidateCounterpartyId { get; set; }
+
+
+        public virtual void SetCandidateCounterpartyIdRecursively(int id)
+        {
+            CandidateCounterpartyId = id;
+        }
+
     }
 }

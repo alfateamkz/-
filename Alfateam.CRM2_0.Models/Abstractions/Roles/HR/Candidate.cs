@@ -28,5 +28,11 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Roles.HR
     {
         public CandidateStatus Status { get; set; } = CandidateStatus.Waiting;
         public List<CandidateInterview> Interviews { get; set; } = new List<CandidateInterview>();
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int HRDepartmentId { get; set; }
     }
 }

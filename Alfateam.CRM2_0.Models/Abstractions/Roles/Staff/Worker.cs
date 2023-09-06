@@ -20,10 +20,10 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Roles.Staff
     [JsonKnownType(typeof(Employee), "Employee")]
     [JsonKnownType(typeof(Counterparty), "Counterparty")]
     /// <summary>
-    /// Базовая модель пользователя, который может учавствовать в разработке проектов
+    /// Базовая модель пользователя, который может участвовать в разработке проектов
     /// От данного класса наследуются Employee (сотрудник фирмы) и Counterparty(контрагент)
     /// </summary>
-    public abstract class Worker : User
+    public class Worker : User
     {
 
 

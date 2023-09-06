@@ -5,6 +5,7 @@
     /// </summary>
     public enum FileType
     {
+        Any = 0,
         Image = 1,
         Document = 2,
         Audio = 3,

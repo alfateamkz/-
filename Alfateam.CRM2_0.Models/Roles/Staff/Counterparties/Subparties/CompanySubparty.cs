@@ -15,10 +15,23 @@ namespace Alfateam.CRM2_0.Models.Roles.Staff.Counterparties.Subparties
     public class CompanySubparty : CounterpartySubparty
     {
         public Company Company { get; set; }
+        public int CompanyId { get; set; }
+
+
 
         /// <summary>
         /// Субподрядчики/работники субподрядчика
         /// </summary>
         public List<CounterpartySubparty> Subparties { get; set; } = new List<CounterpartySubparty>();
+
+        public override void SetCandidateCounterpartyIdRecursively(int id)
+        {
+            base.SetCandidateCounterpartyIdRecursively(id);
+
+            foreach(var subparty in Subparties)
+            {
+                subparty.SetCandidateCounterpartyIdRecursively(id);
+            }
+        }
     }
 }

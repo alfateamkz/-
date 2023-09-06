@@ -19,9 +19,11 @@ namespace Alfateam.CRM2_0.Models.Abstractions
         [JsonIgnore]
         public bool IsDeleted { get; set; }
         [JsonIgnore]
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         [JsonIgnore]
         public DateTime? UpdatedAt { get; set; }
+        [JsonIgnore]
+        public DateTime? DeletedAt { get; set; }
 
 
 
@@ -66,7 +68,7 @@ namespace Alfateam.CRM2_0.Models.Abstractions
                     AbsModel val = (AbsModel)prop.GetValue(this);
                     if (val != null)
                     {
-                        isValid &= val.IsValid();
+                        isValid &= val.IsValidToUpdate();
                     }
                 }
                 else if (type.GetInterfaces().Any(o => o.Name == "IList"))
@@ -78,7 +80,7 @@ namespace Alfateam.CRM2_0.Models.Abstractions
                         AbsModel[] arr = (AbsModel[])method.Invoke(prop.GetValue(this), null);
                         foreach (var model in arr)
                         {
-                            isValid &= model.IsValid();
+                            isValid &= model.IsValidToUpdate();
                         }
                     }
                 }

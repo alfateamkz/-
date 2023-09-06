@@ -3,7 +3,6 @@ using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Models.ClientModels;
 using Alfateam.Website.API.Models.ClientModels.Portfolios;
-using Alfateam.Website.API.Models.Core;
 using Alfateam2._0.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

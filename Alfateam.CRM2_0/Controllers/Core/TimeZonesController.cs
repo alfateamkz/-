@@ -2,6 +2,7 @@
 using Alfateam.CRM2_0.Core;
 using Alfateam.CRM2_0.Filters;
 using Alfateam.CRM2_0.Models.ClientModels.General;
+using Alfateam.CRM2_0.Models.CreateModels.General;
 using Alfateam.CRM2_0.Models.EditModels.General;
 using Alfateam.CRM2_0.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +34,7 @@ namespace Alfateam.CRM2_0.Controllers.Core
 
         [HttpPost, Route("CreateTimezone")]
         [AccessActionFilter(roles: UserRole.President)]
-        public async Task<RequestResult> CreateTimezone(TimeZoneEditModel model)
+        public async Task<RequestResult> CreateTimezone(TimeZoneCreateModel model)
         {
             return TryCreateModel(DB.TimeZones, model);
         }

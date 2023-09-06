@@ -4,6 +4,7 @@ using Alfateam.CRM2_0.Enums;
 using Alfateam.CRM2_0.Filters;
 using Alfateam.CRM2_0.Models.ClientModels.General;
 using Alfateam.CRM2_0.Models.Content.Videos;
+using Alfateam.CRM2_0.Models.CreateModels.General;
 using Alfateam.CRM2_0.Models.EditModels.General;
 using Alfateam.CRM2_0.Models.Enums;
 using Alfateam.CRM2_0.Models.General;
@@ -53,7 +54,7 @@ namespace Alfateam.CRM2_0.Controllers.Business
 
         [HttpPost, Route("CreateBusiness")]
         [AccessActionFilter(roles: new[] { UserRole.President })]
-        public async Task<RequestResult> CreateBusiness(BusinessType type, BusinessEditModel model,User owner)
+        public async Task<RequestResult> CreateBusiness(BusinessType type, BusinessCreateModel model,User owner)
         {
             var business = model.Create();
 
