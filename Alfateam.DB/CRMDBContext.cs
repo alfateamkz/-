@@ -47,6 +47,7 @@ using Alfateam.CRM2_0.Models.Roles.Financier.Investments;
 using Alfateam.CRM2_0.Models.Roles.Financier.Planning;
 using Alfateam.CRM2_0.Models.Roles.Financier.Pricing;
 using Alfateam.CRM2_0.Models.Roles.HR;
+using Alfateam.CRM2_0.Models.Roles.HR.JobVacancies;
 using Alfateam.CRM2_0.Models.Roles.HR.Manuals;
 using Alfateam.CRM2_0.Models.Roles.HR.Questionnaires;
 using Alfateam.CRM2_0.Models.Roles.HR.TestTasks;
@@ -467,6 +468,12 @@ namespace Alfateam.DB
         #endregion
 
         #region HR
+
+        #region JobVacancies
+        public DbSet<JobVacancy> JobVacancies { get; set; }
+        public DbSet<JobVacancyExpierence> JobVacancyExpierences { get; set; }
+
+        #endregion
 
         #region Manuals
         public DbSet<HRManual> HRManuals { get; set; }

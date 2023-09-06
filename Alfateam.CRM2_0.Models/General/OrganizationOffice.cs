@@ -39,11 +39,7 @@ namespace Alfateam.CRM2_0.Models.General
         /// </summary>
         public List<OrganizationOffice> SubOffices { get; set; } = new List<OrganizationOffice>();
 
-        /// <summary>
-        /// Счета филиала
-        /// Если список пуст, то используются счета вышестоящего филиала или огранизации в целом
-        /// </summary>
-        public List<Account> Accounts { get; set; } = new List<Account>();
+     
 
 
 

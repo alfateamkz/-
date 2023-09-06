@@ -1,6 +1,7 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
 using Alfateam.CRM2_0.Models.Abstractions.Roles.HR;
 using Alfateam.CRM2_0.Models.Roles.HR;
+using Alfateam.CRM2_0.Models.Roles.HR.JobVacancies;
 using Alfateam.CRM2_0.Models.Roles.HR.Manuals;
 using Alfateam.CRM2_0.Models.Roles.HR.Questionnaires;
 using System;
@@ -16,6 +17,11 @@ namespace Alfateam.CRM2_0.Models.Departments
     /// </summary>
     public class HRDepartment : Department
     {
+
+        #region JobVacancies
+        public List<JobVacancy> JobVacancies { get; set; } = new List<JobVacancy>();
+        #endregion
+
         #region Manuals
         public List<HRManual> HRManuals { get; set; } = new List<HRManual>();
         public List<HRManualCategory> HRManualCategories { get; set; } = new List<HRManualCategory>();

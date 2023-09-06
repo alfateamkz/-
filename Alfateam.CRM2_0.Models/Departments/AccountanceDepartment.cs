@@ -1,4 +1,5 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
+using Alfateam.CRM2_0.Models.Roles.Accountance;
 using Alfateam.CRM2_0.Models.Roles.Accountance.Loans;
 using System;
 using System.Collections.Generic;
@@ -14,5 +15,6 @@ namespace Alfateam.CRM2_0.Models.Departments
     public class AccountanceDepartment : Department
     {
         public List<LoanObligation> LoanObligations { get; set; } = new List<LoanObligation>();
+        public List<Account> Accounts { get; set; } = new List<Account>();
     }
 }

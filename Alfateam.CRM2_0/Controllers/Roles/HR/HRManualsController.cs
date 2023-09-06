@@ -57,11 +57,7 @@ namespace Alfateam.CRM2_0.Controllers.Roles.HR
         [HttpPut, Route("UpdateHRManual")]
         public async Task<RequestResult> UpdateHRManual(HRManualEditModel model)
         {
-            return TryUpdateModel(DB.HRManuals, model, (item) =>
-            {
-                item.HRDepartmentId = (int)this.DepartmentId;
-                return RequestResult.AsSuccess();
-            });
+            return TryUpdateModel(DB.HRManuals, model);
         }
 
 
@@ -106,11 +102,7 @@ namespace Alfateam.CRM2_0.Controllers.Roles.HR
         [HttpPut, Route("UpdateHRManualCategory")]
         public async Task<RequestResult> UpdateHRManualCategory(HRManualCategoryEditModel model)
         {
-            return TryUpdateModel(DB.HRManualCategories, model, (item) =>
-            {
-                item.HRDepartmentId = (int)this.DepartmentId;
-                return RequestResult.AsSuccess();
-            });
+            return TryUpdateModel(DB.HRManualCategories, model);
         }
 
 

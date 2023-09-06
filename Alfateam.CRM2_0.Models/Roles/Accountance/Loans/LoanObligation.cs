@@ -2,6 +2,7 @@
 using Alfateam.CRM2_0.Models.Abstractions.Roles.Accountance;
 using Alfateam.CRM2_0.Models.Enums.Roles.Accountance.Loans;
 using Alfateam.CRM2_0.Models.General;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,5 +48,13 @@ namespace Alfateam.CRM2_0.Models.Roles.Accountance.Loans
         /// Если список пустой - то обязательство беззалоговое
         /// </summary>
         public List<LoanObligationPledge> Pledges { get; set; } = new List<LoanObligationPledge>();
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        [JsonIgnore]
+        public int AccountanceDepartmentId { get; set; }
     }
 }

@@ -19,5 +19,10 @@ namespace Alfateam.CRM2_0.Models.Roles.HR.Questionnaires
 
 
         public List<HRQuestionaireQuestion> Questions { get; set; } = new List<HRQuestionaireQuestion>();
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int HRQuestionnaireId { get; set; }
     }
 }

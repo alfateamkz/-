@@ -29,10 +29,7 @@ namespace Alfateam.CRM2_0.Models.General
 
 
 
-        /// <summary>
-        /// Счета организации
-        /// </summary>
-        public List<Account> Accounts { get; set; } = new List<Account>();
+   
         public List<OrganizationOffice> Offices { get; set; } = new List<OrganizationOffice>();
 
 

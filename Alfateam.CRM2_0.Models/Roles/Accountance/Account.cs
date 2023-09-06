@@ -2,6 +2,7 @@
 using Alfateam.CRM2_0.Models.Abstractions.Roles.Accountance.Transactions;
 using Alfateam.CRM2_0.Models.Enums.Roles.Accountance;
 using Alfateam.CRM2_0.Models.General;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,12 +41,19 @@ namespace Alfateam.CRM2_0.Models.Roles.Accountance
         /// Валюта счета
         /// </summary>
         public Currency Currency { get; set; }
-
+        public int CurrencyId { get; set; }
 
 
         /// <summary>
         /// Движения по счету
         /// </summary>
         public List<Transaction> Transactions { get; set; } = new List<Transaction>();
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        [JsonIgnore]
+        public int AccountanceDepartmentId { get; set; }
     }
 }

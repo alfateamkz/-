@@ -9,6 +9,8 @@ namespace Alfateam.CRM2_0.Models.CreateModels.Roles.HR
         public string Title { get; set; }
         public string? Description { get; set; }
 
+        public int JobVacancyId { get; set; }
+
         public CandidateCallCreateModel Call { get; set; }
 
         public override CandidateInterview Create()

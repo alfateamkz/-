@@ -1,4 +1,5 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
+using Alfateam.CRM2_0.Models.Roles.HR.JobVacancies;
 using Alfateam.CRM2_0.Models.Roles.HR.TestTasks;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,10 @@ namespace Alfateam.CRM2_0.Models.Roles.HR
     {
         public string Title { get; set; }
         public string? Description { get; set; }
+
+
+        public JobVacancy JobVacancy { get; set; }
+        public int JobVacancyId { get; set; }
 
 
         public List<CandidateTestTask> TestTasks { get; set; } = new List<CandidateTestTask>();

@@ -1,4 +1,5 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,5 +15,12 @@ namespace Alfateam.CRM2_0.Models.Roles.HR.Questionnaires
     {
         public string Title { get; set; }
         public double Score { get; set; }
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        [JsonIgnore]
+        public int HRQuestionaireOptionsQuestionId { get; set; }
     }
 }

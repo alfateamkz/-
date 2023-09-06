@@ -21,5 +21,9 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Roles.HR
     /// </summary>
     public abstract class HRQuestionaireQuestion : AbsModel
     {
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int HRQuestionaireQuestionGroupId { get; set; }
     }
 }

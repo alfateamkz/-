@@ -41,6 +41,7 @@ namespace Alfateam.CRM2_0.Controllers.Roles.HR
                 {
                     var interviews = DB.CandidateInterviews.Where(o => o.CandidateId == candidateId 
                                                                     && !o.IsDeleted)
+                                                           .Include(o => o.JobVacancy)
                                                            .ToList();
                    
                     return GetMany<CandidateInterview,CandidateInterviewClientModel>(interviews,offset,count);
@@ -55,6 +56,7 @@ namespace Alfateam.CRM2_0.Controllers.Roles.HR
            
             var interview = DB.CandidateInterviews.Include(o => o.Call)
                                                   .Include(o => o.Decision)
+                                                  .Include(o => o.JobVacancy).ThenInclude(o => o.Expierence)
                                                   .FirstOrDefault(o => o.Id == interviewId && !o.IsDeleted);
 
             return TryFinishAllRequestes(new[]
