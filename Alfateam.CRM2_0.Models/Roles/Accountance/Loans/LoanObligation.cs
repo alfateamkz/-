@@ -28,6 +28,8 @@ namespace Alfateam.CRM2_0.Models.Roles.Accountance.Loans
 
 
         public Currency Currency { get; set; }
+        public int CurrencyId { get; set; }
+
         public double Sum { get; set; }
         public double Percent { get; set; }
 

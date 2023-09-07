@@ -25,7 +25,7 @@ namespace Alfateam.CRM2_0.Models.Roles.SecurityService.Checking
         /// Сотрудник СБ
         /// </summary>
         public User CheckedBy { get; set; }
-
+        public int CheckedById { get; set; }
 
 
 
@@ -33,11 +33,14 @@ namespace Alfateam.CRM2_0.Models.Roles.SecurityService.Checking
         /// Проверяемый человек
         /// </summary>
         public User CheckedPerson { get; set; }
+        public int CheckedPersonId { get; set; }
+
 
         /// <summary>
         /// Информация, которую нужно проверить
         /// </summary>
         public SSCheckingData CheckingData { get; set; }
+        public int CheckingDataId { get; set; }
 
 
 
@@ -55,5 +58,12 @@ namespace Alfateam.CRM2_0.Models.Roles.SecurityService.Checking
         /// Итоговый результат проверки
         /// </summary>
         public SSCheckingResult? Result { get; set; }
+        public int? ResultId { get; set; }
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int SecurityServiceDepartmentId { get; set; }
     }
 }

@@ -15,5 +15,6 @@ namespace Alfateam.CRM2_0.Models.Roles.Accountance.Transactions
     public class OrderTransaction : Transaction
     {
         public Order Order { get; set; }
+        public int OrderId { get; set; }
     }
 }

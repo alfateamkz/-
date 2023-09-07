@@ -22,6 +22,7 @@ namespace Alfateam.CRM2_0.Models.Departments
 
         #region Scoring
         public List<ScoringModel> ScoringModels { get; set; } = new List<ScoringModel>();
+        public List<ScoringModelCategory> ScoringModelCategories { get; set; } = new List<ScoringModelCategory>();
         #endregion
 
     }

@@ -13,6 +13,6 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Roles.Accountance.Transactions
     public abstract class InvestProjectTransaction : Transaction
     {
         public InvestProject Project { get; set; }
-
+        public int ProjectId { get; set; }
     }
 }

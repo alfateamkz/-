@@ -15,5 +15,11 @@ namespace Alfateam.CRM2_0.Models.Roles.SecurityService.Scoring
     {
         public string Title { get; set; }
         public double Score { get; set; }
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int ScoringOptionsQuestionId { get; set; }
     }
 }

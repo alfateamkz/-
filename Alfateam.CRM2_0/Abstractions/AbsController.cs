@@ -20,6 +20,8 @@ namespace Alfateam.CRM2_0.Abstractions
     [Route("[controller]")]
     public abstract class AbsController : ControllerBase
     {
+
+        //TODO: переназначение, вдруг если человек уволился или еще что-то
         internal CRMDBContext DB { get; set; }
         internal IWebHostEnvironment AppEnvironment { get; set; }
 
@@ -283,6 +285,18 @@ namespace Alfateam.CRM2_0.Abstractions
 
         #region Update generic methods
 
+        protected RequestResult TryUpdateModel<T>(DbSet<T> dbSet, T item, EditModel<T> model, Func<T, RequestResult> prepareCallback = null) where T : AbsModel
+        {
+            var user = GetAuthorizedUser();
+
+            return TryFinishAllRequestes(new[]
+            {
+                () => RequestResult.FromBoolean(item != null,404,"Сущность с данным id не найдена"),
+                () => RequestResult.FromBoolean(model.IsValid(),400, "Неверно заполнены поля"),
+                () => prepareCallback?.Invoke(item),
+                () => UpdateModel(dbSet,item,model)
+            });
+        }
         protected RequestResult TryUpdateModel<T>(DbSet<T> dbSet, EditModel<T> model, Func<T, RequestResult> prepareCallback = null) where T : AbsModel
         {
             var user = GetAuthorizedUser();

@@ -19,7 +19,6 @@ namespace Alfateam.CRM2_0.Models.Roles.Accountance
     {
         public string Title { get; set; }
         public DateTime Date { get; set; }
-        public Currency Currency { get; set; }
         public double Value { get; set; }
 
         public TransactionDirection Direction { get; set; } = TransactionDirection.Debit;

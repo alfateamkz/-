@@ -5,6 +5,7 @@ using Alfateam.CRM2_0.Models.Abstractions.Content.Education.Courses;
 using Alfateam.CRM2_0.Models.Abstractions.Content.Tests;
 using Alfateam.CRM2_0.Models.Abstractions.Gamification;
 using Alfateam.CRM2_0.Models.Abstractions.Roles.Accountance;
+using Alfateam.CRM2_0.Models.Abstractions.Roles.Accountance.Transactions;
 using Alfateam.CRM2_0.Models.Abstractions.Roles.Financier;
 using Alfateam.CRM2_0.Models.Abstractions.Roles.HR;
 using Alfateam.CRM2_0.Models.Abstractions.Roles.Lawyer;
@@ -81,7 +82,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Transactions;
+
 
 namespace Alfateam.DB
 {
@@ -640,6 +641,7 @@ namespace Alfateam.DB
 
         #region Scoring
         public DbSet<ScoringModel> ScoringModels { get; set; }
+        public DbSet<ScoringModelCategory> ScoringModelCategories { get; set; }
         public DbSet<ScoringQuestionGroup> ScoringQuestionGroups { get; set; }
         public DbSet<ScoringQuestionOption> ScoringQuestionOptions { get; set; }
         #endregion

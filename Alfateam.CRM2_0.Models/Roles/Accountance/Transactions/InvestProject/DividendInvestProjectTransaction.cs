@@ -16,6 +16,9 @@ namespace Alfateam.CRM2_0.Models.Roles.Accountance.Transactions.InvestProject
     public class DividendInvestProjectTransaction : InvestProjectTransaction
     {
         public InvestProjectDeposit From { get; set; }
+        public int FromId { get; set; }
+
+
         public DividendInvestProjectTransactionType Type { get; set; } = DividendInvestProjectTransactionType.DepositWithdrawal;
     }
 }

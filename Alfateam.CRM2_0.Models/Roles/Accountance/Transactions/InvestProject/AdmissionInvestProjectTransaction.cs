@@ -15,5 +15,6 @@ namespace Alfateam.CRM2_0.Models.Roles.Accountance.Transactions.InvestProject
     public class AdmissionInvestProjectTransaction : InvestProjectTransaction
     {
         public InvestProjectDeposit To { get; set; }
+        public int ToId { get; set; }
     }
 }

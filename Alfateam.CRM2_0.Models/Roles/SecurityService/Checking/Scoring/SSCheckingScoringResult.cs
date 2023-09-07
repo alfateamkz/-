@@ -14,6 +14,9 @@ namespace Alfateam.CRM2_0.Models.Roles.SecurityService.Checking.Scoring
     public class SSCheckingScoringResult : AbsModel
     {
         public ScoringModel ScoringModel { get; set; }
+        public int ScoringModelId { get; set; }
+
+
         public List<SSCheckingScoringResultQGroup> QuestionGroups { get; set; } = new List<SSCheckingScoringResultQGroup>();
     }
 }

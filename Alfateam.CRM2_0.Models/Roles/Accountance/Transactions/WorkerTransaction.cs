@@ -18,6 +18,8 @@ namespace Alfateam.CRM2_0.Models.Roles.Accountance.Transactions
     public class WorkerTransaction : Transaction
     {
         public Worker Worker { get; set; }
+        public int WorkerId { get; set; }
+
         public WorkerTransactionType Type { get; set; } = WorkerTransactionType.ProjectFee;
 
 
@@ -25,9 +27,13 @@ namespace Alfateam.CRM2_0.Models.Roles.Accountance.Transactions
         /// В рамках какого проекта мы рассчитывается с работником
         /// </summary>
         public Order? Order { get; set; }
+        public int? OrderId { get; set; }
+
+
         /// <summary>
         /// В рамках какого этапа мы рассчитывается с работником
         /// </summary>
         public OrderMilestone? Milestone { get; set; }
+        public int? MilestoneId { get; set; }
     }
 }

@@ -16,6 +16,8 @@ namespace Alfateam.CRM2_0.Models.Roles.Accountance.Transactions
     public class FranchiseTransaction : Transaction
     {
         public FranchiseSale Franchise { get; set; }
+        public int FranchiseId { get; set; }
+
         public FranchiseTransactionType Type { get; set; } = FranchiseTransactionType.EntryFee;
     }
 }

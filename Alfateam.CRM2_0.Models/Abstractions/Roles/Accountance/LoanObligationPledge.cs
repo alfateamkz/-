@@ -24,5 +24,12 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Roles.Accountance
     /// </summary>
     public abstract class LoanObligationPledge : AbsModel
     {
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        [JsonIgnore]
+        public int LoanObligationId { get; set; }
     }
 }

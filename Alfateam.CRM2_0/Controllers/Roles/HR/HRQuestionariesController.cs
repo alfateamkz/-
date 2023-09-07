@@ -60,7 +60,7 @@ namespace Alfateam.CRM2_0.Controllers.Roles.HR
 
             return TryFinishAllRequestes(new[]
             {
-                () => RequestResult.FromBoolean(questionaire != null, 404, "Сущность с данным id не найдена"),
+                () => CheckBaseQuestionnaire(questionaire),
                 () =>
                 {
                     IncludeHRQuestionnaireQuestionOptions(questionaire);
@@ -85,14 +85,24 @@ namespace Alfateam.CRM2_0.Controllers.Roles.HR
         [HttpPut, Route("UpdateHRQuestionnaire")]
         public async Task<RequestResult> UpdateHRQuestionnaire(HRQuestionnaireEditModel model)
         {
-            return TryUpdateModel(DB.HRQuestionnaires, model);
+            var questionaire = DB.HRQuestionnaires.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return TryFinishAllRequestes(new[]
+            {
+                () => CheckBaseQuestionnaire(questionaire),
+                () => TryUpdateModel(DB.HRQuestionnaires, questionaire, model)
+            });
         }
 
 
         [HttpDelete, Route("DeleteHRQuestionnaire")]
         public async Task<RequestResult> DeleteHRQuestionnaire(int id)
         {
-            return TryDeleteModel(DB.HRQuestionnaires, id);
+            var questionaire = DB.HRQuestionnaires.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            return TryFinishAllRequestes(new[]
+            {
+                () => CheckBaseQuestionnaire(questionaire),
+                () => DeleteModel(DB.HRQuestionnaires, questionaire)
+            });
         }
 
         #endregion
@@ -285,8 +295,12 @@ namespace Alfateam.CRM2_0.Controllers.Roles.HR
         [HttpGet, Route("GetHRQuestionnaireCategory")]
         public async Task<RequestResult> GetHRQuestionnaireCategory(int id)
         {
-            var queryable = DB.HRQuestionnaireCategories.Where(o => o.HRDepartmentId == this.DepartmentId);
-            return TryGetModel(queryable, id);
+            var category = DB.HRQuestionnaireCategories.FirstOrDefault(o => o.Id  == id && !o.IsDeleted);
+            return TryFinishAllRequestes(new[]
+            {
+                () => CheckBaseQuestionnaireCategory(category),
+                () => RequestResult<HRQuestionnaireCategory>.AsSuccess(category)
+            });
         }
 
 
@@ -307,14 +321,25 @@ namespace Alfateam.CRM2_0.Controllers.Roles.HR
         [HttpPut, Route("UpdateHRQuestionnaireCategory")]
         public async Task<RequestResult> UpdateHRQuestionnaireCategory(HRQuestionnaireCategoryEditModel model)
         {
-            return TryUpdateModel(DB.HRQuestionnaireCategories, model);
+
+            var category = DB.HRQuestionnaireCategories.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return TryFinishAllRequestes(new[]
+            {
+                () => CheckBaseQuestionnaireCategory(category),
+                () => TryUpdateModel(DB.HRQuestionnaireCategories, category, model)
+            });
         }
 
 
         [HttpDelete, Route("DeleteHRQuestionnaireCategory")]
         public async Task<RequestResult> DeleteHRQuestionnaireCategory(int id)
         {
-            return TryDeleteModel(DB.HRQuestionnaireCategories, id);
+            var category = DB.HRQuestionnaireCategories.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            return TryFinishAllRequestes(new[]
+            {
+                () => CheckBaseQuestionnaireCategory(category),
+                () => DeleteModel(DB.HRQuestionnaireCategories, category)
+            });
         }
 
         #endregion
@@ -335,7 +360,6 @@ namespace Alfateam.CRM2_0.Controllers.Roles.HR
                 () => RequestResult.FromBoolean(questionnaire.HRDepartmentId == this.DepartmentId,403,"Нет доступа к данному опроснику"),
             });
         }
-
         private RequestResult CheckBaseQuestionnaireAndQuestionGroup(HRQuestionnaire questionnaire, HRQuestionaireQuestionGroup questionGroup)
         {
             return TryFinishAllRequestes(new[]
@@ -345,7 +369,6 @@ namespace Alfateam.CRM2_0.Controllers.Roles.HR
                 () => RequestResult.FromBoolean(questionGroup.HRQuestionnaireId == questionnaire.Id,403,"Группа вопросов не принадлежит данному опроснику"),
             });
         }
-
         private RequestResult CheckBaseQuestionnaireAndQuestion(HRQuestionnaire questionnaire, HRQuestionaireQuestion question)
         {
             return TryFinishAllRequestes(new[]
@@ -356,6 +379,16 @@ namespace Alfateam.CRM2_0.Controllers.Roles.HR
                     var questionGroup = DB.HRQuestionaireQuestionGroups.FirstOrDefault(o => o.Id == question.HRQuestionaireQuestionGroupId);
                     return RequestResult.FromBoolean(questionGroup.HRQuestionnaireId == questionnaire.Id, 403,"Группа вопросов не принадлежит данному опроснику");
                 }
+            });
+        }
+
+
+        private RequestResult CheckBaseQuestionnaireCategory(HRQuestionnaireCategory category)
+        {
+            return TryFinishAllRequestes(new[]
+            {
+                () => RequestResult.FromBoolean(category != null,404,"Категория с данным id не найден"),
+                () => RequestResult.FromBoolean(category.HRDepartmentId == this.DepartmentId,403,"Нет доступа к данной категории"),
             });
         }
 

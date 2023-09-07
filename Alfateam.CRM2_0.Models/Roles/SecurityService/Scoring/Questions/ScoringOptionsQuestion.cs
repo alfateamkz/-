@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Alfateam.CRM2_0.Models.Roles.SecurityService.Scoring.Questions
 {
     /// <summary>
-    /// Модель вопроса скоринга, на который есть несколько вариантов ответовы
+    /// Модель вопроса скоринга, на который есть несколько вариантов ответов
     /// </summary>
     public class ScoringOptionsQuestion : ScoringQuestion
     {

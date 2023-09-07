@@ -22,5 +22,10 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Roles.SecurityService
     /// </summary>
     public abstract class ScoringQuestion : AbsModel
     {
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int ScoringQuestionGroupId { get; set; }
     }
 }

@@ -13,6 +13,15 @@ namespace Alfateam.CRM2_0.Models.Roles.SecurityService.Scoring
     /// </summary>
     public class ScoringQuestionGroup : AbsModel
     {
+        public string Title { get; set; }
+        public string? Description { get; set; }
+
         public List<ScoringQuestion> Questions { get; set; } = new List<ScoringQuestion>();
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int ScoringModelId { get; set; }
     }
 }

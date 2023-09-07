@@ -14,7 +14,13 @@ namespace Alfateam.CRM2_0.Models.Roles.Accountance.Transactions
     public class MarketingTransaction : Transaction
     {
         public AdCampaign Campaign { get; set; }
+        public int CampaignId { get; set; }
+
         public AdCampaignItem CampaignItem { get; set; }
+        public int CampaignItemId { get; set; }
+
+
         public AdCampaignBudgetItem? BudgetItem { get; set; }
+        public int BudgetItemId { get; set; }
     }
 }

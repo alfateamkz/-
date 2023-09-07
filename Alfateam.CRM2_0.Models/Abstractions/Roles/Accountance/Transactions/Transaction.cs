@@ -31,14 +31,11 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Roles.Accountance.Transactions
     /// <summary>
     /// Базовая модель бухгалтерской транзакции
     /// </summary>
-    public abstract class Transaction : AbsModel
+    public class Transaction : AbsModel
     {
          
-
-
         public string Title { get; set; }
         public DateTime Date { get; set; }
-        public Currency Currency { get; set; }
         public double Value { get; set; }
 
         public TransactionDirection Direction { get; set; } = TransactionDirection.Debit;
@@ -63,7 +60,31 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Roles.Accountance.Transactions
         /// <summary>
         /// История изменений свойств транзакции
         /// </summary>
+        [JsonIgnore]
         public List<TransactionChanges> OldTransactionVersions { get; set; } = new List<TransactionChanges>();
 
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        [JsonIgnore]
+        public int AccountId { get; set; }
+
+
+
+        public void SaveOldChanges()
+        {
+            OldTransactionVersions.Add(new TransactionChanges
+            {
+                Comment = this.Comment,
+                Date = this.Date,
+                Direction = this.Direction,
+                PlannedDate = this.PlannedDate,
+                IsOfficial = this.IsOfficial,
+                IsPlanned = this.IsPlanned,
+                Value = this.Value,
+                Title = this.Title,
+            });
+        }
     }
 }
