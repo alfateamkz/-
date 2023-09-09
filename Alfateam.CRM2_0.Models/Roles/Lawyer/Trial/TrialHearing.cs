@@ -14,12 +14,25 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.Trial
     public class TrialHearing : AbsModel
     {
         public Judge Judge { get; set; }
-        public CourtStructure CourtStructure { get; set; }
+        public int JudgeId { get; set; }
+
+
+        public Court Court { get; set; }
+        public int CourtId { get; set; }
+
+
         public DateTime Date { get; set; }
 
 
 
         public TrialHearingResult? Result { get; set; }
+        public int? ResultId { get; set; }
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int? LitigationId { get; set; }
 
     }
 }

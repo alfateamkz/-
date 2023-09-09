@@ -513,11 +513,12 @@ namespace Alfateam.DB
         public DbSet<LegalCase> LegalCases { get; set; }
         public DbSet<LegalCaseRequest> LegalCaseRequests { get; set; }
         public DbSet<LegalCaseRequestResult> LegalCaseRequestResults { get; set; }
-        #endregion
+        public DbSet<LegalCaseResult> LegalCaseResults { get; set; }
+		#endregion
 
-        #region Trial
-
-        public DbSet<Judge> Judges { get; set; }
+		#region Trial
+		public DbSet<Court> Courts { get; set; }
+		public DbSet<Judge> Judges { get; set; }
         public DbSet<TrialHearing> TrialHearings { get; set; }
         public DbSet<TrialHearingResult> TrialHearingResults { get; set; }
         public DbSet<TrialProcessResult> TrialProcessResults { get; set; }

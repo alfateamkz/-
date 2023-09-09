@@ -15,5 +15,11 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.Trial
     {
         public string Description { get; set; }
         public List<Document> Documents { get; set; } = new List<Document>();
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int LitigationId { get; set; }
     }
 }

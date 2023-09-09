@@ -23,6 +23,13 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.Documents
         public List<DocumentVersion> Versions { get; set; } = new List<DocumentVersion>();
 
 
-        public SignedDocument? SignedDocument { get; set; } 
+        public SignedDocument? SignedDocument { get; set; }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int LawDepartmentId { get; set; }
     }
 }

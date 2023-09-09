@@ -22,7 +22,7 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.LegalCases
         /// Кем создано юридическое дело
         /// </summary>
         public User CreatedBy { get; set; }
-
+        public int CreatedById { get; set; }
 
 
 
@@ -41,13 +41,15 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.LegalCases
         /// Судебный процесс (если инициирован)
         /// </summary>
         public Litigation? Litigation { get; set; }
+        public int? LitigationId { get; set; }
 
 
 
         /// <summary>
         /// С кем возникла спорная ситуация (клиент, работник или контрагент)
         /// </summary>
-        public User SecondSide { get; set; }
+        public User? SecondSide { get; set; }
+        public int SecondSideId { get; set; }
 
 
         /// <summary>
@@ -60,6 +62,16 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.LegalCases
         /// Документы, составление в ходе ведения дела
         /// </summary>
         public List<Document> Documents { get; set; } = new List<Document>();
+
+        
+        public LegalCaseResult? Result { get; set; }
+        public int? ResultId { get; set; }
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int LawDepartmentId { get; set; }
 
     }
 }

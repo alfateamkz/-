@@ -63,5 +63,14 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer
         /// Сюда подставляется юрист, который быстрее всех подтвердил поручение
         /// </summary>
         public User? AcceptedBy { get; set; }
+
+
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int LawDepartmentId { get; set; }
     }
 }

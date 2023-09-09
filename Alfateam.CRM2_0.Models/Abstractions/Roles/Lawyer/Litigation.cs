@@ -35,6 +35,10 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Roles.Lawyer
 
         public List<TrialRequest> TrialRequests { get; set; } = new List<TrialRequest>();
         public List<TrialHearing> Hearings { get; set; } = new List<TrialHearing>();
+
+
         public TrialProcessResult? Result { get; set; }
+        public int? ResultId { get; set; }
+
     }
 }

@@ -19,11 +19,14 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.LegalCases
         /// Кто запросил дело
         /// </summary>
         public User From { get; set; }
+        public int FromId { get; set; }
+        
 
         /// <summary>
         /// С кем спор
         /// </summary>
-        public User SecondSide { get; set; }
+        public User? SecondSide { get; set; }
+        public int? SecondSideId { get; set; }
 
 
 
@@ -40,5 +43,12 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.LegalCases
         /// Результат запроса на открытие юридического дела
         /// </summary>
         public LegalCaseRequestResult? Result { get; set; }
+        public int? ResultId { get; set; }
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int LawDepartmentId { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
 using Alfateam.CRM2_0.Models.General;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,8 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.Trial
 
 
         public Country Country { get; set; }
+        public int CountryId { get; set; }
+
         public string City { get; set; }
 
 
@@ -28,5 +31,15 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.Trial
         public string? Comment { get; set; }
 
 
-    }
+
+        //TODO: Many to many
+        [JsonIgnore]
+        public List<Court> CourtReferences { get; set; } = new List<Court>();
+
+
+		/// <summary>
+		/// Автоматическое поле
+		/// </summary>
+		public int LawDepartmentId { get; set; }
+	}
 }

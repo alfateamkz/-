@@ -111,8 +111,7 @@ namespace Alfateam.CRM2_0.Controllers.Roles.SecurityService
         [HttpGet, Route("GetSSCheckings")]
         public async Task<RequestResult> GetSSCheckings(bool showActual, int offset, int count = 20)
         {
-            var checkings = DB.SSCheckings.Where(o => o.SecurityServiceDepartmentId == DepartmentId
-                                                            ! && o.IsDeleted)
+            var checkings = DB.SSCheckings.Where(o => o.SecurityServiceDepartmentId == DepartmentId && !o.IsDeleted)
                                           .Include(o => o.CheckedBy)
                                           .Include(o => o.CheckedPerson)
                                           .Include(o => o.Result)

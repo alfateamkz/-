@@ -16,8 +16,10 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.Trial
     {
         public TrialHearingResultType Type { get; set; } = TrialHearingResultType.LawsuitApproved;
         public string Description { get; set; }
+		public bool IsLockedForChanges { get; set; }
 
+		public List<Document> Documents { get; set; } = new List<Document>();
 
-        public List<Document> Documents { get; set; } = new List<Document>();
+       
     }
 }
