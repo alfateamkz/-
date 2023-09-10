@@ -14,8 +14,18 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.Trial
     /// </summary>
     public class TrialProcessSide : AbsModel
     {
-        public TrialProcessSideRole Role { get; set; } = TrialProcessSideRole.Plaintiff;
+        public string Title { get; set; }
+		public string? Description { get; set; }
+		public TrialProcessSideRole Role { get; set; } = TrialProcessSideRole.Plaintiff;
+
+
         public List<TrialProcessParticipant> Participants { get; set; } = new List<TrialProcessParticipant>();
 
-    }
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int LitigationId { get; set; }
+	}
 }

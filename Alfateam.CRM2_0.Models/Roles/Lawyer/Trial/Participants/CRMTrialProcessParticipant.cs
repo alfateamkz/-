@@ -14,5 +14,6 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.Trial.Participants
     public class CRMTrialProcessParticipant : TrialProcessParticipant
     {
         public User User { get; set; }
+        public int UserId { get; set; }
     }
 }

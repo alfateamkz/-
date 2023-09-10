@@ -32,7 +32,7 @@ namespace Alfateam.CRM2_0.Controllers.Roles.SecurityService
         public async Task<RequestResult> GetActualSSCheckingRequests(int offset, int count = 20)
         {
             var requests = DB.SSCheckingRequests.Where(o => o.SecurityServiceDepartmentId == DepartmentId
-                                                            !&& o.IsDeleted
+                                                            && !o.IsDeleted
                                                             && o.ResultId == null)
                                                  .Skip(offset)
                                                  .Take(count)
@@ -45,7 +45,7 @@ namespace Alfateam.CRM2_0.Controllers.Roles.SecurityService
         {
             var requests = DB.SSCheckingRequests.Include(o => o.Result)
                                                  .Where(o => o.SecurityServiceDepartmentId == DepartmentId
-                                                            ! && o.IsDeleted
+                                                            && !o.IsDeleted
                                                             && o.ResultId != null)
                                                  .Where(o => o.Result.Type == type)
                                                  .Skip(offset)

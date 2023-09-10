@@ -232,11 +232,27 @@ namespace Alfateam.CRM2_0.Abstractions
             });
         }
 
-        #endregion
+		#endregion
 
-        #region Create generic methods
+		#region Create generic methods
 
-        protected RequestResult TryCreateModel<T>(DbSet<T> dbSet, CreateModel<T> model, Func<T, RequestResult> prepareCallback = null) where T : AbsModel, new()
+		protected RequestResult TryCreateModel<T>(DbSet<T> dbSet, CreateModel<T> model, Action<T> prepareCallback = null) where T : AbsModel, new()
+		{
+			var user = GetAuthorizedUser();
+
+			return TryFinishAllRequestes(new[]
+			{
+				() => RequestResult.FromBoolean(model.IsValid(),400, "Неверно заполнены поля"),
+                //TODO: тщательно проверить права доступа
+                () =>
+                {
+                    prepareCallback?.Invoke(newItem);
+                    return RequestResult.AsSuccess();
+				},
+				() => CreateModel(dbSet,model)
+			});
+		}
+		protected RequestResult TryCreateModel<T>(DbSet<T> dbSet, CreateModel<T> model, Func<T, RequestResult> prepareCallback = null) where T : AbsModel, new()
         {
             var user = GetAuthorizedUser();
 

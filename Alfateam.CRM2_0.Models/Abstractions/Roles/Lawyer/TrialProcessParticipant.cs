@@ -21,7 +21,7 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Roles.Lawyer
     /// <summary>
     /// Базовая сущность участника судебного процесса
     /// </summary>
-    public abstract class TrialProcessParticipant : AbsModel
+    public class TrialProcessParticipant : AbsModel
     {
         public string Description { get; set; }
         public string? Comment { get; set; }
@@ -44,6 +44,15 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Roles.Lawyer
         /// Если ConnectedAtHearing == null, то человек стал участвовать в судебном процессе с самого начала(до первого слушания)
         /// </summary>
         public TrialHearing? ConnectedAtHearing { get; set; }
+		public int? ConnectedAtHearingId { get; set; }
 
-    }
+
+
+		/// <summary>
+		/// Автоматическое поле
+		/// </summary>
+		public int TrialProcessSideId { get; set; }
+
+
+	}
 }

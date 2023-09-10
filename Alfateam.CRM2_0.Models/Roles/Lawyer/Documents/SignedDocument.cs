@@ -15,15 +15,16 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.Documents
     public class SignedDocument : AbsModel
     {
         public SignatureType SignatureType { get; set; }
+
         public DocumentVersion Version { get; set; }
+		public int VersionId { get; set; }
 
 
-
-        /// <summary>
-        /// Путь к скану документа со стороны корпорации Alfateam
-        /// Используется, если SignatureType == TraditionalSignature
-        /// </summary>
-        public string? AlfateamSideDocumentScan { get; set; }
+		/// <summary>
+		/// Путь к скану документа со стороны корпорации Alfateam
+		/// Используется, если SignatureType == TraditionalSignature
+		/// </summary>
+		public string? AlfateamSideDocumentScan { get; set; }
         /// <summary>
         /// Путь к скану документа со стороны клиента/контрагента
         /// Используется, если SignatureType == TraditionalSignature
@@ -37,5 +38,6 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.Documents
         /// Используется, если SignatureType == DigitalSignature
         /// </summary>
         public EDMProvider? EDMProvider { get; set; }
-    }
+        public int? EDMProviderId { get; set; }
+	}
 }

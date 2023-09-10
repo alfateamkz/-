@@ -38,10 +38,10 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.LegalCases
         public LegalCaseProcedure Procedure { get; set; } = LegalCaseProcedure.PreTrial;
 
         /// <summary>
-        /// Судебный процесс (если инициирован)
+        /// Судебные процессы
         /// </summary>
-        public Litigation? Litigation { get; set; }
-        public int? LitigationId { get; set; }
+        public List<Litigation> Litigations { get; set; } = new List<Litigation>();
+
 
 
 

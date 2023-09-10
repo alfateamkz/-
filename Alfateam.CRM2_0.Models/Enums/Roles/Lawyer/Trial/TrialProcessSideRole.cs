@@ -12,6 +12,9 @@ namespace Alfateam.CRM2_0.Models.Enums.Roles.Lawyer.Trial
     public enum TrialProcessSideRole
     {
         Plaintiff = 1, //Истец
-        Defendant = 2 //Ответчик
+        Defendant = 2, //Ответчик
+
+
+        Other = 999 //Прочая непредусмторенная сторона
     }
 }

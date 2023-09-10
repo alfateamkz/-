@@ -7,6 +7,7 @@ namespace Alfateam.CRM2_0.Models.CreateModels.Roles.Lawyer.Documents
 	public class DocumentCreateModel : CreateModel<Document>
 	{
 		public DocumentType Type { get; set; }
+		public string Title { get; set; }
 		public string? DocumentNumber { get; set; }
 	}
 }

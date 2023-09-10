@@ -11,6 +11,7 @@ namespace Alfateam.CRM2_0.Models.ClientModels.Roles.Lawyer.Documents
 
 
 		public DocumentType Type { get; set; }
+		public string Title { get; set; }
 		public string? DocumentNumber { get; set; }
 		public List<DocumentVersionClientModel> Versions { get; set; } = new List<DocumentVersionClientModel>();
 

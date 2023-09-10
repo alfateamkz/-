@@ -22,8 +22,8 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.Trial
 
 
 
-        public CourtStructure CourtStructure { get; set; }
-        public int CourtStructureId { get; set; }
+        public Court Court { get; set; }
+        public int CourtId { get; set; }
 
 
 
@@ -37,5 +37,13 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.Trial
 
         public TrialRequestResult? Result { get; set; }
         public int? ResultId { get; set; }
-    }
+
+
+
+
+		/// <summary>
+		/// Автоматическое поле
+		/// </summary>
+		public int? LitigationId { get; set; }
+	}
 }

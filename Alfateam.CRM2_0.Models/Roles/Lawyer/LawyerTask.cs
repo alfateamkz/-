@@ -32,22 +32,23 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer
         /// <summary>
         /// Вторая сторона
         /// </summary>
-        public User SecondSide { get; set; }
+        public User? SecondSide { get; set; }
+		public int? SecondSideId { get; set; }
 
 
-        /// <summary>
-        /// Заказ, с каким связано дело
-        /// Может быть пустым
-        /// </summary>
-        public Order? Order { get; set; }
+		/// <summary>
+		/// Заказ, с каким связано дело
+		/// Может быть пустым
+		/// </summary>
+		public Order? Order { get; set; }
+		public int? OrderId { get; set; }
 
 
 
-
-        /// <summary>
-        /// Комментарий к поручению
-        /// </summary>
-        public string? Comment { get; set; }
+		/// <summary>
+		/// Комментарий к поручению
+		/// </summary>
+		public string? Comment { get; set; }
 
 
 
@@ -56,21 +57,26 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer
         /// Кто создал поручение
         /// </summary>
         public User CreatedBy { get; set; }
-
-        /// <summary>
-        /// Кто принял поручение
-        /// По умолчанию null, потому что в компании может быть несколько юристов
-        /// Сюда подставляется юрист, который быстрее всех подтвердил поручение
-        /// </summary>
-        public User? AcceptedBy { get; set; }
+		public int CreatedById { get; set; }
 
 
 
 
+		/// <summary>
+		/// Кто принял поручение
+		/// По умолчанию null, потому что в компании может быть несколько юристов
+		/// Сюда подставляется юрист, который быстрее всех подтвердил поручение
+		/// </summary>
+		public User? AcceptedBy { get; set; }
+		public int? AcceptedById { get; set; }
 
-        /// <summary>
-        /// Автоматическое поле
-        /// </summary>
-        public int LawDepartmentId { get; set; }
+
+
+
+
+		/// <summary>
+		/// Автоматическое поле
+		/// </summary>
+		public int LawDepartmentId { get; set; }
     }
 }

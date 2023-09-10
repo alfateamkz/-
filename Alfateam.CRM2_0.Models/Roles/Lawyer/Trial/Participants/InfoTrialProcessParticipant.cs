@@ -18,5 +18,6 @@ namespace Alfateam.CRM2_0.Models.Roles.Lawyer.Trial.Participants
         public string? Patronymic { get; set; }
 
         public Country Country { get; set; }
-    }
+		public int CountryId { get; set; }
+	}
 }
