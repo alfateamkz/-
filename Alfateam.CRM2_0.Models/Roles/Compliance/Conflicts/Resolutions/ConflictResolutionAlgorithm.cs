@@ -20,5 +20,12 @@ namespace Alfateam.CRM2_0.Models.Roles.Compliance.Conflicts.Resolutions
         /// Начало алгоритма урегулирования конфликта
         /// </summary>
         public ConflictResolutionAlgorithmBlock StartBlock { get; set; }
-    }
+
+
+
+		/// <summary>
+		/// Автоматическое поле
+		/// </summary>
+		public int ComplianceDepartmentId { get; set; }
+	}
 }

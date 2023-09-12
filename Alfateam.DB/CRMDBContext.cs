@@ -6,6 +6,7 @@ using Alfateam.CRM2_0.Models.Abstractions.Content.Tests;
 using Alfateam.CRM2_0.Models.Abstractions.Gamification;
 using Alfateam.CRM2_0.Models.Abstractions.Roles.Accountance;
 using Alfateam.CRM2_0.Models.Abstractions.Roles.Accountance.Transactions;
+using Alfateam.CRM2_0.Models.Abstractions.Roles.Compliance;
 using Alfateam.CRM2_0.Models.Abstractions.Roles.Financier;
 using Alfateam.CRM2_0.Models.Abstractions.Roles.HR;
 using Alfateam.CRM2_0.Models.Abstractions.Roles.Lawyer;
@@ -151,6 +152,10 @@ namespace Alfateam.DB
         #endregion
         public DbSet<LoanObligationPledge> LoanObligationPledges { get; set; }
 
+        #endregion
+
+        #region Compliance
+        public DbSet<CorruptionCaseParticipant> CorruptionCaseParticipants { get; set; }
         #endregion
 
         #region Financier
@@ -420,13 +425,13 @@ namespace Alfateam.DB
         public DbSet<CorruptionCase> CorruptionCases { get; set; }
         public DbSet<CorruptionCaseAction> CorruptionCaseActions { get; set; }
         public DbSet<CorruptionCaseInitDetails> CorruptionCaseInitDetails { get; set; }
-        public DbSet<CorruptionCaseParticipant> CorruptionCaseParticipants { get; set; }
         public DbSet<CorruptionCaseResult> CorruptionCaseResults { get; set; }
         public DbSet<CorruptionCaseSide> CorruptionCaseSides { get; set; }
-        #endregion
+		#endregion
 
-        #region Fraud
-        public DbSet<FraudDescription> FraudDescriptions { get; set; }
+		#region Fraud
+		public DbSet<FraudCategory> FraudCategories { get; set; }
+		public DbSet<FraudDescription> FraudDescriptions { get; set; }
         public DbSet<FraudPreventionMethod> FraudPreventionMethods { get; set; }
 
         #endregion

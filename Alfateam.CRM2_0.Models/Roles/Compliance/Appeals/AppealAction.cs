@@ -14,5 +14,11 @@ namespace Alfateam.CRM2_0.Models.Roles.Compliance.Appeals
     {
         public string Title { get; set; }
         public string? Description { get; set; }
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int AppealId { get; set; }
     }
 }

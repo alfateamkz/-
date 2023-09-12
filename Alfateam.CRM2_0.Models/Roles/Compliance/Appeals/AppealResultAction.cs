@@ -21,5 +21,11 @@ namespace Alfateam.CRM2_0.Models.Roles.Compliance.Appeals
         public DateTime? PerformedAt { get; set; }
         public AppealResultActionStatus Status { get; set; } = AppealResultActionStatus.NotPerformed;
 
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int AppealResultId { get; set; }
     }
 }

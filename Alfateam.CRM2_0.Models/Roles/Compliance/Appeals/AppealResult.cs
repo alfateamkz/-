@@ -14,5 +14,8 @@ namespace Alfateam.CRM2_0.Models.Roles.Compliance.Appeals
     {
         public string Description { get; set; }
         public List<AppealResultAction> Actions { get; set; } = new List<AppealResultAction>();
+
+
+        public bool IsLockedForEdit { get; set; }
     }
 }

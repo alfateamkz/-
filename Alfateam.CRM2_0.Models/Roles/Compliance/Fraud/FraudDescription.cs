@@ -15,7 +15,17 @@ namespace Alfateam.CRM2_0.Models.Roles.Compliance.Fraud
         public string Title { get; set; }
         public string Description { get; set; }
 
-        public List<FraudPreventionMethod> PreventionMethods { get; set; } = new List<FraudPreventionMethod>();
+        public FraudCategory Category { get; set; }
+        public int CategoryId { get; set; } 
 
-    }
+		public List<FraudPreventionMethod> PreventionMethods { get; set; } = new List<FraudPreventionMethod>();
+
+
+
+		/// <summary>
+		/// Автоматическое поле
+		/// </summary>
+		public int ComplianceDepartmentId { get; set; }
+
+	}
 }

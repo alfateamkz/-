@@ -29,5 +29,13 @@ namespace Alfateam.CRM2_0.Models.General.Assessment.Risks
         /// Оценка риска после проведения мероприятий по управлению риском
         /// </summary>
         public RiskAssessment AssessmentAfter { get; set; }
-    }
+
+
+
+
+		/// <summary>
+		/// Автоматическое поле
+		/// </summary>
+		public int? ComplianceDepartmentId { get; set; }
+	}
 }

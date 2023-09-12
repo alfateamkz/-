@@ -38,10 +38,11 @@ namespace Alfateam.CRM2_0.Models.Departments
 
         #region Corruption
         public List<CorruptionCase> CorruptionCases { get; set; } = new List<CorruptionCase>();
-        #endregion
+		#endregion
 
-        #region Fraud
-        public List<FraudDescription> FraudDescriptions { get; set; } = new List<FraudDescription>();
+		#region Fraud
+		public List<FraudCategory> FraudCategories { get; set; } = new List<FraudCategory>();
+		public List<FraudDescription> FraudDescriptions { get; set; } = new List<FraudDescription>();
         #endregion
 
         #region Law

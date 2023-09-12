@@ -25,5 +25,12 @@ namespace Alfateam.CRM2_0.Models.Roles.Compliance.Conflicts
 
         public List<ConflictResolutionProposal> Proposals { get; set; } = new List<ConflictResolutionProposal>();
         public ConflictResult? Result { get; set; }
-    }
+
+
+
+		/// <summary>
+		/// Автоматическое поле
+		/// </summary>
+		public int ComplianceDepartmentId { get; set; }
+	}
 }

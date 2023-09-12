@@ -22,6 +22,13 @@ namespace Alfateam.CRM2_0.Models.Roles.Compliance.Appeals
         /// Если From == null, то обращение анонимное
         /// </summary>
         public User? From { get; set; }
+        public int? FromId { get; set; }
+
+
+        /// <summary>
+        /// Токен, чтобы тот, кто обратился мог видеть движение по обращению
+        /// </summary>
+        public string PublicAccessToken { get; set; } = Guid.NewGuid().ToString();
 
 
         public AppealStatus Status { get; set; } = AppealStatus.Waiting;
@@ -30,6 +37,14 @@ namespace Alfateam.CRM2_0.Models.Roles.Compliance.Appeals
 
 
         public AppealResult? Result { get; set; }
+        public int? ResultId { get; set; }
 
-    }
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int ComplianceDepartmentId { get; set; }
+
+
+	}
 }

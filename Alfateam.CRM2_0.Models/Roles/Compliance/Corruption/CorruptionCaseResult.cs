@@ -17,6 +17,8 @@ namespace Alfateam.CRM2_0.Models.Roles.Compliance.Corruption
         /// Ответственный за решение
         /// </summary>
         public User DecisionMaker { get; set; }
+        public int DecisionMakerId { get; set; }
+
         public string Description { get; set; }
 
     }

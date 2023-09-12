@@ -17,5 +17,12 @@ namespace Alfateam.CRM2_0.Models.Roles.Compliance.Law
         public string? Description { get; set; }
 
         public ProhibitedServiceType Type { get; set; } = ProhibitedServiceType.Legal;
-    }
+
+
+
+		/// <summary>
+		/// Автоматическое поле
+		/// </summary>
+		public int ComplianceDepartmentId { get; set; }
+	}
 }

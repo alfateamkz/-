@@ -18,11 +18,14 @@ namespace Alfateam.CRM2_0.Models.Roles.Compliance.Corruption
         /// Или проверяющий (в случае если коррупционный инцидент был обнаружен при проверке)
         /// </summary>
         public User Applicant { get; set; }
+        public int ApplicantId { get; set; }
+
 
 
         /// <summary>
         /// Сотрудник, который внес в базу коррупционный инцидент
         /// </summary>
         public User CreatedBy { get; set; }
+        public int CreatedById { get; set; }
     }
 }
