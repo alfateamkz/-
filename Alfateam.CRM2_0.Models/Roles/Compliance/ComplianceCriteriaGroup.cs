@@ -12,6 +12,16 @@ namespace Alfateam.CRM2_0.Models.Roles.Compliance
     /// </summary>
     public class ComplianceCriteriaGroup : AbsModel
     {
+        public string Title { get; set; }
+        public string? Description { get; set; }
+
         public List<ComplianceCriteria> Criterias { get; set; } = new List<ComplianceCriteria>();   
-    }
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int ComplianceRequirementsId { get; set; }
+
+	}
 }

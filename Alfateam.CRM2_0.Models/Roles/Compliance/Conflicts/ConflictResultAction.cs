@@ -18,5 +18,13 @@ namespace Alfateam.CRM2_0.Models.Roles.Compliance.Conflicts
 
         public DateTime Deadline { get; set; }
         public ConflictResultActionStatus Status { get; set; } = ConflictResultActionStatus.NotPerformed;
-    }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int ConflictResultId { get; set; }
+
+	}
 }

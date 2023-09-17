@@ -1,4 +1,5 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
+using Alfateam.CRM2_0.Models.Abstractions.Roles.Compliance;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,5 +16,13 @@ namespace Alfateam.CRM2_0.Models.Roles.Compliance.Conflicts
         public string Title { get; set; }   
         public string? Description { get; set; }
         public List<ConflictParticipant> Participants { get; set; } = new List<ConflictParticipant>();
-    }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int ConflictId { get; set; }
+
+	}
 }

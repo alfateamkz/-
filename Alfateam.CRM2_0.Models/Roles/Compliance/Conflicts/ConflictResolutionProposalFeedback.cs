@@ -14,8 +14,18 @@ namespace Alfateam.CRM2_0.Models.Roles.Compliance.Conflicts
     public class ConflictResolutionProposalFeedback : AbsModel
     {
         public ConflictSide Side { get; set; }
-        public ConflictResolutionProposalFeedbackStatus Status { get; set; } = ConflictResolutionProposalFeedbackStatus.Approved;
+		public int SideId { get; set; }
+
+
+		public ConflictResolutionProposalFeedbackStatus Status { get; set; } = ConflictResolutionProposalFeedbackStatus.Approved;
 
         public string? Comment { get; set; }
-    }
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int ConflictResolutionProposalId { get; set; }
+
+	}
 }

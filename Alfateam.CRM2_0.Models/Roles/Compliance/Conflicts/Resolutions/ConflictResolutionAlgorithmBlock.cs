@@ -1,5 +1,6 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
 using Alfateam.CRM2_0.Models.Enums.Roles.Compliance.Conflicts;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,5 +23,6 @@ namespace Alfateam.CRM2_0.Models.Roles.Compliance.Conflicts.Resolutions
         /// Ветвления алгоритма
         /// </summary>
         public List<ConflictResolutionAlgorithmBlock> Nodes { get; set; } = new List<ConflictResolutionAlgorithmBlock>();
-    }
+
+	}
 }

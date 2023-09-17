@@ -15,9 +15,12 @@ namespace Alfateam.CRM2_0.Models.Roles.Compliance
         public string Title { get; set; }
         public string Description { get; set; }
 
-        public ComplianceRequirementsCategory Category { get; set; }
 
-        public List<ComplianceCriteriaGroup> Groups { get; set; } = new List<ComplianceCriteriaGroup>();
+        public ComplianceRequirementsCategory Category { get; set; }
+		public int CategoryId { get; set; }
+
+
+		public List<ComplianceCriteriaGroup> Groups { get; set; } = new List<ComplianceCriteriaGroup>();
 
 
 

@@ -17,11 +17,14 @@ namespace Alfateam.CRM2_0.Models.Roles.Compliance.Conflicts
         /// Сторона конфликта, от которой поступило предложение
         /// </summary>
         public ConflictSide From { get; set; }
+		public int FromId { get; set; }
 
-        /// <summary>
-        /// Стороны конфликта, которым адресовано предложение
-        /// </summary>
-        public List<ConflictSide> To { get; set; } = new List<ConflictSide>();
+
+
+		/// <summary>
+		/// Стороны конфликта, которым адресовано предложение
+		/// </summary>
+		public List<ConflictSide> To { get; set; } = new List<ConflictSide>();
 
 
         public string Title { get; set; }
@@ -31,5 +34,10 @@ namespace Alfateam.CRM2_0.Models.Roles.Compliance.Conflicts
         public List<ConflictResolutionProposalFeedback> Feedback { get; set; } = new List<ConflictResolutionProposalFeedback>();
         public ConflictResolutionProposalStatus Status { get; set; } = ConflictResolutionProposalStatus.Discussion;
 
-    }
+
+
+        public int ConflictId { get; set; }
+
+
+	}
 }

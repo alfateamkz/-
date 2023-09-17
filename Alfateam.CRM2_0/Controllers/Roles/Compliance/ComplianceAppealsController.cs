@@ -180,13 +180,13 @@ namespace Alfateam.CRM2_0.Controllers.Roles.Compliance
             return TryFinishAllRequestes(new[]
             {
                 () => CheckBaseAppealAndResultAction(appeal, action),
-                () => RequestResult<AppealAction>.AsSuccess(action)
+                () => RequestResult<AppealResultAction>.AsSuccess(action)
             });
         }
 
 
-        [HttpPost, Route("CreateAppealResult")]
-        public async Task<RequestResult> CreateAppealResult(int appealId, AppealResultActionCreateModel model)
+        [HttpPost, Route("CreateAppealResultAction")]
+        public async Task<RequestResult> CreateAppealResultAction(int appealId, AppealResultActionCreateModel model)
         {
             var appeal = DB.Appeals.FirstOrDefault(o => o.Id == appealId);
             return TryFinishAllRequestes(new[]
@@ -305,7 +305,7 @@ namespace Alfateam.CRM2_0.Controllers.Roles.Compliance
             return TryFinishAllRequestes(new[]
             {
                 () => RequestResult.FromBoolean(action != null,404,"Действие с данным id не найдено"),
-                () => RequestResult.FromBoolean(action.AppealId == item.Id,403,"Действие не принадлежит данному обращению"),
+                () => RequestResult.FromBoolean(action.AppealResultId == item.ResultId,403,"Действие не принадлежит данному обращению"),
             });
         }
 
