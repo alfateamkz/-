@@ -17,5 +17,14 @@ namespace Alfateam.CRM2_0.Models.Roles.Sales.Plan
 
 
         public List<SalesPlanItem> Items { get; set; } = new List<SalesPlanItem>();
-    }
+
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int SalesPlanningId { get; set; }
+
+	}
 }

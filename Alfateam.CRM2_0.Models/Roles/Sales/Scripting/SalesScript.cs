@@ -19,6 +19,13 @@ namespace Alfateam.CRM2_0.Models.Roles.Sales.Scripting
         /// <summary>
         /// Начало скрипта
         /// </summary>
-        public SalesScriptBlock Start { get; set; }
-    }
+        public SalesScriptBlock StartBlock { get; set; }
+		public int StartBlockId { get; set; }
+
+
+		/// <summary>
+		/// Автоматическое поле
+		/// </summary>
+		public int SalesDepartmentId { get; set; }
+	}
 }

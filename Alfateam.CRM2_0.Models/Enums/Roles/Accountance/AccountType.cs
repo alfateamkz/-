@@ -14,5 +14,6 @@ namespace Alfateam.CRM2_0.Models.Enums.Roles.Accountance
         Regular = 1, //Обычный счет
         InvestProject = 2, //Счет инвест проекта
         FoundationAccount = 3, //Счет какого-либо фонда
+        Referral = 4, //Счет реферала
     }
 }

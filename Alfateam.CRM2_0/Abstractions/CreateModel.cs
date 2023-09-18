@@ -38,7 +38,7 @@ namespace Alfateam.CRM2_0.Abstractions
         }
     }
 
-    public abstract class CreateModel<T> : EditModel where T : AbsModel, new()
+    public abstract class CreateModel<T> : CreateModel where T : AbsModel, new()
     {
 
         public virtual void Fill(T item)

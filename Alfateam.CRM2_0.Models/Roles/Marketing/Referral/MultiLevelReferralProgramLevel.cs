@@ -17,5 +17,10 @@ namespace Alfateam.CRM2_0.Models.Roles.Marketing.Referral
 
 
         public double Percent { get; set; }
-    }
+
+
+
+        public int MultiLevelReferralProgramId { get; set; }
+
+	}
 }

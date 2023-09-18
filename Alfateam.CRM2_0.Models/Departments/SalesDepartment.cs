@@ -20,14 +20,17 @@ namespace Alfateam.CRM2_0.Models.Departments
 
         #region Funnel
         public List<SalesFunnel> SalesFunnels { get; set; } = new List<SalesFunnel>();
+       
         #endregion
 
         #region Orders
         public List<Order> Orders { get; set; } = new List<Order>();
+      
         #endregion
 
         #region Plan
         public List<SalesPlanning> SalesPlannings { get; set; } = new List<SalesPlanning>();
+   
         #endregion
 
         #region Scripting

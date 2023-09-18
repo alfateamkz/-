@@ -20,5 +20,13 @@ namespace Alfateam.CRM2_0.Models.Roles.Sales.Plan
         public double SumOfSales { get; set; }
         public double AverageCheque { get; set; }
 
-    }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int SalesPlanId { get; set; }
+
+	}
 }

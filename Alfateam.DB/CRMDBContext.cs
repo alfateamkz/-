@@ -552,8 +552,6 @@ namespace Alfateam.DB
 
         public DbSet<MultiLevelReferralProgramLevel> MultiLevelReferralProgramLevels { get; set; }
         public DbSet<Referral> Referrals { get; set; }
-        public DbSet<ReferralEntry> ReferralEntries { get; set; }
-        public DbSet<ReferralWithdrawal> ReferralWithdrawals { get; set; }
 
         #endregion
 
@@ -561,13 +559,15 @@ namespace Alfateam.DB
         public DbSet<AdCampaignBudgetItem> AdCampaignBudgetItems { get; set; }
         public DbSet<AdCampaignItem> AdCampaignItems { get; set; }
         public DbSet<AdCampaignItemReport> AdCampaignItemReports { get; set; }
-        #endregion
+		public DbSet<AdCampaignItemTaskCheckRequest> AdCampaignItemTaskCheckRequests { get; set; }
+		public DbSet<AdCampaignItemTaskCheckRequestResult> AdCampaignItemTaskCheckRequestResults { get; set; }
+		#endregion
 
-        #region Sales
+		#region Sales
 
-        #region Conversations
-        //TODO: подумать над рефакторингом
-        public DbSet<CustomerCall> CustomerCalls { get; set; }
+		#region Conversations
+		//TODO: подумать над рефакторингом
+		public DbSet<CustomerCall> CustomerCalls { get; set; }
         public DbSet<CustomerConference> CustomerConferences { get; set; }
         public DbSet<CustomerMeeting> CustomerMeetings { get; set; }
         public DbSet<CustomerMeetingAttachment> CustomerMeetingAttachments { get; set; }

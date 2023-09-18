@@ -8,6 +8,7 @@ using Alfateam.CRM2_0.Models.CreateModels.Roles.HR.Manuals;
 using Alfateam.CRM2_0.Models.EditModels.Roles.Accountance;
 using Alfateam.CRM2_0.Models.EditModels.Roles.HR.Manuals;
 using Alfateam.CRM2_0.Models.Enums;
+using Alfateam.CRM2_0.Models.Enums.Roles.Accountance;
 using Alfateam.CRM2_0.Models.Roles.Accountance;
 using Alfateam.CRM2_0.Models.Roles.Accountance.Loans;
 using Alfateam.CRM2_0.Models.Roles.HR.Manuals;
@@ -31,13 +32,13 @@ namespace Alfateam.CRM2_0.Controllers.Roles.Accountance
         [HttpGet,Route("GetAccounts")]
         public async Task<RequestResult> GetAccounts(int offset, int count = 20)
         {
-            return GetMany<Account, AccountClientModel>(DB.Accounts.Where(o => o.AccountanceDepartmentId == this.DepartmentId), offset, count);
+            return GetMany<Account, AccountClientModel>(DB.Accounts.Where(o => o.AccountanceDepartmentId == this.DepartmentId && o.Type != AccountType.Referral), offset, count);
         }
 
         [HttpGet, Route("GetAccount")]
         public async Task<RequestResult> GetAccount(int id)
         {
-            var account = DB.Accounts.FirstOrDefault(o => o.Id == id);
+            var account = DB.Accounts.FirstOrDefault(o => o.Id == id && o.Type != AccountType.Referral);
             return TryFinishAllRequestes(new[]
             {
                 () => CheckBaseAccount(account),
@@ -58,7 +59,7 @@ namespace Alfateam.CRM2_0.Controllers.Roles.Accountance
         [HttpPut, Route("UpdateAccount")]
         public async Task<RequestResult> UpdateAccount(AccountEditModel model)
         {
-            var account = DB.Accounts.FirstOrDefault(o => o.Id == model.Id);
+            var account = DB.Accounts.FirstOrDefault(o => o.Id == model.Id && o.Type != AccountType.Referral);
 
             return TryFinishAllRequestes(new[]
             {
@@ -72,7 +73,7 @@ namespace Alfateam.CRM2_0.Controllers.Roles.Accountance
         public async Task<RequestResult> DeleteAccount(int id)
         {
             var account = DB.Accounts.Include(o => o.Transactions)
-                                     .FirstOrDefault(o => o.Id == id);
+                                     .FirstOrDefault(o => o.Id == id && o.Type != AccountType.Referral);
 
             return TryFinishAllRequestes(new[]
             {

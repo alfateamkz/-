@@ -13,5 +13,23 @@ namespace Alfateam.CRM2_0.Models.CreateModels.Roles.Compliance.Conflicts.Resolut
 		/// Начало алгоритма урегулирования конфликта
 		/// </summary>
 		public ConflictResolutionAlgorithmBlockCreateModel StartBlock { get; set; }
+
+		public override bool IsValid()
+		{
+			bool isValid = base.IsValid();
+
+			//TODO: сделать рекурсию
+
+			return isValid;
+		}
+
+		public override ConflictResolutionAlgorithm Create()
+		{
+			var entity = base.Create();
+
+			//TODO: сделать рекурсию
+
+			return entity;
+		}
 	}
 }

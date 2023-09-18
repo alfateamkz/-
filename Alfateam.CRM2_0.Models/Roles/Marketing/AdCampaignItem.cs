@@ -40,5 +40,11 @@ namespace Alfateam.CRM2_0.Models.Roles.Marketing
         public List<AdCampaignItemReport> Reports { get; set; } = new List<AdCampaignItemReport>();
 
 
-    }
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int AdCampaignId { get; set; }
+	}
 }

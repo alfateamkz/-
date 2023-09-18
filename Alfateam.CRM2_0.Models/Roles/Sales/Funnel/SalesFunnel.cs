@@ -17,5 +17,12 @@ namespace Alfateam.CRM2_0.Models.Roles.Sales.Funnel
 
 
         public List<SalesFunnelStage> Stages { get; set; } = new List<SalesFunnelStage>();
-    }
+
+
+
+		/// <summary>
+		/// Автоматическое поле
+		/// </summary>
+		public int SalesDepartmentId { get; set; }
+	}
 }

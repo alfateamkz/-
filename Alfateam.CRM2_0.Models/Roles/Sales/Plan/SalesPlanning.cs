@@ -21,17 +21,23 @@ namespace Alfateam.CRM2_0.Models.Roles.Sales.Plan
 
 
 
-        /// <summary>
-        /// Минимальный план продаж для достижения точки безубыточности
-        /// </summary>
-        public SalesPlan MinumumPlan { get; set; }
-        /// <summary>
-        /// Основной план продаж, который необходимо выполнить
-        /// </summary>
-        public SalesPlan GeneralPlan { get; set; }
-        /// <summary>
-        /// Максимальный план продаж, к которому нужно стремиться
-        /// </summary>
-        public SalesPlan MaximumPlan { get; set; }
-    }
+
+        public List<SalesPlan> Plans { get; set; } = new List<SalesPlan>();
+
+
+
+
+
+
+		/// <summary>
+		/// Автоматическое поле
+		/// </summary>
+		public int SalesDepartmentId { get; set; }
+
+
+		public bool IsInPeriod(DateTime value)
+		{
+			return StartDate <= value && EndDate >= value;
+		}
+	}
 }

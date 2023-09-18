@@ -17,5 +17,13 @@ namespace Alfateam.CRM2_0.Models.Roles.Marketing
 
         public string Title { get; set; }
         public string? Description { get; set; }
-    }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int AdCampaignItemId { get; set; }
+
+	}
 }

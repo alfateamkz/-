@@ -1,5 +1,7 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
+using Alfateam.CRM2_0.Models.Abstractions.Roles.Marketing;
 using Alfateam.CRM2_0.Models.General;
+using Alfateam.CRM2_0.Models.Roles.Accountance;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,12 +19,9 @@ namespace Alfateam.CRM2_0.Models.Roles.Marketing.Referral
         /// Пользователь в CRM системе 
         /// </summary>
         public User Owner { get; set; }
+		public int OwnerId { get; set; }
 
 
-        /// <summary>
-        /// Текущий баланс
-        /// </summary>
-        public double Balance { get; set; }
 
 
         /// <summary>
@@ -32,22 +31,16 @@ namespace Alfateam.CRM2_0.Models.Roles.Marketing.Referral
 
 
 
-
-
-
         /// <summary>
-        /// Поступления по реферальной программе
+        /// Реферальные валютные счета 
         /// </summary>
-        public List<ReferralEntry> Entries { get; set; } = new List<ReferralEntry>();
-
-        /// <summary>
-        /// История выплат по реферальной программе
-        /// </summary>
-        public List<ReferralWithdrawal> Withdrawals { get; set; } = new List<ReferralWithdrawal>();
-
-
-
+        public List<Account> Accounts { get; set; } = new List<Account>();
 
         
-    }
+
+
+
+        public BaseReferralProgram BaseReferralProgram { get; set; }
+		public int BaseReferralProgramId { get; set; }
+	}
 }

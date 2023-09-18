@@ -5,6 +5,7 @@ using Alfateam.CRM2_0.Models.General;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -50,10 +51,27 @@ namespace Alfateam.CRM2_0.Models.Roles.Accountance
         public List<Transaction> Transactions { get; set; } = new List<Transaction>();
 
 
-        /// <summary>
-        /// Автоматическое поле
-        /// </summary>
-        [JsonIgnore]
+
+
+
+        [NotMapped]
+        public double TotalDebit => Transactions.Where(o => !o.IsDeleted && o.Direction == TransactionDirection.Debit).Sum(o => o.Value);
+		[NotMapped]
+		public double TotalCredit => Transactions.Where(o => !o.IsDeleted && o.Direction == TransactionDirection.Credit).Sum(o => o.Value);
+
+
+
+
+
+		/// <summary>
+		/// Автоматическое поле
+		/// </summary>
+		[JsonIgnore]
         public int AccountanceDepartmentId { get; set; }
+
+
+
+
+
     }
 }

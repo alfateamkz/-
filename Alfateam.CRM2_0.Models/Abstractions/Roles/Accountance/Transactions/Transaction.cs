@@ -4,6 +4,7 @@ using Alfateam.CRM2_0.Models.Roles.Accountance;
 using Alfateam.CRM2_0.Models.Roles.Accountance.Loans.Pledges;
 using Alfateam.CRM2_0.Models.Roles.Accountance.Transactions;
 using Alfateam.CRM2_0.Models.Roles.Accountance.Transactions.InvestProject;
+using Alfateam.CRM2_0.Models.Roles.Accountance.Transactions.Referral;
 using JsonKnownTypes;
 using Newtonsoft.Json;
 using System;
@@ -23,7 +24,10 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Roles.Accountance.Transactions
     [JsonKnownType(typeof(AdmissionInvestProjectTransaction), "AdmissionInvestProjectTransaction")]
     [JsonKnownType(typeof(DividendInvestProjectTransaction), "DividendInvestProjectTransaction")]
 
-    [JsonKnownType(typeof(FranchiseTransaction), "FranchiseTransaction")]
+	[JsonKnownType(typeof(ReferralAdmissionTransaction), "ReferralAdmissionTransaction")]
+	[JsonKnownType(typeof(ReferralWithdrawalTransaction), "ReferralWithdrawalTransaction")]
+
+	[JsonKnownType(typeof(FranchiseTransaction), "FranchiseTransaction")]
     [JsonKnownType(typeof(MarketingTransaction), "MarketingTransaction")]
     [JsonKnownType(typeof(OrderTransaction), "OrderTransaction")]
     [JsonKnownType(typeof(SimpleTransaction), "SimpleTransaction")]

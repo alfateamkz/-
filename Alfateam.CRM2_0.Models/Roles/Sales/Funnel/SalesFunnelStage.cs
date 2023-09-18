@@ -18,5 +18,12 @@ namespace Alfateam.CRM2_0.Models.Roles.Sales.Funnel
         public string? Description { get; set; }
 
         public SalesFunnelStageType Type { get; set; } = SalesFunnelStageType.Awareness;
-    }
+
+
+		/// <summary>
+		/// Автоматическое поле
+		/// </summary>
+		public int SalesFunnelId { get; set; }
+
+	}
 }

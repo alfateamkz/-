@@ -42,5 +42,13 @@ namespace Alfateam.CRM2_0.Models.Roles.Sales
         /// Продажник, который привлек данного клиента 
         /// </summary>
         public User FoundBy { get; set; }
-    }
+		public int FoundById { get; set; }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int SalesDepartmentId { get; set; }
+	}
 }

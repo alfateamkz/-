@@ -54,5 +54,12 @@ namespace Alfateam.CRM2_0.Models.Roles.Sales.Orders
 
         public List<OrderMilestone> Milestones { get; set; } = new List<OrderMilestone>();
 
-    }
+
+
+		/// <summary>
+		/// Автоматическое поле
+		/// </summary>
+		public int SalesDepartmentId { get; set; }
+
+	}
 }
