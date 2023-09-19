@@ -13,6 +13,7 @@ using Alfateam.DB;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using Alfateam.CRM2_0.Helpers;
 
 namespace Alfateam.CRM2_0.Abstractions
 {
@@ -47,43 +48,23 @@ namespace Alfateam.CRM2_0.Abstractions
     
         public User? GetAuthorizedUser()
         {
-            if (string.IsNullOrWhiteSpace(UserSessid))
-            {
-                return null;
-            }
-
-            var session = GetCurrentSession();
-            if (!CheckSession(session))
-            {
-                return null;
-            }
-
-            return session.User;
-        }
+            return SessionUserHelper.GetAuthorizedUser(DB,UserSessid);
+		}
         public Session? GetCurrentSession()
         {
-            var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.RoleModel).ThenInclude(o => o.GivenRoles)
-                                .FirstOrDefault(o => o.SessID == UserSessid);
-            return session;
-        }
+            return SessionUserHelper.GetCurrentSession(DB, UserSessid);
+		}
 
 
         public bool CheckSession(Session session)
         {
-            if(session == null) return false;
-            if(session.IsExpired) return false;
-            if(session.IsDeactivated )return false;
-
-            return true;
-        }
-        public RequestResult CheckSessionAsRequestResult(Session session)
+            return SessionUserHelper.CheckSession(session);
+		}
+		public RequestResult CheckSessionAsRequestResult(Session session)
         {
-            if (session == null) return RequestResult.AsError(404,"Сессия с данным ключом не найдена");
-            if (session.IsExpired) return RequestResult.AsError(401, "Сессия уже просрочена");
-            if (session.IsDeactivated) return RequestResult.AsError(401, "Сессия была деактивирована");
+            return SessionUserHelper.CheckSessionAsRequestResult(session);
 
-            return RequestResult.AsSuccess();
-        }
+		}
 
 
         public int GetRoleHighestLevel(int userId)

@@ -19,10 +19,13 @@ namespace Alfateam.CRM2_0.Models.Roles.Sales.Conversation
         /// Клиент, с которым назначена встреча
         /// </summary>
         public Customer Customer { get; set; }
-        /// <summary>
-        /// Адрес встречи с клиентом
-        /// </summary>
-        public Address Address { get; set; }
+		public int CustomerId { get; set; }
+
+
+		/// <summary>
+		/// Адрес встречи с клиентом
+		/// </summary>
+		public Address Address { get; set; }
 
 
         /// <summary>
@@ -58,6 +61,7 @@ namespace Alfateam.CRM2_0.Models.Roles.Sales.Conversation
         /// Комментарий касательно встречи
         /// </summary>
         public string? Comment { get; set; }
+
         /// <summary>
         /// Дополнительные вложения(файлы) касательно встречи
         /// </summary>

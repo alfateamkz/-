@@ -16,9 +16,11 @@ namespace Alfateam.CRM2_0.Models.Roles.Sales.Conversation
     {
 
         public Customer Customer { get; set; }
+		public int CustomerId { get; set; }
 
 
-        public string Phone { get; set; }
+
+		public string Phone { get; set; }
         public CustomerCallStatus Status { get; set; } = CustomerCallStatus.Planned;
 
 

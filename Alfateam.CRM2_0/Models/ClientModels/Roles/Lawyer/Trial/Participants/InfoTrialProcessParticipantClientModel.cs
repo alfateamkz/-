@@ -4,7 +4,7 @@ using Alfateam.CRM2_0.Models.Roles.Lawyer.Trial.Participants;
 
 namespace Alfateam.CRM2_0.Models.ClientModels.Roles.Lawyer.Trial.Participants
 {
-	public class InfoTrialProcessParticipantClientModel : TrialProcessParticipantClientModel<InfoTrialProcessParticipant>
+	public class InfoTrialProcessParticipantClientModel : TrialProcessParticipantClientModel
 	{
 		public string Name { get; set; }
 		public string Surname { get; set; }

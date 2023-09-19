@@ -16,6 +16,7 @@ using Alfateam.CRM2_0.Models.CreateModels.Roles.Lawyer.Trial;
 using Alfateam.CRM2_0.Models.ClientModels.Roles.Lawyer.Documents;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.CRM2_0.Models.Enums.Roles.Lawyer.LegalCases;
+using Alfateam.CRM2_0.Models.Enums;
 
 namespace Alfateam.CRM2_0.Controllers.Roles.Lawyer.LegalCases
 {

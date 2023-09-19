@@ -7,6 +7,7 @@ using Alfateam.CRM2_0.Models.ClientModels.Roles.Lawyer.Trial;
 using Alfateam.CRM2_0.Models.CreateModels.Roles.Lawyer.Trial;
 using Alfateam.CRM2_0.Models.EditModels.Roles.Lawyer.Trial;
 using Alfateam.CRM2_0.Models.Enums;
+using Alfateam.CRM2_0.Models.Roles.Lawyer.Documents;
 using Alfateam.CRM2_0.Models.Roles.Lawyer.LegalCases;
 using Alfateam.CRM2_0.Models.Roles.Lawyer.Trial;
 using Microsoft.AspNetCore.Mvc;

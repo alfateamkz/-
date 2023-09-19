@@ -15,13 +15,19 @@ namespace Alfateam.CRM2_0.Models.Roles.Sales.Orders
     public class OrderSaleInfo : AbsModel
     {
         public SalesFunnel? Funnel { get; set; }
-        public SalesFunnelStage? FunnelStage { get; set; }
+		public int? FunnelId { get; set; }
 
 
-        /// <summary>
-        /// Продажник, который внес заказ в систему
-        /// </summary>
-        public User FoundBy { get; set; }
+		public SalesFunnelStage? FunnelStage { get; set; }
+		public int? FunnelStageId { get; set; }
 
-    }
+
+
+
+		/// <summary>
+		/// Продажник, который внес заказ в систему
+		/// </summary>
+		public User FoundBy { get; set; }
+		public int FoundById { get; set; }
+	}
 }

@@ -15,11 +15,11 @@ namespace Alfateam.CRM2_0.Models.Roles.Sales.Conversation
     /// </summary>
     public class CustomerConference : AbsModel
     {
-
         public Customer Customer { get; set; }
+		public int CustomerId { get; set; }
 
 
-        public CustomerConferenceStatus Status { get; set; } = CustomerConferenceStatus.Planned;
+		public CustomerConferenceStatus Status { get; set; } = CustomerConferenceStatus.Planned;
 
 
         /// <summary>

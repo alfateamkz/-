@@ -15,12 +15,23 @@ namespace Alfateam.CRM2_0.Models.Communication.Messenger
     public class GroupChatUserInfo : AbsModel
     {
         public User User { get; set; }
-        public GroupChatUserRole Role { get; set; } = GroupChatUserRole.User;
+		public int UserId { get; set; }
+
+
+		public GroupChatUserRole Role { get; set; } = GroupChatUserRole.User;
 
         public bool IsInChat { get; set; }
 
 
         public bool IsKicked { get; set; }
         public DateTime? KickedAt { get; set; }
-    }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int GroupChatId { get; set; }
+
+	}
 }

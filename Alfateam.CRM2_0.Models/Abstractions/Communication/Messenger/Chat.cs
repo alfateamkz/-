@@ -19,8 +19,13 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Communication.Messenger
     /// <summary>
     /// Базовая модель чата
     /// </summary>
-    public abstract class Chat : AbsModel
+    public class Chat : AbsModel
     {
         public List<Message> Messages { get; set; } = new List<Message>();
+
+        public virtual bool HasUserAccess(int userId)
+        {
+            throw new NotImplementedException("Need to implement in inheritors");
+        }
     }
 }

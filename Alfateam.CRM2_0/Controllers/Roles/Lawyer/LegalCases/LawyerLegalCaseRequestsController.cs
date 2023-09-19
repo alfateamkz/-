@@ -2,6 +2,7 @@
 using Alfateam.CRM2_0.Core;
 using Alfateam.CRM2_0.Filters;
 using Alfateam.CRM2_0.Models.CreateModels.Roles.Lawyer.LegalCases;
+using Alfateam.CRM2_0.Models.Enums;
 using Alfateam.CRM2_0.Models.Enums.Roles.Lawyer.LegalCases;
 using Alfateam.CRM2_0.Models.Roles.Lawyer.LegalCases;
 using Microsoft.AspNetCore.Mvc;

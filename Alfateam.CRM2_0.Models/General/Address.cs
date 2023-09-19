@@ -13,8 +13,10 @@ namespace Alfateam.CRM2_0.Models.General
     public class Address : AbsModel
     {
         public Country Country { get; set; }
+		public int CountryId { get; set; }
 
-        public string State { get; set; }
+
+		public string State { get; set; }
         public string? District { get; set; }
 
 

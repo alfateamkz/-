@@ -8,6 +8,7 @@ using Alfateam.CRM2_0.Models.Roles.Lawyer.LegalCases;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Alfateam.CRM2_0.Models.EditModels.Roles.Lawyer.LegalCases;
+using Alfateam.CRM2_0.Models.Enums;
 
 namespace Alfateam.CRM2_0.Controllers.Roles.Lawyer.LegalCases
 {

@@ -13,13 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\Roles\Management\" />
     <Folder Include="Controllers\Roles\Staff\" />
-    <Folder Include="Helpers\" />
-    <Folder Include="Models\ClientModels\Roles\Sales\Orders\" />
     <Folder Include="Models\CreateModels\Abstractions\Roles\Accountance\" />
-    <Folder Include="Models\CreateModels\Roles\Sales\Orders\" />
-    <Folder Include="Models\EditModels\Roles\Sales\Orders\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Principal;
 using Alfateam.CRM2_0.Models.Roles.Accountance.Transactions.Referral;
+using Alfateam.CRM2_0.Models.Abstractions.Roles.Accountance.Transactions;
 
 namespace Alfateam.CRM2_0.Controllers.Roles.Marketing
 {

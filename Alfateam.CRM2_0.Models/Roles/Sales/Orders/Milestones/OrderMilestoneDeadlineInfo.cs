@@ -18,6 +18,8 @@ namespace Alfateam.CRM2_0.Models.Roles.Sales.Orders.Milestones
 
 
         public DeadlineFailedReason Reason { get; set; }
-        public string Comment { get; set; }
+		public int ReasonId { get; set; }
+
+		public string Comment { get; set; }
     }
 }

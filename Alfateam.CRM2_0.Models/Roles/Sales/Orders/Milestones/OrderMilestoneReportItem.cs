@@ -13,7 +13,10 @@ namespace Alfateam.CRM2_0.Models.Roles.Sales.Orders.Milestones
     public class OrderMilestoneReportItem : AbsModel
     {
         public OrderTask Task { get; set; }
-        public string Comment { get; set; }
+		public int TaskId { get; set; }
+
+
+		public string Comment { get; set; }
 
         public List<OrderMilestoneReportItemAttachment> Attachments { get; set; } = new List<OrderMilestoneReportItemAttachment>();
     }
