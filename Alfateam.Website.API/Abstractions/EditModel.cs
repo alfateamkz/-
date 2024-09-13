@@ -1,8 +1,10 @@
 ﻿
 
+using Alfateam2._0.Models.Abstractions;
+
 namespace Alfateam.Website.API.Abstractions
 {
-    public abstract class EditModel<T> 
+    public abstract class EditModel
     {
         public int Id { get; set; }
 
@@ -40,6 +42,10 @@ namespace Alfateam.Website.API.Abstractions
         }
 
 
+    }
+
+    public abstract class EditModel<T> : EditModel where T : AbsModel
+    {
         public virtual void Fill(T item)
         {
             var props = this.GetType().GetProperties();
@@ -47,20 +53,20 @@ namespace Alfateam.Website.API.Abstractions
 
             foreach (var prop in props)
             {
-                if(prop.Name == "Id")
+                if (prop.Name == "Id")
                 {
                     continue;
                 }
 
                 var itemSameProp = itemProps.FirstOrDefault(o => o.Name == prop.Name);
-                if(itemSameProp != null && itemSameProp.CanWrite)
+                if (itemSameProp != null && itemSameProp.CanWrite)
                 {
                     itemSameProp.SetValue(item, prop.GetValue(this));
                 }
             }
         }
 
-    }
 
+    }
 
 }

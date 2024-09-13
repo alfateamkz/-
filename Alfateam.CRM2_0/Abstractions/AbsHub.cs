@@ -1,6 +1,8 @@
-﻿using Alfateam.CRM2_0.Controllers.Communication.Messenger;
+﻿using Alfateam.CRM2_0.Abstractions.Services;
+using Alfateam.CRM2_0.Controllers.Communication.Messenger;
 using Alfateam.CRM2_0.Core;
 using Alfateam.CRM2_0.Helpers;
+using Alfateam.CRM2_0.Services;
 using Alfateam.DB;
 using Microsoft.AspNetCore.SignalR;
 
@@ -15,19 +17,26 @@ namespace Alfateam.CRM2_0.Abstractions
 
 	public abstract class AbsHub : Hub
 	{
-		public AbsHub(ControllerParams @params)
+        protected AbsDBService DBService { get; set; }
+        protected CRMDBContext DB { get; set; }
+        protected IWebHostEnvironment AppEnvironment { get; set; }
+        protected AbsUploadFileService FileService { get; set; }
+
+        public AbsHub(ControllerParams @params)
 		{
 			DB = @params.DB;
 			AppEnvironment = @params.AppEnvironment;
-		}
+            FileService = @params.FileService;
+            DBService = @params.DBService;
+        }
+
 
 		protected static List<AbsHubConnection> UserConnections { get; } = new List<AbsHubConnection>();
 
-		protected CRMDBContext DB { get; set; }
-		protected IWebHostEnvironment AppEnvironment { get; set; }
+	
 
 
-		protected string SessID => UserConnections.FirstOrDefault(o => o.ConnectionID == Context.ConnectionId).UserSessId;
+        protected string SessID => UserConnections.FirstOrDefault(o => o.ConnectionID == Context.ConnectionId).UserSessId;
 
 
 
@@ -89,7 +98,22 @@ namespace Alfateam.CRM2_0.Abstractions
 
 			await Clients.Clients(Context.ConnectionId).SendAsync(method, successResult);
 		}
-	}
+        public RequestResult TryFinishAllRequestes(Func<RequestResult>[] funcs)
+        {
+            RequestResult successResult = null;
+
+            foreach (var func in funcs)
+            {
+                var res = func.Invoke();
+                if (!res.Success) return res;
+
+                successResult = res;
+            }
+
+            return successResult;
+        }
+
+    }
 
 
 }

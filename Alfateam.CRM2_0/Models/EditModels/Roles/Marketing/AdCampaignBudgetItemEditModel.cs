@@ -5,7 +5,8 @@ namespace Alfateam.CRM2_0.Models.EditModels.Roles.Marketing
 {
 	public class AdCampaignBudgetItemEditModel : EditModel<AdCampaignBudgetItem>
 	{
-		public double Sum { get; set; }
+        public int CurrencyId { get; set; }
+        public double Sum { get; set; }
 
 
 		public string Title { get; set; }

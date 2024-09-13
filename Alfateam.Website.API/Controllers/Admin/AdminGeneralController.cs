@@ -2,10 +2,10 @@
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Extensions;
-using Alfateam.Website.API.Models.ClientModels.General;
-using Alfateam.Website.API.Models.EditModels.Events;
-using Alfateam.Website.API.Models.EditModels.General;
-using Alfateam.Website.API.Models.LocalizationEditModels.General;
+using Alfateam.Website.API.Helpers;
+using Alfateam.Website.API.Models.DTO.General;
+using Alfateam.Website.API.Models.DTO.Events;
+using Alfateam.Website.API.Models.DTOLocalization.General;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Localization.General;
@@ -27,16 +27,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Страны
 
         [HttpGet, Route("GetCountries")]
-        public async Task<RequestResult<IEnumerable<CountryClientModel>>> GetCountries()
+        public async Task<RequestResult<IEnumerable<CountryDTO>>> GetCountries()
         {
             var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<CountryClientModel>> (new[]
+            return TryFinishAllRequestes<IEnumerable<CountryDTO>> (new[]
             {
                 () => CheckSession(session),
                 () => RequestResult.FromBoolean(IsInAdminRole(session.User), 403, "У данного пользователя нет прав на получение объектов"),
                 () => {
-                   var clientItems = CountryClientModel.CreateItems(GetCountriesList(), LanguageId);
-                   return RequestResult<IEnumerable<CountryClientModel>>.AsSuccess(clientItems);
+                   var clientItems = CountryDTO.CreateItemsWithLocalization(GetCountriesList(), LanguageId) as IEnumerable<CountryDTO>;
+                   return RequestResult<IEnumerable<CountryDTO>>.AsSuccess(clientItems);
                 }
             });
         }
@@ -61,7 +61,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             {
                 () => CheckSession(session),
                 () => RequestResult.FromBoolean(IsInAdminRole(session.User), 403, "У данного пользователя нет прав на получение объектов"),
-                () => TryGetOne(DB.CountryLocalizations.Include(o => o.Language).Where(o => !o.IsDeleted), id),
+                () => TryGetOne(DB.CountryLocalizations.Include(o => o.LanguageEntity).Where(o => !o.IsDeleted), id),
             });
         }
 
@@ -105,7 +105,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateCountryMain")]
-        public async Task<RequestResult<Country>> UpdateCountryMain(CountryMainEditModel model)
+        public async Task<RequestResult<Country>> UpdateCountryMain(CountryDTO model)
         {
             var item = GetCountriesList().FirstOrDefault(o => o.Id == model.Id);
             var session = GetSessionWithRoleInclude();
@@ -119,7 +119,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                 () => RequestResult.FromBoolean(DB.Languages.Any(o => o.Id == model.MainLanguageId && !o.IsDeleted), 400, "Языка с данным id не существует"),
                 () =>
                 {
-                    model.Fill(item,GetLanguagesList().ToList());
+                    model.FillDBModel(item,GetLanguagesList().ToList(), DBModelFillMode.Update);
                     return RequestResult.AsSuccess();
                 },
                 () => UpdateModel(DB.Countries, item)
@@ -127,7 +127,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
      
         [HttpPut, Route("UpdateCountryLocalization")]
-        public async Task<RequestResult<CountryLocalization>> UpdateCountryLocalization(CountryLocalizationEditModel model)
+        public async Task<RequestResult<CountryLocalization>> UpdateCountryLocalization(CountryLocalizationDTO model)
         {
             var localization = DB.CountryLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var session = GetSessionWithRoleInclude();
@@ -185,16 +185,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Языки
 
         [HttpGet, Route("GetLanguages")]
-        public async Task<RequestResult<IEnumerable<LanguageClientModel>>> GetLanguages()
+        public async Task<RequestResult<IEnumerable<LanguageDTO>>> GetLanguages()
         {
             var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<LanguageClientModel>>(new[]
+            return TryFinishAllRequestes<IEnumerable<LanguageDTO>>(new[]
             {
                 () => CheckSession(session),
                 () => RequestResult.FromBoolean(IsInAdminRole(session.User), 403, "У данного пользователя нет прав на получение объектов"),
                 () => {
-                   var clientItems = LanguageClientModel.CreateItems(GetLanguagesList(), LanguageId);
-                   return RequestResult<IEnumerable<LanguageClientModel>>.AsSuccess(clientItems);
+                   var clientItems = LanguageDTO.CreateItemsWithLocalization(GetLanguagesList(), LanguageId) as IEnumerable<LanguageDTO>;
+                   return RequestResult<IEnumerable<LanguageDTO>>.AsSuccess(clientItems);
                 }
             });
         }
@@ -219,7 +219,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             {
                 () => CheckSession(session),
                 () => RequestResult.FromBoolean(IsInAdminRole(session.User), 403, "У данного пользователя нет прав на получение объектов"),
-                () => TryGetOne(DB.LanguageLocalizations.Include(o => o.Language).Where(o => !o.IsDeleted), id),
+                () => TryGetOne(DB.LanguageLocalizations.Include(o => o.LanguageEntity).Where(o => !o.IsDeleted), id),
             });
         }
 
@@ -237,7 +237,15 @@ namespace Alfateam.Website.API.Controllers.Admin
                 () => CheckSession(session),
                 () => CheckContentAreaRights(session,ContentAccessModelType.General,4),
                 () => RequestResult.FromBoolean(item.IsValid(), 400, "Проверьте корректность заполненных значений"),
-                () => CreateModel(DB.Languages,item)
+                () => CreateModel(DB.Languages,item),
+                () =>
+                {
+                    var websiteLocalization = new Alfateam2._0.Models.Localization.Texts.Grouping.WebsiteLocalizationTexts(item.Id);
+                    CreateModel(DB.WebsiteLocalizationTexts,websiteLocalization);
+                    StaticFilesHelper.CreateStaticLocalizationsFile(websiteLocalization);
+
+                    return RequestResult<Language>.AsSuccess(item);
+                }
             });
         }
     
@@ -265,7 +273,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateLanguageMain")]
-        public async Task<RequestResult<Language>> UpdateLanguageMain(LanguageMainEditModel model)
+        public async Task<RequestResult<Language>> UpdateLanguageMain(LanguageDTO model)
         {
             var item = GetLanguagesList().FirstOrDefault(o => o.Id == model.Id);
             var session = GetSessionWithRoleInclude();
@@ -282,7 +290,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
    
         [HttpPut, Route("UpdateLanguageLocalization")]
-        public async Task<RequestResult<LanguageLocalization>> UpdateCurrencyLocalization(LanguageLocalizationEditModel model)
+        public async Task<RequestResult<LanguageLocalization>> UpdateCurrencyLocalization(LanguageLocalizationDTO model)
         {
             var localization = DB.LanguageLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var session = GetSessionWithRoleInclude();
@@ -341,16 +349,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Валюты
 
         [HttpGet, Route("GetCurrencies")]
-        public async Task<RequestResult<IEnumerable<CurrencyClientModel>>> GetCurrencies()
+        public async Task<RequestResult<IEnumerable<CurrencyDTO>>> GetCurrencies()
         {
             var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<CurrencyClientModel>>(new[]
+            return TryFinishAllRequestes<IEnumerable<CurrencyDTO>>(new[]
             {
                 () => CheckSession(session),
                 () => RequestResult.FromBoolean(IsInAdminRole(session.User), 403, "У данного пользователя нет прав на получение объектов"),
                 () => {
-                   var clientItems = CurrencyClientModel.CreateItems(GetCurrenciesList(), LanguageId);
-                   return RequestResult<IEnumerable<CurrencyClientModel>>.AsSuccess(clientItems);
+                   var clientItems = CurrencyDTO.CreateItemsWithLocalization(GetCurrenciesList(), LanguageId) as IEnumerable<CurrencyDTO>;
+                   return RequestResult<IEnumerable<CurrencyDTO>>.AsSuccess(clientItems);
                 }
             });
         }
@@ -375,7 +383,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             {
                 () => CheckSession(session),
                 () => RequestResult.FromBoolean(IsInAdminRole(session.User), 403, "У данного пользователя нет прав на получение объектов"),
-                () => TryGetOne(DB.CurrencyLocalizations.Include(o => o.Language).Where(o => !o.IsDeleted), id),
+                () => TryGetOne(DB.CurrencyLocalizations.Include(o => o.LanguageEntity).Where(o => !o.IsDeleted), id),
             });
         }
 
@@ -418,7 +426,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateCurrencyMain")]
-        public async Task<RequestResult<Currency>> UpdateCurrencyMain(CurrencyMainEditModel model)
+        public async Task<RequestResult<Currency>> UpdateCurrencyMain(CurrencyDTO model)
         {
             var item = GetCurrenciesList().FirstOrDefault(o => o.Id == model.Id);
             var session = GetSessionWithRoleInclude();
@@ -435,7 +443,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
        
         [HttpPut, Route("UpdateCurrencyLocalization")]
-        public async Task<RequestResult<CurrencyLocalization>> UpdateCurrencyLocalization(CurrencyLocalizationEditModel model)
+        public async Task<RequestResult<CurrencyLocalization>> UpdateCurrencyLocalization(CurrencyLocalizationDTO model)
         {
             var localization = DB.CurrencyLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var session = GetSessionWithRoleInclude();
@@ -497,7 +505,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Private get included methods
         private IQueryable<Country> GetCountriesList()
         {
-            return DB.Countries.Include(o => o.Localizations).ThenInclude(o => o.Language)
+            return DB.Countries.Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                .Include(o => o.MainLanguage)
                                .Include(o => o.Languages)
                                .Include(o => o.OfficialMainLanguage)
@@ -505,13 +513,13 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
         private IQueryable<Language> GetLanguagesList()
         {
-            return DB.Languages.Include(o => o.Localizations).ThenInclude(o => o.Language)
+            return DB.Languages.Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                .Include(o => o.MainLanguage)
                                .Where(o => !o.IsDeleted);
         }
         private IQueryable<Currency> GetCurrenciesList()
         {
-            return DB.Currencies.Include(o => o.Localizations).ThenInclude(o => o.Language)
+            return DB.Currencies.Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                 .Include(o => o.MainLanguage)
                                 .Where(o => !o.IsDeleted);
         }

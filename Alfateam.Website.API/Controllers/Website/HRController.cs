@@ -3,8 +3,8 @@ using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Models;
-using Alfateam.Website.API.Models.ClientModels.HR;
-using Alfateam.Website.API.Models.EditModels.HR;
+using Alfateam.Website.API.Models.DTO.HR;
+using Alfateam.Website.API.Models.DTO.HR;
 using Alfateam.Website.API.Models.Filters;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.HR;
@@ -65,7 +65,7 @@ namespace Alfateam.Website.API.Controllers.Website
                                          .Include(o => o.WatchesList)
                                          .Include(o => o.InnerContent).ThenInclude(o => o.Items)
                                          .Include(o => o.MainLanguage)
-                                         .Include(o => o.Localizations).ThenInclude(o => o.Language)
+                                         .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                          .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
                                          .FirstOrDefault(o => o.Id == id);
 
@@ -149,7 +149,7 @@ namespace Alfateam.Website.API.Controllers.Website
         }
 
         [HttpPut, Route("UpdateSummary")]
-        public async Task<RequestResult<JobSummary>> UpdateSummary(int vacancyId, JobSummaryEditModel model)
+        public async Task<RequestResult<JobSummary>> UpdateSummary(int vacancyId, JobSummaryDTO model)
         {
             var vacancy = DB.JobVacancies.FirstOrDefault(o => o.Id == vacancyId && !o.IsDeleted);
             if (vacancy == null)
@@ -205,7 +205,7 @@ namespace Alfateam.Website.API.Controllers.Website
 
 
         #region Private methods
-        public IQueryable<JobVacancy> GetVacancies()
+        private IQueryable<JobVacancy> GetVacancies()
         {
             return DB.JobVacancies.IncludeAvailability()
                                   .Include(o => o.Expierence)
@@ -234,7 +234,7 @@ namespace Alfateam.Website.API.Controllers.Website
             vacancy.WatchesList.Clear();
             return new JobVacancyCard
             {
-                Vacancy = JobVacancyClientModel.Create(vacancy, LanguageId),
+                Vacancy = JobVacancyDTO.CreateWithLocalization(vacancy, LanguageId) as JobVacancyDTO,
                 WatchingNow = watchingNow,
             };
         }
@@ -279,7 +279,7 @@ namespace Alfateam.Website.API.Controllers.Website
             }
             return RequestResult.AsSuccess();
         }
-        private async Task<RequestResult> PrepareSummaryBeforeUpdate(JobSummary summary, JobSummaryEditModel model)
+        private async Task<RequestResult> PrepareSummaryBeforeUpdate(JobSummary summary, JobSummaryDTO model)
         {
             var cvFile = Request.Form.Files.FirstOrDefault(o => o.Name == "cvFile");
             if (cvFile != null)

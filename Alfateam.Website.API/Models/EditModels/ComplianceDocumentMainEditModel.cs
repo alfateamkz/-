@@ -18,27 +18,5 @@ namespace Alfateam.Website.API.Models.EditModels
 
         public int MainLanguageId { get; set; }
 
-        public override void Fill(ComplianceDocument item)
-        {
-           
-            item.KBSize = KBSize;
-            item.Title = Title;
-            item.ImgPreviewPath = ImgPreviewPath;
-            item.DocumentPath = DocumentPath;
-
-            item.MainLanguageId = MainLanguageId;
-        }
-
-        public override bool IsValid()
-        {
-            bool isValid = true;
-
-            isValid &= KBSize > 0;
-            isValid &= !string.IsNullOrEmpty(Title);
-            isValid &= !string.IsNullOrEmpty(ImgPreviewPath);
-            isValid &= !string.IsNullOrEmpty(DocumentPath);
-
-            return isValid;
-        }
     }
 }

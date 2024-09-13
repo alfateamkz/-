@@ -11,10 +11,11 @@ namespace Alfateam.CRM2_0.Models.Enums.Gamification
     /// </summary>
     public enum ShopOrderStatus
     {
-        Waiting = 1, //В ожидании
-        Sent = 2, //Отправлен получателю
-        Delivered = 3, //Доставлен получателю
-        Canceled = 4, //Отклонен получателем
-        Rejected = 5 //Отклонен админом
+        Basket = 1, //В раздумиях
+        Waiting = 2, //В ожидании
+        Sent = 3, //Отправлен получателю
+        Delivered = 4, //Доставлен получателю
+        Canceled = 5, //Отклонен получателем
+        Rejected = 6 //Отклонен админом
     }
 }

@@ -308,6 +308,8 @@ namespace Alfateam.DB
         #endregion
 
         public DbSet<GamificationFine> GamificationFines { get; set; }
+        public DbSet<GamificationModel> GamificationModels { get; set; }
+        public DbSet<GamificationUser> GamificationUsers { get; set; }
         public DbSet<GamificationUserTask> GamificationUserTasks { get; set; }
         #endregion
 

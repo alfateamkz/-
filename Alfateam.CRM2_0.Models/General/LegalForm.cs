@@ -1,4 +1,5 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
+using Alfateam.CRM2_0.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,8 @@ namespace Alfateam.CRM2_0.Models.General
     public class LegalForm : AbsModel
     {
         public string Title { get; set; }
+        public string ShortTitle { get; set; }
+        public LegalFormType Type { get; set; }
         public int CountryId { get; set; }
     }
 }

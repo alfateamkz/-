@@ -1,6 +1,6 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
-using Alfateam.Website.API.Models.ClientModels.Outstaff;
+using Alfateam.Website.API.Models.DTO.Outstaff;
 using Alfateam2._0.Models.Outstaff;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,9 +16,9 @@ namespace Alfateam.Website.API.Controllers.Website
         }
 
         [HttpGet, Route("GetOutstaffMatrix")]
-        public async Task<OutstaffMatrixClientModel> GetOutstaffMatrix()
+        public async Task<OutstaffMatrixDTO> GetOutstaffMatrix()
         {
-            return OutstaffMatrixClientModel.Create(DB.GetOutstaffMatrix(), LanguageId,CountryId);
+            return OutstaffMatrixDTO.Create(DB.GetOutstaffMatrix(), LanguageId,CountryId);
         }
 
     }

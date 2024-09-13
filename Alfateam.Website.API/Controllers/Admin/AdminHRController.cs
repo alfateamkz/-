@@ -3,13 +3,13 @@ using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Models;
-using Alfateam.Website.API.Models.ClientModels.HR;
-using Alfateam.Website.API.Models.ClientModels.Shop;
-using Alfateam.Website.API.Models.EditModels.General;
-using Alfateam.Website.API.Models.EditModels.HR;
-using Alfateam.Website.API.Models.EditModels.Shop;
-using Alfateam.Website.API.Models.LocalizationEditModels.HR;
-using Alfateam.Website.API.Models.LocalizationEditModels.Shop;
+using Alfateam.Website.API.Models.DTO.HR;
+using Alfateam.Website.API.Models.DTO.Shop;
+using Alfateam.Website.API.Models.DTO.General;
+using Alfateam.Website.API.Models.DTO.HR;
+using Alfateam.Website.API.Models.DTO.Shop;
+using Alfateam.Website.API.Models.DTOLocalization.HR;
+using Alfateam.Website.API.Models.DTOLocalization.Shop;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.HR;
@@ -32,16 +32,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Вакансии
 
         [HttpGet, Route("GetJobVacancies")]
-        public async Task<RequestResult<IEnumerable<JobVacancyClientModel>>> GetJobVacancies(int offset, int count = 20)
+        public async Task<RequestResult<IEnumerable<JobVacancyDTO>>> GetJobVacancies(int offset, int count = 20)
         {
             var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<JobVacancyClientModel>>(new Func<RequestResult>[]
+            return TryFinishAllRequestes<IEnumerable<JobVacancyDTO>>(new Func<RequestResult>[]
             {
                 () => CheckAccess(1),
                 () => {
                     var items = GetAvailableModels(GetSessionWithRoleInclude().User, GetVacanciesList(), offset, count);
-                    var models = JobVacancyClientModel.CreateItems(items.Cast<JobVacancy>(), LanguageId);
-                    return RequestResult<IEnumerable<JobVacancyClientModel>>.AsSuccess(models);
+                    var models = JobVacancyDTO.CreateItemsWithLocalization(items.Cast<JobVacancy>(), LanguageId) as IEnumerable<JobVacancyDTO>;
+                    return RequestResult<IEnumerable<JobVacancyDTO>>.AsSuccess(models);
                 }
             });
         }
@@ -63,7 +63,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpGet, Route("GetJobVacancyLocalization")]
         public async Task<RequestResult<JobVacancyLocalization>> GetJobVacancyLocalization(int id)
         {
-            var localization = DB.JobVacancyLocalizations.Include(o => o.Language).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var localization = DB.JobVacancyLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             if (localization == null) return RequestResult<JobVacancyLocalization>.AsError(404, "Сущность с данным id не найдена");
 
             var vacancy = GetVacanciesList().FirstOrDefault(o => o.Id == localization.JobVacancyId);
@@ -121,7 +121,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateJobVacancyMain")]
-        public async Task<RequestResult<JobVacancy>> UpdateJobVacancyMain(JobVacancyMainEditModel model)
+        public async Task<RequestResult<JobVacancy>> UpdateJobVacancyMain(JobVacancyDTO model)
         {
             var item = GetVacanciesFullIncludedList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var user = GetSessionWithRoleInclude()?.User;
@@ -137,7 +137,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
    
         [HttpPut, Route("UpdateJobVacancyLocalization")]
-        public async Task<RequestResult<JobVacancyLocalization>> UpdateJobVacancyLocalization(JobVacancyLocalizationEditModel model)
+        public async Task<RequestResult<JobVacancyLocalization>> UpdateJobVacancyLocalization(JobVacancyLocalizationDTO model)
         {
             var localization = DB.JobVacancyLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             if (localization == null) return RequestResult<JobVacancyLocalization>.AsError(404, "Локализация с данным id не найдена");
@@ -259,7 +259,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateAvailability")]
-        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityEditModel model)
+        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityDTO model)
         {
             bool hasThisModel = false;
 
@@ -336,7 +336,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
 
-        private async Task<RequestResult> PrepareVacancyMainBeforeUpdate(JobVacancy item,JobVacancyMainEditModel model)
+        private async Task<RequestResult> PrepareVacancyMainBeforeUpdate(JobVacancy item,JobVacancyDTO model)
         {
             return TryFinishAllRequestes(new[]
             {
@@ -355,7 +355,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                 }
             });
         }
-        private async Task<RequestResult> PrepareVacancyLocalizationBeforeUpdate(JobVacancyLocalization item, JobVacancyLocalizationEditModel model)
+        private async Task<RequestResult> PrepareVacancyLocalizationBeforeUpdate(JobVacancyLocalization item, JobVacancyLocalizationDTO model)
         {
             if (!item.InnerContent.AreSame(model.InnerContent))
             {
@@ -370,7 +370,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Private get included methods
 
-        public IQueryable<JobVacancy> GetVacanciesList()
+        private IQueryable<JobVacancy> GetVacanciesList()
         {
             return DB.JobVacancies.IncludeAvailability()
                                   .Include(o => o.Expierence)
@@ -379,7 +379,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                                   .Include(o => o.Localizations)
                                   .Where(o => !o.IsDeleted);
         }
-        public IQueryable<JobVacancy> GetVacanciesFullIncludedList()
+        private IQueryable<JobVacancy> GetVacanciesFullIncludedList()
         {
             return DB.JobVacancies.IncludeAvailability()
                                   .Include(o => o.Expierence)
@@ -387,11 +387,11 @@ namespace Alfateam.Website.API.Controllers.Admin
                                   .Include(o => o.WatchesList)
                                   .Include(o => o.InnerContent).ThenInclude(o => o.Items)
                                   .Include(o => o.MainLanguage)
-                                  .Include(o => o.Localizations).ThenInclude(o => o.Language)
+                                  .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                   .Where(o => !o.IsDeleted);
         }
 
-        public IQueryable<JobSummary> GetSummariesList()
+        private IQueryable<JobSummary> GetSummariesList()
         {
             return DB.JobSummaries.Include(o => o.CreatedBy).Where(o => !o.IsDeleted);
         }

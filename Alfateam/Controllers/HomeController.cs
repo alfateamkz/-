@@ -262,6 +262,11 @@ namespace Alfateam.Controllers
         {
             return View();
         }
+        [Route("Privacy_ru")]
+        public IActionResult Privacy_ru()
+        {
+            return View();
+        }
         [Route("Privacy_en")]
         public IActionResult Privacy_en()
         {

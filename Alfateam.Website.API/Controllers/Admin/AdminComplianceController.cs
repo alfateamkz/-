@@ -3,12 +3,12 @@ using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Filters;
-using Alfateam.Website.API.Models.ClientModels;
-using Alfateam.Website.API.Models.ClientModels.Posts;
-using Alfateam.Website.API.Models.EditModels;
-using Alfateam.Website.API.Models.EditModels.General;
-using Alfateam.Website.API.Models.LocalizationEditModels;
-using Alfateam.Website.API.Models.LocalizationEditModels.Posts;
+using Alfateam.Website.API.Models.DTO;
+using Alfateam.Website.API.Models.DTO.Posts;
+using Alfateam.Website.API.Models.DTO;
+using Alfateam.Website.API.Models.DTO.General;
+using Alfateam.Website.API.Models.DTOLocalization;
+using Alfateam.Website.API.Models.DTOLocalization.Posts;
 using Alfateam2._0.Models;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
@@ -35,16 +35,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Комплаенс-документы
 
         [HttpGet, Route("GetComplianceDocuments")]
-        public async Task<RequestResult<IEnumerable<ComplianceDocumentClientModel>>> GetComplianceDocuments(int offset, int count = 20)
+        public async Task<RequestResult<IEnumerable<ComplianceDocumentDTO>>> GetComplianceDocuments(int offset, int count = 20)
         {
             var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<ComplianceDocumentClientModel>>(new Func<RequestResult>[]
+            return TryFinishAllRequestes<IEnumerable<ComplianceDocumentDTO>>(new Func<RequestResult>[]
             {
                 () => CheckContentAreaRights(session, ContentAccessModelType.Compliance, 1),
                 () => {
                     var items = GetAvailableModels(session.User, ComplianceDocuments(), offset, count);
-                    var models = ComplianceDocumentClientModel.CreateItems(items.Cast<ComplianceDocument>(), LanguageId);
-                    return RequestResult<IEnumerable<ComplianceDocumentClientModel>>.AsSuccess(models);
+                    var models = ComplianceDocumentDTO.CreateItemsWithLocalization(items.Cast<ComplianceDocument>(), LanguageId) as IEnumerable<ComplianceDocumentDTO>;
+                    return RequestResult<IEnumerable<ComplianceDocumentDTO>>.AsSuccess(models);
                 }
             });
         }
@@ -58,7 +58,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpGet, Route("GetComplianceDocumentLocalization")]
         public async Task<RequestResult<ComplianceDocumentLocalization>> GetComplianceDocumentLocalization(int id)
         {
-            var localization = DB.ComplianceDocumentLocalizations.Include(o => o.Language).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var localization = DB.ComplianceDocumentLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             if (localization == null) return RequestResult<ComplianceDocumentLocalization>.AsError(404, "Сущность с данным id не найдена");
 
             var mainEntity = ComplianceDocuments().FirstOrDefault(o => o.Id == localization.ComplianceDocumentId && !o.IsDeleted);
@@ -104,7 +104,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateComplianceDocumentMain")]
-        public async Task<RequestResult<ComplianceDocument>> UpdateComplianceDocumentMain(ComplianceDocumentMainEditModel model)
+        public async Task<RequestResult<ComplianceDocument>> UpdateComplianceDocumentMain(ComplianceDocumentDTO model)
         {
             var item = ComplianceDocuments().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var session = GetSessionWithRoleInclude();
@@ -121,7 +121,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
         [HttpPut, Route("UpdateComplianceDocumentLocalization")]
-        public async Task<RequestResult<ComplianceDocumentLocalization>> UpdateComplianceDocumentLocalization(ComplianceDocumentLocalizationEditModel model)
+        public async Task<RequestResult<ComplianceDocumentLocalization>> UpdateComplianceDocumentLocalization(ComplianceDocumentLocalizationDTO model)
         {
             var localization = DB.ComplianceDocumentLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryFinishAllRequestes<ComplianceDocumentLocalization>(new[]
@@ -163,7 +163,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         #endregion
 
         [HttpPut, Route("UpdateAvailability")]
-        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityEditModel model)
+        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityDTO model)
         {
             bool hasThisModel = false;
 
@@ -275,23 +275,23 @@ namespace Alfateam.Website.API.Controllers.Admin
 
             var res = new RequestResult();
 
-            string previewFormFileName = $"{localization.LanguageId}_previewImg";
+            string previewFormFileName = $"{localization.LanguageEntityId}_previewImg";
             if (!isUpdate || (isUpdate && Request.Form.Files.Any(o => o.Name == previewFormFileName)))
             {
-                var localizationPreviewFile = Request.Form.Files.FirstOrDefault(o => o.Name == $"{localization.LanguageId}_previewImg");
+                var localizationPreviewFile = Request.Form.Files.FirstOrDefault(o => o.Name == $"{localization.LanguageEntityId}_previewImg");
                 var localizationPreviewFileCheckRes = this.CheckImageFile(localizationPreviewFile);
 
                 if (!localizationPreviewFileCheckRes.Success)
                 {
                     res.FillFromRequestResult(localizationPreviewFileCheckRes);
-                    res.Error += $"\r\nПроблема с файлом {localization.LanguageId}_previewImg";
+                    res.Error += $"\r\nПроблема с файлом {localization.LanguageEntityId}_previewImg";
                     return res;
                 }
                 localization.ImgPreviewPath = await this.UploadFile(localizationPreviewFile);
             }
 
 
-            string documentFormFileName = $"{localization.LanguageId}_doc";
+            string documentFormFileName = $"{localization.LanguageEntityId}_doc";
             if (!isUpdate || (isUpdate && Request.Form.Files.Any(o => o.Name == previewFormFileName)))
             {
                 var localizationDocFile = Request.Form.Files.FirstOrDefault(o => o.Name == documentFormFileName);
@@ -300,7 +300,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                 if (!localizationDocFileCheckRes.Success)
                 {
                     res.FillFromRequestResult(localizationDocFileCheckRes);
-                    res.Error += $"\r\nПроблема с файлом {localization.LanguageId}_doc";
+                    res.Error += $"\r\nПроблема с файлом {localization.LanguageEntityId}_doc";
                     return res;
                 }
 
@@ -316,7 +316,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         private IQueryable<ComplianceDocument> ComplianceDocuments()
         {
             return DB.ComplianceDocuments.IncludeAvailability()
-                                         .Include(o => o.Localizations).ThenInclude(o => o.Language)
+                                         .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                          .Include(o => o.MainLanguage)
                                          .Where(o => !o.IsDeleted);
         }

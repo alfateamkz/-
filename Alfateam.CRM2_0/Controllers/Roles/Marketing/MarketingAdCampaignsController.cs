@@ -242,7 +242,7 @@ namespace Alfateam.CRM2_0.Controllers.Roles.Marketing
 		{
 			var campaign = DB.AdCampaigns.FirstOrDefault(o => o.Id == campaignId && !o.IsDeleted);
 
-			var item = DB.AdCampaignItems.Include(o => o.BudgetItems)
+			var item = DB.AdCampaignItems.Include(o => o.BudgetItems).ThenInclude(o => o.Currency)
 										 .FirstOrDefault(o => o.Id == itemId && !o.IsDeleted);
 
 			return TryFinishAllRequestes(new[]
@@ -261,7 +261,9 @@ namespace Alfateam.CRM2_0.Controllers.Roles.Marketing
 		{
 			var campaign = DB.AdCampaigns.FirstOrDefault(o => o.Id == campaignId && !o.IsDeleted);
 			var item = DB.AdCampaignItems.FirstOrDefault(o => o.Id == itemId && !o.IsDeleted);
-			var budgetItem = DB.AdCampaignBudgetItems.FirstOrDefault(o => o.Id == budgetItemId && !o.IsDeleted);
+
+			var budgetItem = DB.AdCampaignBudgetItems.Include(o => o.Currency)
+													 .FirstOrDefault(o => o.Id == budgetItemId && !o.IsDeleted);
 
 			return TryFinishAllRequestes(new[]
 			{
@@ -289,7 +291,8 @@ namespace Alfateam.CRM2_0.Controllers.Roles.Marketing
 			{
 				() => CheckBaseAdCampaignAndItem(campaign, item),
 				() => IsUserManagerOfAdCampaign(campaign, authorizedUser),
-				() => RequestResult.FromBoolean(model.IsValid(), 400, "Проверьте корректность заполнения полей"),
+                () => RequestResult.FromBoolean(DB.Currencies.Any(o => o.Id == model.CurrencyId && !o.IsDeleted), 404, "Валюта с данным id не найдена"),
+                () => RequestResult.FromBoolean(model.IsValid(), 400, "Проверьте корректность заполнения полей"),
 				() =>
 				{
 					var budgetItem = model.Create();
@@ -314,7 +317,8 @@ namespace Alfateam.CRM2_0.Controllers.Roles.Marketing
 			{
 				() => CheckBaseAdCampaignAndBudgetItem(campaign, item,budgetItem),
 				() => IsUserManagerOfAdCampaign(campaign, authorizedUser),
-				() => TryUpdateModel(DB.AdCampaignBudgetItems,budgetItem,model)
+                () => RequestResult.FromBoolean(DB.Currencies.Any(o => o.Id == model.CurrencyId && !o.IsDeleted), 404, "Валюта с данным id не найдена"),
+                () => DBService.TryUpdateModel(DB.AdCampaignBudgetItems,budgetItem,model)
 			});
 		}
 
@@ -419,7 +423,7 @@ namespace Alfateam.CRM2_0.Controllers.Roles.Marketing
 		private RequestResult CheckBaseAdCampaignAndBudgetItem(AdCampaign campaign, AdCampaignItem item, AdCampaignBudgetItem budgetItem)
 		{
 			return TryFinishAllRequestes(new[]
-		{
+			{
 				() => CheckBaseAdCampaignAndItem(campaign,item),
 				() => RequestResult.FromBoolean(budgetItem != null,404,"Статья бюджета рекламной кампании с данным id не найдена"),
 				() => RequestResult.FromBoolean(budgetItem.AdCampaignItemId == item.Id,403,"Статья бюджета рекламной кампании не принадлежит данному пункту рекламной кампании"),

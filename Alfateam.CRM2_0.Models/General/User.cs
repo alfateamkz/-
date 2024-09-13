@@ -1,5 +1,6 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
 using Alfateam.CRM2_0.Models.Enums;
+using Alfateam.CRM2_0.Models.Gamification;
 using Alfateam.CRM2_0.Models.General.Info;
 using Alfateam.CRM2_0.Models.Security;
 using Newtonsoft.Json;
@@ -27,6 +28,9 @@ namespace Alfateam.CRM2_0.Models.General
 
         public UserRoleModel RoleModel { get; set; }
 
+
+        public GamificationUser? GamificationUser { get; set; }
+        public int? GamificationUserId { get; set; }
 
 
         public string Login { get; set; }

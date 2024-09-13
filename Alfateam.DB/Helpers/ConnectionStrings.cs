@@ -8,16 +8,35 @@ namespace Alfateam.DB.Helpers
 {
     internal static class ConnectionStrings
     {
-        public static string Website { get; set; } = "server=localhost;" +
-                                                     "user=root;" +
-                                                     "password=H2c7V7p6;" +
-                                                     "port=3306;" +
-                                                     "database=alfateam_co;";
 
+
+
+#if DEBUG
+
+        public static string Website { get; set; } = "server=localhost;" +
+                                                    "user=root;" +
+                                                    "password=H2c7V7p6;" +
+                                                    "port=3306;" +
+                                                    "database=alfateam_co;";
         public static string CRM { get; set; } = "server=localhost;" +
                                                  "user=root;" +
                                                  "password=H2c7V7p6;" +
                                                  "port=3306;" +
                                                  "database=alfateam_co_crm;";
+#else
+
+        public static string Website { get; set; } = "server=localhost;" +
+                                                    "user=usp;" +
+                                                    "password=ErPvm!3;" +
+                                                    "port=3306;" +
+                                                    "database=alfateam_co;";
+
+
+         public static string CRM { get; set; } = "server=localhost;" +
+                                                 "user=usp;" +
+                                                 "password=ErPvm!3;" +
+                                                 "port=3306;" +
+                                                 "database=alfateam_co_crm;";
+#endif
     }
 }

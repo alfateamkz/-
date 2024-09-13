@@ -18,11 +18,11 @@ namespace Alfateam2._0.Models.Shop.Orders
 
 
 
-        //public double Amount { get; set; }
+        public double Amount { get; set; }
         public double PriceForOne { get; set; }
 
         [NotMapped]
-        public double Sum => /*Amount **/ PriceForOne;
+        public double Sum => Amount * PriceForOne;
 
     }
 }

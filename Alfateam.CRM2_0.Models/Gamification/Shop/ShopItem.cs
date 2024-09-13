@@ -23,5 +23,16 @@ namespace Alfateam.CRM2_0.Models.Gamification.Shop
 
         public double Price { get; set; }
         public double Rating { get; set; }
+
+
+        public ShopCategory Category { get; set; }
+        public int CategoryId { get; set; }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int GamificationModelId { get; set; }
     }
 }

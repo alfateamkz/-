@@ -2,7 +2,7 @@
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Extensions;
-using Alfateam.Website.API.Models.ClientModels.Posts;
+using Alfateam.Website.API.Models.DTO.Posts;
 using Alfateam.Website.API.Models.Filters;
 using Alfateam2._0.Models;
 using Alfateam2._0.Models.General;
@@ -19,15 +19,15 @@ namespace Alfateam.Website.API.Controllers.Website
         }
 
         [HttpGet, Route("GetPosts")]
-        public async Task<IEnumerable<PostClientModel>> GetPosts(int offset, int count = 20)
+        public async Task<IEnumerable<PostDTO>> GetPosts(int offset, int count = 20)
         {
             var items = GetPosts().Skip(offset).Take(count).ToList();
 
-            return PostClientModel.CreateItems(items,LanguageId);
+            return PostDTO.CreateItemsWithLocalization(items,LanguageId) as IEnumerable<PostDTO>;
         }
 
         [HttpGet, Route("GetPostsByFilter")]
-        public async Task<IEnumerable<PostClientModel>> GetPostsByFilter(PostsSearchFilter filter)
+        public async Task<IEnumerable<PostDTO>> GetPostsByFilter(PostsSearchFilter filter)
         {
             var posts = GetPosts();
 
@@ -45,15 +45,15 @@ namespace Alfateam.Website.API.Controllers.Website
             }
             posts = posts.Skip(filter.Offset).Take(filter.Count);
 
-            return PostClientModel.CreateItems(posts.ToList(), LanguageId);
+            return PostDTO.CreateItemsWithLocalization(posts.ToList(), LanguageId) as IEnumerable<PostDTO>;
         }
 
 
         [HttpGet, Route("GetPost")]
-        public async Task<PostClientModel> GetPost(int id)
+        public async Task<PostDTO> GetPost(int id)
         {
             var post = GetFullIncludedPosts().FirstOrDefault(o => o.Id == id);
-            return PostClientModel.Create(post, LanguageId);
+            return PostDTO.CreateWithLocalization(post, LanguageId) as PostDTO;
         }
 
 
@@ -110,27 +110,27 @@ namespace Alfateam.Website.API.Controllers.Website
 
 
         [HttpGet, Route("GetPostCategories")]
-        public async Task<IEnumerable<PostCategoryClientModel>> GetPostCategories()
+        public async Task<IEnumerable<PostCategoryDTO>> GetPostCategories()
         {
             var items = DB.PostCategories.IncludeAvailability()
                                          .Include(o => o.Localizations)
                                          .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
                                          .ToList();
-            return PostCategoryClientModel.CreateItems(items,LanguageId);
+            return PostCategoryDTO.CreateItemsWithLocalization(items,LanguageId) as IEnumerable<PostCategoryDTO>;
         }
         [HttpGet, Route("GetPostIndustries")]
-        public async Task<IEnumerable<PostIndustryClientModel>> GetPostIndustries()
+        public async Task<IEnumerable<PostIndustryDTO>> GetPostIndustries()
         {
             var items = DB.PostIndustries.IncludeAvailability()
                                          .Include(o => o.Localizations)
                                          .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
                                          .ToList();
-            return PostIndustryClientModel.CreateItems(items, LanguageId);
+            return PostIndustryDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<PostIndustryDTO>;
         }
 
 
         #region Private methods
-        public IQueryable<Post> GetPosts()
+        private IQueryable<Post> GetPosts()
         {
             return DB.Posts.IncludeAvailability()
                             .Include(o => o.Category).ThenInclude(o => o.Localizations)
@@ -139,7 +139,7 @@ namespace Alfateam.Website.API.Controllers.Website
                             .Include(o => o.Localizations).ThenInclude(o => o.Content).ThenInclude(o => o.Items)
                             .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
         }
-        public IQueryable<Post> GetFullIncludedPosts()
+        private IQueryable<Post> GetFullIncludedPosts()
         {
             return DB.Posts.IncludeAvailability()
                             .Include(o => o.Category).ThenInclude(o => o.Localizations)

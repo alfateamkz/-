@@ -22,7 +22,7 @@ namespace Alfateam.Website.API.Models.ClientModels.General
 
             if (item.MainLanguageId != langId)
             {
-                var localization = item.Localizations.FirstOrDefault(o => o.LanguageId == langId);
+                var localization = item.Localizations.FirstOrDefault(o => o.LanguageEntityId == langId);
                 if (localization != null)
                 {
                     model.Title = GetActualValue(model.Title, localization.Title);

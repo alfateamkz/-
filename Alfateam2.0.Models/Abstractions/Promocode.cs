@@ -21,10 +21,10 @@ namespace Alfateam2._0.Models.Abstractions
     /// <summary>
     /// Базовая сущность промокода
     /// </summary>
-    public abstract class Promocode : AvailabilityModel
+    public class Promocode : AvailabilityModel
     {
         [NotMapped]
-        public abstract PromocodeType Type { get; }
+        public virtual PromocodeType Type { get; }
         public string Discriminator { get; set; }
 
         public string Code { get; set; }

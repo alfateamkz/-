@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Alfateam.CRM2_0.Models.General.Taxes
 {
     /// <summary>
-    /// Грейи прогрессивной система налогообложения
+    /// Грейд прогрессивной система налогообложения
     /// </summary>
     public class ProgressiveTaxSystemGrade : AbsModel
     {

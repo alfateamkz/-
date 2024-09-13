@@ -2,8 +2,7 @@
 using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Enums;
 using Alfateam.Website.API.Filters;
-using Alfateam.Website.API.Models.ClientModels.Posts;
-using Alfateam.Website.API.Models.EditModels.General;
+using Alfateam.Website.API.Models.DTO.General;
 using Alfateam2._0.Models;
 using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.ContentItems;
@@ -27,7 +26,7 @@ namespace Alfateam.Website.API.Abstractions
 
         //TODO: В будущем: таблица файлов, удаление невостребованных(например файл был загружен на сервер, но дальше вышла ошибка и по факту моделька не сохранилась)
 
-        
+        [NonAction]
         public Session GetSessionWithRoleInclude()
         {
             var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.RoleModel).ThenInclude(o => o.AvailableCountries)
@@ -286,7 +285,7 @@ namespace Alfateam.Website.API.Abstractions
 
             return RequestResult.AsSuccess();
         }
-        protected RequestResult<Availability> TryUpdateAvailability(AvailabilityEditModel model, ContentAccessModelType accessType)
+        protected RequestResult<Availability> TryUpdateAvailability(AvailabilityDTO model, ContentAccessModelType accessType)
         {
             var availability = DB.GetIncludedAvailability(model.Id);
             var session = GetSessionWithRoleInclude();
@@ -328,15 +327,7 @@ namespace Alfateam.Website.API.Abstractions
                 () => RequestResult<T>.AsSuccess(item)
             });
         }
-        protected RequestResult<T> TryGetOne<T>(IEnumerable<T> fromModels, int id) where T : AbsModel
-        {
-            var item = fromModels.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (item == null)
-            {
-                return RequestResult<T>.AsError(404, "Запись по данному id не найдена");
-            }
-            return RequestResult<T>.AsSuccess(item);
-        }
+        
         #endregion
 
         #region Обобщенные методы создания объекта
@@ -366,6 +357,7 @@ namespace Alfateam.Website.API.Abstractions
                 () => CreateModel(dbSet,item)
             });
         }
+
 
 
 
@@ -417,26 +409,21 @@ namespace Alfateam.Website.API.Abstractions
         }
 
 
-        protected RequestResult<T> CreateModel<T>(DbSet<T> dbSet, T item) where T : AbsModel
-        {
-            dbSet.Add(item);
-            DB.SaveChanges();
-            return RequestResult<T>.AsSuccess(item);
-        }
+      
         #endregion
 
         #region Обобщенные методы редактирования объекта
 
-        protected RequestResult<T> CheckMainModelBeforeUpdate<T>(T model,EditModel<T> editModel,ContentAccessModelType accessType) where T : AvailabilityModel
+        protected RequestResult<T> CheckMainModelBeforeUpdate<T>(T model, DTOModel DTO, ContentAccessModelType accessType) where T : AvailabilityModel, new()
         {
             return TryFinishAllRequestes<T>(new[]
             {
                 () => RequestResult.FromBoolean(model != null, 400, "Запись по данному id не найдена"),
                 () => CheckContentAreaRights(GetSessionWithRoleInclude(), model, accessType, 3),
-                () => RequestResult.FromBoolean(editModel.IsValid(), 400, "Некорректно заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз")
+                () => RequestResult.FromBoolean(DTO.IsValid(), 400, "Некорректно заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз")
             });
         }
-        protected RequestResult<T> CheckMainModelBeforeUpdate<T>(IQueryable<T> dbSet, EditModel<T> model, ContentAccessModelType accessType) where T : AvailabilityModel
+        protected RequestResult<T> CheckMainModelBeforeUpdate<T>(IQueryable<T> dbSet, DTOModel model, ContentAccessModelType accessType) where T : AvailabilityModel, new()
         {
 
             var item = dbSet.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
@@ -447,7 +434,7 @@ namespace Alfateam.Website.API.Abstractions
                 () => RequestResult.FromBoolean(model.IsValid(), 400, "Некорректно заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз")
             });
         }
-        protected RequestResult CheckLocalizationModelBeforeUpdate<T>(IQueryable<T> dbSet, LocalizationEditModel model, int mainEntityId, ContentAccessModelType accessType) where T: AvailabilityModel
+        protected RequestResult CheckLocalizationModelBeforeUpdate<T>(IQueryable<T> dbSet, DTOModel model, int mainEntityId, ContentAccessModelType accessType) where T : AvailabilityModel, new()
         {
             var category = dbSet.FirstOrDefault(o => o.Id == mainEntityId && !o.IsDeleted);
             return TryFinishAllRequestes<T>(new[]
@@ -460,23 +447,13 @@ namespace Alfateam.Website.API.Abstractions
 
 
 
-        protected RequestResult<T> UpdateModel<T>(DbSet<T> dbSet, EditModel<T> model,T item) where T : AbsModel
+        
+        protected RequestResult<T> UpdateModel<T>(DbSet<T> dbSet, DTOModel<T> model, T item) where T : AbsModel, new()
         {
-            model.Fill(item);
+            model.FillDBModel(item, DBModelFillMode.Update);
             return UpdateModel(dbSet, item);
         }
-        protected RequestResult<T> UpdateModel<T>(DbSet<T> dbSet, LocalizationEditModel<T> model, T item) where T: AbsModel
-        {
-            model.Fill(item);
-            return UpdateModel(dbSet, item);
-        }
-        protected RequestResult<T> UpdateModel<T>(DbSet<T> dbSet, T item) where T : AbsModel
-        {
-            dbSet.Update(item);
-            DB.SaveChanges();
-
-            return new RequestResult<T>().SetSuccess(item);
-        }
+       
 
 
  
@@ -515,21 +492,7 @@ namespace Alfateam.Website.API.Abstractions
         }
 
 
-        protected RequestResult<T> DeleteModel<T>(DbSet<T> dbSet,T item,bool softDelete = true) where T : AbsModel
-        {
-            if (softDelete)
-            {
-                item.IsDeleted = true;
-                dbSet.Update(item);       
-            }
-            else
-            {
-                dbSet.Remove(item);
-            }
-
-            DB.SaveChanges();
-            return new RequestResult<T>().SetSuccess(item);
-        }
+       
 
         #endregion
 

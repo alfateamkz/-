@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 namespace Alfateam.CRM2_0.Models.Roles.Marketing.Tasks
 {
     /// <summary>
-    ///  Модель задачи пункта рекламной кампании с счетчиком выполнения
+    /// Модель задачи пункта рекламной кампании с счетчиком выполнения
     /// </summary>
-    internal class CounterAdCampaignItemTask : BaseAdCampaignItemTask
+    public class CounterAdCampaignItemTask : BaseAdCampaignItemTask
     {
         public double Total { get; set; }
         public double Completed { get; set; }   

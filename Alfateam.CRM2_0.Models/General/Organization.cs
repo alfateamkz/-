@@ -1,5 +1,6 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
 using Alfateam.CRM2_0.Models.Departments;
+using Alfateam.CRM2_0.Models.Gamification;
 using Alfateam.CRM2_0.Models.Roles.Accountance;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,8 @@ namespace Alfateam.CRM2_0.Models.General
         public TaxSystem TaxSystem { get; set; }
 
 
+
+        public GamificationModel Gamification { get; set; }
 
    
         public List<OrganizationOffice> Offices { get; set; } = new List<OrganizationOffice>();

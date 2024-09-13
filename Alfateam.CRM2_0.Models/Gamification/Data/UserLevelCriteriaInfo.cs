@@ -16,6 +16,9 @@ namespace Alfateam.CRM2_0.Models.Gamification.Data
     public class UserLevelCriteriaInfo : AbsModel
     {
         public LevelCriteria Criteria { get; set; }
+        public int CriteriaId { get; set; }
+
+
         public bool IsCompleted { get; set; }
 
     }

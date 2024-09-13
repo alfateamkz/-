@@ -17,9 +17,17 @@ namespace Alfateam.CRM2_0.Models.Gamification.Achievements
         public string ImagePath { get; set; }
 
         public AchievementCategory Category { get; set; }
+        public int CategoryId { get; set; }
 
 
         public double Rating { get; set; }
         public double Reward { get; set; }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int GamificationModelId { get; set; }
     }
 }

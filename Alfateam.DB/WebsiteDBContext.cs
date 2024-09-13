@@ -16,6 +16,21 @@ using Alfateam2._0.Models.Localization.Items.Shop;
 using Alfateam2._0.Models.Localization.Items.Shop.Modifiers;
 using Alfateam2._0.Models.Localization.Items.Team;
 using Alfateam2._0.Models.Localization.Outstaff;
+using Alfateam2._0.Models.Localization.Texts;
+using Alfateam2._0.Models.Localization.Texts.ClientCabinet;
+using Alfateam2._0.Models.Localization.Texts.ClientCabinet.Auth;
+using Alfateam2._0.Models.Localization.Texts.ClientCabinet.Referral;
+using Alfateam2._0.Models.Localization.Texts.Common;
+using Alfateam2._0.Models.Localization.Texts.Grouping;
+using Alfateam2._0.Models.Localization.Texts.Grouping.ClientCabinet;
+using Alfateam2._0.Models.Localization.Texts.Grouping.StaticPages;
+using Alfateam2._0.Models.Localization.Texts.HR;
+using Alfateam2._0.Models.Localization.Texts.Invest;
+using Alfateam2._0.Models.Localization.Texts.Portfolio;
+using Alfateam2._0.Models.Localization.Texts.Shop;
+using Alfateam2._0.Models.Localization.Texts.StaticPages;
+using Alfateam2._0.Models.Localization.Texts.StaticPages.InnerLandings;
+using Alfateam2._0.Models.Localization.Texts.Team;
 using Alfateam2._0.Models.Outstaff;
 using Alfateam2._0.Models.Portfolios;
 using Alfateam2._0.Models.Posts;
@@ -42,17 +57,23 @@ namespace Alfateam.DB
     {
         public WebsiteDBContext()
         {
-            if (Database.EnsureCreated())
-            {
-                MakeDefaultEntities();
-            } 
+            Database.EnsureCreated();
+            MakeDefaultEntities();
+
+            //if (Database.EnsureCreated())
+            //{
+            //    MakeDefaultEntities();
+            //} 
         }
         public WebsiteDBContext(DbContextOptions<WebsiteDBContext> options)
         {
-            if (Database.EnsureCreated())
-            {
-                MakeDefaultEntities();
-            }
+            Database.EnsureCreated();
+            MakeDefaultEntities();
+
+            //if (Database.EnsureCreated())
+            //{
+            //    MakeDefaultEntities();
+            //}
         }
 
 
@@ -156,6 +177,134 @@ namespace Alfateam.DB
         public DbSet<OutstaffItemLocalization> OutstaffItemLocalizations { get; set; }
         #endregion
 
+        #region Texts
+
+        #region ClientCabinet
+
+        #region Auth
+        public DbSet<CCAuthCodeSentPageTexts> CCAuthCodeSentPageTexts { get; set; }
+        public DbSet<CCAuthRestorePageTexts> CCAuthRestorePageTexts { get; set; }
+        public DbSet<CCAuthSignInPageTexts> CCAuthSignInPageTexts { get; set; }
+        public DbSet<CCAuthSignUpPageTexts> CCAuthSignUpPageTexts { get; set; }
+
+        #endregion
+
+        #region Referral
+        public DbSet<CCRefAccountPageTexts> CCRefAccountPageTexts { get; set; }
+        public DbSet<CCRefMainPageTexts> CCRefMainPageTexts { get; set; }
+        public DbSet<CCRefMyAccountsPageTexts> CCRefMyAccountsPageTexts { get; set; }
+        public DbSet<CCRefWithdrawalPageTexts> CCRefWithdrawalPageTexts { get; set; }
+
+        #endregion
+
+        public DbSet<CCInfoPageTexts> CCInfoPageTexts { get; set; }
+        public DbSet<CCMyOrdersPageTexts> CCMyOrdersPageTexts { get; set; }
+        public DbSet<CCMyProjectsPageTexts> CCMyProjectsPageTexts { get; set; }
+        public DbSet<CCNotificationsPageTexts> CCNotificationsPageTexts { get; set; }
+        public DbSet<CCOrderPageTexts> CCOrderPageTexts { get; set; }
+        public DbSet<CCProjectPageTexts> CCProjectPageTexts { get; set; }
+
+        #endregion
+
+        #region Common
+        public DbSet<ClientCabinetCommonTexts> ClientCabinetCommonTexts { get; set; }
+        public DbSet<FooterTexts> FooterTexts { get; set; }
+        public DbSet<HeaderTexts> HeaderTexts { get; set; }
+        public DbSet<LinksLocalization> LinksLocalization { get; set; }
+
+        #endregion
+
+        #region Grouping
+
+        #region ClientCabinet
+        public DbSet<CCAuthLocalizationTexts> CCAuthLocalizationTexts { get; set; }
+        public DbSet<CCRefLocalizationTexts> CCRefLocalizationTexts { get; set; }
+        public DbSet<CCWebsiteLocalizationTexts> CCWebsiteLocalizationTexts { get; set; }
+
+        #endregion
+
+        #region StaticPages
+        public DbSet<InnerLandingsLocalizationTexts> InnerLandingsLocalizationTexts { get; set; }
+        public DbSet<StaticPagesLocalizationTexts> StaticPagesLocalizationTexts { get; set; }
+
+        #endregion
+
+        public DbSet<CommonTexts> CommonTexts { get; set; }
+        public DbSet<HRLocalizationTexts> HRLocalizationTexts { get; set; }
+        public DbSet<InvestLocalizationTexts> InvestLocalizationTexts { get; set; }
+        public DbSet<PortfolioLocalizationTexts> PortfolioLocalizationTexts { get; set; }
+        public DbSet<ShopLocalizationTexts> ShopLocalizationTexts { get; set; }
+        public DbSet<TeamLocalizationTexts> TeamLocalizationTexts { get; set; }
+        public DbSet<WebsiteLocalizationTexts> WebsiteLocalizationTexts { get; set; }
+
+        #endregion
+
+        #region HR
+        public DbSet<HRJobVacanciesListPageTexts> HRJobVacanciesListPageTexts { get; set; }
+        public DbSet<HRJobVacancyPageText> HRJobVacancyPageText { get; set; }
+
+        #endregion
+
+        #region Invest
+        public DbSet<InvestProjectPageTexts> InvestProjectPageTexts { get; set; }
+        public DbSet<InvestProjectsListPageTexts> InvestProjectsListPageTexts { get; set; }
+
+        #endregion
+
+        #region Portfolio
+        public DbSet<PortfolioItemPageTexts> PortfolioItemPageTexts { get; set; }
+        public DbSet<PortfolioListPageTexts> PortfolioListPageTexts { get; set; }
+        public DbSet<PortfolioStatsPageTexts> PortfolioStatsPageTexts { get; set; }
+
+        #endregion
+
+        #region Shop
+        public DbSet<ShopBasketPageTexts> ShopBasketPageTexts { get; set; }
+        public DbSet<ShopDeliveryAddressPageTexts> ShopDeliveryAddressPageTexts { get; set; }
+        public DbSet<ShopItemPageTexts> ShopItemPageTexts { get; set; }
+        public DbSet<ShopItemsPageTexts> ShopItemsPageTexts { get; set; }
+        public DbSet<ShopOrderNotPaidPageTexts> ShopOrderNotPaidPageTexts { get; set; }
+        public DbSet<ShopOrderPaidSuccessfullyPageTexts> ShopOrderPaidSuccessfullyPageTexts { get; set; }
+
+        #endregion
+
+        #region StaticPages
+
+        #region InnerLandings
+        public DbSet<ILQualityAndPipelinePageTexts> ILQualityAndPipelinePageTexts { get; set; }
+        public DbSet<ILRefProgramPageTexts> ILRefProgramPageTexts { get; set; }
+        public DbSet<ILWorkWithUsPageTexts> ILWorkWithUsPageTexts { get; set; }
+
+        #endregion
+
+        public DbSet<AboutUsPageTexts> AboutUsPageTexts { get; set; }
+        public DbSet<CorporateCulturePageTexts> CorporateCulturePageTexts { get; set; }
+        public DbSet<FindMyAgreementPageTexts> FindMyAgreementPageTexts { get; set; }
+        public DbSet<FraudCounteractionPageTexts> FraudCounteractionPageTexts { get; set; }
+        public DbSet<LandingTexts> LandingTexts { get; set; }
+        public DbSet<PrivacyPolicyPageTexts> PrivacyPolicyPageTexts { get; set; }
+        public DbSet<ServicesListPageTexts> ServicesListPageTexts { get; set; }
+
+        #endregion
+
+        #region Team
+        public DbSet<TeamMemberPageTexts> TeamMemberPageTexts { get; set; }
+        public DbSet<TeamPageTexts> TeamPageTexts { get; set; }
+
+        #endregion
+
+        public DbSet<ComplianceTexts> ComplianceTexts { get; set; }
+        public DbSet<EventTexts> EventTexts { get; set; }
+        public DbSet<MassMediaAboutUsTexts> MassMediaAboutUsTexts { get; set; }
+        public DbSet<OutstaffPageTexts> OutstaffPageTexts { get; set; }
+        public DbSet<PartnersPageTexts> PartnersPageTexts { get; set; }
+        public DbSet<PostsPageTexts> PostsPageTexts { get; set; }
+        public DbSet<ReviewsPageTexts> ReviewsPageTexts { get; set; }
+        public DbSet<ServicePageTexts> ServicePageTexts { get; set; }
+        public DbSet<SitemapPageTexts> SitemapPageTexts { get; set; }
+
+        #endregion
+
         #endregion
 
         #region Outstaff
@@ -249,11 +398,29 @@ namespace Alfateam.DB
         {
             optionsBuilder.UseMySql(ConnectionStrings.Website, new MySqlServerVersion(new Version(8, 0, 11)));
         }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Country>().HasMany(o => o.Languages).WithMany(o => o.CountryManyToManyRefs);
             modelBuilder.Entity<Country>().HasMany(o => o.Currencies).WithMany(o => o.CountryManyToManyRefs);
+            modelBuilder.Entity<Country>().HasOne(o => o.MainCurrency);
+            modelBuilder.Entity<Country>().HasOne(o => o.MainLanguage);
+            modelBuilder.Entity<Country>().HasOne(o => o.OfficialMainLanguage);
+
             modelBuilder.Entity<Language>().HasMany(o => o.Localizations).WithOne(o => o.LanguageMainModel);
+
+
+            modelBuilder.Entity<User>().HasOne(o => o.Basket);
+            modelBuilder.Entity<User>().HasMany(o => o.Orders).WithOne(o => o.CreatedBy);
+            modelBuilder.Entity<User>().HasOne(o => o.Wishlist);
+
+          
+
+
+
+            //modelBuilder.Entity<ShopWishlist>().HasOne(o => o.User).WithOne(o => o.Wishlist);
+
+            //modelBuilder.Entity<Language>().HasOne(o => o.Localizations).
         }
 
         #endregion
@@ -262,13 +429,25 @@ namespace Alfateam.DB
 
         private void MakeDefaultEntities()
         {
-            MakeDefaultLanguages();
-            MakeDefaultCurrencies();
-            MakeDefaultCountries();
+            try
+            {
+                MakeDefaultLanguages();
+                SaveChanges();
 
-            MakeDefaultUsers();
 
-            SaveChanges();
+                MakeDefaultCurrencies();
+                SaveChanges();
+
+                MakeDefaultCountries();
+
+                MakeDefaultUsers();
+
+                SaveChanges();
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
 
 
@@ -280,21 +459,22 @@ namespace Alfateam.DB
             {
                 Title = "Русский",
                 Code = "RU",
+         
             };
-            russian.MainLanguage = russian;
+            //russian.MainLanguage = russian;
 
             var kazakh = new Language
             {
                 Title = "Казахский",
                 Code = "KZ",
                 MainLanguage = russian,
-                IsHidden = true
+                IsHidden = true,
             };
 
             var kyrgyz = new Language
             {
                 Title = "Кыргызский",
-                Code = "KZ",
+                Code = "KG",
                 MainLanguage = russian,
                 IsHidden = true
             };
@@ -325,7 +505,7 @@ namespace Alfateam.DB
 
             var russianRuble = new Currency("Российский рубль", "RUB", "₽")
             {
-                MainLanguage = rusMainLang
+                MainLanguage = rusMainLang,
             };
             var kazakhTenge = new Currency("Казахстанский тенге", "KZT", "₸")
             {
@@ -343,7 +523,7 @@ namespace Alfateam.DB
             {
                 MainLanguage = rusMainLang
             };
-            var kyrgyzSom = new Currency("Кыргызстанский сом", "KGS", "₮")
+            var kyrgyzSom = new Currency("Кыргызстанский сом", "KGS", "⃀")
             {
                 MainLanguage = rusMainLang
             };
@@ -397,6 +577,8 @@ namespace Alfateam.DB
                 MainCurrency = mongTugrik,
                 Currencies = new List<Currency> { mongTugrik, usDollar },
             };
+
+            Countries.AddRange(russia, kazakhstan, kyrgyzstan, mongolia);
         }
 
         private void MakeDefaultUsers()

@@ -17,7 +17,8 @@ namespace Alfateam2._0.Models.Shop.Orders
     public class ShopOrder : AbsModel
     {
         public User CreatedBy { get; set; }
-        public Address Address { get; set; }
+        public int CreatedById { get; set; }
+        public Address? Address { get; set; }
 
 
         public Currency? Currency { get; set; }

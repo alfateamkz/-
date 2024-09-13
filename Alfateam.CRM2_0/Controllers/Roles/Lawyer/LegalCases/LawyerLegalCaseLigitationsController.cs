@@ -16,7 +16,9 @@ using Alfateam.CRM2_0.Models.CreateModels.Roles.Lawyer.Trial;
 using Alfateam.CRM2_0.Models.ClientModels.Roles.Lawyer.Documents;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.CRM2_0.Models.Enums.Roles.Lawyer.LegalCases;
+using Document = Alfateam.CRM2_0.Models.Roles.Lawyer.Documents.Document;
 using Alfateam.CRM2_0.Models.Enums;
+using Alfateam.CRM2_0.Services;
 
 namespace Alfateam.CRM2_0.Controllers.Roles.Lawyer.LegalCases
 {
@@ -88,7 +90,11 @@ namespace Alfateam.CRM2_0.Controllers.Roles.Lawyer.LegalCases
 					var litigation = CreateLitigation(type);
 					legalCase.Litigations.Add(litigation);
 
-					UpdateModel(DB.LegalCases, legalCase);
+                    
+
+
+
+                    DBService.UpdateModel(DB.LegalCases, legalCase);
 					return RequestResult<Litigation>.AsSuccess(litigation);
 				}
 			});

@@ -9,8 +9,8 @@ namespace Alfateam.Gateways
 {
     public class MailGateway : IMailGateway
     {
-        private const string SMTP_HOST = "smtp.alfateam.co";
-        private const int SMTP_PORT = 587;
+        private const string SMTP_HOST = "smtp.beget.com";
+        private const int SMTP_PORT = 2525;
 
 
 
@@ -20,19 +20,21 @@ namespace Alfateam.Gateways
             MailAddress toAddress = new MailAddress(message.ToEmail, message.ToDisplayName);
 
             using (MailMessage mailMessage = new MailMessage(fromMailAddress, toAddress))
-            using (SmtpClient smtpClient = new SmtpClient())
             {
-                mailMessage.Subject = message.Subject;
-                mailMessage.Body = message.Body;
+                using (SmtpClient smtpClient = new SmtpClient())
+                {
+                    mailMessage.Subject = message.Subject;
+                    mailMessage.Body = message.Body;
 
-                smtpClient.Host = SMTP_HOST;
-                smtpClient.Port = SMTP_PORT;
-                smtpClient.EnableSsl = true;
-                smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
-                smtpClient.UseDefaultCredentials = false;
-                smtpClient.Credentials = new NetworkCredential(fromMailAddress.Address, credentials.Password);
+                    smtpClient.Host = SMTP_HOST;
+                    smtpClient.Port = SMTP_PORT;
+                    smtpClient.EnableSsl = true;
+                    smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+                    smtpClient.UseDefaultCredentials = false;
+                    smtpClient.Credentials = new NetworkCredential(fromMailAddress.Address, credentials.Password);
 
-                smtpClient.Send(mailMessage);
+                    smtpClient.Send(mailMessage);
+                }
             }
         }
 

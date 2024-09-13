@@ -14,6 +14,9 @@ namespace Alfateam2._0.Models.Shop.Wishes
     public class ShopWishlist : AbsModel
     {
         public User User { get; set; }
+        public int UserId { get; set; }
+
+
         public List<ShopWishlistItem> Items { get; set; } = new List<ShopWishlistItem>();
     }
 }

@@ -3,9 +3,10 @@ using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Filters;
-using Alfateam.Website.API.Models.ClientModels;
-using Alfateam.Website.API.Models.ClientModels.Shop;
-using Alfateam.Website.API.Models.EditModels.Shop;
+using Alfateam.Website.API.Models.DTO;
+using Alfateam.Website.API.Models.DTO.Promocodes;
+using Alfateam.Website.API.Models.DTO.Shop;
+using Alfateam.Website.API.Models.DTO.Shop.Orders;
 using Alfateam.Website.API.Models.Filters;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
@@ -31,14 +32,14 @@ namespace Alfateam.Website.API.Controllers.Website
         #region Позиции
 
         [HttpGet, Route("GetProducts")]
-        public async Task<IEnumerable<ShopProductClientModel>> GetProducts(int offset, int count = 20)
+        public async Task<IEnumerable<ShopProductDTO>> GetProducts(int offset, int count = 20)
         {
             var items = GetShopProducts().Skip(offset).Take(count).ToList();
-            return ShopProductClientModel.CreateItems(items, LanguageId,CountryId);
+            return ShopProductDTO.CreateItems(items, LanguageId,CountryId);
         }
 
         [HttpGet, Route("GetProductsByFilter")]
-        public async Task<IEnumerable<ShopProductClientModel>> GetProductsByFilter(ShopProductsFilter filter)
+        public async Task<IEnumerable<ShopProductDTO>> GetProductsByFilter(ShopProductsFilter filter)
         {
             var products = GetShopProducts();
 
@@ -53,14 +54,14 @@ namespace Alfateam.Website.API.Controllers.Website
             }
 
             products = products.Skip(filter.Offset).Take(filter.Count);
-            return ShopProductClientModel.CreateItems(products.ToList(), LanguageId, CountryId);
+            return ShopProductDTO.CreateItems(products.ToList(), LanguageId, CountryId);
         }
 
         [HttpGet, Route("GetProduct")]
-        public async Task<ShopProductClientModel> GetProduct(int id)
+        public async Task<ShopProductDTO> GetProduct(int id)
         {
             var product = GetShopProducts().FirstOrDefault(o => o.Id == id);
-            return ShopProductClientModel.Create(product,LanguageId,CountryId);
+            return ShopProductDTO.Create(product,LanguageId,CountryId);
         }
 
 
@@ -68,13 +69,13 @@ namespace Alfateam.Website.API.Controllers.Website
 
 
         [HttpGet, Route("GetProductCategories")]
-        public async Task<IEnumerable<ShopProductCategoryClientModel>> GetProductCategories()
+        public async Task<IEnumerable<ShopProductCategoryDTO>> GetProductCategories()
         {
             var items = DB.ShopProductCategories.IncludeAvailability()
                                                 .Include(o => o.Localizations)
                                                 .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
                                                 .ToList();
-            return ShopProductCategoryClientModel.CreateItems(items, LanguageId);
+            return ShopProductCategoryDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<ShopProductCategoryDTO>;
         }
 
         #endregion
@@ -239,7 +240,7 @@ namespace Alfateam.Website.API.Controllers.Website
         }
 
         [HttpPut, Route("EditBasketItem"), UserActionsFilter]
-        public async Task<RequestResult> EditBasketItem(ShopOrderItemEditModel model)
+        public async Task<RequestResult> EditBasketItem(ShopOrderItemDTO model)
         {
             var res = new RequestResult();
 
@@ -594,22 +595,22 @@ namespace Alfateam.Website.API.Controllers.Website
 
 
         [HttpGet, Route("GetPromocodeInfo")]
-        public async Task<RequestResult<PromocodeClientModel>> GetPromocodeInfo(string code)
+        public async Task<RequestResult<PromocodeDTO>> GetPromocodeInfo(string code)
         {
             var promocode = DB.Promocodes.IncludeAvailability()
                                         .FirstOrDefault(o => o.Code == code && !o.IsDeleted
                                                       && o.Availability.IsAvailable(CountryId));
             if (promocode == null)
             {
-                return RequestResult<PromocodeClientModel>.AsError(404, "Данный промокод не найден");
+                return RequestResult<PromocodeDTO>.AsError(404, "Данный промокод не найден");
             }
             if (promocode.IsExpired)
             {
-                return RequestResult<PromocodeClientModel>.AsError(403, "Данный промокод уже не активен");
+                return RequestResult<PromocodeDTO>.AsError(403, "Данный промокод уже не активен");
             }
 
-            var clientModel = PromocodeClientModel.Create(promocode, CountryId, (int)CurrencyId);
-            return RequestResult<PromocodeClientModel>.AsSuccess(clientModel);
+            var DTO = PromocodeDTO.Create(promocode, CountryId, (int)CurrencyId);
+            return RequestResult<PromocodeDTO>.AsSuccess(DTO);
         }
 
 
@@ -618,13 +619,13 @@ namespace Alfateam.Website.API.Controllers.Website
         #region Private methods
 
 
-        private void UpdateOrderItem(ShopOrderItem item, ShopOrderItemEditModel editModel)
+        private void UpdateOrderItem(ShopOrderItem item, ShopOrderItemDTO DTO)
         {
-            item.ItemId = editModel.ItemId;
-            item.Amount = editModel.Amount;
+            item.ItemId = DTO.ItemId;
+            item.Amount = DTO.Amount;
 
             item.SelectedModifiers.Clear();
-            foreach(var updModifier in editModel.SelectedModifiers)
+            foreach(var updModifier in DTO.SelectedModifiers)
             {
                 var modifier = new ShopOrderItemModifier()
                 {

@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 namespace Alfateam.Website.API.Models.EditModels.Promocodes
 {
     
-    [JsonConverter(typeof(JsonKnownTypesConverter<Promocode>))]
+    [JsonConverter(typeof(JsonKnownTypesConverter<PromocodeEditModel>))]
     [JsonDiscriminator(Name = "Discriminator")]
     [JsonKnownType(typeof(PricePromocodeEditModel), "PricePromocode")]
     [JsonKnownType(typeof(PercentPromocodeEditModel), "PercentPromocode")]
@@ -28,6 +28,9 @@ namespace Alfateam.Website.API.Models.EditModels.Promocodes
 
         public PricingMatrix? PriceFrom { get; set; }
         public PricingMatrix? PriceTo { get; set; }
+
+
+
 
     }
 }

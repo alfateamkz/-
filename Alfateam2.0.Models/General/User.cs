@@ -62,7 +62,7 @@ namespace Alfateam2._0.Models.General
         /// </summary>
         public ShopOrder? Basket { get; set; }
         public List<ShopOrder> Orders { get; set; } = new List<ShopOrder>();
-        public ShopWishlist Wishlist { get; set; }
+        public ShopWishlist? Wishlist { get; set; }
         public List<UsedPromocode> UsedPromocodes { get; set; } = new List<UsedPromocode>();
     }
 }

@@ -15,7 +15,7 @@ namespace Alfateam.Website.API.Abstractions
     public abstract class AbsController : ControllerBase
     {
         //TODO: глобально! Рефакторинг в угоду ActionFilter
-        //TODO: Задачка на рефакторинг номер 2: ClientModel, автомаппинг
+        //TODO: Задачка на рефакторинг номер 2: DTO, автомаппинг
 
 
         public WebsiteDBContext DB { get; set; }
@@ -53,12 +53,14 @@ namespace Alfateam.Website.API.Abstractions
         }
 
 
+        [NonAction]
         public Session GetUserSession()
         {
             var session = DB.Sessions.Include(o => o.User).ThenInclude(o => o.BanInfo)
                                      .FirstOrDefault(o => o.SessID == this.UserSessid);
             return session;
         }
+        [NonAction]
         public RequestResult CheckSession(Session session)
         {
             return TryFinishAllRequestes(new[]
@@ -68,6 +70,7 @@ namespace Alfateam.Website.API.Abstractions
                 () => RequestResult.FromBoolean(!session.IsDeactivated, 401, "Токен был деактивирован"),
             });
         }
+        [NonAction]
         public RequestResult<BanInfo> CheckForBan(User user, BanType type)
         {
             if(user.BanInfo?.Type == type || user.BanInfo?.Type == BanType.All)
@@ -311,7 +314,134 @@ namespace Alfateam.Website.API.Abstractions
 
 
 
+
+
+
+
+        //#region Обобщенные методы CRUD для DTO
+        //protected RequestResult<T> TryGetOne<T>(IEnumerable<T> fromModels, int id) where T : AbsModel
+        //{
+        //    var item = fromModels.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+        //    if (item == null)
+        //    {
+        //        return RequestResult<T>.AsError(404, "Запись по данному id не найдена");
+        //    }
+        //    return RequestResult<T>.AsSuccess(item);
+        //}
+        //protected RequestResult<T> CreateModel<T>(DbSet<T> dbSet, T item) where T : AbsModel
+        //{
+        //    dbSet.Add(item);
+        //    DB.SaveChanges();
+        //    return RequestResult<T>.AsSuccess(item);
+        //}
+        //protected RequestResult<T> CreateModel<T>(DbSet<T> dbSet, DTO<T> model) where T : AbsModel, new()
+        //{
+        //    var item = new T();
+        //    model.Fill(item);
+        //    return CreateModel(dbSet, item);
+        //}
+
+
+
+
+        //protected RequestResult<T> UpdateModel<T>(DbSet<T> dbSet, DTO<T> model, T item) where T : AbsModel
+        //{
+        //    model.Fill(item);
+        //    return UpdateModel(dbSet, item);
+        //}
+        //protected RequestResult<T> UpdateModel<T>(DbSet<T> dbSet, T item) where T : AbsModel
+        //{
+        //    dbSet.Update(item);
+        //    DB.SaveChanges();
+
+        //    return new RequestResult<T>().SetSuccess(item);
+        //}
+
+
+        //protected RequestResult<T> DeleteModel<T>(DbSet<T> dbSet, T item, bool softDelete = true) where T : AbsModel
+        //{
+        //    if (softDelete)
+        //    {
+        //        item.IsDeleted = true;
+        //        dbSet.Update(item);
+        //    }
+        //    else
+        //    {
+        //        dbSet.Remove(item);
+        //    }
+
+        //    DB.SaveChanges();
+        //    return new RequestResult<T>().SetSuccess(item);
+        //}
+
+
+        //#endregion
+
+
+        #region Обобщенные методы CRUD для DTO
+        protected RequestResult<T> TryGetOne<T>(IEnumerable<T> fromModels, int id) where T : AbsModel
+        {
+            var item = fromModels.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (item == null)
+            {
+                return RequestResult<T>.AsError(404, "Запись по данному id не найдена");
+            }
+            return RequestResult<T>.AsSuccess(item);
+        }
+        protected RequestResult<T> CreateModel<T>(DbSet<T> dbSet, T item) where T : AbsModel
+        {
+            dbSet.Add(item);
+            DB.SaveChanges();
+            return RequestResult<T>.AsSuccess(item);
+        }
+        protected RequestResult<T> CreateModel<T>(DbSet<T> dbSet, DTOModel<T> model) where T : AbsModel, new()
+        {
+            var item = new T();
+            model.FillDBModel(item, DBModelFillMode.Create);
+            return CreateModel(dbSet, item);
+        }
+
+
+
+
+        protected RequestResult<T> UpdateModel<T>(DbSet<T> dbSet, DTOModel<T> model, T item) where T : AbsModel, new()
+        {
+            model.FillDBModel(item, DBModelFillMode.Update);
+            return UpdateModel(dbSet, item);
+        }
+        protected RequestResult<T> UpdateModel<T>(DbSet<T> dbSet, T item) where T : AbsModel
+        {
+            dbSet.Update(item);
+            DB.SaveChanges();
+
+            return new RequestResult<T>().SetSuccess(item);
+        }
+
+
+        protected RequestResult<T> DeleteModel<T>(DbSet<T> dbSet, T item, bool softDelete = true) where T : AbsModel
+        {
+            if (softDelete)
+            {
+                item.IsDeleted = true;
+                dbSet.Update(item);
+            }
+            else
+            {
+                dbSet.Remove(item);
+            }
+
+            DB.SaveChanges();
+            return new RequestResult<T>().SetSuccess(item);
+        }
+
+
+        #endregion
+
+
+
+
         #region TryFinishAllRequestes
+        [NonAction]
         public RequestResult TryFinishAllRequestes(Func<RequestResult>[] funcs)
         {
             RequestResult successResult = null;
@@ -326,11 +456,12 @@ namespace Alfateam.Website.API.Abstractions
 
             return successResult;
         }
+        [NonAction]
         public RequestResult<T> TryFinishAllRequestes<T>(Func<RequestResult>[] funcs)
         {
             return (RequestResult<T>)TryFinishAllRequestes(funcs);
         }
-
+        [NonAction]
         public RequestResult TryFinishAllRequestes(RequestResult[] funcs)
         {
             RequestResult successResult = null;
@@ -343,6 +474,7 @@ namespace Alfateam.Website.API.Abstractions
 
             return successResult;
         }
+        [NonAction]
         public RequestResult<T> TryFinishAllRequestes<T>(RequestResult[] funcs)
         {
             return (RequestResult<T>)TryFinishAllRequestes(funcs);

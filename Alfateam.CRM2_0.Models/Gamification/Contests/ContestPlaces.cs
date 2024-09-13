@@ -24,5 +24,25 @@ namespace Alfateam.CRM2_0.Models.Gamification.Contests
         public double Coins { get; set; }
         public double Rating { get; set; }
 
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int ContestId { get; set; }
+
+
+
+        public bool ArePlacesCorrect()
+        {
+            if (SecondValue == null && FirstValue > 0) return true;
+            return FirstValue < SecondValue;
+        }
+        public int GetLastPlace()
+        {
+            if (SecondValue == null) return FirstValue;
+            return (int)SecondValue;
+        }
     }
 }

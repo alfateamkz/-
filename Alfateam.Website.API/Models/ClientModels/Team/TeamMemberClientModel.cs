@@ -40,7 +40,7 @@ namespace Alfateam.Website.API.Models.ClientModels.Team
 
             if (item.MainLanguageId != langId)
             {
-                var localization = item.Localizations.FirstOrDefault(o => o.LanguageId == langId);
+                var localization = item.Localizations.FirstOrDefault(o => o.LanguageEntityId == langId);
                 if (localization != null)
                 {
                     model.Name = GetActualValue(model.Name, localization.Name);

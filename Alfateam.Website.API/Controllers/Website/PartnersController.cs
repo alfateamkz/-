@@ -1,8 +1,8 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Extensions;
-using Alfateam.Website.API.Models.ClientModels;
-using Alfateam.Website.API.Models.ClientModels.Portfolios;
+using Alfateam.Website.API.Models.DTO;
+using Alfateam.Website.API.Models.DTO.Portfolios;
 using Alfateam2._0.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,37 +17,37 @@ namespace Alfateam.Website.API.Controllers.Website
 
 
         [HttpGet, Route("GetPartners")]
-        public async Task<IEnumerable<PartnerClientModel>> GetPartners(int offset, int count = 20)
+        public async Task<IEnumerable<PartnerDTO>> GetPartners(int offset, int count = 20)
         {
             var items = GetPartnersList().Skip(offset).Take(count).ToList();
-            return PartnerClientModel.CreateItems(items, LanguageId);
+            return PartnerDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<PartnerDTO>;
         }
 
         [HttpGet, Route("GetPartner")]
-        public async Task<PartnerClientModel> GetPartner(int id)
+        public async Task<PartnerDTO> GetPartner(int id)
         {
             var partner = GetPartnersFullIncludedList().FirstOrDefault(o => o.Id == id);
-            return PartnerClientModel.Create(partner, LanguageId);
+            return PartnerDTO.CreateWithLocalization(partner, LanguageId) as PartnerDTO;
         }
 
 
 
 
         #region Private get included methods
-        public IQueryable<Partner> GetPartnersList()
+        private IQueryable<Partner> GetPartnersList()
         {
             return DB.Partners.IncludeAvailability()
                               .Include(o => o.Localizations)
-                              .Include(o => o.Localizations).ThenInclude(o => o.Language)
+                              .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                               .Include(o => o.MainLanguage)
                               .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
         }
-        public IQueryable<Partner> GetPartnersFullIncludedList()
+        private IQueryable<Partner> GetPartnersFullIncludedList()
         {
             return DB.Partners.IncludeAvailability()
                               .Include(o => o.Content).ThenInclude(o => o.Items)
                               .Include(o => o.Localizations).ThenInclude(o => o.Content).ThenInclude(o => o.Items)
-                              .Include(o => o.Localizations).ThenInclude(o => o.Language)
+                              .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                               .Include(o => o.MainLanguage)
                               .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
         }

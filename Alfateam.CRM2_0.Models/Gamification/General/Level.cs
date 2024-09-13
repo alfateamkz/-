@@ -17,8 +17,22 @@ namespace Alfateam.CRM2_0.Models.Gamification.General
         public string ImagePath { get; set; }
 
 
+        /// <summary>
+        /// Автоматически проставляется при создании уровня
+        /// </summary>
+        public int Number { get; set; }
+
+
         public List<LevelCriteria> Criterias { get; set; } = new List<LevelCriteria>();
         public LevelReward Reward { get; set; }
+
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int GamificationModelId { get; set; }
 
     }
 }

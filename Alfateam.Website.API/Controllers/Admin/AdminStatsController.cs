@@ -1,9 +1,9 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
-using Alfateam.Website.API.Models;
-using Alfateam.Website.API.Models.ClientModels.Portfolios;
+using Alfateam.Website.API.Models.DTO.Portfolios;
 using Alfateam.Website.API.Models.Filters.Admin;
+using Alfateam.Website.API.Models.Stats;
 using Alfateam2._0.Models.Stats;
 using Microsoft.AspNetCore.Mvc;
 

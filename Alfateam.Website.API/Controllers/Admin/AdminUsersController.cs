@@ -3,10 +3,10 @@ using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Helpers;
-using Alfateam.Website.API.Models;
-using Alfateam.Website.API.Models.ClientModels.General;
-using Alfateam.Website.API.Models.ClientModels.Shop;
-using Alfateam.Website.API.Models.EditModels;
+using Alfateam.Website.API.Models.DTO.General;
+using Alfateam.Website.API.Models.DTO.Shop;
+using Alfateam.Website.API.Models.DTO;
+using Alfateam.Website.API.Models.UserModels;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.HR;
@@ -30,17 +30,17 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpGet,Route("GetUsers")]
-        public async Task<RequestResult<IEnumerable<UserClientModel>>> GetUsers(int offset, int count = 20)
+        public async Task<RequestResult<IEnumerable<UserDTO>>> GetUsers(int offset, int count = 20)
         {
             var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<UserClientModel>>(new Func<RequestResult>[]
+            return TryFinishAllRequestes<IEnumerable<UserDTO>>(new Func<RequestResult>[]
             {
                 () => CheckAccess(),
                 () => {
 
                     var users = GetAvailableUsers(GetSessionWithRoleInclude().User,offset,count);
-                    var models = UserClientModel.CreateItems(users,LanguageId);
-                    return RequestResult<IEnumerable<UserClientModel>>.AsSuccess(models);
+                    var models = UserDTO.CreateItemsWithLocalization(users,LanguageId) as IEnumerable<UserDTO>;
+                    return RequestResult<IEnumerable<UserDTO>>.AsSuccess(models);
                 }
             });
         }
@@ -259,7 +259,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
         [HttpPut, Route("UpdateUserRoles")]
-        public async Task<RequestResult<User>> UpdateUserRoles(UserRoleEditModel model)
+        public async Task<RequestResult<User>> UpdateUserRoles(UserRoleDTO model)
         {
             var found = DB.Users.Include(o => o.RoleModel).ThenInclude(o => o.AvailableCountries)
                                 .Include(o => o.RoleModel).ThenInclude(o => o.ForbiddenCountries)
@@ -404,7 +404,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Private get included methods
 
-        public IQueryable<User> GetUsersList()
+        private IQueryable<User> GetUsersList()
         {
             return DB.Users.Include(o => o.Country)
                            .Include(o => o.RegisteredFromCountry)
@@ -414,7 +414,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
 
-        public IQueryable<User> GetUsersFullIncludedList()
+        private IQueryable<User> GetUsersFullIncludedList()
         {
             return DB.Users.Include(o => o.Country)
                            .Include(o => o.RegisteredFromCountry)

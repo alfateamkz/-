@@ -1,7 +1,6 @@
 ﻿using Alfateam.CRM2_0.Abstractions;
 using Alfateam.CRM2_0.Core;
 using Alfateam.CRM2_0.Models.Enums;
-using Alfateam.CRM2_0.Enums.Roles.Sales;
 using Alfateam.CRM2_0.Filters;
 using Alfateam.CRM2_0.Models.ClientModels.Roles.Sales.Funnel;
 using Alfateam.CRM2_0.Models.ClientModels.Roles.Sales.Plan;

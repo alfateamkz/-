@@ -19,7 +19,7 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Content.Tests
     [JsonDiscriminator(Name = "Discriminator")]
     [JsonKnownType(typeof(EmojiQuestionOption), "EmojiQuestionOption")]
     [JsonKnownType(typeof(PictureQuestionOption), "PictureQuestionOption")]
-    [JsonKnownType(typeof(SimplePicturedQuestion), "SimplePicturedQuestion")]
+    //[JsonKnownType(typeof(SimplePicturedQuestion), "SimplePicturedQuestion")]
     [JsonKnownType(typeof(SimpleQuestionOption), "SimpleQuestionOption")]
     public class QuestionOption : AbsModel
     {

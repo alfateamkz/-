@@ -1,18 +1,18 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
-using Alfateam.Website.API.Models.ClientModels;
+using Alfateam.Website.API.Models.DTO;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using Alfateam.Website.API.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Alfateam.Website.API.Models.ClientModels.Posts;
+using Alfateam.Website.API.Models.DTO.Posts;
 using Alfateam.Website.API.Enums;
-using Alfateam.Website.API.Models.EditModels;
-using Alfateam.Website.API.Models.LocalizationEditModels;
+using Alfateam.Website.API.Models.DTO;
+using Alfateam.Website.API.Models.DTOLocalization;
 using Alfateam2._0.Models.Localization.Items;
-using Alfateam.Website.API.Models.EditModels.General;
+using Alfateam.Website.API.Models.DTO.General;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Localization.Items.Posts;
 using Alfateam.Website.API.Core;
@@ -29,16 +29,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Посты
 
         [HttpGet, Route("GetPosts")]
-        public async Task<RequestResult<IEnumerable<MassMediaPostClientModel>>> GetPosts(int offset, int count = 20)
+        public async Task<RequestResult<IEnumerable<MassMediaPostDTO>>> GetPosts(int offset, int count = 20)
         {
             var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<MassMediaPostClientModel>>(new Func<RequestResult>[]
+            return TryFinishAllRequestes<IEnumerable<MassMediaPostDTO>>(new Func<RequestResult>[]
             {
                 () => CheckContentAreaRights(session, ContentAccessModelType.MassMediaPosts, 1),
                 () => {
                     var items = GetAvailableModels(session.User, GetPostsList(), offset, count);
-                    var models = MassMediaPostClientModel.CreateItems(items.Cast<MassMediaPost>(), LanguageId);
-                    return RequestResult<IEnumerable<MassMediaPostClientModel>>.AsSuccess(models);
+                    var models = MassMediaPostDTO.CreateItemsWithLocalization(items.Cast<MassMediaPost>(), LanguageId) as IEnumerable<MassMediaPostDTO>;
+                    return RequestResult<IEnumerable<MassMediaPostDTO>>.AsSuccess(models);
                 }
             });
         }
@@ -52,7 +52,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpGet, Route("GetPostLocalization")]
         public async Task<RequestResult<MassMediaPostLocalization>> GetPostLocalization(int id)
         {
-            var localization = DB.MassMediaPostLocalizations.Include(o => o.Language).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var localization = DB.MassMediaPostLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             if (localization == null) return RequestResult<MassMediaPostLocalization>.AsError(404, "Сущность с данным id не найдена");
 
             var mainEntity = GetPostsList().FirstOrDefault(o => o.Id == localization.MassMediaPostId && !o.IsDeleted);
@@ -96,7 +96,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdatePostMain")]
-        public async Task<RequestResult<MassMediaPost>> UpdatePostMain(MassMediaPostEditModel model)
+        public async Task<RequestResult<MassMediaPost>> UpdatePostMain(MassMediaPostDTO model)
         {
             var post = GetPostsList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var session = GetSessionWithRoleInclude();
@@ -112,7 +112,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
         [HttpPut, Route("UpdatePostLocalization")]
-        public async Task<RequestResult<MassMediaPostLocalization>> UpdatePostLocalization(MassMediaPostLocalizationEditModel model)
+        public async Task<RequestResult<MassMediaPostLocalization>> UpdatePostLocalization(MassMediaPostLocalizationDTO model)
         {
             var localization = DB.MassMediaPostLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryFinishAllRequestes<MassMediaPostLocalization>(new[]
@@ -153,7 +153,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         #endregion
 
         [HttpPut, Route("UpdateAvailability")]
-        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityEditModel model)
+        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityDTO model)
         {
             bool hasThisModel = false;
 
@@ -205,7 +205,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return DB.MassMediaPosts.IncludeAvailability()
                                     .Include(o => o.MainLanguage)
-                                    .Include(o => o.Localizations).ThenInclude(o => o.Language);
+                                    .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity);
         }
 
         #endregion

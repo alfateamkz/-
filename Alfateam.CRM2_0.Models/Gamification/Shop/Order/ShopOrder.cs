@@ -14,8 +14,11 @@ namespace Alfateam.CRM2_0.Models.Gamification.Shop.Order
     /// </summary>
     public class ShopOrder : AbsModel
     {
-        public ShopOrderStatus Status { get; set; } = ShopOrderStatus.Waiting;
+        public ShopOrderStatus Status { get; set; } = ShopOrderStatus.Basket;
+
         public User OrderedBy { get; set; }
+        public int OrderedById { get; set; }
+
         public List<ShopOrderItem> Items { get; set; } = new List<ShopOrderItem>();
 
 
@@ -25,6 +28,12 @@ namespace Alfateam.CRM2_0.Models.Gamification.Shop.Order
         public Address? DeliveryAddress { get; set; }
         public string? Comment { get; set; }
 
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int GamificationModelId { get; set; }
 
     }
 }

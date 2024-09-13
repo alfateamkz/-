@@ -2,6 +2,7 @@
 using Alfateam2._0.Models.Localization.General;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -12,6 +13,7 @@ namespace Alfateam2._0.Models.General
     /// <summary>
     /// Сущность языка
     /// </summary>
+    [Table("LanguageEntities")]
     public class Language : AbsModel
     {
         public string Title { get; set; }
@@ -30,8 +32,8 @@ namespace Alfateam2._0.Models.General
         /// Основной язык модели страны
         /// Язык будет здесь русский по идее, т.к. в разных языках название языка разные
         /// </summary>
-        public Language MainLanguage { get; set; }
-        public int MainLanguageId { get; set; }
+        public Language? MainLanguage { get; set; }
+        public int? MainLanguageId { get; set; }
         public List<LanguageLocalization> Localizations { get; set; } = new List<LanguageLocalization>();
 
 

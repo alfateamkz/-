@@ -8,7 +8,6 @@ using Alfateam.CRM2_0.Models.Roles.SecurityService.Checking;
 using Alfateam.CRM2_0.Models.Roles.SecurityService.Scoring;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc;
-using Models.Roles.SecurityService.Checking.Data;
 using Microsoft.EntityFrameworkCore;
 using Alfateam.CRM2_0.Models.EditModels.Roles.SecurityService.Checking;
 using System.Net.Mail;

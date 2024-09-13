@@ -1,4 +1,5 @@
 ﻿using Alfateam.CRM2_0.Models.Abstractions;
+using Alfateam.CRM2_0.Models.General;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,11 @@ namespace Alfateam.CRM2_0.Models.Roles.Marketing
     /// </summary>
     public class AdCampaignBudgetItem : AbsModel
     {
+
+        public Currency Currency { get; set; }
+        public int CurrencyId { get; set; }
+
+
         public double Sum { get; set; }
 
 

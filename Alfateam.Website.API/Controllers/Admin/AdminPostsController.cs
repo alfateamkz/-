@@ -3,10 +3,10 @@ using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Enums;
 using Alfateam.Website.API.Extensions;
-using Alfateam.Website.API.Models.ClientModels.Posts;
-using Alfateam.Website.API.Models.EditModels.General;
-using Alfateam.Website.API.Models.EditModels.Posts;
-using Alfateam.Website.API.Models.LocalizationEditModels.Posts;
+using Alfateam.Website.API.Models.DTO.Posts;
+using Alfateam.Website.API.Models.DTO.General;
+using Alfateam.Website.API.Models.DTO.Posts;
+using Alfateam.Website.API.Models.DTOLocalization.Posts;
 using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
@@ -30,16 +30,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Новости
 
         [HttpGet, Route("GetPosts")]
-        public async Task<RequestResult<IEnumerable<PostClientModel>>> GetPosts(int offset, int count = 20)
+        public async Task<RequestResult<IEnumerable<PostDTO>>> GetPosts(int offset, int count = 20)
         {
             var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<PostClientModel>>(new Func<RequestResult>[]
+            return TryFinishAllRequestes<IEnumerable<PostDTO>>(new Func<RequestResult>[]
             {
                 () => CheckContentAreaRights(session, ContentAccessModelType.Posts, 1),
                 () => {
                     var items = GetAvailableModels(session.User, GetPosts(), offset, count);
-                    var models = PostClientModel.CreateItems(items.Cast<Post>(), LanguageId);
-                    return RequestResult<IEnumerable<PostClientModel>>.AsSuccess(models);
+                    var models = PostDTO.CreateItemsWithLocalization(items.Cast<Post>(), LanguageId) as IEnumerable<PostDTO>;
+                    return RequestResult<IEnumerable<PostDTO>>.AsSuccess(models);
                 }
             });
         }
@@ -53,7 +53,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpGet, Route("GetPostLocalization")]
         public async Task<RequestResult<PostLocalization>> GetPostLocalization(int id)
         {
-            var localization = DB.PostLocalizations.Include(o => o.Language).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var localization = DB.PostLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             if (localization == null) return RequestResult<PostLocalization>.AsError(404, "Сущность с данным id не найдена");
 
             var mainEntity = GetPosts().FirstOrDefault(o => o.Id == localization.PostId && !o.IsDeleted);
@@ -98,7 +98,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdatePostMain")]
-        public async Task<RequestResult<Post>> UpdatePostMain(PostMainEditModel model)
+        public async Task<RequestResult<Post>> UpdatePostMain(PostDTO model)
         {
             var post = GetPosts().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var session = GetSessionWithRoleInclude();
@@ -117,7 +117,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
         [HttpPut, Route("UpdatePostLocalization")]
-        public async Task<RequestResult<PostLocalization>> UpdatePostLocalization(PostLocalizationEditModel model)
+        public async Task<RequestResult<PostLocalization>> UpdatePostLocalization(PostLocalizationDTO model)
         {
             var localization = DB.PostLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryFinishAllRequestes<PostLocalization>(new[]
@@ -161,16 +161,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Категории новостей
 
         [HttpGet, Route("GetPostCategories")]
-        public async Task<RequestResult<IEnumerable<PostCategoryClientModel>>> GetPostCategories(int offset, int count = 20)
+        public async Task<RequestResult<IEnumerable<PostCategoryDTO>>> GetPostCategories(int offset, int count = 20)
         {
             var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<PostCategoryClientModel>>(new Func<RequestResult>[]
+            return TryFinishAllRequestes<IEnumerable<PostCategoryDTO>>(new Func<RequestResult>[]
             {
                 () => CheckContentAreaRights(session, ContentAccessModelType.Posts, 1),
                 () => {
                     var items = GetAvailableModels(session.User, GetPostCategoriesList(), offset, count);
-                    var models = PostCategoryClientModel.CreateItems(items.Cast<PostCategory>(), LanguageId);
-                    return RequestResult<IEnumerable<PostCategoryClientModel>>.AsSuccess(models);
+                    var models = PostCategoryDTO.CreateItemsWithLocalization(items.Cast<PostCategory>(), LanguageId) as IEnumerable<PostCategoryDTO>;
+                    return RequestResult<IEnumerable<PostCategoryDTO>>.AsSuccess(models);
                 }
             });
         }
@@ -184,7 +184,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpGet, Route("GetPostCategoryLocalization")]
         public async Task<RequestResult<PostCategoryLocalization>> GetPostCategoryLocalization(int id)
         {
-            var localization = DB.PostCategoryLocalizations.Include(o => o.Language).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var localization = DB.PostCategoryLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             if (localization == null) return RequestResult<PostCategoryLocalization>.AsError(404, "Сущность с данным id не найдена");
 
             var mainEntity = GetPostCategoriesList().FirstOrDefault(o => o.Id == localization.PostCategoryId && !o.IsDeleted);
@@ -227,7 +227,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdatePostCategoryMain")]
-        public async Task<RequestResult<PostCategory>> UpdatePostCategoryMain(PostCategoryMainEditModel model)
+        public async Task<RequestResult<PostCategory>> UpdatePostCategoryMain(PostCategoryDTO model)
         {
             var item = GetPostCategoriesList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryFinishAllRequestes<PostCategory>(new[]
@@ -240,7 +240,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
         [HttpPut, Route("UpdatePostCategoryLocalization")]
-        public async Task<RequestResult<PostCategoryLocalization>> UpdatePostCategoryLocalization(PostCategoryLocalizationEditModel model)
+        public async Task<RequestResult<PostCategoryLocalization>> UpdatePostCategoryLocalization(PostCategoryLocalizationDTO model)
         {
             var localization = DB.PostCategoryLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryFinishAllRequestes<PostCategoryLocalization>(new[]
@@ -284,16 +284,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Индустрии новостей
 
         [HttpGet, Route("GetPostIndustries")]
-        public async Task<RequestResult<IEnumerable<PostIndustryClientModel>>> GetPostIndustries(int offset, int count = 20)
+        public async Task<RequestResult<IEnumerable<PostIndustryDTO>>> GetPostIndustries(int offset, int count = 20)
         {
             var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<PostIndustryClientModel>>(new Func<RequestResult>[]
+            return TryFinishAllRequestes<IEnumerable<PostIndustryDTO>>(new Func<RequestResult>[]
             {
                 () => CheckContentAreaRights(session, ContentAccessModelType.Posts, 1),
                 () => {
                     var items = GetAvailableModels(session.User, GetPostCategoriesList(), offset, count);
-                    var models = PostIndustryClientModel.CreateItems(items.Cast<PostIndustry>(), LanguageId);
-                    return RequestResult<IEnumerable<PostIndustryClientModel>>.AsSuccess(models);
+                    var models = PostIndustryDTO.CreateItemsWithLocalization(items.Cast<PostIndustry>(), LanguageId) as IEnumerable<PostIndustryDTO>;
+                    return RequestResult<IEnumerable<PostIndustryDTO>>.AsSuccess(models);
                 }
             });
         }
@@ -307,7 +307,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpGet, Route("GetPostIndustryLocalization")]
         public async Task<RequestResult<PostIndustryLocalization>> GetPostIndustryLocalization(int id)
         {
-            var localization = DB.PostIndustryLocalizations.Include(o => o.Language).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var localization = DB.PostIndustryLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             if (localization == null) return RequestResult<PostIndustryLocalization>.AsError(404, "Сущность с данным id не найдена");
 
             var mainEntity = GetPostCategoriesList().FirstOrDefault(o => o.Id == localization.PostIndustryId && !o.IsDeleted);
@@ -349,7 +349,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdatePostIndustryMain")]
-        public async Task<RequestResult<PostIndustry>> UpdatePostIndustryMain(PostIndustryMainEditModel model)
+        public async Task<RequestResult<PostIndustry>> UpdatePostIndustryMain(PostIndustryDTO model)
         {
             var item = GetPostPostIndustriesList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryFinishAllRequestes<PostIndustry>(new[]
@@ -362,7 +362,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
         [HttpPut, Route("UpdatePostIndustryLocalization")]
-        public async Task<RequestResult<PostIndustryLocalization>> UpdatePostIndustryLocalization(PostIndustryLocalizationEditModel model)
+        public async Task<RequestResult<PostIndustryLocalization>> UpdatePostIndustryLocalization(PostIndustryLocalizationDTO model)
         {
             var localization = DB.PostIndustryLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryFinishAllRequestes<PostIndustryLocalization>(new[]
@@ -406,7 +406,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateAvailability")]
-        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityEditModel model)
+        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityDTO model)
         {
             bool hasThisModel = false;
 
@@ -477,7 +477,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         private async Task<RequestResult> PreparePostLocalizationBeforeCreate(PostLocalization localization)
         {
 
-            var localizationFileUploadResult = TryUploadFile($"{localization.LanguageId}_img", FileType.Image).Result;
+            var localizationFileUploadResult = TryUploadFile($"{localization.LanguageEntityId}_img", FileType.Image).Result;
             if (!localizationFileUploadResult.Success)
             {
                 return localizationFileUploadResult;
@@ -495,7 +495,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
 
-        private async Task<RequestResult> PreparePostMainBeforeUpdate(Post post, PostMainEditModel model)
+        private async Task<RequestResult> PreparePostMainBeforeUpdate(Post post, PostDTO model)
         {
             if (Request.Form.Files.Any(o => o.Name == $"mainImg"))
             {
@@ -520,11 +520,11 @@ namespace Alfateam.Website.API.Controllers.Admin
 
             return RequestResult.AsSuccess();
         }
-        private async Task<RequestResult> PreparePostLocalizationBeforeUpdate(PostLocalization localization, PostLocalizationEditModel model)
+        private async Task<RequestResult> PreparePostLocalizationBeforeUpdate(PostLocalization localization, PostLocalizationDTO model)
         {
-            if (Request.Form.Files.Any(o => o.Name == $"{localization.LanguageId}_img"))
+            if (Request.Form.Files.Any(o => o.Name == $"{localization.LanguageEntityId}_img"))
             {
-                var localizationFileUploadResult = TryUploadFile($"{localization.LanguageId}_img", FileType.Image).Result;
+                var localizationFileUploadResult = TryUploadFile($"{localization.LanguageEntityId}_img", FileType.Image).Result;
                 if (!localizationFileUploadResult.Success)
                 {
                     return localizationFileUploadResult;
@@ -550,7 +550,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         #endregion
 
         #region Private get included methods 
-        public IQueryable<Post> GetPosts()
+        private IQueryable<Post> GetPosts()
         {
             return DB.Posts.IncludeAvailability()
                             .Include(o => o.Category).ThenInclude(o => o.Localizations)
@@ -559,7 +559,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                             .Include(o => o.Localizations).ThenInclude(o => o.Content).ThenInclude(o => o.Items)
                             .Where(o => !o.IsDeleted);
         }
-        public IQueryable<Post> GetFullIncludedPosts()
+        private IQueryable<Post> GetFullIncludedPosts()
         {
             return DB.Posts.IncludeAvailability()
                             .Include(o => o.Category).ThenInclude(o => o.Localizations)
@@ -572,17 +572,17 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
 
-        public IQueryable<PostCategory> GetPostCategoriesList()
+        private IQueryable<PostCategory> GetPostCategoriesList()
         {
             return DB.PostCategories.IncludeAvailability()
-                                    .Include(o => o.Localizations).ThenInclude(o => o.Language)
+                                    .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                     .Include(o => o.MainLanguage)
                                     .Where(o => !o.IsDeleted);
         }
-        public IQueryable<PostIndustry> GetPostPostIndustriesList()
+        private IQueryable<PostIndustry> GetPostPostIndustriesList()
         {
             return DB.PostIndustries.IncludeAvailability()
-                                    .Include(o => o.Localizations).ThenInclude(o => o.Language)
+                                    .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                     .Include(o => o.MainLanguage)
                                     .Where(o => !o.IsDeleted);
         }

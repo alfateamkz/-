@@ -24,6 +24,15 @@ namespace Alfateam.CRM2_0.Models.Gamification.Contests
         public DateTime EndDate { get; set; } = DateTime.Now.AddDays(30);
 
 
+
         public ContestResult? Result { get; set; }
+        public int? ResultId { get; set; }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int GamificationModelId { get; set; }
     }
 }

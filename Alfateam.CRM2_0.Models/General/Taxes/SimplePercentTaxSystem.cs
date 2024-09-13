@@ -15,7 +15,7 @@ namespace Alfateam.CRM2_0.Models.General.Taxes
         public double Percent { get; set; }
 
         /// <summary>
-        /// Лимит, до которого дейтствует налоговый режим. 
+        /// Лимит, до которого действует налоговый режим. 
         /// Например, в России по УСН доход не должен составлять более 150 млн. 
         /// </summary>
         public double? Limit { get; set; }

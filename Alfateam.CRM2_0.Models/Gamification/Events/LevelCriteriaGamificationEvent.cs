@@ -16,5 +16,6 @@ namespace Alfateam.CRM2_0.Models.Gamification.Events
     public class LevelCriteriaGamificationEvent : GamificationEvent
     {
         public LevelCriteria Criteria { get; set; }
+        public int CriteriaId { get; set; }
     }
 }

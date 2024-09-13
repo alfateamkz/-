@@ -55,7 +55,7 @@ namespace Alfateam.CRM2_0.Models.Abstractions
                     int val = (int)prop.GetValue(this);
                     isValid &= val > 0;
                 }
-                else if (Nullable.GetUnderlyingType(typeof(int)) == typeof(int) && prop.Name.EndsWith("Id"))
+                else if (type == Nullable.GetUnderlyingType(typeof(int)) && prop.Name.EndsWith("Id"))
                 {
                     int? val = (int)prop.GetValue(this);
                     if (val.HasValue)

@@ -4,7 +4,7 @@ using Alfateam.Gateways.Models.Messages;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Helpers;
-using Alfateam.Website.API.Models;
+using Alfateam.Website.API.Models.UserModels;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Roles;
 using Alfateam2._0.Models.Shop.Orders;
@@ -28,9 +28,15 @@ namespace Alfateam.Website.API.Controllers.General
             var res = new AuthResponseModel();
 
 
+            var sdfsf = DB.Users
+                .Include(o => o.RoleModel).ThenInclude(o => o.AvailableCountries)
+                .Include(o => o.Country)
+                .ToList();
+
             var user = DB.Users
                 .Include(o => o.RoleModel).ThenInclude(o => o.AvailableCountries)
                 .Include(o => o.Country)
+                .ToList()
                 .FirstOrDefault(o => o.Email.Equals(email, StringComparison.OrdinalIgnoreCase)
                                 && PasswordHelper.CheckEncryptedPassword(password, o.Password));
 
@@ -63,7 +69,7 @@ namespace Alfateam.Website.API.Controllers.General
                 res.Code = 404;
                 res.Error = "Токен не найден в системе";
             }
-            else if(sessionUser.Session.ExpiresAt >= DateTime.UtcNow)
+            else if(sessionUser.Session.ExpiresAt < DateTime.UtcNow)
             {
                 res.Code = 403;
                 res.Error = "Срок действия токена закончился";
@@ -82,37 +88,42 @@ namespace Alfateam.Website.API.Controllers.General
 
 
         [HttpPost, Route("RegisterUser")]
-        public RequestResult<User> RegisterUser(User user)
+        public RequestResult<User> RegisterUser(RegisterUserModel model)
         {
             var res = new RequestResult<User>();
 
-            if (user.Id != 0)
-            {
-                res.Code = 400;
-                res.Error = "Невозможно создать пользователя с явно заданным идентификатором";
-            }
-            if (user.RegisteredFromCountryId == null)
+            if (model.RegisteredFromCountryId == null)
             {
                 res.Code = 400;
                 res.Error = "Необходимо указать id страны, из которой зарегистрирован пользователь";
             }
-            if (user.Country == null)
+            if (model.CountryId == null)
             {
                 res.Code = 400;
                 res.Error = "Необходимо указать id страны, в которой находится пользователь";
             }
-            if (DB.Users.Any(o => o.Email.Equals(user.Email,StringComparison.OrdinalIgnoreCase)))
+            if (DB.Users.ToList().Any(o => o.Email.Equals(model.Email,StringComparison.OrdinalIgnoreCase)))
             {
                 res.Code = 400;
                 res.Error = "Пользователь с данным email уже зарегистрирован";
             }
             else
             {
+                var user = new User();
+                model.SetData(user);
+
                 user.Password = PasswordHelper.EncryptPassword(user.Password);
-                user.RoleModel = new UserRoleModel();
+                user.RoleModel = UserRoleModel.CreateDefault();
 
                 user.Wishlist = new ShopWishlist();
-                user.Basket = new ShopOrder();
+
+                DB.Users.Add(user);
+                DB.SaveChanges();
+
+
+
+                user.Wishlist.User = null;
+
 
                 res.Success = true;
                 res.Value = user;
@@ -136,7 +147,11 @@ namespace Alfateam.Website.API.Controllers.General
             {
                 () => CheckSession(session),
                 () => RequestResult.FromBoolean(session.User != null,404,"Пользователь не найден"),
-                () => RequestResult.FromBoolean(model.ValidateModel(),400,"Заполните необходимые данные"),
+                () =>
+                {
+                    model.Id = session.UserId;
+                    return RequestResult.FromBoolean(model.ValidateModel(),400,"Заполните необходимые данные");
+                },
                 () =>
                 {
                     model.SetData(session.User);
@@ -234,7 +249,6 @@ namespace Alfateam.Website.API.Controllers.General
                 Body = $"Ваш новый пароль : {pwd}",
                 ToDisplayName = $"{found.Name} {found.Surname}",
                 ToEmail = found.Email
-
             });
 
             return RequestResult.AsSuccess();

@@ -28,7 +28,6 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Roles.Staff
 
 
 
-
         public WorkerNotificationSettings NotificationSettings { get; set; }
         public List<WorkerDocument> Documents { get; set; } = new List<WorkerDocument>();
 

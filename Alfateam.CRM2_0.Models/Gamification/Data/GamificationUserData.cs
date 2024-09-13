@@ -15,9 +15,6 @@ namespace Alfateam.CRM2_0.Models.Gamification.Data
     /// </summary>
     public class GamificationUserData : AbsModel
     {
-        public User User { get; set; }
-
-
 
         public double Coins { get; set; }
         public double Rating { get; set; }

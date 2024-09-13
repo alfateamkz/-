@@ -2,7 +2,9 @@
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Extensions;
-using Alfateam.Website.API.Models.ClientModels.Portfolios;
+using Alfateam.Website.API.Models;
+using Alfateam.Website.API.Models.DTO.Portfolios;
+using Alfateam.Website.API.Models.Stats;
 using Alfateam2._0.Models;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Portfolios;
@@ -20,14 +22,14 @@ namespace Alfateam.Website.API.Controllers.Website
         #region Получение портфолио
 
         [HttpGet, Route("GetPortfolios")]
-        public async Task<IEnumerable<PortfolioClientModel>> GetPortfolios(int offset,int count = 20)
+        public async Task<IEnumerable<PortfolioDTO>> GetPortfolios(int offset,int count = 20)
         {
             var items = GetPortfoliosList().Skip(offset).Take(count).ToList();
-            return PortfolioClientModel.CreateItems(items, LanguageId);
+            return PortfolioDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<PortfolioDTO>;
         }
 
         [HttpGet, Route("GetPortfoliosByFilter")]
-        public async Task<IEnumerable<PortfolioClientModel>> GetPortfoliosByFilter(int categoryId, int industryId, int offset, int count = 20)
+        public async Task<IEnumerable<PortfolioDTO>> GetPortfoliosByFilter(int categoryId, int industryId, int offset, int count = 20)
         {
             var portfolios = GetPortfoliosList();
             if(categoryId > 0)
@@ -40,15 +42,15 @@ namespace Alfateam.Website.API.Controllers.Website
             }
 
             portfolios = portfolios.Skip(offset).Take(count);
-            return PortfolioClientModel.CreateItems(portfolios.ToList(), LanguageId);
+            return PortfolioDTO.CreateItemsWithLocalization(portfolios.ToList(), LanguageId) as IEnumerable<PortfolioDTO>;
         }
 
 
         [HttpGet, Route("GetPortfolio")]
-        public async Task<PortfolioClientModel> GetPortfolio(int id)
+        public async Task<PortfolioDTO> GetPortfolio(int id)
         {
             var portfolio = GetFullIncludedPortfoliosList().FirstOrDefault(o => o.Id == id);
-            return PortfolioClientModel.Create(portfolio,LanguageId);
+            return PortfolioDTO.CreateWithLocalization(portfolio,LanguageId) as PortfolioDTO;
         }
 
         #endregion
@@ -181,32 +183,77 @@ namespace Alfateam.Website.API.Controllers.Website
         #region Получение категорий и индустрии
 
         [HttpGet, Route("GetPortfolioCategories")]
-        public async Task<IEnumerable<PortfolioCategoryClientModel>> GetPortfolioCategories()
+        public async Task<IEnumerable<PortfolioCategoryDTO>> GetPortfolioCategories()
         {
             var items = DB.PortfolioCategories.IncludeAvailability()
                                               .Include(o => o.Localizations)
                                               .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
                                               .ToList();
-            return PortfolioCategoryClientModel.CreateItems(items, LanguageId);
+            return PortfolioCategoryDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<PortfolioCategoryDTO>;
         }
         [HttpGet, Route("GetPortfolioIndustries")]
-        public async Task<IEnumerable<PortfolioIndustryClientModel>> GetPortfolioIndustries()
+        public async Task<IEnumerable<PortfolioIndustryDTO>> GetPortfolioIndustries()
         {
             var items = DB.PortfolioIndustries.IncludeAvailability()
                                               .Include(o => o.Localizations)
                                               .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
                                               .ToList();
-            return PortfolioIndustryClientModel.CreateItems(items, LanguageId);
+            return PortfolioIndustryDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<PortfolioIndustryDTO>;
         }
+        #endregion
+
+        #region Получение статистики портфолио
+
+        [HttpGet, Route("GetPortfolioStats")]
+        public async Task<IEnumerable<PortfolioStatsCategoryGrouping>> GetPortfolioStats(int year, int month)
+        {
+            var categoryStats = new List<PortfolioStatsCategoryGrouping>();
+
+
+            var itemsByCategories = DB.Portfolios.IncludeAvailability()
+                                                 .Include(o => o.WatchesList)
+                                                 .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
+                                                 .GroupBy(o => o.CategoryId);
+  
+            foreach(var byCategory in itemsByCategories)
+            {
+                var items = byCategory.ToList();
+                var totalWatches = items.SelectMany(o => o.WatchesList);
+                DateTime dateStart = new DateTime(year, month, 1);
+
+
+                var categoryModel = new PortfolioStatsCategoryGrouping()
+                {
+                    Category = (await GetPortfolioCategories()).FirstOrDefault(o => o.Id == byCategory.Key)
+                };
+
+                while (dateStart.Month == month)
+                {
+                    int watchesCount = totalWatches.Count(o => o.CreatedAt.Date == dateStart);
+
+                    categoryModel.Days.Add(new PortfolioStatsCategoryGroupingDay
+                    {
+                        Date = dateStart,
+                        WatchesCount = watchesCount
+                    });
+
+                    dateStart = dateStart.AddDays(1);
+                }
+
+                categoryStats.Add(categoryModel);
+            }
+
+
+            return categoryStats;
+        }
+
+
         #endregion
 
 
 
-
-
-
         #region Private methods
-        public IQueryable<Portfolio> GetPortfoliosList()
+        private IQueryable<Portfolio> GetPortfoliosList()
         {
             return DB.Portfolios.IncludeAvailability()
                                 .Include(o => o.Industry).ThenInclude(o => o.Localizations)
@@ -214,7 +261,7 @@ namespace Alfateam.Website.API.Controllers.Website
                                 .Include(o => o.Localizations)
                                 .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
         }
-        public IQueryable<Portfolio> GetFullIncludedPortfoliosList()
+        private IQueryable<Portfolio> GetFullIncludedPortfoliosList()
         {
             return DB.Portfolios.IncludeAvailability()
                                 .Include(o => o.Industry).ThenInclude(o => o.Localizations)

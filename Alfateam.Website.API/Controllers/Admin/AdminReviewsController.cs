@@ -1,7 +1,7 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
-using Alfateam.Website.API.Models.ClientModels.Shop.Orders;
+using Alfateam.Website.API.Models.DTO.Shop.Orders;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Reviews;

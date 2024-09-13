@@ -1,7 +1,7 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Extensions;
-using Alfateam.Website.API.Models.ClientModels.Events;
+using Alfateam.Website.API.Models.DTO.Events;
 using Alfateam.Website.API.Models.Filters;
 using Alfateam2._0.Models.Events;
 using Alfateam2._0.Models.Localization.Items.Events;
@@ -19,14 +19,14 @@ namespace Alfateam.Website.API.Controllers.Website
         }
 
         [HttpGet, Route("GetEvents")]
-        public async Task<IEnumerable<EventClientModel>> GetEvents(int offset, int count = 20)
+        public async Task<IEnumerable<EventDTO>> GetEvents(int offset, int count = 20)
         {
             var items = GetEvents().Skip(offset).Take(count).ToList();
-            return EventClientModel.CreateItems(items, LanguageId);
+            return EventDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<EventDTO>;
         }
   
         [HttpGet, Route("GetEventsByFilter")]
-        public async Task<IEnumerable<EventClientModel>> GetEventsByFilter(EventsSearchFilter filter)
+        public async Task<IEnumerable<EventDTO>> GetEventsByFilter(EventsSearchFilter filter)
         {
             var events = GetEvents();
 
@@ -44,40 +44,40 @@ namespace Alfateam.Website.API.Controllers.Website
             }
 
             events = events.Skip(filter.Offset).Take(filter.Count);
-            return EventClientModel.CreateItems(events.ToList(), LanguageId);
+            return EventDTO.CreateItemsWithLocalization(events.ToList(), LanguageId) as IEnumerable<EventDTO>;
         }
 
         [HttpGet, Route("GetEvent")]
-        public async Task<EventClientModel> GetEvent(int id)
+        public async Task<EventDTO> GetEvent(int id)
         {
             var item = GetEvents().FirstOrDefault(o => o.Id == id);
-            return EventClientModel.Create(item, LanguageId);
+            return EventDTO.CreateWithLocalization(item, LanguageId) as EventDTO;
         }
 
 
 
 
         [HttpGet, Route("GetEventCategories")]
-        public async Task<IEnumerable<EventCategoryClientModel>> GetEventCategories()
+        public async Task<IEnumerable<EventCategoryDTO>> GetEventCategories()
         {
             var items = DB.EventCategories.Include(o => o.Localizations)
                                           .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
                                           .ToList();
-            return EventCategoryClientModel.CreateItems(items,LanguageId);
+            return EventCategoryDTO.CreateItemsWithLocalization(items,LanguageId) as IEnumerable<EventCategoryDTO>;
         }
         [HttpGet, Route("GetEventFormats")]
-        public async Task<IEnumerable<EventFormatClientModel>> GetEventFormats()
+        public async Task<IEnumerable<EventFormatDTO>> GetEventFormats()
         {
             var items = DB.EventFormats.Include(o => o.Localizations)
                                        .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
                                        .ToList();
-            return EventFormatClientModel.CreateItems(items, LanguageId);
+            return EventFormatDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<EventFormatDTO>;
         }
 
 
 
         #region Private methods
-        public IQueryable<Event> GetEvents()
+        private IQueryable<Event> GetEvents()
         {
             return DB.Events.IncludeAvailability()
                             .Include(o => o.Category).ThenInclude(o => o.Localizations)

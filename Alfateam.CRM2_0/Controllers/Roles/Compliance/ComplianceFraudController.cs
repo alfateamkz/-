@@ -179,13 +179,13 @@ namespace Alfateam.CRM2_0.Controllers.Roles.Compliance
 		#endregion
 
 		#region Категории мошенничества 
-
 		[HttpGet, Route("GetFraudCategories")]
 		public async Task<RequestResult> GetFraudCategories(int offset, int count = 20)
 		{
 			var queryable = DB.FraudCategories.Where(o => o.ComplianceDepartmentId == this.DepartmentId);
-			return GetMany<FraudCategory, FraudCategoryClientModel>(queryable, offset, count);
+			return DBService.GetMany<FraudCategory, FraudCategoryClientModel>(queryable, offset, count);
 		}
+
 
 
 		[HttpGet, Route("GetFraudCategory")]

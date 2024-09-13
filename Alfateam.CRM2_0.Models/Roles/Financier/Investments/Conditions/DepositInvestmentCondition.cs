@@ -15,6 +15,7 @@ namespace Alfateam.CRM2_0.Models.Roles.Financier.Investments.Conditions
     public class DepositInvestmentCondition : InvestmentCondition
     {
         public double? Percent { get; set; }
+      
         /// <summary>
         /// Период процентной ставки
         /// </summary>

@@ -13,9 +13,17 @@ namespace Alfateam.CRM2_0.Models.Gamification.Shop.Order
     public class ShopOrderItem : AbsModel
     {
         public ShopItem Item { get; set; }
+        public int ItemId { get; set; }
 
 
         public double PriceForOne { get; set; }
         public double Amount { get; set; }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int ShopOrderId { get; set; }
     }
 }

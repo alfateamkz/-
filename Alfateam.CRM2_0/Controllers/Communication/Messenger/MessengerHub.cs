@@ -3,10 +3,14 @@ using Alfateam.CRM2_0.Core;
 using Alfateam.CRM2_0.Helpers;
 using Alfateam.CRM2_0.Models.Abstractions.Communication.Messenger;
 using Alfateam.CRM2_0.Models.Communication.Messenger.Chats;
+using Alfateam.CRM2_0.Models.Communication.Messenger.Messages;
 using Alfateam.CRM2_0.Models.CreateModels.Abstractions.Communication.Messenger;
+using Alfateam.CRM2_0.Models.CreateModels.Communication.Messenger.Messages;
+using Alfateam.CRM2_0.Models.General;
 using Alfateam.DB;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using System;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Alfateam.CRM2_0.Controllers.Communication.Messenger
@@ -28,14 +32,8 @@ namespace Alfateam.CRM2_0.Controllers.Communication.Messenger
 			await TryFinishAllRequestes("ReceiveMessage", new[]
 			{
 				() => BaseCheckSession(),
-				() => RequestResult.FromBoolean(chat != null, 404,"Чат с данным id не найден"),
-				() =>
-				{
-					IncludeChatMembersIds(chat);
-					return RequestResult.AsSuccess();
-				},
-				() => RequestResult.FromBoolean(chat.HasUserAccess(authorizedUser.Id),403,"Нет доступа к чату"),
-				() => RequestResult.FromBoolean(model.IsValid(),400, "Проверьте корректность заполнения полей"),
+				() => CheckChatAccess(authorizedUser, chat),
+                () => RequestResult.FromBoolean(model.IsValid(),400, "Проверьте корректность заполнения полей"),
 				() =>
 				{
 					var message = model.Create();
@@ -56,6 +54,11 @@ namespace Alfateam.CRM2_0.Controllers.Communication.Messenger
 						message.RepliedMessages.Add(repliedMsg);
 					}
 
+					if(message is CommonMessage commonMsg)
+					{
+
+					}
+
 					//TODO: проверка пересланных сообщений на доступ к ним
 
 					chat.Messages.Add(message);
@@ -66,12 +69,66 @@ namespace Alfateam.CRM2_0.Controllers.Communication.Messenger
 				}
 			});
 		}
+		public async Task ReadMessage(int chatId, int messageId)
+		{
+            var authorizedUser = SessionUserHelper.GetAuthorizedUser(DB, SessID);
+            var chat = DB.Chats.FirstOrDefault(o => o.Id == chatId && !o.IsDeleted);
+			var message = DB.Messages.FirstOrDefault(o => o.Id == messageId && !o.IsDeleted);
+
+            await TryFinishAllRequestes("ReceiveMessage", new[]
+            {
+                () => BaseCheckSession(),
+				() => CheckChatAndMessage(authorizedUser,chat, message),
+                () => RequestResult.FromBoolean(!message.IsRead, 400,"Сообщение уже прочитано"),
+                () => RequestResult.FromBoolean(message.SentById != authorizedUser.Id, 403,"Нельзя прочитать свое сообщение"),
+				() =>
+				{
+					message.IsRead = true;
+
+                    DB.Messages.Update(message);
+                    DB.SaveChanges();
+
+                    return RequestResult<int>.AsSuccess(message.Id);
+                }
+            });
+        }
 
 
 
-		#region Private includes methods
 
-		private void IncludeChatMembersIds(Chat chat)
+
+        #region Private check methods
+
+        private RequestResult CheckChatAccess(User authorizedUser, Chat chat)
+		{
+			return TryFinishAllRequestes(new[]
+			{
+                () => RequestResult.FromBoolean(chat != null, 404,"Чат с данным id не найден"),
+                () =>
+                {
+                    IncludeChatMembersIds(chat);
+                    return RequestResult.AsSuccess();
+                },
+                () => RequestResult.FromBoolean(chat.HasUserAccess(authorizedUser.Id),403,"Нет доступа к чату"),
+            });
+        }
+
+		private RequestResult CheckChatAndMessage(User authorizedUser, Chat chat, Message message)
+		{
+            return TryFinishAllRequestes(new[]
+            {
+				() => CheckChatAccess(authorizedUser, chat),
+                () => RequestResult.FromBoolean(message != null, 404,"Сообщение с данным id не найдено"),
+                () => RequestResult.FromBoolean(message.ChatId == chat.Id, 403,"Нет доступа к данному сообщению"),
+            });
+        }
+
+        #endregion
+
+
+        #region Private includes methods
+
+        private void IncludeChatMembersIds(Chat chat)
 		{
 			 if (chat is GroupChat groupChat)
 			{

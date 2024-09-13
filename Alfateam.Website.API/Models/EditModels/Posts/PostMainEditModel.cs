@@ -17,32 +17,5 @@ namespace Alfateam.Website.API.Models.EditModels.Posts
 
         public int MainLanguageId { get; set; }
 
-        public override bool IsValid()
-        {
-            bool isValid = true;
-
-            isValid &= !string.IsNullOrEmpty(Title);
-            isValid &= !string.IsNullOrEmpty(ImgPath);
-            isValid &= !string.IsNullOrEmpty(ShortDescription);
-            isValid &= Content != null;
-            isValid &= CategoryId > 0;
-            isValid &= IndustryId > 0;
-            isValid &= MainLanguageId > 0;
-
-            return isValid;
-        }
-
-        public override void Fill(Post post)
-        {
-            post.Title = Title;
-            post.ImgPath = ImgPath;
-            post.ShortDescription = ShortDescription;
-            post.Content = Content;
-
-            post.CategoryId = CategoryId;
-            post.IndustryId = IndustryId;
-
-            post.MainLanguageId = MainLanguageId;
-        }
     }
 }

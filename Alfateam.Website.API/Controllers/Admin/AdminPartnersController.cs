@@ -3,13 +3,13 @@ using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Enums;
 using Alfateam.Website.API.Extensions;
-using Alfateam.Website.API.Models.ClientModels;
-using Alfateam.Website.API.Models.ClientModels.Posts;
-using Alfateam.Website.API.Models.ClientModels.Shop;
-using Alfateam.Website.API.Models.EditModels;
-using Alfateam.Website.API.Models.EditModels.General;
-using Alfateam.Website.API.Models.LocalizationEditModels;
-using Alfateam.Website.API.Models.LocalizationEditModels.Posts;
+using Alfateam.Website.API.Models.DTO;
+using Alfateam.Website.API.Models.DTO.Posts;
+using Alfateam.Website.API.Models.DTO.Shop;
+using Alfateam.Website.API.Models.DTO;
+using Alfateam.Website.API.Models.DTO.General;
+using Alfateam.Website.API.Models.DTOLocalization;
+using Alfateam.Website.API.Models.DTOLocalization.Posts;
 using Alfateam2._0.Models;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
@@ -32,16 +32,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Партнеры
 
         [HttpGet, Route("GetPartners")]
-        public async Task<RequestResult<IEnumerable<PartnerClientModel>>> GetPartners(int offset, int count = 20)
+        public async Task<RequestResult<IEnumerable<PartnerDTO>>> GetPartners(int offset, int count = 20)
         {
             var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<PartnerClientModel>>(new Func<RequestResult>[]
+            return TryFinishAllRequestes<IEnumerable<PartnerDTO>>(new Func<RequestResult>[]
             {
                 () => CheckContentAreaRights(session, ContentAccessModelType.Partners, 1),
                 () => {
                     var items = GetAvailableModels(session.User, GetPartnersIncluded(), offset, count);
-                    var models = PartnerClientModel.CreateItems(items.Cast<Partner>(), LanguageId);
-                    return RequestResult<IEnumerable<PartnerClientModel>>.AsSuccess(models);
+                    var models = PartnerDTO.CreateItemsWithLocalization(items.Cast<Partner>(), LanguageId) as IEnumerable<PartnerDTO>;
+                    return RequestResult<IEnumerable<PartnerDTO>>.AsSuccess(models);
                 }
             });
         }
@@ -63,7 +63,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpGet, Route("GetPartnerLocalization")]
         public async Task<RequestResult<PartnerLocalization>> GetPartnerLocalization(int id)
         {
-            var localization = DB.PartnerLocalizations.Include(o => o.Language).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var localization = DB.PartnerLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             if (localization == null) return RequestResult<PartnerLocalization>.AsError(404, "Сущность с данным id не найдена");
 
             var partner = GetPartnersIncluded().FirstOrDefault(o => o.Id == localization.PartnerId && !o.IsDeleted);
@@ -110,7 +110,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdatePartnerMain")]
-        public async Task<RequestResult<Partner>> UpdatePostCategoryMain(PartnerMainEditModel model)
+        public async Task<RequestResult<Partner>> UpdatePostCategoryMain(PartnerDTO model)
         {
             var item = GetPartnersIncluded().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryFinishAllRequestes<Partner>(new[]
@@ -124,7 +124,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
         [HttpPut, Route("UpdatePartnerLocalization")]
-        public async Task<RequestResult<PartnerLocalization>> UpdatePartnerLocalization(PartnerLocalizationEditModel model)
+        public async Task<RequestResult<PartnerLocalization>> UpdatePartnerLocalization(PartnerLocalizationDTO model)
         {
             var localization = DB.PartnerLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryFinishAllRequestes<PartnerLocalization>(new[]
@@ -164,7 +164,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateAvailability")]
-        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityEditModel model)
+        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityDTO model)
         {
             bool hasThisModel = false;
 
@@ -215,12 +215,12 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Private get included methods
 
-        public IQueryable<Partner> GetPartnersIncluded()
+        private IQueryable<Partner> GetPartnersIncluded()
         {
             return DB.Partners.IncludeAvailability()
                               .Include(o => o.Content).ThenInclude(o => o.Items)
                               .Include(o => o.Localizations).ThenInclude(o => o.Content).ThenInclude(o => o.Items)
-                              .Include(o => o.Localizations).ThenInclude(o => o.Language)
+                              .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                               .Include(o => o.MainLanguage)
                               .Where(o => !o.IsDeleted);
         }

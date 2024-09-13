@@ -2,8 +2,9 @@
 using Alfateam.Models.Helpers;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Models;
-using Alfateam.Website.API.Models.ClientModels;
-using Alfateam.Website.API.Models.ClientModels.General;
+using Alfateam.Website.API.Models.DTO;
+using Alfateam.Website.API.Models.DTO.General;
+using Alfateam.Website.API.Models.DTO.Stats;
 using Alfateam.Website.API.Models.Navigation;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Stats;
@@ -21,46 +22,44 @@ namespace Alfateam.Website.API.Controllers.General
 
 
         [HttpGet, Route("GetLanguages")]
-        public async Task<IEnumerable<LanguageClientModel>> GetLanguages()
+        public async Task<IEnumerable<LanguageDTO>> GetLanguages()
         {
             var items = DB.Languages.Include(o => o.Localizations)
                                     .Where(o => !o.IsDeleted && !o.IsHidden)
                                     .ToList();
-            return LanguageClientModel.CreateItems(items, LanguageId);
+            return LanguageDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<LanguageDTO>;
         }
 
         [HttpGet, Route("GetCurrencies")]
-        public async Task<IEnumerable<CurrencyClientModel>> GetCurrencies()
+        public async Task<IEnumerable<CurrencyDTO>> GetCurrencies()
         {
             var items = DB.Currencies.Include(o => o.Localizations)
                                      .Where(o => !o.IsDeleted && !o.IsHidden)
                                      .ToList();
-            return CurrencyClientModel.CreateItems(items, LanguageId);
+            return CurrencyDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<CurrencyDTO>;
         }
 
         [HttpGet, Route("GetCountries")]
-        public async Task<IEnumerable<CountryClientModel>> GetCountries()
+        public async Task<IEnumerable<CountryDTO>> GetCountries()
         {
             var items = DB.Countries.Include(o => o.Localizations)
                                     .Where(o => !o.IsDeleted && !o.IsHidden)
                                     .ToList();
-            return CountryClientModel.CreateItems(items, LanguageId);
+            return CountryDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<CountryDTO>;
         }
 
 
 
 
         [HttpPut, Route("AddSiteVisit")]
-        public async Task<bool> AddSiteVisit(SiteVisit info)
+        public async Task<bool> AddSiteVisit(SiteVisitDTO model)
         {
-            if (!info.IsValid()) return false;
+            if (!model.IsValid()) return false;
 
-            DB.SiteVisits.Add(info);
-            DB.SaveChanges();
+            CreateModel(DB.SiteVisits, model);
 
             return true;
         }
-
 
 
 
@@ -76,7 +75,8 @@ namespace Alfateam.Website.API.Controllers.General
             var countries = DB.Countries.Include(o => o.Languages)
                                         .Include(o => o.MainLanguage)
                                         .Include(o => o.OfficialMainLanguage)
-                                        .Where(o => !o.IsDeleted);
+                                        .Where(o => !o.IsDeleted)
+                                        .ToList();
             foreach (var country in countries)
             {
                 foreach(var lang in country.Languages)
@@ -155,10 +155,15 @@ namespace Alfateam.Website.API.Controllers.General
                 .Include(o => o.Groups).ThenInclude(o => o.Members)
                 .FirstOrDefault();
 
-            foreach(var member in structure.Groups.SelectMany(o => o.Members))
+            if(structure != null)
             {
-                teamBlock.Sublelements.Add(new SitemapItem($"{member.Name} {member.Surname} - {member.Position}", ""));
+                foreach (var member in structure.Groups.SelectMany(o => o.Members))
+                {
+                    teamBlock.Sublelements.Add(new SitemapItem($"{member.Name} {member.Surname} - {member.Position}", ""));
+                }
             }
+
+           
 
     
 

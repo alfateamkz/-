@@ -1,7 +1,12 @@
 
+using Alfateam.DB;
 using Alfateam.Gateways;
 using Alfateam.Gateways.Abstractions;
+using Alfateam.Website.API.Filters;
+using Alfateam.Website.API.Jobs;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using System.Threading.RateLimiting;
 
 namespace Alfateam.Website.API
@@ -23,6 +28,26 @@ namespace Alfateam.Website.API
 
             builder.Services.AddTransient<IMailGateway, MailGateway>();
 
+            // Add services to the container.
+            builder.Services.AddDbContext<WebsiteDBContext>(options =>
+            {
+                options.UseMySql(new MySqlServerVersion(new Version(8, 0, 11)), o =>
+                {
+                    o.EnableRetryOnFailure();
+                    o.EnableStringComparisonTranslations();
+                });
+            });
+
+            builder.Services.AddSwaggerGen(config =>
+            {
+                config.SwaggerDoc("v1", new OpenApiInfo { Title = "Эта апишка для сайта и админки", Version = "V1" });
+
+
+
+                //config.SchemaFilter<EnumSchemaFilter>();
+                config.OperationFilter<SwaggerHeadersFilter>();
+            });
+
             //builder.Services.AddRateLimiter(_ => _
             //.AddFixedWindowLimiter(policyName: "fixed", options =>
             //{
@@ -36,11 +61,15 @@ namespace Alfateam.Website.API
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            //if (app.Environment.IsDevelopment())
+            //{
+            //    app.UseSwagger();
+            //    app.UseSwaggerUI();
+               
+            //}
+
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             app.UseHttpsRedirection();
 
@@ -48,6 +77,8 @@ namespace Alfateam.Website.API
 
 
             app.MapControllers();
+
+            //new StaticFilesJob().Start();
 
             app.Run();
         }

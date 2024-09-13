@@ -13,5 +13,12 @@ namespace Alfateam.CRM2_0.Models.Gamification.Achievements
     public class AchievementCategory : AbsModel
     {
         public string Title { get; set; }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int GamificationModelId { get; set; }
     }
 }

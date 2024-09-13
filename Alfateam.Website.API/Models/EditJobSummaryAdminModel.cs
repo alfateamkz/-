@@ -4,7 +4,7 @@ using Alfateam2._0.Models.HR;
 
 namespace Alfateam.Website.API.Models
 {
-    public class EditJobSummaryAdminModel : EditModel<JobSummary>
+    public class EditJobSummaryAdminModel : DTOModel<JobSummary>
     {
         public JobSummaryStatus Status { get; set; } = JobSummaryStatus.Active;
         public string? Note { get; set; }

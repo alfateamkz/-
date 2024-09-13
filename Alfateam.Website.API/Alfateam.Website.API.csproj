@@ -1,10 +1,51 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Models\ClientModels\**" />
+    <Compile Remove="Models\DTOs\**" />
+    <Compile Remove="Models\CreateModels\**" />
+    <Compile Remove="Models\DTOs\**" />
+    <Compile Remove="Models\EditModels\**" />
+    <Compile Remove="Models\LocalizationDTOs\**" />
+    <Compile Remove="Models\LocalizationEditModels\**" />
+    <Content Remove="Models\ClientModels\**" />
+    <Content Remove="Models\DTOs\**" />
+    <Content Remove="Models\CreateModels\**" />
+    <Content Remove="Models\DTOs\**" />
+    <Content Remove="Models\EditModels\**" />
+    <Content Remove="Models\LocalizationDTOs\**" />
+    <Content Remove="Models\LocalizationEditModels\**" />
+    <EmbeddedResource Remove="Models\ClientModels\**" />
+    <EmbeddedResource Remove="Models\DTOs\**" />
+    <EmbeddedResource Remove="Models\CreateModels\**" />
+    <EmbeddedResource Remove="Models\DTOs\**" />
+    <EmbeddedResource Remove="Models\EditModels\**" />
+    <EmbeddedResource Remove="Models\LocalizationDTOs\**" />
+    <EmbeddedResource Remove="Models\LocalizationEditModels\**" />
+    <None Remove="Models\ClientModels\**" />
+    <None Remove="Models\DTOs\**" />
+    <None Remove="Models\CreateModels\**" />
+    <None Remove="Models\DTOs\**" />
+    <None Remove="Models\EditModels\**" />
+    <None Remove="Models\LocalizationDTOs\**" />
+    <None Remove="Models\LocalizationEditModels\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Abstractions\ClientModel.cs" />
+    <Compile Remove="Abstractions\DTO.cs" />
+    <Compile Remove="Abstractions\CreateModel.cs" />
+    <Compile Remove="Abstractions\DTO.cs" />
+    <Compile Remove="Abstractions\EditModel.cs" />
+    <Compile Remove="Abstractions\LocalizationDTO.cs" />
+    <Compile Remove="Abstractions\LocalizationEditModel.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="JsonKnownTypes" Version="0.5.5" />
@@ -15,9 +56,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\Admin\Localizations\" />
     <Folder Include="Controllers\Cabinet\" />
-    <Folder Include="Helpers\" />
     <Folder Include="Middlewares\" />
   </ItemGroup>
 

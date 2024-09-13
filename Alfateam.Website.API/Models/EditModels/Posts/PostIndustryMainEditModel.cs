@@ -8,20 +8,6 @@ namespace Alfateam.Website.API.Models.EditModels.Posts
         public string Title { get; set; }
         public int MainLanguageId { get; set; }
 
-        public override bool IsValid()
-        {
-            bool isValid = true;
-
-            isValid &= !string.IsNullOrEmpty(Title);
-            isValid &= MainLanguageId > 0;
-
-            return isValid;
-        }
-        public override void Fill(PostIndustry item)
-        {
-            item.Title = Title;
-            item.MainLanguageId = MainLanguageId;
-        }
 
     }
 }

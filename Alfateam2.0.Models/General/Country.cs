@@ -55,6 +55,9 @@ namespace Alfateam2._0.Models.General
         /// </summary>
         public Language MainLanguage { get; set; }
         public int MainLanguageId { get; set; }
+
+
+
         public List<CountryLocalization> Localizations { get; set; } = new List<CountryLocalization>();
 
 

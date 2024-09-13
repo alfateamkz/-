@@ -29,6 +29,10 @@ namespace Alfateam.CRM2_0.Models.Abstractions.Communication.Messenger
 		public int? SentById { get; set; }
 
 
+
+        public bool IsRead { get; set; }
+
+
 		/// <summary>
 		/// Список сообщений, на которые дан ответ
 		/// </summary>

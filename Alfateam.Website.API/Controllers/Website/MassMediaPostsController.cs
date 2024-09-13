@@ -1,7 +1,7 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Extensions;
-using Alfateam.Website.API.Models.ClientModels;
+using Alfateam.Website.API.Models.DTO;
 using Alfateam2._0.Models;
 using Alfateam2._0.Models.HR;
 using Microsoft.AspNetCore.Mvc;
@@ -17,10 +17,10 @@ namespace Alfateam.Website.API.Controllers.Website
 
 
         [HttpGet, Route("GetPosts")]
-        public async Task<IEnumerable<MassMediaPostClientModel>> GetPosts(int offset, int count = 20)
+        public async Task<IEnumerable<MassMediaPostDTO>> GetPosts(int offset, int count = 20)
         {
             var items = GetMassMediaPosts().Skip(offset).Take(count).ToList();
-            return MassMediaPostClientModel.CreateItems(items, LanguageId);
+            return MassMediaPostDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<MassMediaPostDTO>;
         }
 
         [HttpPut, Route("AddClick")]
@@ -41,7 +41,7 @@ namespace Alfateam.Website.API.Controllers.Website
 
 
         #region Private methods
-        public IQueryable<MassMediaPost> GetMassMediaPosts()
+        private IQueryable<MassMediaPost> GetMassMediaPosts()
         {
             return DB.MassMediaPosts.IncludeAvailability()
                                     .Include(o => o.Localizations)

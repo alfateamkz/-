@@ -2,8 +2,8 @@
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Filters;
-using Alfateam.Website.API.Models.EditModels.HR;
-using Alfateam.Website.API.Models.EditModels.Reviews;
+using Alfateam.Website.API.Models.DTO.HR;
+using Alfateam.Website.API.Models.DTO.Reviews;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.HR;
 using Alfateam2._0.Models.Reviews;
@@ -65,7 +65,7 @@ namespace Alfateam.Website.API.Controllers.Website
         }
 
         [HttpPut, Route("UpdateReview"), UserActionsFilter]
-        public async Task<RequestResult<Review>> UpdateReview(ReviewEditModel model)
+        public async Task<RequestResult<Review>> UpdateReview(ReviewDTO model)
         {
             var review = DB.Reviews.FirstOrDefault(o => o.Id == model.Id);
             var session = DB.Sessions.FirstOrDefault(o => o.SessID == UserSessid);
@@ -76,7 +76,7 @@ namespace Alfateam.Website.API.Controllers.Website
                 () => RequestResult.FromBoolean(review.UserId == session.User.Id, 403, "Сущность не принадлежит текущему пользователю"),
                 () =>
                 {
-                    model.Fill(review);
+                    model.FillDBModel(review, DBModelFillMode.Update);
                     DB.Reviews.Update(review);
                     DB.SaveChanges();
                     return RequestResult<Review>.AsSuccess(review);

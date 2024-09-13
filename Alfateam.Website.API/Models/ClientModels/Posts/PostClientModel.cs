@@ -41,7 +41,7 @@ namespace Alfateam.Website.API.Models.ClientModels.Posts
 
             if (post.MainLanguageId != langId)
             {
-                var localization = post.Localizations.FirstOrDefault(o => o.LanguageId == langId);
+                var localization = post.Localizations.FirstOrDefault(o => o.LanguageEntityId == langId);
                 if (localization != null)
                 {
                     model.Title = GetActualValue(model.Title, localization.Title);

@@ -10,15 +10,15 @@ namespace Alfateam2._0.Models.Localization.Texts.Common
     /// <summary>
     /// Сущность текстов хедера
     /// </summary>
-    public class HeaderTexts : AbsModel
+    public class HeaderTexts : LocalizableModel
     {
-        public string Main { get; set; }
-        public string OurWorks { get; set; }
-        public string Cost { get; set; }
-        public string Services { get; set; }
-        public string WorkForUs { get; set; }
-        public string More { get; set; }
-        public string WriteUs { get; set; }
+        public string Main { get; set; } = "ГЛАВНАЯ";
+        public string OurWorks { get; set; } = "ПОРТФОЛИО";
+        public string Cost { get; set; } = "АУТСТАФФ";
+        public string Services { get; set; } = "УСЛУГИ";
+        public string WorkForUs { get; set; } = "ВАКАНСИИ";
+        public string More { get; set; } = "ЕЩЕ";
+        public string WriteUs { get; set; } = "НАПИСАТЬ НАМ";
     }
 
 }

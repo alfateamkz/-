@@ -20,11 +20,13 @@ namespace Alfateam2._0.Models.Abstractions
     /// <summary>
     /// Сущность варианта выбора модификатора товара
     /// </summary>
-    public abstract class ProductModifierItem : AbsModel
+    public class ProductModifierItem : AbsModel
     {
         public string Title { get; set; }
         public PricingMatrix Pricing { get; set; }
 
+
+        public string Discriminator { get; set; }
 
 
         public Language MainLanguage { get; set; }

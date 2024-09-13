@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Alfateam.CRM2_0.Models.Enums.Roles.HR
 {
+    /// <summary>
+    /// Статус вакансии
+    /// </summary>
     public enum JobVacancyStatus
     {
         Active = 1, //Активная вакансия

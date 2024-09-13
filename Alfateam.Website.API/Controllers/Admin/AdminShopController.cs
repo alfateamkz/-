@@ -4,16 +4,16 @@ using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Enums;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Models;
-using Alfateam.Website.API.Models.ClientModels;
-using Alfateam.Website.API.Models.ClientModels.Posts;
-using Alfateam.Website.API.Models.ClientModels.Shop;
-using Alfateam.Website.API.Models.ClientModels.Shop.Orders;
-using Alfateam.Website.API.Models.EditModels.Events;
-using Alfateam.Website.API.Models.EditModels.General;
-using Alfateam.Website.API.Models.EditModels.Promocodes;
-using Alfateam.Website.API.Models.EditModels.Shop;
-using Alfateam.Website.API.Models.LocalizationEditModels.Events;
-using Alfateam.Website.API.Models.LocalizationEditModels.Shop;
+using Alfateam.Website.API.Models.DTO;
+using Alfateam.Website.API.Models.DTO.Posts;
+using Alfateam.Website.API.Models.DTO.Shop;
+using Alfateam.Website.API.Models.DTO.Shop.Orders;
+using Alfateam.Website.API.Models.DTO.Events;
+using Alfateam.Website.API.Models.DTO.General;
+using Alfateam.Website.API.Models.DTO.Promocodes;
+using Alfateam.Website.API.Models.DTO.Shop;
+using Alfateam.Website.API.Models.DTOLocalization.Events;
+using Alfateam.Website.API.Models.DTOLocalization.Shop;
 using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
@@ -40,16 +40,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Товары
 
         [HttpGet, Route("GetProducts")]
-        public async Task<RequestResult<IEnumerable<ShopProductClientModel>>> GetProducts(int offset, int count = 20)
+        public async Task<RequestResult<IEnumerable<ShopProductDTO>>> GetProducts(int offset, int count = 20)
         {
             var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<ShopProductClientModel>>(new Func<RequestResult>[]
+            return TryFinishAllRequestes<IEnumerable<ShopProductDTO>>(new Func<RequestResult>[]
             {
                 () => CheckAccess(1),
                 () => {
                     var items = GetAvailableModels(GetSessionWithRoleInclude().User, GetProductsList(), offset, count);
-                    var models = ShopProductClientModel.CreateItems(items.Cast<ShopProduct>(), LanguageId,CountryId);
-                    return RequestResult<IEnumerable<ShopProductClientModel>>.AsSuccess(models);
+                    var models = ShopProductDTO.CreateItems(items.Cast<ShopProduct>(), LanguageId,CountryId);
+                    return RequestResult<IEnumerable<ShopProductDTO>>.AsSuccess(models);
                 }
             });
         }
@@ -71,7 +71,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpGet, Route("GetProductLocalization")]
         public async Task<RequestResult<ShopProductLocalization>> GetProductLocalization(int id)
         {
-            var localization = DB.ShopProductLocalizations.Include(o => o.Language).FirstOrDefault(o => o.Id == id && !o.IsDeleted); 
+            var localization = DB.ShopProductLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted); 
             return TryFinishAllRequestes<ShopProductLocalization>(new Func<RequestResult>[]
             {
                 () => CheckAccess(1),
@@ -126,7 +126,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateProductMain")]
-        public async Task<RequestResult<ShopProduct>> UpdateProductMain(ShopProductMainEditModel model)
+        public async Task<RequestResult<ShopProduct>> UpdateProductMain(ShopProductDTO model)
         {
             var item = GetProductsList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var user = GetSessionWithRoleInclude()?.User;
@@ -142,7 +142,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
         [HttpPut, Route("UpdateProductLocalization")]
-        public async Task<RequestResult<ShopProductLocalization>> UpdateProductLocalization(ShopProductLocalizationEditModel model)
+        public async Task<RequestResult<ShopProductLocalization>> UpdateProductLocalization(ShopProductLocalizationDTO model)
         {
             var localization = DB.ShopProductLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             if (localization == null) return RequestResult<ShopProductLocalization>.AsError(404, "Локализация с данным id не найдена");
@@ -335,7 +335,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpGet, Route("GetProductModifierLocalization")]
         public async Task<RequestResult<ProductModifierLocalization>> GetProductModifierLocalization(int id)
         {
-            var localization = DB.ProductModifierLocalizations.Include(o => o.Language).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var localization = DB.ProductModifierLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             return TryFinishAllRequestes<ProductModifierLocalization>(new Func<RequestResult>[]
             {
                 () => CheckAccess(1),
@@ -384,7 +384,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateProductModifierMain")]
-        public async Task<RequestResult<ProductModifier>> UpdateProductModifierMain(ProductModifierMainEditModel model)
+        public async Task<RequestResult<ProductModifier>> UpdateProductModifierMain(ProductModifierDTO model)
         {
             var item = GetProductModifiersList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryFinishAllRequestes<ProductModifier>(new[]
@@ -398,7 +398,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
      
         [HttpPut, Route("UpdateProductModifierLocalization")]
-        public async Task<RequestResult<ProductModifierLocalization>> UpdateProductModifierLocalization(ProductModifierLocalizationEditModel model)
+        public async Task<RequestResult<ProductModifierLocalization>> UpdateProductModifierLocalization(ProductModifierLocalizationDTO model)
         {
             var localization = DB.ProductModifierLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             if (localization == null) return RequestResult<ProductModifierLocalization>.AsError(404, "Локализация с данным id не найдена");
@@ -466,7 +466,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpGet, Route("GetProductModifierOptionLocalization")]
         public async Task<RequestResult<ProductModifierItemLocalization>> GetProductModifierOptionLocalization(int id)
         {
-            var localization = DB.ProductModifierItemLocalizations.Include(o => o.Language).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var localization = DB.ProductModifierItemLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             return TryFinishAllRequestes<ProductModifierItemLocalization>(new Func<RequestResult>[]
             {
                 () => CheckAccess(1),
@@ -514,7 +514,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateProductModifierOptionMain")]
-        public async Task<RequestResult<ProductModifierItem>> UpdateProductCategoryMain(ProductModifierItemMainEditModel model)
+        public async Task<RequestResult<ProductModifierItem>> UpdateProductCategoryMain(ProductModifierItemDTO model)
         {
             var item = GetProductModifiersItemsList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryFinishAllRequestes<ProductModifierItem>(new[]
@@ -528,7 +528,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
       
         [HttpPut, Route("UpdateProductModifierOptionLocalization")]
-        public async Task<RequestResult<ProductModifierItemLocalization>> UpdateProductModifierOptionLocalization(ProductModifierItemLocalizationEditModel model)
+        public async Task<RequestResult<ProductModifierItemLocalization>> UpdateProductModifierOptionLocalization(ProductModifierItemLocalizationDTO model)
         {
             var localization = DB.ProductModifierItemLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             if (localization == null) return RequestResult<ProductModifierItemLocalization>.AsError(404, "Локализация с данным id не найдена");
@@ -579,16 +579,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Категории товаров
 
         [HttpGet, Route("GetProductCategories")]
-        public async Task<RequestResult<IEnumerable<ShopProductCategoryClientModel>>> GetProductCategories(int offset, int count = 20)
+        public async Task<RequestResult<IEnumerable<ShopProductCategoryDTO>>> GetProductCategories(int offset, int count = 20)
         {
             var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<ShopProductCategoryClientModel>>(new Func<RequestResult>[]
+            return TryFinishAllRequestes<IEnumerable<ShopProductCategoryDTO>>(new Func<RequestResult>[]
             {
                 () => CheckAccess(1),
                 () => {
                     var items = GetAvailableModels(GetSessionWithRoleInclude().User, GetProductCategoriesList(), offset, count);
-                    var models = ShopProductCategoryClientModel.CreateItems(items.Cast<ShopProductCategory>(), LanguageId);
-                    return RequestResult<IEnumerable<ShopProductCategoryClientModel>>.AsSuccess(models);
+                    var models = ShopProductCategoryDTO.CreateItemsWithLocalization(items.Cast<ShopProductCategory>(), LanguageId) as IEnumerable<ShopProductCategoryDTO>;
+                    return RequestResult<IEnumerable<ShopProductCategoryDTO>>.AsSuccess(models);
                 }
             });
         }
@@ -610,7 +610,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpGet, Route("GetProductCategoryLocalization")]
         public async Task<RequestResult<ShopProductCategoryLocalization>> GetProductCategoryLocalization(int id)
         {
-            var localization = DB.ShopProductCategoryLocalizations.Include(o => o.Language).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var localization = DB.ShopProductCategoryLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             if (localization == null) return RequestResult<ShopProductCategoryLocalization>.AsError(404, "Локализация с данным id не найдена");
 
             var mainEntity = GetProductsList().FirstOrDefault(o => o.Id == localization.ShopProductCategoryId);
@@ -666,7 +666,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateProductCategoryMain")]
-        public async Task<RequestResult<ShopProductCategory>> UpdateProductCategoryMain(ShopProductCategoryMainEditModel model)
+        public async Task<RequestResult<ShopProductCategory>> UpdateProductCategoryMain(ShopProductCategoryDTO model)
         {
             var item = GetProductCategoriesList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var user = GetSessionWithRoleInclude()?.User;
@@ -681,7 +681,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
         [HttpPut, Route("UpdateProductCategoryLocalization")]
-        public async Task<RequestResult<ShopProductCategoryLocalization>> UpdateProductCategoryLocalization(ShopProductCategoryLocalizationEditModel model)
+        public async Task<RequestResult<ShopProductCategoryLocalization>> UpdateProductCategoryLocalization(ShopProductCategoryLocalizationDTO model)
         {
             var localization = DB.ShopProductCategoryLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             if (localization == null) return RequestResult<ShopProductCategoryLocalization>.AsError(404, "Локализация с данным id не найдена");
@@ -741,18 +741,18 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Заказы
 
         [HttpGet, Route("GetOrders")]
-        public async Task<RequestResult<IEnumerable<ShopOrderClientModel>>> GetOrders(int offset, int count = 20)
+        public async Task<RequestResult<IEnumerable<ShopOrderDTO>>> GetOrders(int offset, int count = 20)
         {
             var checkAccessResult = CheckAccess(2);
             if (!checkAccessResult.Success)
             {
-                return new RequestResult<IEnumerable<ShopOrderClientModel>>().FillFromRequestResult(checkAccessResult);
+                return new RequestResult<IEnumerable<ShopOrderDTO>>().FillFromRequestResult(checkAccessResult);
             }
 
             var user = GetSessionWithRoleInclude().User;
             var orders = GetAvailableOrders(user,offset,count);
-            var models = ShopOrderClientModel.CreateItems(orders, LanguageId, CountryId);
-            return new RequestResult<IEnumerable<ShopOrderClientModel>>().SetSuccess(models);
+            var models = ShopOrderDTO.CreateItems(orders, LanguageId, CountryId);
+            return new RequestResult<IEnumerable<ShopOrderDTO>>().SetSuccess(models);
         }
 
         [HttpGet, Route("GetOrder")]
@@ -845,16 +845,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Промокоды
 
         [HttpGet, Route("GetPromocodes")]
-        public async Task<RequestResult<IEnumerable<PromocodeClientModel>>> GetPromocodes(int offset, int count = 20)
+        public async Task<RequestResult<IEnumerable<PromocodeDTO>>> GetPromocodes(int offset, int count = 20)
         {
             var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<PromocodeClientModel>>(new Func<RequestResult>[]
+            return TryFinishAllRequestes<IEnumerable<PromocodeDTO>>(new Func<RequestResult>[]
             {
                 () => CheckAccess(1),
                 () => {
                     var items = GetAvailableModels(GetSessionWithRoleInclude().User, GetPromocodesList(), offset, count);
-                    var models = PromocodeClientModel.CreateItems(items.Cast<Promocode>(), LanguageId,(int)CurrencyId);
-                    return RequestResult<IEnumerable<PromocodeClientModel>>.AsSuccess(models);
+                    var models = PromocodeDTO.CreateItems(items.Cast<Promocode>(), LanguageId,(int)CurrencyId) as IEnumerable<PromocodeDTO>;
+                    return RequestResult<IEnumerable<PromocodeDTO>>.AsSuccess(models);
                 }
             });
         }
@@ -889,7 +889,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdatePromocode")]
-        public async Task<RequestResult<Promocode>> UpdatePromocode(PromocodeEditModel model)
+        public async Task<RequestResult<Promocode>> UpdatePromocode(PromocodeDTO model)
         {
             var item = GetPromocodesList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var user = GetSessionWithRoleInclude()?.User;
@@ -927,7 +927,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Матрицы цен
         [HttpPut, Route("UpdatePricingMatrix")]
-        public async Task<RequestResult<PricingMatrix>> UpdatePricingMatrix(PricingMatrixEditModel model)
+        public async Task<RequestResult<PricingMatrix>> UpdatePricingMatrix(PricingMatrixDTO model)
         {
            var matrix = DB.GetIncludedPricingMatrix(model.Id);
          
@@ -980,7 +980,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         #endregion
 
         [HttpPut, Route("UpdateAvailability")]
-        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityEditModel model)
+        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityDTO model)
         {
             bool hasThisModel = false;
 
@@ -1159,7 +1159,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             if (localization.UseLocalizationImages)
             {
                 //Загрузка главной картинки
-                var mainFileUploadResult = await TryUploadFile($"localization_{localization.LanguageId}_mainImg", FileType.Image);
+                var mainFileUploadResult = await TryUploadFile($"localization_{localization.LanguageEntityId}_mainImg", FileType.Image);
                 if (!mainFileUploadResult.Success)
                 {
                     return mainFileUploadResult;
@@ -1200,7 +1200,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
 
-        private async Task<RequestResult> CheckAndPrepareProductBeforeUpdate(ShopProduct product, ShopProductMainEditModel model)
+        private async Task<RequestResult> CheckAndPrepareProductBeforeUpdate(ShopProduct product, ShopProductDTO model)
         {
             //Загрузка главной картинки
             if (Request.Form.Files.Any(o => o.Name == "mainImg"))
@@ -1215,16 +1215,16 @@ namespace Alfateam.Website.API.Controllers.Admin
 
             return RequestResult.AsSuccess();
         }
-        private async Task<RequestResult> CheckAndPrepareProductLocalizationBeforeUpdate(ShopProductLocalization localization, ShopProductLocalizationEditModel model)
+        private async Task<RequestResult> CheckAndPrepareProductLocalizationBeforeUpdate(ShopProductLocalization localization, ShopProductLocalizationDTO model)
         {
 
             if (model.UseLocalizationImages)
             {
-                string formFileName = $"localization_{localization.LanguageId}_mainImg";
+                string formFileName = $"localization_{localization.LanguageEntityId}_mainImg";
                 if (Request.Form.Files.Any(o => o.Name == formFileName))
                 {
                     //Загрузка главной картинки
-                    var mainFileUploadResult = await TryUploadFile($"localization_{localization.LanguageId}_mainImg", FileType.Image);
+                    var mainFileUploadResult = await TryUploadFile($"localization_{localization.LanguageEntityId}_mainImg", FileType.Image);
                     if (!mainFileUploadResult.Success)
                     {
                         return mainFileUploadResult;
@@ -1250,7 +1250,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return DB.ShopProducts.IncludeAvailability()
                                   .IncludePricing()
-                                  .Include(o => o.Localizations).ThenInclude(o => o.Language)
+                                  .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                   .Include(o => o.MainImage)
                                   .Include(o => o.MainLanguage)
                                   .Where(o => !o.IsDeleted);
@@ -1292,7 +1292,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         private IQueryable<ShopProductCategory> GetProductCategoriesList()
         {
             return DB.ShopProductCategories.IncludeAvailability()
-                                           .Include(o => o.Localizations).ThenInclude(o => o.Language)
+                                           .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                            .Include(o => o.MainLanguage)
                                            .Where(o => !o.IsDeleted);
         }

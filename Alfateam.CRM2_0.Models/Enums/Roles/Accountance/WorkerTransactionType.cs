@@ -15,5 +15,7 @@ namespace Alfateam.CRM2_0.Models.Enums.Roles.Accountance
         ProjectFee = 2, //Гонорар по проекту
         PaymentForHours = 3, //Оплата за фактически затраченные часы работы
         UpfrontPayment = 4, //Предоплата
+
+        Other = 999, //Прочее
     }
 }

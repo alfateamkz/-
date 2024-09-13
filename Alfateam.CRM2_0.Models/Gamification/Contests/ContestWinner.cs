@@ -14,7 +14,12 @@ namespace Alfateam.CRM2_0.Models.Gamification.Contests
     public class ContestWinner : AbsModel
     {
         public User User { get; set; }
+        public int UserId { get; set; }
+
         public int Place { get; set; }
+
+
         public ContestPrize Prize { get; set; }
+        public int PrizeId { get; set; }
     }
 }

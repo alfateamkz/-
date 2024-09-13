@@ -14,7 +14,6 @@ namespace Alfateam.CRM2_0.Models.Gamification
     /// </summary>
     public class GamificationUserTask : AbsModel
     {
-        public User TaskFor { get; set; }
 
 
 

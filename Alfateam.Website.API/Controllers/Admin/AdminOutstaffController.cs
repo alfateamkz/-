@@ -1,11 +1,11 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
-using Alfateam.Website.API.Models.EditModels.General;
-using Alfateam.Website.API.Models.EditModels.Outstaff;
-using Alfateam.Website.API.Models.EditModels.Shop;
-using Alfateam.Website.API.Models.LocalizationEditModels.Outstaff;
-using Alfateam.Website.API.Models.LocalizationEditModels.Shop;
+using Alfateam.Website.API.Models.DTO.General;
+using Alfateam.Website.API.Models.DTO.Outstaff;
+using Alfateam.Website.API.Models.DTO.Shop;
+using Alfateam.Website.API.Models.DTOLocalization.Outstaff;
+using Alfateam.Website.API.Models.DTOLocalization.Shop;
 using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
@@ -101,13 +101,13 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateOutstaffColumnMain")]
-        public async Task<RequestResult<OutstaffColumn>> UpdateOutstaffColumnMain(OutstaffColumnMainEditModel model)
+        public async Task<RequestResult<OutstaffColumn>> UpdateOutstaffColumnMain(OutstaffColumnDTO model)
         {
             var column = DB.GetOutstaffMatrix().Columns.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryUpdateOutstaffModel(DB.OutstaffColumns, model, column);
         }
         [HttpPut, Route("UpdateOutstaffColumnLocalization")]
-        public async Task<RequestResult<OutstaffColumnLocalization>> UpdateOutstaffColumnLocalization(OutstaffColumnLocalizationEditModel model)
+        public async Task<RequestResult<OutstaffColumnLocalization>> UpdateOutstaffColumnLocalization(OutstaffColumnLocalizationDTO model)
         {
             var localization = DB.OutstaffColumnLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryUpdateOutstaffLocalizationModel(DB.OutstaffColumnLocalizations, model, localization);
@@ -197,14 +197,14 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateOutstaffItemMain")]
-        public async Task<RequestResult<OutstaffItem>> UpdateOutstaffItemMain(OutstaffItemMainEditModel model)
+        public async Task<RequestResult<OutstaffItem>> UpdateOutstaffItemMain(OutstaffItemDTO model)
         {
             var item = DB.GetOutstaffMatrix().Items.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryUpdateOutstaffModel(DB.OutstaffItems, model, item);
         }
 
         [HttpPut, Route("UpdateOutstaffItemLocalization")]
-        public async Task<RequestResult<OutstaffItemLocalization>> UpdateOutstaffColumnLocalization(OutstaffItemLocalizationEditModel model)
+        public async Task<RequestResult<OutstaffItemLocalization>> UpdateOutstaffColumnLocalization(OutstaffItemLocalizationDTO model)
         {
             var localization = DB.OutstaffItemLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryUpdateOutstaffLocalizationModel(DB.OutstaffItemLocalizations, model, localization);
@@ -296,13 +296,13 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateOutstaffItemGradeMain")]
-        public async Task<RequestResult<OutstaffItemGrade>> UpdateOutstaffItemGradeMain(OutstaffItemGradeMainEditModel model)
+        public async Task<RequestResult<OutstaffItemGrade>> UpdateOutstaffItemGradeMain(OutstaffItemGradeDTO model)
         {
             var grade = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades).FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryUpdateOutstaffModel(DB.OutstaffItemGrades, model, grade);
         }
         [HttpPut, Route("UpdateOutstaffItemGradeLocalization")]
-        public async Task<RequestResult<OutstaffItemGradeLocalization>> UpdateOutstaffItemGradeLocalization(OutstaffItemGradeLocalizationEditModel model)
+        public async Task<RequestResult<OutstaffItemGradeLocalization>> UpdateOutstaffItemGradeLocalization(OutstaffItemGradeLocalizationDTO model)
         {
             var localization = DB.OutstaffItemGradeLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryUpdateOutstaffLocalizationModel(DB.OutstaffItemGradeLocalizations, model, localization);
@@ -366,7 +366,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateOutstaffItemGradeColumn")]
-        public async Task<RequestResult<OutstaffItemGradeColumn>> UpdateOutstaffItemGradeColumn(OutstaffItemGradeColumnEditModel model)
+        public async Task<RequestResult<OutstaffItemGradeColumn>> UpdateOutstaffItemGradeColumn(OutstaffItemGradeColumnDTO model)
         {
             var column = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades)
                                                   .SelectMany(o => o.Prices)
@@ -394,7 +394,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Матрицы цен
 
         [HttpPut, Route("UpdatePricingMatrix")]
-        public async Task<RequestResult<PricingMatrix>> UpdatePricingMatrix(PricingMatrixEditModel model)
+        public async Task<RequestResult<PricingMatrix>> UpdatePricingMatrix(PricingMatrixDTO model)
         {
             var matrix = DB.GetIncludedPricingMatrix(model.Id);
 
@@ -465,7 +465,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
 
-        private RequestResult<T> TryUpdateOutstaffModel<T>(DbSet<T> dbSet, EditModel<T> model, T localization) where T : AbsModel
+        private RequestResult<T> TryUpdateOutstaffModel<T>(DbSet<T> dbSet, DTOModel<T> model, T localization) where T : AbsModel, new()
         {
             return TryFinishAllRequestes<T>(new[]
             {
@@ -475,7 +475,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                  () => UpdateModel(dbSet, model, localization)
             });
         }
-        private RequestResult<T> TryUpdateOutstaffLocalizationModel<T>(DbSet<T> dbSet, LocalizationEditModel<T> model, T localization) where T : AbsModel
+        private RequestResult<T> TryUpdateOutstaffLocalizationModel<T>(DbSet<T> dbSet, DTOModel<T> model, T localization) where T : AbsModel, new()
         {
             return TryFinishAllRequestes<T>(new[]
             {

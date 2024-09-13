@@ -22,9 +22,10 @@ namespace Alfateam2._0.Models.Abstractions
     /// <summary>
     /// Сущность блока контента
     /// </summary>
-    public abstract class ContentItem : AbsModel
+    public class ContentItem : AbsModel
     {
         public string Guid { get; set; } = System.Guid.NewGuid().ToString();
+        public string Discriminator { get; set; }
 
         public virtual bool AreSame(ContentItem other)
         {

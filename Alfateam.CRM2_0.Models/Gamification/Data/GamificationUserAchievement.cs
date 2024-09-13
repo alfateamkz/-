@@ -14,6 +14,9 @@ namespace Alfateam.CRM2_0.Models.Gamification.Data
     public class GamificationUserAchievement : AbsModel
     {
         public Achievement Achievement { get; set; }
-        public DateTime GotAt { get; set; }
+        public int AchievementId { get; set; }
+
+
+        public DateTime GotAt { get; set; } = DateTime.UtcNow;
     }
 }

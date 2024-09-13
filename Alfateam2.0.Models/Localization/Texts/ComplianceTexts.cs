@@ -13,8 +13,17 @@ namespace Alfateam2._0.Models.Localization.Texts
     /// </summary>
     public class ComplianceTexts :  LocalizableModel
     {
-        public string LastBreadcrump { get; set; }
-        public string Header { get; set; }
-        public Content Content { get; set; }
+        public string LastBreadcrump { get; set; } = "Комплаенс в Alfateam";
+        public string Header { get; set; } = "Комплаенс";
+        public Content Content { get; set; } = new Content()
+        {
+            Items = new List<ContentItem>
+            {
+                new TextContentItem
+                {
+                    Content = "Текст комплаенса, задать из админки контент"
+                }
+            }
+        };
     }
 }

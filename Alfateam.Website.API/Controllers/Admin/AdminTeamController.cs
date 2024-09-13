@@ -3,13 +3,13 @@ using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Enums;
 using Alfateam.Website.API.Extensions;
-using Alfateam.Website.API.Models.ClientModels.Portfolios;
-using Alfateam.Website.API.Models.ClientModels.Team;
-using Alfateam.Website.API.Models.EditModels;
-using Alfateam.Website.API.Models.EditModels.General;
-using Alfateam.Website.API.Models.EditModels.Team;
-using Alfateam.Website.API.Models.LocalizationEditModels.Events;
-using Alfateam.Website.API.Models.LocalizationEditModels.Team;
+using Alfateam.Website.API.Models.DTO.Portfolios;
+using Alfateam.Website.API.Models.DTO.Team;
+using Alfateam.Website.API.Models.DTO;
+using Alfateam.Website.API.Models.DTO.General;
+using Alfateam.Website.API.Models.DTO.Team;
+using Alfateam.Website.API.Models.DTOLocalization.Events;
+using Alfateam.Website.API.Models.DTOLocalization.Team;
 using Alfateam2._0.Models;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
@@ -38,16 +38,16 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpGet, Route("GetTeamStructures")]
-        public async Task<RequestResult<IEnumerable<TeamStructureClientModel>>> GetTeamStructures(int offset, int count = 20)
+        public async Task<RequestResult<IEnumerable<TeamStructureDTO>>> GetTeamStructures(int offset, int count = 20)
         {
             var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<TeamStructureClientModel>>(new Func<RequestResult>[]
+            return TryFinishAllRequestes<IEnumerable<TeamStructureDTO>>(new Func<RequestResult>[]
             {
                 () => CheckContentAreaRights(session, ContentAccessModelType.Posts, 1),
                 () => {
                     var items = GetAvailableModels(session.User, GetTeamStructuresList(), offset, count);
-                    var models = TeamStructureClientModel.CreateItems(items.Cast<TeamStructure>(), LanguageId);
-                    return RequestResult<IEnumerable<TeamStructureClientModel>>.AsSuccess(models);
+                    var models = TeamStructureDTO.CreateItemsWithLocalization(items.Cast<TeamStructure>(), LanguageId) as IEnumerable<TeamStructureDTO>;
+                    return RequestResult<IEnumerable<TeamStructureDTO>>.AsSuccess(models);
                 }
             });
         }
@@ -101,7 +101,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpGet, Route("GetTeamGroupLocalization")]
         public async Task<RequestResult<TeamGroupLocalization>> GetTeamGroupLocalization(int id)
         {
-            var localization = DB.TeamGroupLocalizations.Include(o => o.Language).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var localization = DB.TeamGroupLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             return TryFinishAllRequestes<TeamGroupLocalization>(new[]
             {
                 () => RequestResult.FromBoolean(localization != null,404, "Сущность по данному id не найдена"),
@@ -154,7 +154,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateTeamGroupMain")]
-        public async Task<RequestResult<TeamGroup>> UpdateTeamGroupMain(TeamGroupMainEditModel model)
+        public async Task<RequestResult<TeamGroup>> UpdateTeamGroupMain(TeamGroupDTO model)
         {
             var item = GetTeamGroupsList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryFinishAllRequestes<TeamGroup>(new[]
@@ -166,7 +166,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
     
         [HttpPut, Route("UpdateTeamGroupLocalization")]
-        public async Task<RequestResult<TeamGroupLocalization>> UpdateTeamGroupLocalization(TeamGroupLocalizationEditModel model)
+        public async Task<RequestResult<TeamGroupLocalization>> UpdateTeamGroupLocalization(TeamGroupLocalizationDTO model)
         {
             var localization = DB.TeamGroupLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryFinishAllRequestes<TeamGroupLocalization>(new[]
@@ -225,7 +225,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpGet, Route("GetTeamMemberLocalization")]
         public async Task<RequestResult<TeamMemberLocalization>> GetTeamMemberLocalization(int id)
         {
-            var localization = DB.TeamMemberLocalizations.Include(o => o.Language).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var localization = DB.TeamMemberLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             return TryFinishAllRequestes<TeamMemberLocalization>(new[]
             {
                 () => RequestResult.FromBoolean(localization != null , 404, "Сущность с данным id не найдена"),
@@ -277,7 +277,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateTeamMemberMain")]
-        public async Task<RequestResult<TeamMember>> UpdateTeamMemberMain(TeamMemberMainEditModel model)
+        public async Task<RequestResult<TeamMember>> UpdateTeamMemberMain(TeamMemberDTO model)
         {
             var item = GetTeamMembersList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryFinishAllRequestes<TeamMember>(new[]
@@ -290,7 +290,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
         [HttpPut, Route("UpdateTeamMemberLocalization")]
-        public async Task<RequestResult<TeamMemberLocalization>> UpdateTeamMemberLocalization(TeamMemberLocalizationEditModel model)
+        public async Task<RequestResult<TeamMemberLocalization>> UpdateTeamMemberLocalization(TeamMemberLocalizationDTO model)
         {
             var localization = DB.TeamMemberLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return TryFinishAllRequestes<TeamMemberLocalization>(new[]
@@ -333,7 +333,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateAvailability")]
-        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityEditModel model)
+        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityDTO model)
         {
             bool hasThisModel = false;
 
@@ -451,9 +451,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return DB.TeamStructures.IncludeAvailability()
                                     .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.MainLanguage)
-                                    .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.Localizations).ThenInclude(o => o.Language)
+                                    .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                     .Include(o => o.Groups).ThenInclude(o => o.MainLanguage)
-                                    .Include(o => o.Groups).ThenInclude(o => o.Localizations).ThenInclude(o => o.Language)
+                                    .Include(o => o.Groups).ThenInclude(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                     .Where(o => !o.IsDeleted);
         }
         private IQueryable<TeamStructure> GetTeamStructuresFullIncludedList()
@@ -462,9 +462,9 @@ namespace Alfateam.Website.API.Controllers.Admin
                                     .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.MainLanguage)
                                     .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.DetailContent).ThenInclude(o => o.Items)
                                     .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.Localizations).ThenInclude(o => o.DetailContent).ThenInclude(o => o.Items)
-                                    .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.Localizations).ThenInclude(o => o.Language)
+                                    .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                     .Include(o => o.Groups).ThenInclude(o => o.MainLanguage)
-                                    .Include(o => o.Groups).ThenInclude(o => o.Localizations).ThenInclude(o => o.Language)
+                                    .Include(o => o.Groups).ThenInclude(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                     .Where(o => !o.IsDeleted);
         }
 
@@ -472,9 +472,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         private IQueryable<TeamGroup> GetTeamGroupsList()
         {
             return DB.TeamGroups.Include(o => o.Members).ThenInclude(o => o.MainLanguage)
-                                .Include(o => o.Members).ThenInclude(o => o.Localizations).ThenInclude(o => o.Language)
+                                .Include(o => o.Members).ThenInclude(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                 .Include(o => o.MainLanguage)
-                                .Include(o => o.Localizations).ThenInclude(o => o.Language)
+                                .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                 .Where(o => !o.IsDeleted);
         }
 
@@ -482,7 +482,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return DB.TeamMembers.Include(o => o.MainLanguage)
                                  .Include(o => o.Localizations).ThenInclude(o => o.DetailContent).ThenInclude(o => o.Items)
-                                 .Include(o => o.Localizations).ThenInclude(o => o.Language)
+                                 .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                  .Include(o => o.DetailContent).ThenInclude(o => o.Items)
                                  .Where(o => !o.IsDeleted);
         }
