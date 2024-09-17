@@ -3,6 +3,7 @@ using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Enums.LocalizationTexts;
 using Alfateam.Website.API.Enums.LocalizationTexts.ClientCabinet;
 using Alfateam.Website.API.Enums.LocalizationTexts.StaticPages;
+using Alfateam.Website.API.Models;
 using Alfateam2._0.Models.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,7 @@ namespace Alfateam.Website.API.Controllers.Admin.Localizations
 {
     public class AdminAllInterfaceTextsController : AbsAdminController
     {
-        public AdminAllInterfaceTextsController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
+        public AdminAllInterfaceTextsController(ControllerParams @params) : base(@params)
         {
         }
 

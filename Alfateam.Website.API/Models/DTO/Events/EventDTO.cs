@@ -2,13 +2,12 @@
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Attributes.DTO;
 using Alfateam.Website.API.Models.DTO.General;
-using Alfateam.Website.API.Models.DTO.General;
 using Alfateam2._0.Models.Events;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Alfateam.Website.API.Models.DTO.Events
 {
-    public class EventDTO : DTOModel<Event>
+    public class EventDTO : AvailabilityDTOModel<Event>
     {
     
         public string Title { get; set; }

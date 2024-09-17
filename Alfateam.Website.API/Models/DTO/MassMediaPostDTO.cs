@@ -3,7 +3,7 @@ using Alfateam2._0.Models;
 
 namespace Alfateam.Website.API.Models.DTO
 {
-    public class MassMediaPostDTO : DTOModel<MassMediaPost>
+    public class MassMediaPostDTO : AvailabilityDTOModel<MassMediaPost>
     {
         public string ImgPath { get; set; }
         public string Title { get; set; }

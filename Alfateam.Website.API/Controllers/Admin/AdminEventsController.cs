@@ -1,12 +1,19 @@
-﻿using Alfateam.DB;
+﻿using Alfateam.CRM2_0.Models.Security;
+using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Enums;
+using Alfateam.Website.API.Exceptions;
 using Alfateam.Website.API.Extensions;
-using Alfateam.Website.API.Models.DTO.Events;
+using Alfateam.Website.API.Filters;
+using Alfateam.Website.API.Filters.Access;
+using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTO.Events;
 using Alfateam.Website.API.Models.DTO.General;
 using Alfateam.Website.API.Models.DTOLocalization.Events;
+using Alfateam.Website.API.Results;
+using Alfateam.Website.API.Results.StatusCodes;
+using Alfateam.Website.API.Services;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.Events;
 using Alfateam2._0.Models.General;
@@ -14,109 +21,103 @@ using Alfateam2._0.Models.Localization.Items.Events;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
+using System.Collections.Generic;
+using System.Net;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
     public class AdminEventsController : AbsAdminController
     {
-        public AdminEventsController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
+        public AdminEventsController(ControllerParams @params) : base(@params)
         {
-           
         }
+    
 
 
         #region События
 
         [HttpGet, Route("GetEvents")]
-        public async Task<RequestResult<IEnumerable<EventDTO>>> GetEvents(int offset, int count = 20)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
+        public async Task<IEnumerable<EventDTO>> GetEvents(int offset, int count = 20)
         {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<EventDTO>>(new Func<RequestResult>[]
-            {
-                () => CheckContentAreaRights(session, ContentAccessModelType.Events, 1),
-                () => {
-                    var items = GetAvailableModels(session.User, GetEventCategoriesList(), offset, count);
-                    var models = EventDTO.CreateItemsWithLocalization(items.Cast<Event>(), LanguageId) as IEnumerable<EventDTO>;
-                    return RequestResult<IEnumerable<EventDTO>>.AsSuccess(models);
-                }
-            });
+            var items = GetAvailableEvents().Skip(offset).Take(count);
+            return new EventDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<EventDTO>();
         }
+
+
 
         [HttpGet, Route("GetEvent")]
-        public async Task<RequestResult<Event>> GetEvent(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
+        public async Task<EventDTO> GetEvent(int id)
         {
-            return TryGetOne(GetEventsList(), id, ContentAccessModelType.Events);
+            return (EventDTO)DbService.TryGetOne(GetAvailableEvents(), id, new EventDTO());
         }
+
+
 
         [HttpGet, Route("GetEventLocalization")]
-        public async Task<RequestResult<EventLocalization>> GetEventLocalization(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
+        public async Task<EventLocalizationDTO> GetEventLocalization(int id)
         {
             var localization = DB.EventLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null) return RequestResult<EventLocalization>.AsError(404, "Сущность с данным id не найдена");
+            var mainEntity = GetAvailableEvents().FirstOrDefault(o => o.Id == localization?.EventId && !o.IsDeleted);
 
-            var mainEntity = GetEventFormatsList().FirstOrDefault(o => o.Id == localization.EventId && !o.IsDeleted);
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<EventLocalization>(new Func<RequestResult>[]
-            {
-                () => RequestResult.FromBoolean(mainEntity != null, 500, "Внутренняя ошибка"),
-                () => CheckContentAreaRights(session, mainEntity, ContentAccessModelType.Events, 1),
-                () => RequestResult<EventLocalization>.AsSuccess(localization)
-            });
+            return (EventLocalizationDTO)DbService.GetLocalizationModel(localization, mainEntity, new EventLocalizationDTO());
         }
 
 
 
 
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
         [HttpPost, Route("CreateEvent")]
-        public async Task<RequestResult<Event>> CreateEvent(Event item)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 4)]
+        public async Task<EventDTO> CreateEvent(EventDTO model)
         {
-            return await TryCreate(DB.Events, item, ContentAccessModelType.Events, async () => await CheckAndPrepareEventBeforeCreate(item));
+            return (EventDTO)DbService.TryCreateAvailabilityEntity(DB.Events, model, this.Session, async (entity) =>
+            {
+                await HandleEventModel(entity, DBModelFillMode.Create);
+            });
         }
-     
+
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем localization_{languageEntityId}_mainImg")]
         [HttpPost, Route("CreateEventLocalization")]
-        public async Task<RequestResult<EventLocalization>> CreateEventLocalization(int itemId, EventLocalization localization)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 3)]
+        public async Task<EventLocalizationDTO> CreateEventLocalization(int itemId, EventLocalizationDTO localization)
         {
-            var mainEntity = GetEventsList().FirstOrDefault(o => o.Id == itemId);
-            return TryFinishAllRequestes<EventLocalization>(new[]
+            var mainEntity = GetAvailableEvents().FirstOrDefault(o => o.Id == itemId);
+            return (EventLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.Events, mainEntity, localization, async (entity) =>
             {
-                () => CheckLocalizationModelBeforeCreate(localization, mainEntity, ContentAccessModelType.Events),
-                () => CheckAndPrepareEventLocalizationBeforeCreate(localization).Result,
-                () =>
-                {
-                    mainEntity.Localizations.Add(localization);
-                    return UpdateModel(DB.Events,mainEntity);
-                }
+                await HandleEventLocalizationModel(entity, DBModelFillMode.Create);
             });
         }
 
 
 
+
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg, если изменяем картинку")]
         [HttpPut, Route("UpdateEventMain")]
-        public async Task<RequestResult<Event>> UpdateEventMain(EventDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 3)]
+        public async Task<EventDTO> UpdateEventMain(EventDTO model)
         {
-            var item = GetEventsList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<Event>(new[]
+            var item = GetAvailableEvents().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return (EventDTO)DbService.TryUpdateEntity(DB.Events, model, item, async (entity) =>
             {
-                () => RequestResult.FromBoolean(item != null,404, "Сущность по данному id не найдена"),
-                () => CheckContentAreaRights(session, item, ContentAccessModelType.Events, 2),
-                () => RequestResult.FromBoolean(model.IsValid(), 400, "Не заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз"),
-                () => RequestResult.FromBoolean(DB.Languages.Any(o => o.Id == model.MainLanguageId && !o.IsDeleted),404, "Языка с данным id не существует"),
-                () => CheckAndPrepareEventMainBeforeUpdate(item, model).Result,
-                () => UpdateModel(DB.Events, model, item)
+                await HandleEventModel(entity, DBModelFillMode.Update);
             });
         }
 
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем localization_{languageEntityId}_mainImg, если изменяем картинку")]
         [HttpPost, Route("UpdateEventLocalization")]
-        public async Task<RequestResult<EventLocalization>> UpdateEventLocalization(EventLocalizationDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 3)]
+        public async Task<EventLocalizationDTO> UpdateEventLocalization(EventLocalizationDTO model)
         {
-            var localization = DB.EventLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);  
-            return TryFinishAllRequestes<EventLocalization>(new[]
+            var localization = DB.EventLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            var mainEntity = GetAvailableEvents().FirstOrDefault(o => o.Id == localization.EventId && !o.IsDeleted);
+
+            return (EventLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.EventLocalizations, localization, model, mainEntity, async (entity) =>
             {
-                () => RequestResult.FromBoolean(localization != null,404, "Локализация с данным id не найдена"),
-                () => CheckLocalizationModelBeforeUpdate(GetEventsList(), model, localization.EventId, ContentAccessModelType.Events),
-                () => CheckAndPrepareEventLocalizationBeforeUpdate(localization).Result,
-                () => UpdateModel(DB.EventLocalizations, model, localization)
+                await HandleEventLocalizationModel(entity, DBModelFillMode.Update);
             });
         }
 
@@ -127,26 +128,21 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpDelete, Route("DeleteEvent")]
-        public async Task<RequestResult> DeleteEvent(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 5)]
+        public async Task DeleteEvent(int id)
         {
-            var item = GetEventsList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                () => RequestResult.FromBoolean(item != null,404, "Категория по данному id не найдена"),
-                () => TryDelete(DB.Events, item, ContentAccessModelType.Events)
-            });
+            var item = GetAvailableEvents().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            DbService.TryDeleteEntity(DB.Events, item);
         }
 
         [HttpDelete, Route("DeleteEventLocalization")]
-        public async Task<RequestResult> DeleteEventLocalization(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 5)]
+        public async Task DeleteEventLocalization(int id)
         {
             var item = DB.EventLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                () => RequestResult.FromBoolean(item != null,404, "Запись по данному id не найдена"),
-                () => CheckLocalizationModelBeforeDelete(GetEventFormatsList(), item.EventId, ContentAccessModelType.Events),
-                () => DeleteModel(DB.EventLocalizations, item, false)
-            });
+            var mainModel = GetAvailableEvents().FirstOrDefault(o => o.Id == item.EventId && !o.IsDeleted);
+
+            DbService.TryDeleteLocalizationEntity(DB.EventLocalizations, item, mainModel);
         }
 
 
@@ -155,95 +151,75 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Категории событий
 
         [HttpGet, Route("GetEventCategories")]
-        public async Task<RequestResult<IEnumerable<EventCategoryDTO>>> GetEventCategories(int offset, int count = 20)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
+        public async Task<IEnumerable<EventCategoryDTO>> GetEventCategories(int offset, int count = 20)
         {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<EventCategoryDTO>>(new Func<RequestResult>[]
-            {
-                () => CheckContentAreaRights(session, ContentAccessModelType.Events, 1),
-                () => {
-                    var items = GetAvailableModels(session.User, GetEventCategoriesList(), offset, count);
-                    var models = EventCategoryDTO.CreateItemsWithLocalization(items.Cast<EventCategory>(), LanguageId) as IEnumerable<EventCategoryDTO> ;
-                    return RequestResult<IEnumerable<EventCategoryDTO>>.AsSuccess(models);
-                }
-            });
+            var items = GetAvailableEventCategories().Skip(offset).Take(count);
+            return new EventCategoryDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<EventCategoryDTO>();
         }
 
         [HttpGet, Route("GetEventCategory")]
-        public async Task<RequestResult<EventCategory>> GetEventCategory(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
+        public async Task<EventCategoryDTO> GetEventCategory(int id)
         {
-            return TryGetOne(GetEventCategoriesList(), id, ContentAccessModelType.Events);
+            return (EventCategoryDTO)DbService.TryGetOne(GetAvailableEventCategories(), id, new EventCategoryDTO());
         }
     
         [HttpGet, Route("GetEventCategoryLocalization")]
-        public async Task<RequestResult<EventCategoryLocalization>> GetEventCategoryLocalization(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
+        public async Task<EventCategoryLocalizationDTO> GetEventCategoryLocalization(int id)
         {
             var localization = DB.EventCategoryLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null) return RequestResult<EventCategoryLocalization>.AsError(404, "Сущность с данным id не найдена");
+            var mainEntity = GetAvailableEventCategories().FirstOrDefault(o => o.Id == localization?.EventCategoryId && !o.IsDeleted);
 
-            var mainEntity = GetEventFormatsList().FirstOrDefault(o => o.Id == localization.EventCategoryId && !o.IsDeleted);
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<EventCategoryLocalization>(new Func<RequestResult>[]
-            {
-                () => RequestResult.FromBoolean(mainEntity != null, 500, "Внутренняя ошибка"),
-                () => CheckContentAreaRights(session, mainEntity, ContentAccessModelType.Events, 1),
-                () => RequestResult<EventCategoryLocalization>.AsSuccess(localization)
-            });
+            return (EventCategoryLocalizationDTO)DbService.GetLocalizationModel(localization, mainEntity, new EventCategoryLocalizationDTO());
         }
+
 
 
 
 
 
         [HttpPost, Route("CreateEventCategory")]
-        public async Task<RequestResult<EventCategory>> CreateEventCategory(EventCategory item)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 4)]
+        public async Task<EventCategoryDTO> CreateEventCategory(EventCategoryDTO model)
         {
-            return TryCreate(DB.EventCategories, item, ContentAccessModelType.Events);
+            return (EventCategoryDTO)DbService.TryCreateAvailabilityEntity(DB.EventCategories, model, this.Session);
         }
 
         [HttpPost, Route("CreateEventCategoryLocalization")]
-        public async Task<RequestResult<EventCategoryLocalization>> CreateEventCategoryLocalization(int itemId, EventCategoryLocalization localization)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 3)]
+        public async Task<EventCategoryLocalizationDTO> CreateEventCategoryLocalization(int itemId, EventCategoryLocalizationDTO localization)
         {
-            var mainEntity = GetEventCategoriesList().FirstOrDefault(o => o.Id == itemId);
-            return TryFinishAllRequestes<EventCategoryLocalization>(new[]
-            {
-                () => CheckLocalizationModelBeforeCreate(localization, mainEntity, ContentAccessModelType.Events),
-                () =>
-                {
-                    mainEntity.Localizations.Add(localization);
-                    UpdateModel(DB.EventCategories, mainEntity);
-                    return RequestResult<EventCategoryLocalization>.AsSuccess(localization);
-                }
-            });
+            var mainEntity = GetAvailableEventCategories().FirstOrDefault(o => o.Id == itemId);
+            return (EventCategoryLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.EventCategories, mainEntity, localization);
         }
+
+
 
 
 
 
         [HttpPut, Route("UpdateEventCategoryMain")]
-        public async Task<RequestResult<EventCategory>> UpdateEventCategoryMain(EventCategoryDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 3)]
+        public async Task<EventCategoryDTO> UpdateEventCategoryMain(EventCategoryDTO model)
         {
-            var item = GetEventCategoriesList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryFinishAllRequestes<EventCategory>(new[]
-            {
-                () => CheckMainModelBeforeUpdate(item, model,ContentAccessModelType.Events),
-                () => RequestResult.FromBoolean(DB.Languages.Any(o => o.Id == model.MainLanguageId && !o.IsDeleted),
-                                                    404, "Языка с данным id не существует"),
-                () => UpdateModel(DB.EventCategories, model, item)
-            });
+            var item = GetAvailableEventCategories().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return (EventCategoryDTO)DbService.TryUpdateEntity(DB.EventCategories, model, item);
         }
 
+
         [HttpPut, Route("UpdateEventCategoryLocalization")]
-        public async Task<RequestResult<EventCategoryLocalization>> UpdatePostCategoryLocalization(EventCategoryLocalizationDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 3)]
+        public async Task<EventCategoryLocalizationDTO> UpdateEventCategoryLocalization(EventCategoryLocalizationDTO model)
         {
             var localization = DB.EventCategoryLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryFinishAllRequestes<EventCategoryLocalization>(new[]
-            {
-                () => RequestResult.FromBoolean(localization != null,404, "Локализация с данным id не найдена"),
-                () => CheckLocalizationModelBeforeUpdate(GetEventCategoriesList(), model, localization.EventCategoryId, ContentAccessModelType.Events),
-                () => UpdateModel(DB.EventCategoryLocalizations, model, localization)
-            });
+            var mainEntity = GetAvailableEventCategories().FirstOrDefault(o => o.Id == localization.EventCategoryId && !o.IsDeleted);
+
+            return (EventCategoryLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.EventCategoryLocalizations, localization, model, mainEntity);
         }
+
+
 
 
 
@@ -251,26 +227,22 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpDelete, Route("DeleteEventCategory")]
-        public async Task<RequestResult> DeleteEventCategory(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 5)]
+        public async Task DeleteEventCategory(int id)
         {
-            var item = GetEventCategoriesList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                () => RequestResult.FromBoolean(item != null,404, "Категория по данному id не найдена"),
-                () => TryDelete(DB.EventCategories, item, ContentAccessModelType.Events)
-            });
+            var item = GetAvailableEventCategories().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            DbService.TryDeleteEntity(DB.EventCategories, item);
         }
 
+
         [HttpDelete, Route("DeleteEventCategoryLocalization")]
-        public async Task<RequestResult> DeleteEventCategoryLocalization(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 5)]
+        public async Task DeleteEventCategoryLocalization(int id)
         {
             var item = DB.EventCategoryLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                () => RequestResult.FromBoolean(item != null,404, "Запись по данному id не найдена"),
-                () => CheckLocalizationModelBeforeDelete(GetEventFormatsList(), item.EventCategoryId, ContentAccessModelType.Events),
-                () => DeleteModel(DB.EventCategoryLocalizations, item, false)
-            });
+            var mainModel = DB.EventCategories.FirstOrDefault(o => o.Id == item.EventCategoryId && !o.IsDeleted);
+
+            DbService.TryDeleteLocalizationEntity(DB.EventCategoryLocalizations, item, mainModel);
         }
 
         #endregion
@@ -278,65 +250,47 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Форматы событий
 
         [HttpGet, Route("GetEventFormats")]
-        public async Task<RequestResult<IEnumerable<EventFormatDTO>>> GetEventFormats(int offset, int count = 20)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
+        public async Task<IEnumerable<EventFormatDTO>> GetEventFormats(int offset, int count = 20)
         {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<EventFormatDTO>>(new Func<RequestResult>[]
-            {
-                () => CheckContentAreaRights(session, ContentAccessModelType.Events, 1),
-                () => {
-                    var items = GetAvailableModels(session.User, GetEventFormatsList(), offset, count);
-                    var models = EventFormatDTO.CreateItemsWithLocalization(items.Cast<EventFormat>(), LanguageId) as IEnumerable<EventFormatDTO>;
-                    return RequestResult<IEnumerable<EventFormatDTO>>.AsSuccess(models);
-                }
-            });
+            var items = GetAvailableEventFormats().Skip(offset).Take(count);
+            return new EventFormatDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<EventFormatDTO>();
         }
 
         [HttpGet, Route("GetEventFormat")]
-        public async Task<RequestResult<EventFormat>> GetEventFormat(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
+        public async Task<EventFormatDTO> GetEventFormat(int id)
         {
-            return TryGetOne(GetEventFormatsList(), id, ContentAccessModelType.Events);
+            return (EventFormatDTO)DbService.TryGetOne(GetAvailableEventFormats(), id, new EventFormatDTO());
         }
 
+
         [HttpGet, Route("GetEventFormatLocalization")]
-        public async Task<RequestResult<EventFormatLocalization>> GetEventFormatLocalization(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
+        public async Task<EventFormatLocalizationDTO> GetEventFormatLocalization(int id)
         {
             var localization = DB.EventFormatLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null) return RequestResult<EventFormatLocalization>.AsError(404, "Сущность с данным id не найдена");
+            var mainEntity = GetAvailableEventFormats().FirstOrDefault(o => o.Id == localization?.EventFormatId && !o.IsDeleted);
 
-            var mainEntity = GetEventFormatsList().FirstOrDefault(o => o.Id == localization.EventFormatId && !o.IsDeleted);
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<EventFormatLocalization>(new Func<RequestResult>[]
-            {
-                () => RequestResult.FromBoolean(mainEntity != null, 500, "Внутренняя ошибка"),
-                () => CheckContentAreaRights(session, mainEntity, ContentAccessModelType.Events, 1),
-                () => RequestResult<EventFormatLocalization>.AsSuccess(localization)
-            });
+            return (EventFormatLocalizationDTO)DbService.GetLocalizationModel(localization, mainEntity, new EventFormatLocalizationDTO());
         }
 
 
 
 
         [HttpPost, Route("CreateEventFormat")]
-        public async Task<RequestResult<EventFormat>> CreateEventFormat(EventFormat item)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 4)]
+        public async Task<EventFormatDTO> CreateEventFormat(EventFormatDTO model)
         {
-            return TryCreate(DB.EventFormats, item, ContentAccessModelType.Events);
+            return (EventFormatDTO)DbService.TryCreateAvailabilityEntity(DB.EventFormats, model, this.Session);
         }
      
         [HttpPost, Route("CreateEventFormatLocalization")]
-        public async Task<RequestResult<EventFormatLocalization>> CreateEventFormatLocalization(int itemId, EventFormatLocalization localization)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 3)]
+        public async Task<EventFormatLocalizationDTO> CreateEventFormatLocalization(int itemId, EventFormatLocalizationDTO localization)
         {
-            var mainEntity = GetEventFormatsList().FirstOrDefault(o => o.Id == itemId);
-            return TryFinishAllRequestes<EventFormatLocalization>(new[]
-            {
-                () => CheckLocalizationModelBeforeCreate(localization, mainEntity, ContentAccessModelType.Events),
-                () =>
-                {
-                    mainEntity.Localizations.Add(localization);
-                    UpdateModel(DB.EventFormats, mainEntity);
-                    return RequestResult<EventFormatLocalization>.AsSuccess(localization);
-                }
-            });
+            var mainEntity = GetAvailableEventFormats().FirstOrDefault(o => o.Id == itemId);
+            return (EventFormatLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.EventFormats, mainEntity, localization);
         }
 
 
@@ -344,28 +298,22 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateEventFormatMain")]
-        public async Task<RequestResult<EventFormat>> UpdateEventFormatMain(EventFormatDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 3)]
+        public async Task<EventFormatDTO> UpdateEventFormatMain(EventFormatDTO model)
         {
-            var item = GetEventFormatsList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryFinishAllRequestes<EventFormat>(new[]
-            {
-                () => CheckMainModelBeforeUpdate(item, model,ContentAccessModelType.Events),
-                () => RequestResult.FromBoolean(DB.Languages.Any(o => o.Id == model.MainLanguageId && !o.IsDeleted),
-                                                    404, "Языка с данным id не существует"),
-                () => UpdateModel(DB.EventFormats, model, item)
-            });
+            var item = GetAvailableEventFormats().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return (EventFormatDTO)DbService.TryUpdateEntity(DB.EventFormats, model, item);
         }
 
+
         [HttpPut, Route("UpdateEventFormatLocalization")]
-        public async Task<RequestResult<EventFormatLocalization>> UpdateEventFormatLocalization(EventFormatLocalizationDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 3)]
+        public async Task<EventFormatLocalizationDTO> UpdateEventFormatLocalization(EventFormatLocalizationDTO model)
         {
             var localization = DB.EventFormatLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryFinishAllRequestes<EventFormatLocalization>(new[]
-            {
-                () => RequestResult.FromBoolean(localization != null,404, "Локализация с данным id не найдена"),
-                () => CheckLocalizationModelBeforeUpdate(GetEventCategoriesList(), model, localization.EventFormatId, ContentAccessModelType.Events),
-                () => UpdateModel(DB.EventFormatLocalizations, model, localization)
-            });
+            var mainEntity = GetAvailableEventFormats().FirstOrDefault(o => o.Id == localization.EventFormatId && !o.IsDeleted);
+
+            return (EventFormatLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.EventFormatLocalizations, localization, model, mainEntity);
         }
    
       
@@ -373,27 +321,25 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
 
+
+
         [HttpDelete, Route("DeleteEventFormat")]
-        public async Task<RequestResult> DeleteEventFormat(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 5)]
+        public async Task DeleteEventFormat(int id)
         {
-            var item = GetEventFormatsList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                () => RequestResult.FromBoolean(item != null,404, "Категория по данному id не найдена"),
-                () => TryDelete(DB.EventFormats, item, ContentAccessModelType.Events)
-            });
+            var item = GetAvailableEventFormats().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            DbService.TryDeleteEntity(DB.EventFormats, item);
         }
 
+
         [HttpDelete, Route("DeleteEventFormatLocalization")]
-        public async Task<RequestResult> DeleteEventFormatLocalization(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 5)]
+        public async Task DeleteEventFormatLocalization(int id)
         {
             var item = DB.EventFormatLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                () => RequestResult.FromBoolean(item != null,404, "Запись по данному id не найдена"),
-                () => CheckLocalizationModelBeforeDelete(GetEventFormatsList(), item.EventFormatId, ContentAccessModelType.Events),
-                () => DeleteModel(DB.EventFormatLocalizations, item, false)
-            });
+            var mainModel = DB.EventFormats.FirstOrDefault(o => o.Id == item.EventFormatId && !o.IsDeleted);
+
+            DbService.TryDeleteLocalizationEntity(DB.EventFormatLocalizations, item, mainModel);
         }
 
 
@@ -401,142 +347,95 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateAvailability")]
-        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.Events, 2)]
+        public async Task<AvailabilityDTO> UpdateAvailability(AvailabilityDTO model)
         {
             bool hasThisModel = false;
 
-            var user = GetSessionWithRoleInclude().User;
-            hasThisModel |= GetAvailableModels(user, DB.Events.IncludeAvailability()).Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
-            hasThisModel |= GetAvailableModels(user, DB.EventCategories.IncludeAvailability()).Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
-            hasThisModel |= GetAvailableModels(user, DB.EventFormats.IncludeAvailability()).Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            hasThisModel |= DbService.GetAvailableModels(this.Session.User, DB.Events.IncludeAvailability())
+                                     .Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            hasThisModel |= DbService.GetAvailableModels(this.Session.User, DB.EventCategories.IncludeAvailability())
+                                     .Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            hasThisModel |= DbService.GetAvailableModels(this.Session.User, DB.EventFormats.IncludeAvailability())
+                                     .Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
 
             if (!hasThisModel)
             {
-                return new RequestResult<Availability>().SetError(403, "У данного пользователя нет прав на редактирование матрицы доступности");
+                throw new Exception403("У данного пользователя нет прав на редактирование матрицы доступности");
             }
 
-            return TryUpdateAvailability(model, ContentAccessModelType.Events);
+            return DbService.TryUpdateAvailability(model, this.Session);
         }
 
 
 
+
+
+
+
+        #region Private get available methods
+        private IEnumerable<Event> GetAvailableEvents()
+        {
+            return DbService.GetAvailableModels(this.Session.User, GetEventsList()).Cast<Event>();
+        }
+        private IEnumerable<EventCategory> GetAvailableEventCategories()
+        {
+            return DbService.GetAvailableModels(this.Session.User, GetEventCategoriesList()).Cast<EventCategory>();
+        }
+        private IEnumerable<EventFormat> GetAvailableEventFormats()
+        {
+            return DbService.GetAvailableModels(this.Session.User, GetEventFormatsList()).Cast<EventFormat>();
+        }
+
+        #endregion
 
         #region Private prepare methods
 
-        private async Task<RequestResult> CheckAndPrepareEventBeforeCreate(Event item)
+        private async Task HandleEventModel(Event entity, DBModelFillMode mode)
         {
-            if(!DB.EventFormats.Any(o => o.Id == item.FormatId && !o.IsDeleted))
+            const string formFilename = "mainImg";
+
+            if (!DB.EventFormats.Any(o => o.Id == entity.FormatId && !o.IsDeleted))
             {
-                return RequestResult.AsError(400, "Формат события с данным id не найден");
+                throw new Exception400("Формат события с данным id не найден");
             }
-            else if (!DB.EventCategories.Any(o => o.Id == item.CategoryId && !o.IsDeleted))
+            else if (!DB.EventCategories.Any(o => o.Id == entity.CategoryId && !o.IsDeleted))
             {
-                return RequestResult.AsError(400, "Категория события с данным id не найден");
+                throw new Exception400("Категория событий с данным id не найдена");
             }
-            else if (!DB.TimeZones.Any(o => o.Id == item.TimeZoneId && !o.IsDeleted))
+            else if (!DB.TimeZones.Any(o => o.Id == entity.TimeZoneId && !o.IsDeleted))
             {
-                return RequestResult.AsError(400, "Часовой пояс с данным id не найден");
+                throw new Exception400("Часовой пояс с данным id не найден");
             }
 
-            //Загрузка главной картинки
-            var mainFileUploadResult = await TryUploadFile("mainImg", FileType.Image);
-            if (!mainFileUploadResult.Success)
+            if((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
+                || mode == DBModelFillMode.Create)
             {
-                return mainFileUploadResult;
-            }
-            item.ImgPath = mainFileUploadResult.Value;
-
-            foreach(var localization in item.Localizations)
-            {
-                var localizationCheckResult = await CheckAndPrepareEventLocalizationBeforeCreate(localization);
-                if (!localizationCheckResult.Success)
-                {
-                    return localizationCheckResult;
-                }
+                entity.ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
             }
 
-            return RequestResult.AsSuccess();
+
         }
-        private async Task<RequestResult> CheckAndPrepareEventMainBeforeUpdate(Event item, EventDTO model)
+        private async Task HandleEventLocalizationModel(EventLocalization entity, DBModelFillMode mode)
         {
-            if (!DB.EventFormats.Any(o => o.Id == model.FormatId && !o.IsDeleted))
+            string formFilename = $"localization_{entity.LanguageEntityId}_mainImg";
+
+            if (!entity.IsValid())
             {
-                return RequestResult.AsError(400, "Формат события с данным id не найден");
+                throw new Exception400("Проверьте корректность заполения полей локализации события");
             }
-            else if (!DB.EventCategories.Any(o => o.Id == model.CategoryId && !o.IsDeleted))
+            if (!DB.Languages.Any(o => o.Id == entity.LanguageEntityId && !o.IsDeleted))
             {
-                return RequestResult.AsError(400, "Категория события с данным id не найден");
-            }
-            else if (!DB.TimeZones.Any(o => o.Id == model.TimeZoneId && !o.IsDeleted))
-            {
-                return RequestResult.AsError(400, "Часовой пояс с данным id не найден");
+                throw new Exception400("Язык с данным id не существует");
             }
 
 
-            if (item.ImgPath != model.ImgPath)
+            if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
+               || mode == DBModelFillMode.Create)
             {
-                //Загрузка главной картинки
-                var mainFileUploadResult = await TryUploadFile("mainImg", FileType.Image);
-                if (!mainFileUploadResult.Success)
-                {
-                    return new RequestResult().FillFromRequestResult(mainFileUploadResult);
-                }
-                item.ImgPath = mainFileUploadResult.Value;
+                entity.ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
             }
-
-            return RequestResult.AsSuccess();
         }
-
-
-        private async Task<RequestResult> CheckAndPrepareEventLocalizationBeforeCreate(EventLocalization localization)
-        {
-            if (!localization.IsValid())
-            {
-                return RequestResult.AsError(400, "Проверьте корректность заполения полей локализации события");
-            }
-            if(!DB.Languages.Any(o => o.Id == localization.LanguageEntityId && !o.IsDeleted))
-            {
-                return RequestResult.AsError(400, "Язык с данным id не существует");
-            }
-
-
-            //Загрузка главной картинки
-            var mainFileUploadResult = await TryUploadFile($"localization_{localization.LanguageEntityId}_mainImg", FileType.Image);
-            if (!mainFileUploadResult.Success)
-            {
-                return mainFileUploadResult;
-            }
-            localization.ImgPath = mainFileUploadResult.Value;
-
-            return RequestResult.AsSuccess();
-        }
-        private async Task<RequestResult> CheckAndPrepareEventLocalizationBeforeUpdate(EventLocalization localization)
-        {
-            if (!localization.IsValid())
-            {
-                return RequestResult.AsError(400, "Проверьте корректность заполения полей локализации события");
-            }
-            if (!DB.Languages.Any(o => o.Id == localization.LanguageEntityId && !o.IsDeleted))
-            {
-                return RequestResult.AsError(400, "Язык с данным id не существует");
-            }
-
-            string formFileName = $"localization_{localization.LanguageEntityId}_mainImg";
-            if (Request.Form.Files.Any(o => o.Name == formFileName))
-            {
-                //Загрузка главной картинки
-                var mainFileUploadResult = await TryUploadFile(formFileName, FileType.Image);
-                if (!mainFileUploadResult.Success)
-                {
-                    return mainFileUploadResult;
-                }
-                localization.ImgPath = mainFileUploadResult.Value;
-            }
-
-          
-            return RequestResult.AsSuccess();
-        }
-
 
         #endregion
 

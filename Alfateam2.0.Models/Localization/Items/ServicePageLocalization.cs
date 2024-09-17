@@ -21,5 +21,9 @@ namespace Alfateam2._0.Models.Localization.Items
 
 
         public List<ServicePageFakeReview> Reviews { get; set; } = new List<ServicePageFakeReview>();
+
+
+
+        public int ServicePageId { get; set; }
     }
 }

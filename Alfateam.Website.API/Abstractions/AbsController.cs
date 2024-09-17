@@ -1,6 +1,10 @@
 ﻿using Alfateam.DB;
+using Alfateam.Gateways.Abstractions;
 using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Enums;
+using Alfateam.Website.API.Filters;
+using Alfateam.Website.API.Models;
+using Alfateam.Website.API.Services;
 using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
@@ -12,31 +16,47 @@ namespace Alfateam.Website.API.Abstractions
 {
     [ApiController]
     [Route("[controller]")]
+    [ErrorsFilter]
+    [APIExceptionFilter]
     public abstract class AbsController : ControllerBase
     {
-        //TODO: глобально! Рефакторинг в угоду ActionFilter
-        //TODO: Задачка на рефакторинг номер 2: DTO, автомаппинг
-
-
-        public WebsiteDBContext DB { get; set; }
-        protected IWebHostEnvironment AppEnvironment { get; set; }
+        public readonly IMailGateway MailGateway;
+        public readonly WebsiteDBContext DB;
+        public readonly DBService DbService;
+        public readonly IWebHostEnvironment AppEnvironment;
+        public readonly FilesService FilesService;
 
         protected string UserSessid => Request.Headers["Sessid"];
         protected int? CountryId => ParseIntValueFromHeader("CountryId");
         protected int? CurrencyId => ParseIntValueFromHeader("CurrencyId");
         protected int? LanguageId => ParseIntValueFromHeader("LanguageId");
 
-        public AbsController(WebsiteDBContext db, IWebHostEnvironment appEnv)
+        public AbsController(ControllerParams @params)
         {
-            DB = db;
-            AppEnvironment = appEnv;
+            DB = @params.DB;
+            DbService = @params.DbService;
+            FilesService = @params.FilesService;    
+            AppEnvironment = @params.AppEnvironment;
+            MailGateway = @params.MailGateway;
+        }
+        public virtual Session Session => GetUserSession();
+
+
+        protected int? GetUserIdIfSessionValid()
+        {
+            var session = DB.Sessions.Include(o => o.User)
+                                     .FirstOrDefault(o => o.SessID == this.UserSessid);
+
+            var checkSessionRes = CheckSession(session);
+            if (!checkSessionRes.Success)
+            {
+                return null;
+            }
+            return session.User.Id;
         }
 
-        protected AbsController(WebsiteDBContext db)
-        {
-            DB = db;
-        }
 
+       
 
         protected SessionUser GetUserBySessid()
         {
@@ -71,371 +91,18 @@ namespace Alfateam.Website.API.Abstractions
             });
         }
         [NonAction]
-        public RequestResult<BanInfo> CheckForBan(User user, BanType type)
+        public RequestResult CheckForBan(User user, BanType type)
         {
             if(user.BanInfo?.Type == type || user.BanInfo?.Type == BanType.All)
             {
-                var res = new RequestResult<BanInfo>();
+                var res = new RequestResult();
                 res.Value = user.BanInfo;
                 return res.SetError(403, "Пользователь забанен. Дополнительно в свойстве Value");
             }
 
-            return RequestResult<BanInfo>.AsSuccess(null);
+            return RequestResult.AsSuccess(null);
         }
 
-        #region File check
-        protected RequestResult CheckImageFile(IFormFile file)
-        {
-            var baseCheckRes = CheckFileBase(file);
-            if (!baseCheckRes.Success) return baseCheckRes;
-
-            if (!this.IsImageFileExtension(file.FileName))
-            {
-                return RequestResult.AsError(400, "Неподдерживаемый формат файла");
-            }
-
-            return RequestResult.AsSuccess();
-        }
-        protected RequestResult CheckDocumentFile(IFormFile file)
-        {
-            var baseCheckRes = CheckFileBase(file);
-            if (!baseCheckRes.Success) return baseCheckRes;
-
-            if (!this.IsDocumentFileExtension(file.FileName))
-            {
-                return RequestResult.AsError(400, "Неподдерживаемый формат файла");
-            }
-
-            return RequestResult.AsSuccess();
-        }
-        protected RequestResult CheckAudioFile(IFormFile file)
-        {
-            var baseCheckRes = CheckFileBase(file);
-            if (!baseCheckRes.Success) return baseCheckRes;
-
-            if (!this.IsAudioFileExtension(file.FileName))
-            {
-                return RequestResult.AsError(400, "Неподдерживаемый формат файла");
-            }
-
-            return RequestResult.AsSuccess();
-        }
-        protected RequestResult CheckVideoFile(IFormFile file)
-        {
-            var baseCheckRes = CheckFileBase(file);
-            if (!baseCheckRes.Success) return baseCheckRes;
-
-            if (!this.IsVideoFileExtension(file.FileName))
-            {
-                return RequestResult.AsError(400, "Неподдерживаемый формат файла");
-            }
-
-            return RequestResult.AsSuccess();
-        }
-        private RequestResult CheckFileBase(IFormFile file)
-        {
-            if (file == null)
-            {
-                return RequestResult.AsError(400, "Необходимо загрузить файл");
-            }
-            else if (file.Length == 0)
-            {
-                return RequestResult.AsError(400, "Пустой файл");
-            }
-            return RequestResult.AsSuccess();
-        }
-
-
-
-        protected bool IsImageFileExtension(string filename)
-        {
-            var ext = Path.GetExtension(filename);
-            return ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp";
-        }
-        protected bool IsDocumentFileExtension(string filename)
-        {
-            var ext = Path.GetExtension(filename);
-            return ext == ".pdf" || ext == ".docx" || ext == ".xls" || ext == ".xlsx" || ext == ".ort" || ext == ".rtf";
-        }
-        protected bool IsAudioFileExtension(string filename)
-        {
-            var ext = Path.GetExtension(filename);
-            return ext == ".mp3" || ext == ".wav" || ext == ".ogg";
-        }
-        protected bool IsVideoFileExtension(string filename)
-        {
-            var ext = Path.GetExtension(filename);
-            return ext == ".mp4" || ext == ".avi" || ext == ".mkv";
-        }
-        #endregion
-
-        #region UploadFile
-
-
-        protected async Task<RequestResult<string>> TryUploadFile(string formFileName, FileType fileType)
-        {
-            var res = new RequestResult<string>();
-
-            //Загрузка главной картинки
-            var file = Request.Form.Files.FirstOrDefault(o => o.Name == formFileName);
-
-            RequestResult fileCheckResult = null;
-            switch (fileType)
-            {
-                case FileType.Image:
-                    fileCheckResult = this.CheckImageFile(file);
-                    break;
-                case FileType.Document:
-                    fileCheckResult = this.CheckDocumentFile(file);
-                    break;
-                case FileType.Video:
-                    fileCheckResult = this.CheckVideoFile(file);
-                    break;
-                case FileType.Audio:
-                    fileCheckResult = this.CheckAudioFile(file);
-                    break;
-            }
-
-
-
-            if (!fileCheckResult.Success)
-            {
-                res.FillFromRequestResult(fileCheckResult);
-                res.Error += $"\r\nПроблема с файлом {formFileName}";
-                return res;
-            }
-
-            string filepath = await this.UploadFile(file);
-            return res.SetSuccess(filepath);
-        }
-        protected async Task<RequestResult<string>> TryUploadFile(IFormFile file, FileType fileType)
-        {
-            var res = new RequestResult<string>();
-  
-            RequestResult fileCheckResult = null;
-            switch (fileType)
-            {
-                case FileType.Image:
-                    fileCheckResult = this.CheckImageFile(file);
-                    break;
-                case FileType.Document:
-                    fileCheckResult = this.CheckDocumentFile(file);
-                    break;
-                case FileType.Video:
-                    fileCheckResult = this.CheckVideoFile(file);
-                    break;
-                case FileType.Audio:
-                    fileCheckResult = this.CheckAudioFile(file);
-                    break;
-            }
-
-
-
-            if (!fileCheckResult.Success)
-            {
-                res.FillFromRequestResult(fileCheckResult);
-                res.Error += $"\r\nПроблема с файлом {file.Name}";
-                return res;
-            }
-
-            string filepath = await this.UploadFile(file);
-            return res.SetSuccess(filepath);
-        }
-
-        protected async Task<string> UploadFile(int index = 0)
-        {
-            var attachment = Request.Form.Files.Skip(index).FirstOrDefault();
-            var filePath = "/uploads/" + Guid.NewGuid().ToString();
-
-            if (attachment != null && attachment.Length > 0)
-            {
-                string path = filePath + attachment.FileName;
-                using (var fileStream = new FileStream(AppEnvironment.WebRootPath + path, FileMode.Create))
-                {
-                    await attachment.CopyToAsync(fileStream);
-                }
-                return path;
-            }
-            return "";
-        }
-        protected async Task<string> UploadFile(IFormFile file)
-        {
-            var filePath = "/uploads/" + Guid.NewGuid().ToString();
-
-            if (file != null && file.Length > 0)
-            {
-                string path = filePath + file.FileName;
-                using (var fileStream = new FileStream(AppEnvironment.WebRootPath + path, FileMode.Create))
-                {
-                    await file.CopyToAsync(fileStream);
-                }
-                return path;
-            }
-            return "";
-        }
-        protected async Task<string> UploadFile(string formFileName)
-        {
-            var attachment = Request.Form.Files.FirstOrDefault(o => o.Name == formFileName);
-            var filePath = "/uploads/" + Guid.NewGuid().ToString();
-
-            if (attachment != null && attachment.Length > 0)
-            {
-                string path = filePath + attachment.FileName;
-                using (var fileStream = new FileStream(AppEnvironment.WebRootPath + path, FileMode.Create))
-                {
-                    await attachment.CopyToAsync(fileStream);
-                }
-                return path;
-            }
-            return "";
-        }
-        #endregion
-
-        #region Delete file
-        protected void DeleteFiles(List<string> paths)
-        {
-            foreach (var path in paths)
-            {
-                DeleteFile(path);
-            }
-        }
-        protected void DeleteFile(string path)
-        {
-            if(System.IO.File.Exists(AppEnvironment.WebRootPath + path))
-            {
-                System.IO.File.Delete(AppEnvironment.WebRootPath + path);
-            }
-        }
-
-
-        #endregion
-
-
-
-
-
-
-
-
-
-        //#region Обобщенные методы CRUD для DTO
-        //protected RequestResult<T> TryGetOne<T>(IEnumerable<T> fromModels, int id) where T : AbsModel
-        //{
-        //    var item = fromModels.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-        //    if (item == null)
-        //    {
-        //        return RequestResult<T>.AsError(404, "Запись по данному id не найдена");
-        //    }
-        //    return RequestResult<T>.AsSuccess(item);
-        //}
-        //protected RequestResult<T> CreateModel<T>(DbSet<T> dbSet, T item) where T : AbsModel
-        //{
-        //    dbSet.Add(item);
-        //    DB.SaveChanges();
-        //    return RequestResult<T>.AsSuccess(item);
-        //}
-        //protected RequestResult<T> CreateModel<T>(DbSet<T> dbSet, DTO<T> model) where T : AbsModel, new()
-        //{
-        //    var item = new T();
-        //    model.Fill(item);
-        //    return CreateModel(dbSet, item);
-        //}
-
-
-
-
-        //protected RequestResult<T> UpdateModel<T>(DbSet<T> dbSet, DTO<T> model, T item) where T : AbsModel
-        //{
-        //    model.Fill(item);
-        //    return UpdateModel(dbSet, item);
-        //}
-        //protected RequestResult<T> UpdateModel<T>(DbSet<T> dbSet, T item) where T : AbsModel
-        //{
-        //    dbSet.Update(item);
-        //    DB.SaveChanges();
-
-        //    return new RequestResult<T>().SetSuccess(item);
-        //}
-
-
-        //protected RequestResult<T> DeleteModel<T>(DbSet<T> dbSet, T item, bool softDelete = true) where T : AbsModel
-        //{
-        //    if (softDelete)
-        //    {
-        //        item.IsDeleted = true;
-        //        dbSet.Update(item);
-        //    }
-        //    else
-        //    {
-        //        dbSet.Remove(item);
-        //    }
-
-        //    DB.SaveChanges();
-        //    return new RequestResult<T>().SetSuccess(item);
-        //}
-
-
-        //#endregion
-
-
-        #region Обобщенные методы CRUD для DTO
-        protected RequestResult<T> TryGetOne<T>(IEnumerable<T> fromModels, int id) where T : AbsModel
-        {
-            var item = fromModels.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (item == null)
-            {
-                return RequestResult<T>.AsError(404, "Запись по данному id не найдена");
-            }
-            return RequestResult<T>.AsSuccess(item);
-        }
-        protected RequestResult<T> CreateModel<T>(DbSet<T> dbSet, T item) where T : AbsModel
-        {
-            dbSet.Add(item);
-            DB.SaveChanges();
-            return RequestResult<T>.AsSuccess(item);
-        }
-        protected RequestResult<T> CreateModel<T>(DbSet<T> dbSet, DTOModel<T> model) where T : AbsModel, new()
-        {
-            var item = new T();
-            model.FillDBModel(item, DBModelFillMode.Create);
-            return CreateModel(dbSet, item);
-        }
-
-
-
-
-        protected RequestResult<T> UpdateModel<T>(DbSet<T> dbSet, DTOModel<T> model, T item) where T : AbsModel, new()
-        {
-            model.FillDBModel(item, DBModelFillMode.Update);
-            return UpdateModel(dbSet, item);
-        }
-        protected RequestResult<T> UpdateModel<T>(DbSet<T> dbSet, T item) where T : AbsModel
-        {
-            dbSet.Update(item);
-            DB.SaveChanges();
-
-            return new RequestResult<T>().SetSuccess(item);
-        }
-
-
-        protected RequestResult<T> DeleteModel<T>(DbSet<T> dbSet, T item, bool softDelete = true) where T : AbsModel
-        {
-            if (softDelete)
-            {
-                item.IsDeleted = true;
-                dbSet.Update(item);
-            }
-            else
-            {
-                dbSet.Remove(item);
-            }
-
-            DB.SaveChanges();
-            return new RequestResult<T>().SetSuccess(item);
-        }
-
-
-        #endregion
 
 
 
@@ -457,9 +124,9 @@ namespace Alfateam.Website.API.Abstractions
             return successResult;
         }
         [NonAction]
-        public RequestResult<T> TryFinishAllRequestes<T>(Func<RequestResult>[] funcs)
+        public RequestResult TryFinishAllRequestes<T>(Func<RequestResult>[] funcs)
         {
-            return (RequestResult<T>)TryFinishAllRequestes(funcs);
+            return (RequestResult)TryFinishAllRequestes(funcs);
         }
         [NonAction]
         public RequestResult TryFinishAllRequestes(RequestResult[] funcs)
@@ -475,9 +142,9 @@ namespace Alfateam.Website.API.Abstractions
             return successResult;
         }
         [NonAction]
-        public RequestResult<T> TryFinishAllRequestes<T>(RequestResult[] funcs)
+        public RequestResult TryFinishAllRequestes<T>(RequestResult[] funcs)
         {
-            return (RequestResult<T>)TryFinishAllRequestes(funcs);
+            return (RequestResult)TryFinishAllRequestes(funcs);
         }
 
 
@@ -486,10 +153,7 @@ namespace Alfateam.Website.API.Abstractions
 
 
 
-        protected long GetFileSizeInBytes(string filepath)
-        {
-            return new FileInfo(AppEnvironment.WebRootPath + filepath).Length;
-        }
+     
 
         private int? ParseIntValueFromHeader(string key)
         {

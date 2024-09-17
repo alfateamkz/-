@@ -1,17 +1,19 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Extensions;
+using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTO;
 using Alfateam.Website.API.Models.DTO.Portfolios;
 using Alfateam2._0.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Alfateam.Website.API.Controllers.Website
 {
     public class PartnersController : AbsController
     {
-        public PartnersController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
+        public PartnersController(ControllerParams @params) : base(@params)
         {
         }
 
@@ -20,14 +22,14 @@ namespace Alfateam.Website.API.Controllers.Website
         public async Task<IEnumerable<PartnerDTO>> GetPartners(int offset, int count = 20)
         {
             var items = GetPartnersList().Skip(offset).Take(count).ToList();
-            return PartnerDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<PartnerDTO>;
+            return new PartnerDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<PartnerDTO>();
         }
 
         [HttpGet, Route("GetPartner")]
         public async Task<PartnerDTO> GetPartner(int id)
         {
             var partner = GetPartnersFullIncludedList().FirstOrDefault(o => o.Id == id);
-            return PartnerDTO.CreateWithLocalization(partner, LanguageId) as PartnerDTO;
+            return (PartnerDTO) new PartnerDTO().CreateDTOWithLocalization(partner, LanguageId);
         }
 
 

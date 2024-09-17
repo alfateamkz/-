@@ -1,6 +1,7 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Extensions;
+using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTO.Team;
 using Alfateam2._0.Models.Team;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,7 @@ namespace Alfateam.Website.API.Controllers.Website
 
     public class TeamController : AbsController
     {
-        public TeamController(WebsiteDBContext db) : base(db)
+        public TeamController(ControllerParams @params) : base(@params)
         {
         }
 
@@ -26,7 +27,7 @@ namespace Alfateam.Website.API.Controllers.Website
                                         .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.Localizations)
                                         .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.MainLanguage)
                                         .FirstOrDefault(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
-            return TeamStructureDTO.CreateWithLocalization(team, LanguageId) as TeamStructureDTO;
+            return (TeamStructureDTO)new TeamStructureDTO().CreateDTOWithLocalization(team, LanguageId);
         }
 
         [HttpGet, Route("GetTeamMember")]
@@ -36,7 +37,7 @@ namespace Alfateam.Website.API.Controllers.Website
                                        .Include(o => o.Localizations).ThenInclude(o => o.DetailContent).ThenInclude(o => o.Items)
                                        .Include(o => o.MainLanguage)
                                        .FirstOrDefault(o => o.Id == id);
-            return TeamMemberDTO.CreateWithLocalization(member, LanguageId) as TeamMemberDTO;
+            return (TeamMemberDTO)new TeamMemberDTO().CreateDTOWithLocalization(member, LanguageId);
         }
     }
 }

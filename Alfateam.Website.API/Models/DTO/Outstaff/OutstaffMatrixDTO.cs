@@ -15,8 +15,8 @@ namespace Alfateam.Website.API.Models.DTO.Outstaff
 
             var model = new OutstaffMatrixDTO();
 
-            model.Columns = OutstaffColumnDTO.CreateItemsWithLocalization(item.Columns, langId) as List<OutstaffColumnDTO>;
-            model.Items = OutstaffItemDTO.CreateItems(item.Items, langId, countryId) as List<OutstaffItemDTO>;
+            model.Columns = new OutstaffColumnDTO().CreateDTOsWithLocalization(item.Columns, langId).Cast<OutstaffColumnDTO>().ToList();
+            model.Items = OutstaffItemDTO.CreateItems(item.Items, langId, countryId);
 
             return model;
         }

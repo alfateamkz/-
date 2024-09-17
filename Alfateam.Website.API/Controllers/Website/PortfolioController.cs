@@ -1,6 +1,8 @@
-﻿using Alfateam.DB;
+﻿using Alfateam.CRM2_0.Models.General;
+using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
+using Alfateam.Website.API.Exceptions;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTO.Portfolios;
@@ -10,12 +12,13 @@ using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Portfolios;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Alfateam.Website.API.Controllers.Website
 {
     public class PortfolioController : AbsController
     {
-        public PortfolioController(WebsiteDBContext db) : base(db)
+        public PortfolioController(ControllerParams @params) : base(@params)
         {
         }
 
@@ -25,7 +28,7 @@ namespace Alfateam.Website.API.Controllers.Website
         public async Task<IEnumerable<PortfolioDTO>> GetPortfolios(int offset,int count = 20)
         {
             var items = GetPortfoliosList().Skip(offset).Take(count).ToList();
-            return PortfolioDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<PortfolioDTO>;
+            return new PortfolioDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<PortfolioDTO>();
         }
 
         [HttpGet, Route("GetPortfoliosByFilter")]
@@ -42,7 +45,7 @@ namespace Alfateam.Website.API.Controllers.Website
             }
 
             portfolios = portfolios.Skip(offset).Take(count);
-            return PortfolioDTO.CreateItemsWithLocalization(portfolios.ToList(), LanguageId) as IEnumerable<PortfolioDTO>;
+            return new PortfolioDTO().CreateDTOsWithLocalization(portfolios.ToList(), LanguageId).Cast<PortfolioDTO>();
         }
 
 
@@ -50,7 +53,7 @@ namespace Alfateam.Website.API.Controllers.Website
         public async Task<PortfolioDTO> GetPortfolio(int id)
         {
             var portfolio = GetFullIncludedPortfoliosList().FirstOrDefault(o => o.Id == id);
-            return PortfolioDTO.CreateWithLocalization(portfolio,LanguageId) as PortfolioDTO;
+            return (PortfolioDTO)new PortfolioDTO().CreateDTOWithLocalization(portfolio,LanguageId);
         }
 
         #endregion
@@ -58,125 +61,67 @@ namespace Alfateam.Website.API.Controllers.Website
         #region Взаимодействие с портфолио
 
         [HttpPut, Route("AddWatch")]
-        public async Task<RequestResult> AddWatch(int id,string fingerprint)
+        public async Task AddWatch(int portfolioId,string fingerprint)
         {
-            var res = new RequestResult();
-
-
-            var portfolio = DB.Portfolios.FirstOrDefault(o => o.Id == id);
-            if(portfolio != null)
+            var portfolio = DB.Portfolios.FirstOrDefault(o => o.Id == portfolioId);
+            if(portfolio == null)
             {
-                int? userId = null;
-                if (!string.IsNullOrEmpty(this.UserSessid))
-                {
-                    var session = DB.Sessions.Include(o => o.User)
-                                             .FirstOrDefault(o => o.SessID == this.UserSessid);
-
-                    var checkSessionRes = CheckSession(session);
-                    if (!checkSessionRes.Success)
-                    {
-                        res.FillFromRequestResult(checkSessionRes);
-                        return res;
-                    }
-                    userId = session.User.Id;
-                }
-               
-
-                portfolio.Watches++;
-                portfolio.WatchesList.Add(new Watch
-                {
-                    WatchedByFingerprint = fingerprint,
-                    WatchedById = userId
-                });
-
-                DB.Portfolios.Update(portfolio);
-                DB.SaveChanges();
-
-                res.Success = true;
-            }
-            else
-            {
-                res.Code = 404;
-                res.Error = "Портфолио по данному id не найдено";
+                throw new Exception404("Портфолио по данному id не найдено");
             }
 
-            return res;
+            portfolio.Watches++;
+            portfolio.WatchesList.Add(new Watch
+            {
+                WatchedByFingerprint = fingerprint,
+                WatchedById = this.GetUserIdIfSessionValid()
+            });
+
+            DbService.UpdateEntity(DB.Portfolios, portfolio);
+        }
+
+        [HttpGet, Route("HasLike")]
+        public async Task<bool> HasLike(int portfolioId, string fingerprint)
+        {
+            var portfolio = DB.Portfolios.Include(o => o.LikesList)
+                                        .FirstOrDefault(o => o.Id == portfolioId);
+            if (portfolio == null)
+            {
+                throw new Exception404("Портфолио по данному id не найдено");
+            }
+
+            return GetLike(portfolio, fingerprint) != null;
         }
 
         [HttpPut, Route("ToggleLike")]
-        public async Task<RequestResult<bool>> ToggleLike(int id, string fingerprint)
+        public async Task<bool> ToggleLike(int portfolioId, string fingerprint)
         {
-            var res = new RequestResult<bool>();
-
-
-            var portfolio = DB.Portfolios
-                .Include(o => o.LikesList)
-                .FirstOrDefault(o => o.Id == id);
-            if (portfolio != null)
+            var portfolio = DB.Portfolios.Include(o => o.LikesList)
+                                         .FirstOrDefault(o => o.Id == portfolioId);
+            if (portfolio == null)
             {
-             
-                int? userId = null;
-                if (!string.IsNullOrEmpty(this.UserSessid))
+                throw new Exception404("Портфолио по данному id не найдено");      
+            }
+
+
+            RateVote foundLike = GetLike(portfolio, fingerprint);
+            if (foundLike == null)
+            {
+                portfolio.Likes++;
+                portfolio.LikesList.Add(new RateVote
                 {
-                    var session = DB.Sessions.Include(o => o.User)
-                                             .FirstOrDefault(o => o.SessID == this.UserSessid);
-
-                    var checkSessionRes = CheckSession(session);
-                    if (!checkSessionRes.Success)
-                    {
-                        res.FillFromRequestResult(checkSessionRes);
-                        return res;
-                    }
-                    userId = session.User.Id;
-                }
-
-
-
-
-                RateVote foundLike;
-
-                if (userId == null)
-                {
-                    foundLike = portfolio.LikesList.FirstOrDefault(o => o.SetByFingerprint == fingerprint);
-                }
-                else
-                {
-                    foundLike = portfolio.LikesList.FirstOrDefault(o => o.SetById == userId);
-                }
-
-
-
-                if(foundLike == null)
-                {
-                    portfolio.Likes++;
-                    portfolio.LikesList.Add(new RateVote
-                    {
-                        SetByFingerprint = fingerprint,
-                        SetById = userId
-                    });
-                }
-                else
-                {
-                    portfolio.Likes--;
-                    portfolio.LikesList.Remove(foundLike);
-                }
-
-
-                DB.Portfolios.Update(portfolio);
-                DB.SaveChanges();
-
-
-                //Если foundLike  == null, то лайк ставим, иначе убираем
-                res.Value = foundLike == null;
-                res.Success = true;
+                    SetByFingerprint = fingerprint,
+                    SetById = GetUserIdIfSessionValid()
+                });
             }
             else
             {
-                res.Code = 404;
-                res.Error = "По данному id кейс не найден";
+                portfolio.Likes--;
+                portfolio.LikesList.Remove(foundLike);
             }
-           
-            return res;
+
+
+            DbService.UpdateEntity(DB.Portfolios, portfolio);
+            return foundLike == null; //если лайка нет, то добавляем и он есть
         }
         #endregion
 
@@ -189,7 +134,7 @@ namespace Alfateam.Website.API.Controllers.Website
                                               .Include(o => o.Localizations)
                                               .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
                                               .ToList();
-            return PortfolioCategoryDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<PortfolioCategoryDTO>;
+            return new PortfolioCategoryDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<PortfolioCategoryDTO>();
         }
         [HttpGet, Route("GetPortfolioIndustries")]
         public async Task<IEnumerable<PortfolioIndustryDTO>> GetPortfolioIndustries()
@@ -198,7 +143,7 @@ namespace Alfateam.Website.API.Controllers.Website
                                               .Include(o => o.Localizations)
                                               .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
                                               .ToList();
-            return PortfolioIndustryDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<PortfolioIndustryDTO>;
+            return new PortfolioIndustryDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<PortfolioIndustryDTO>();
         }
         #endregion
 
@@ -252,7 +197,27 @@ namespace Alfateam.Website.API.Controllers.Website
 
 
 
-        #region Private methods
+
+
+
+
+        #region Private other methods
+        private RateVote GetLike(Portfolio portfolio, string fingerprint)
+        {
+            int? userId = GetUserIdIfSessionValid();
+            if (userId == null)
+            {
+                return portfolio.LikesList.FirstOrDefault(o => o.SetByFingerprint == fingerprint);
+            }
+            else
+            {
+                return portfolio.LikesList.FirstOrDefault(o => o.SetById == userId);
+            }
+        }
+
+        #endregion
+
+        #region Private get included methods
         private IQueryable<Portfolio> GetPortfoliosList()
         {
             return DB.Portfolios.IncludeAvailability()

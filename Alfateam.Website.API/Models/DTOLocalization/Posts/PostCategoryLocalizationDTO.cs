@@ -5,7 +5,7 @@ using Alfateam2._0.Models.Posts;
 
 namespace Alfateam.Website.API.Models.DTOLocalization.Posts
 {
-    public class PostCategoryLocalizationDTO : DTOModel<PostCategoryLocalization>
+    public class PostCategoryLocalizationDTO : LocalizationDTOModel<PostCategoryLocalization>
     {
         public string Title { get; set; }
     }

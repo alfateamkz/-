@@ -27,58 +27,50 @@ using Alfateam2._0.Models.Shop.Orders;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using Alfateam.Website.API.Models.DTO.Team;
+using Alfateam.Website.API.Filters.Access;
+using Alfateam.Website.API.Models.DTOLocalization.Posts;
+using Alfateam.Website.API.Exceptions;
+using Alfateam.Website.API.Services;
+using Microsoft.Extensions.Options;
+using Alfateam.Website.API.Models.DTOLocalization.Team;
+using System.Security.Cryptography;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
     public class AdminShopController : AbsAdminController
     {
-        public AdminShopController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
+        public AdminShopController(ControllerParams @params) : base(@params)
         {
-
         }
 
         #region Товары
 
         [HttpGet, Route("GetProducts")]
-        public async Task<RequestResult<IEnumerable<ShopProductDTO>>> GetProducts(int offset, int count = 20)
+        [ShopSectionAccess(1)]
+        public async Task<IEnumerable<ShopProductDTO>> GetProducts(int offset, int count = 20)
         {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<ShopProductDTO>>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(1),
-                () => {
-                    var items = GetAvailableModels(GetSessionWithRoleInclude().User, GetProductsList(), offset, count);
-                    var models = ShopProductDTO.CreateItems(items.Cast<ShopProduct>(), LanguageId,CountryId);
-                    return RequestResult<IEnumerable<ShopProductDTO>>.AsSuccess(models);
-                }
-            });
+            var items = GetAvailableShopProducts().Skip(offset).Take(count);
+            return new ShopProductDTO().CreateDTOs(items).Cast<ShopProductDTO>();
         }
 
         [HttpGet, Route("GetProduct")]
-        public async Task<RequestResult<ShopProduct>> GetProduct(int id)
+        [ShopSectionAccess(1)]
+        public async Task<ShopProductDTO> GetProduct(int id)
         {
-            var item = GetProductsFullIncludedList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<ShopProduct>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(1),
-                () => RequestResult.FromBoolean(item != null, 404, "Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(this.CheckBasePermissions(user, item),403, "У данного пользователя нет доступа к записи"),
-                () => RequestResult<ShopProduct>.AsSuccess(item)
-            });
+            return (ShopProductDTO)DbService.TryGetOne(GetAvailableShopProducts(), id, new ShopProductDTO());
         }
   
         [HttpGet, Route("GetProductLocalization")]
-        public async Task<RequestResult<ShopProductLocalization>> GetProductLocalization(int id)
+        [ShopSectionAccess(1)]
+        public async Task<ShopProductLocalizationDTO> GetProductLocalization(int id)
         {
-            var localization = DB.ShopProductLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted); 
-            return TryFinishAllRequestes<ShopProductLocalization>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(1),
-                () => RequestResult.FromBoolean(localization != null, 404, "Сущность с данным id не найдена"),
-                () => CheckFromProduct(localization.ShopProductId),
-                () => RequestResult<ShopProductLocalization>.AsSuccess(localization)
-            });
+            var localization = DB.ShopProductLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var mainEntity = GetAvailableShopProducts().FirstOrDefault(o => o.Id == localization?.ShopProductId && !o.IsDeleted);
+
+            return (ShopProductLocalizationDTO)DbService.GetLocalizationModel(localization, mainEntity, new ShopProductLocalizationDTO());
         }
 
 
@@ -87,76 +79,54 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPost, Route("CreateProduct")]
-        public async Task<RequestResult<ShopProduct>> CreateProduct(ShopProduct item)
+        [ShopSectionAccess(8)]
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
+        public async Task<ShopProductDTO> CreateProduct(ShopProductDTO model)
         {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<ShopProduct>(new[]
+            return (ShopProductDTO)DbService.TryCreateAvailabilityEntity(DB.ShopProducts, model, this.Session, async (entity) =>
             {
-                () => CheckSession(session),
-                () => CheckAccess(8),
-                () => CheckAndPrepareProductBeforeCreate(item).Result,
-                () => RequestResult.FromBoolean(item.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () => CanSetAvailabilityCountries(session.User, item.Availability),
-                () => CreateModel(DB.ShopProducts,item)
+                await HandleProduct(entity, DBModelFillMode.Create);
             });
         }
 
         [HttpPost, Route("CreateProductLocalization")]
-        public async Task<RequestResult<ShopProductLocalization>> CreateProductCategoryLocalization(int itemId, ShopProductLocalization localization)
+        [ShopSectionAccess(6)]
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg (опционально)")]
+        public async Task<ShopProductLocalizationDTO> CreateProductCategoryLocalization(int itemId, ShopProductLocalizationDTO localization)
         {
-            var mainEntity = GetProductsList().FirstOrDefault(o => o.Id == itemId);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<ShopProductLocalization>(new[]
+            var mainEntity = GetAvailableShopProducts().FirstOrDefault(o => o.Id == itemId);
+            return (ShopProductLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.ShopProducts, mainEntity, localization, async (entity) =>
             {
-                () => CheckAccess(6),
-                () => RequestResult.FromBoolean(mainEntity != null, 404, "Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(this.CheckBasePermissions(user, mainEntity), 403, "У данного пользователя нет доступа к записи"),
-                () => CheckAndPrepareProductLocalizationBeforeCreate(localization).Result,
-                () => RequestResult.FromBoolean(localization.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () =>
-                {
-                    mainEntity.Localizations.Add(localization);
-                    UpdateModel(DB.ShopProducts,mainEntity);
-                    return RequestResult<ShopProductLocalization>.AsSuccess(localization);
-                }
-             });
+                await HandleProductLocalization(entity, DBModelFillMode.Create);
+            });
         }
 
 
 
 
         [HttpPut, Route("UpdateProductMain")]
-        public async Task<RequestResult<ShopProduct>> UpdateProductMain(ShopProductDTO model)
+        [ShopSectionAccess(5)]
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg, если изменяем изображение")]
+        public async Task<ShopProductDTO> UpdateProductMain(ShopProductDTO model)
         {
-            var item = GetProductsList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<ShopProduct>(new[]
+            var item = GetAvailableShopProducts().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return (ShopProductDTO)DbService.TryUpdateEntity(DB.ShopProducts, model, item, async (entity) =>
             {
-                 () => CheckAccess(5),
-                 () => RequestResult.FromBoolean(item != null, 404,  "Запись по данному id не найдена"),
-                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, item), 403, "У данного пользователя нет доступа к записи"),
-                 () => CheckAndPrepareProductBeforeUpdate(item,model).Result,
-                 () => RequestResult.FromBoolean(model.IsValid(),400,"Проверьте корректность заполнения данных"),
-                 () => UpdateModel(DB.ShopProducts, model, item)
+                await HandleProduct(entity, DBModelFillMode.Update);
             });
         }
 
         [HttpPut, Route("UpdateProductLocalization")]
-        public async Task<RequestResult<ShopProductLocalization>> UpdateProductLocalization(ShopProductLocalizationDTO model)
+        [ShopSectionAccess(6)]
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg (опционально), если изменяем изображение")]
+        public async Task<ShopProductLocalizationDTO> UpdateProductLocalization(ShopProductLocalizationDTO model)
         {
             var localization = DB.ShopProductLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            if (localization == null) return RequestResult<ShopProductLocalization>.AsError(404, "Локализация с данным id не найдена");
+            var mainEntity = GetAvailableShopProducts().FirstOrDefault(o => o.Id == localization.ShopProductId && !o.IsDeleted);
 
-            var mainEntity = GetProductCategoriesList().FirstOrDefault(o => o.Id == localization.ShopProductId);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<ShopProductLocalization>(new[]
+            return (ShopProductLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.ShopProductLocalizations, localization, model, mainEntity, async (entity) =>
             {
-                 () => CheckAccess(6),
-                 () => RequestResult.FromBoolean(mainEntity != null, 500, "Внутренняя ошибка"),
-                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, mainEntity), 403, "У данного пользователя нет доступа к записи"),
-                 () => CheckAndPrepareProductLocalizationBeforeUpdate(localization,model).Result,
-                 () => RequestResult.FromBoolean(model.IsValid(),400,"Проверьте корректность заполнения данных"),
-                 () => UpdateModel(DB.ShopProductLocalizations, model, localization)
+                await HandleProductLocalization(entity, DBModelFillMode.Update);
             });
         }
 
@@ -166,151 +136,92 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPost, Route("AddProductPhoto")]
-        public async Task<RequestResult<ShopProductImage>> AddProductPhoto(int productId)
+        [ShopSectionAccess(5)]
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
+        public async Task AddProductPhoto(int productId)
         {
-            var product = GetProductsList().FirstOrDefault(o => o.Id == productId && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-
-            return TryFinishAllRequestes<ShopProductImage>(new Func<RequestResult>[]
+            var product = GetAvailableShopProducts().FirstOrDefault(o => o.Id == productId  && !o.IsDeleted);
+            if(product == null)
             {
-                 () => CheckAccess(5),
-                 () => RequestResult.FromBoolean(product != null, 404, "Сущность по данному id не найдена"),
-                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, product), 403, "У данного пользователя нет доступа к записи"),
-                 () =>
-                 {
-                     var photo = new ShopProductImage();
+                throw new Exception404("Сущность по данному id не найдена");
+            }
 
-                     var imgUploadResult = TryUploadFile("productPhoto", FileType.Image).Result;
-                     if (!imgUploadResult.Success)
-                     {
-                         return imgUploadResult;
-                     }
-
-                     product.Images.Add(photo);
-                     UpdateModel(DB.ShopProducts, product);
-                     return RequestResult<ShopProductImage>.AsSuccess(photo);
-                 }
-            });
+            await HandleProductAddPhoto(product);
+            DbService.UpdateEntity(DB.ShopProducts, product);
         }
 
         [HttpPost, Route("AddProductLocalizationPhoto")]
-        public async Task<RequestResult<ShopProductImage>> AddProductLocalizationPhoto(int localizationId)
+        [ShopSectionAccess(5)]
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
+        public async Task AddProductLocalizationPhoto(int localizationId)
         {
             var localization = DB.ShopProductLocalizations.FirstOrDefault(o => o.Id == localizationId && !o.IsDeleted);
-            if (localization == null) return RequestResult<ShopProductImage>.AsError(404, "Сущность по данному id не найдена");
-
-            var product = GetProductsList().FirstOrDefault(o => o.Id == localization.ShopProductId && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<ShopProductImage>(new Func<RequestResult>[]
+            var product = GetAvailableShopProducts().FirstOrDefault(o => o.Id == localization?.ShopProductId && !o.IsDeleted);
+            if (localization == null || product == null)
             {
-                 () => CheckAccess(5),
-                 () => RequestResult.FromBoolean(product != null, 500, "Внутренняя ошибка"),
-                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, product), 403, "У данного пользователя нет доступа к записи"),
-                 () =>
-                 {
-                     var photo = new ShopProductImage();
+                throw new Exception404("Сущность по данному id не найдена");
+            }
 
-                     var imgUploadResult = TryUploadFile("productPhoto", FileType.Image).Result;
-                     if (!imgUploadResult.Success)
-                     {
-                         return imgUploadResult;
-                     }
-
-                     localization.Images.Add(photo);
-                     UpdateModel(DB.ShopProductLocalizations, localization);
-                     return RequestResult<ShopProductImage>.AsSuccess(photo);
-                 }
-            });
+            await HandleProductLocalizationAddPhoto(localization);
+            DbService.UpdateEntity(DB.ShopProductLocalizations, localization);
         }
 
 
 
 
         [HttpDelete, Route("DeleteProductPhoto")]
-        public async Task<RequestResult> DeleteProductPhoto(int productId,int photoId)
+        [ShopSectionAccess(5)]
+        public async Task DeleteProductPhoto(int productId,int photoId)
         {
-            var product = GetProductsList().FirstOrDefault(o => o.Id == productId && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-
-            return TryFinishAllRequestes(new Func<RequestResult>[]
+            var product = GetAvailableShopProducts().FirstOrDefault(o => o.Id == productId && !o.IsDeleted);
+            var photo = product?.Images?.FirstOrDefault(o => o.Id == photoId);
+            if (product == null || photo == null)
             {
-                 () => CheckAccess(5),
-                 () => RequestResult.FromBoolean(product != null, 404, "Сущность по данному id не найдена"),
-                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, product), 403, "У данного пользователя нет доступа к записи"),
-                 () =>
-                 {
-                     var photo = product.Images.FirstOrDefault(o => o.Id == photoId);
-                     if(photo == null)
-                     {
-                         return RequestResult.AsError(404, "Фото по данному id не найдена");
-                     }
-                     DeleteFile(photo.ImgPath);
-                     product.Images.Remove(photo);
-                     return UpdateModel(DB.ShopProducts, product);
-                 }
-            });
+                throw new Exception404("Сущность по данному id не найдена");
+            }
+
+            FilesService.DeleteFile(photo.ImgPath);
+            product.Images.Remove(photo);
+            DbService.UpdateEntity(DB.ShopProducts, product);
         }
 
         [HttpDelete, Route("DeleteProductLocalizationPhoto")]
-        public async Task<RequestResult> DeleteProductLocalizationPhoto(int localizationId, int photoId)
+        [ShopSectionAccess(5)]
+        public async Task DeleteProductLocalizationPhoto(int localizationId, int photoId)
         {
             var localization = DB.ShopProductLocalizations.FirstOrDefault(o => o.Id == localizationId && !o.IsDeleted);
-            if (localization == null) return RequestResult.AsError(404, "Сущность по данному id не найдена");
+            var photo = localization?.Images?.FirstOrDefault(o => o.Id == photoId);
+            var product = GetAvailableShopProducts().FirstOrDefault(o => o.Id == localization?.ShopProductId && !o.IsDeleted);
 
-            var product = GetProductsList().FirstOrDefault(o => o.Id == localization.ShopProductId && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes(new Func<RequestResult>[]
+            if (localization == null || product == null || localization == null)
             {
-                 () => CheckAccess(5),
-                 () => RequestResult.FromBoolean(product != null, 500, "Внутренняя ошибка"),
-                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, product), 403, "У данного пользователя нет доступа к записи"),
-                 () =>
-                 {
-                     var photo = localization.Images.FirstOrDefault(o => o.Id == photoId);
-                     if(photo == null)
-                     {
-                         return RequestResult.AsError(404, "Фото по данному id не найдена");
-                     }
-                     DeleteFile(photo.ImgPath);
-                     localization.Images.Remove(photo);
-                     return UpdateModel(DB.ShopProductLocalizations, localization);
-                 }
-            });
+                throw new Exception404("Сущность по данному id не найдена");
+            }
+
+            FilesService.DeleteFile(photo.ImgPath);
+            localization.Images.Remove(photo);
+            DbService.UpdateEntity(DB.ShopProductLocalizations, localization);
         }
 
         #endregion
 
 
         [HttpDelete, Route("DeleteProduct")]
-        public async Task<RequestResult> DeleteProduct(int id)
+        [ShopSectionAccess(9)]
+        public async Task DeleteProduct(int id)
         {
-            var item = GetProductsList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-
-            return TryFinishAllRequestes(new[]
-            {
-                 () => CheckAccess(9),
-                 () => RequestResult.FromBoolean(item != null, 404, "Сущность по данному id не найдена"),
-                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, item), 403, "У данного пользователя нет доступа к записи"),
-                 () => DeleteModel(DB.ShopProducts, item)
-            });
+            var item = GetAvailableShopProducts().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            DbService.TryDeleteEntity(DB.ShopProducts, item);
         }
 
         [HttpDelete, Route("DeleteProductLocalization")]
-        public async Task<RequestResult> DeleteProductLocalization(int id)
+        [ShopSectionAccess(9)]
+        public async Task DeleteProductLocalization(int id)
         {
-            var localization = DB.ShopProductLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null) return RequestResult.AsError(404, "Запись по данному id не найдена");
-    
-            var mainEntity = DB.ShopProducts.FirstOrDefault(o => o.Id == localization.ShopProductId && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes(new[]
-            {
-                 () => CheckAccess(9),
-                 () => RequestResult.FromBoolean(mainEntity != null, 500, "Внутренняя ошибка"),
-                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, mainEntity), 403, "У данного пользователя нет доступа к записи"),
-                 () => DeleteModel(DB.ShopProductLocalizations, localization,false)
-            });
+            var item = DB.ShopProductLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var mainModel = GetAvailableShopProducts().FirstOrDefault(o => o.Id == item.ShopProductId && !o.IsDeleted);
+
+            DbService.TryDeleteLocalizationEntity(DB.ShopProductLocalizations, item, mainModel);
         }
 
 
@@ -320,29 +231,24 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Модификаторы
 
         [HttpGet, Route("GetProductModifier")]
-        public async Task<RequestResult<ProductModifier>> GetProductModifier(int id)
+        [ShopSectionAccess(1)]
+        public async Task<ProductModifierDTO> GetProductModifier(int id)
         {
             var item = GetProductModifiersList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes<ProductModifier>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(1),
-                () => RequestResult.FromBoolean(item != null, 404, "Сущность с данным id не найдена"),
-                () => CheckFromProduct(item.ShopProductId),
-                () => RequestResult<ProductModifier>.AsSuccess(item)
-            });
+
+            CheckFromProductModifier(id);
+            return (ProductModifierDTO)new ProductModifierDTO().CreateDTO(item);
         }
 
         [HttpGet, Route("GetProductModifierLocalization")]
-        public async Task<RequestResult<ProductModifierLocalization>> GetProductModifierLocalization(int id)
+        [ShopSectionAccess(1)]
+        public async Task<ProductModifierLocalizationDTO> GetProductModifierLocalization(int id)
         {
             var localization = DB.ProductModifierLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes<ProductModifierLocalization>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(1),
-                () => RequestResult.FromBoolean(localization != null, 404, "Сущность с данным id не найдена"),
-                () => CheckFromProductModifier(localization.ProductModifierId),
-                () => RequestResult<ProductModifierLocalization>.AsSuccess(localization)
-            });
+            var mainEntity = GetProductModifiersList().FirstOrDefault(o => o.Id == localization?.ProductModifierId && !o.IsDeleted);
+
+            CheckFromProductModifier(localization?.ProductModifierId);
+            return (ProductModifierLocalizationDTO)DbService.GetLocalizationModel(localization, mainEntity, new ProductModifierLocalizationDTO());
         }
 
 
@@ -350,33 +256,21 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPost, Route("CreateProductModifier")]
-        public async Task<RequestResult<ProductModifier>> CreateProductModifier(ProductModifier item)
+        [ShopSectionAccess(8)]
+        public async Task<ProductModifierDTO> CreateProductModifier(ProductModifierDTO model)
         {
-            return TryFinishAllRequestes<ProductModifier>(new[]
-            {
-                () => CheckAccess(8),
-                () => RequestResult.FromBoolean(item.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () => CreateModel(DB.ProductModifiers,item)
-           });
+            CheckFromProduct(model.ShopProductId);
+            return (ProductModifierDTO)DbService.TryCreateEntity(DB.ProductModifiers, model);
         }
 
         [HttpPost, Route("CreateProductModifierLocalization")]
-        public async Task<RequestResult<ProductModifierLocalization>> CreateProductCategoryLocalization(int itemId, ProductModifierLocalization localization)
+        [ShopSectionAccess(8)]
+        public async Task<ProductModifierLocalizationDTO> CreateProductModifierLocalization(int itemId, ProductModifierLocalizationDTO model)
         {
             var mainEntity = GetProductModifiersList().FirstOrDefault(o => o.Id == itemId);
-            return TryFinishAllRequestes<ProductModifierLocalization>(new[]
-            {
-                () => CheckAccess(8),
-                () => RequestResult.FromBoolean(mainEntity != null, 404, "Сущность по данному id не найдена"),
-                () => CheckFromProductModifier(localization.ProductModifierId),
-                () => RequestResult.FromBoolean(localization.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () =>
-                {
-                    mainEntity.Localizations.Add(localization);
-                    UpdateModel(DB.ProductModifiers,mainEntity);
-                    return RequestResult<ProductModifierLocalization>.AsSuccess(localization);
-                }
-            });
+
+            CheckFromProductModifier(itemId);
+            return (ProductModifierLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.ProductModifiers, mainEntity, model);
         }
 
 
@@ -384,32 +278,24 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateProductModifierMain")]
-        public async Task<RequestResult<ProductModifier>> UpdateProductModifierMain(ProductModifierDTO model)
+        [ShopSectionAccess(5)]
+        public async Task<ProductModifierDTO> UpdateProductModifierMain(ProductModifierDTO model)
         {
             var item = GetProductModifiersList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryFinishAllRequestes<ProductModifier>(new[]
-            {
-                 () => CheckAccess(5),
-                 () => RequestResult.FromBoolean(item != null, 404,  "Запись по данному id не найдена"),
-                 () => CheckFromProduct(item.ShopProductId),
-                 () => RequestResult.FromBoolean(model.IsValid(),400,"Проверьте корректность заполнения данных"),
-                 () => UpdateModel(DB.ProductModifiers, model, item)
-            });
+
+            CheckFromProductModifier(model.Id);
+            return (ProductModifierDTO)DbService.TryUpdateEntity(DB.ProductModifiers, model, item);
         }
      
         [HttpPut, Route("UpdateProductModifierLocalization")]
-        public async Task<RequestResult<ProductModifierLocalization>> UpdateProductModifierLocalization(ProductModifierLocalizationDTO model)
+        [ShopSectionAccess(6)]
+        public async Task<ProductModifierLocalizationDTO> UpdateProductModifierLocalization(ProductModifierLocalizationDTO model)
         {
             var localization = DB.ProductModifierLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            if (localization == null) return RequestResult<ProductModifierLocalization>.AsError(404, "Локализация с данным id не найдена");
+            var mainEntity = GetProductModifiersList().FirstOrDefault(o => o.Id == localization?.ProductModifierId && !o.IsDeleted);
 
-            return TryFinishAllRequestes<ProductModifierLocalization>(new[]
-            {
-                 () => CheckAccess(6),
-                 () => CheckFromProductModifier(localization.ProductModifierId),
-                 () => RequestResult.FromBoolean(model.IsValid(),400,"Проверьте корректность заполнения данных"),
-                 () => UpdateModel(DB.ProductModifierLocalizations, model, localization)
-            });
+            CheckFromProductModifier(localization.ProductModifierId);
+            return (ProductModifierLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.ProductModifierLocalizations, localization, model, mainEntity);
         }
 
 
@@ -418,29 +304,24 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpDelete, Route("DeleteProductModifier")]
-        public async Task<RequestResult> DeleteProductModifier(int id)
+        [ShopSectionAccess(9)]
+        public async Task DeleteProductModifier(int id)
         {
             var item = GetProductModifiersList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                 () => CheckAccess(9),
-                 () => RequestResult.FromBoolean(item != null,404, "Сущность с данным id не найдена"),
-                 () => CheckFromProduct(item.ShopProductId),
-                 () => DeleteModel(DB.ProductModifiers, item)
-            });
+
+            CheckFromProductModifier(id);
+            DbService.TryDeleteEntity(DB.ProductModifiers, item);
         }
     
         [HttpDelete, Route("DeleteProductModifierLocalization")]
-        public async Task<RequestResult> DeleteProductModifierLocalization(int id)
+        [ShopSectionAccess(9)]
+        public async Task DeleteProductModifierLocalization(int id)
         {
-            var localization = DB.ProductModifierLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                 () => CheckAccess(9),
-                 () => RequestResult.FromBoolean(localization != null,404, "Локализация с данным id не найдена"),
-                 () => CheckFromProductModifier(localization.ProductModifierId),
-                 () => DeleteModel(DB.ProductModifierLocalizations, localization, false)
-            });
+            var item = DB.ProductModifierLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var mainModel = GetProductModifiersList().FirstOrDefault(o => o.Id == item?.ProductModifierId && !o.IsDeleted);
+
+            CheckFromProductModifier(item?.ProductModifierId);
+            DbService.TryDeleteLocalizationEntity(DB.ProductModifierLocalizations, item, mainModel);
         }
 
 
@@ -451,29 +332,24 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Опции модификаторов
 
         [HttpGet, Route("GetProductModifierOption")]
-        public async Task<RequestResult<ProductModifierItem>> GetProductModifierOption(int id)
+        [ShopSectionAccess(1)]
+        public async Task<ProductModifierItemDTO> GetProductModifierOption(int id)
         {
             var item = GetProductModifiersItemsList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes<ProductModifierItem>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(1),
-                () => RequestResult.FromBoolean(item != null,404, "Сущность с данным id не найдена"),
-                () => CheckFromProductModifier(item.ProductModifierId),
-                () => RequestResult<ProductModifierItem>.AsSuccess(item)
-            });
+
+            CheckFromProductModifierOption(id);
+            return (ProductModifierItemDTO)new ProductModifierItemDTO().CreateDTO(item);
         }
 
         [HttpGet, Route("GetProductModifierOptionLocalization")]
-        public async Task<RequestResult<ProductModifierItemLocalization>> GetProductModifierOptionLocalization(int id)
+        [ShopSectionAccess(1)]
+        public async Task<ProductModifierItemLocalizationDTO> GetProductModifierOptionLocalization(int id)
         {
             var localization = DB.ProductModifierItemLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes<ProductModifierItemLocalization>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(1),
-                () => RequestResult.FromBoolean(localization != null,404, "Локализация с данным id не найдена"),
-                () => CheckFromProductModifierOption(localization.ProductModifierItemId),
-                () => RequestResult<ProductModifierItemLocalization>.AsSuccess(localization)
-            });
+            var mainEntity = GetProductModifiersItemsList().FirstOrDefault(o => o.Id == localization?.ProductModifierItemId && !o.IsDeleted);
+
+            CheckFromProductModifierOption(localization?.ProductModifierItemId);
+            return (ProductModifierItemLocalizationDTO)DbService.GetLocalizationModel(localization, mainEntity, new ProductModifierItemLocalizationDTO());
         }
 
 
@@ -481,65 +357,45 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPost, Route("CreateProductModifierOption")]
-        public async Task<RequestResult<ProductModifierItem>> CreateProductModifierOption(ProductModifierItem item)
+        [ShopSectionAccess(8)]
+        public async Task<ProductModifierItemDTO> CreateProductModifierOption(ProductModifierItemDTO model)
         {
-            return TryFinishAllRequestes<ProductModifierItem>(new[]
-            {
-                () => CheckAccess(8),
-                () => RequestResult.FromBoolean(item.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () => CreateModel(DB.ProductModifierItems,item)
-           });
+            CheckFromProductModifier(model.ProductModifierId);
+            return (ProductModifierItemDTO)DbService.TryCreateEntity(DB.ProductModifierItems, model);
         }
 
         [HttpPost, Route("CreateProductModifierOptionLocalization")]
-        public async Task<RequestResult<ProductModifierItemLocalization>> CreateProductModifierOptionLocalization(int itemId, ProductModifierItemLocalization localization)
+        [ShopSectionAccess(8)]
+        public async Task<ProductModifierItemLocalizationDTO> CreateProductModifierOptionLocalization(int itemId, ProductModifierItemLocalizationDTO model)
         {
             var mainEntity = GetProductModifiersItemsList().FirstOrDefault(o => o.Id == itemId);
-            return TryFinishAllRequestes<ProductModifierItemLocalization>(new[]
-            {
-                () => CheckAccess(8),
-                () => RequestResult.FromBoolean(mainEntity != null, 404, "Сущность по данному id не найдена"),
-                () => CheckFromProductModifierOption(localization.ProductModifierItemId),
-                () => RequestResult.FromBoolean(localization.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () =>
-                {
-                    mainEntity.Localizations.Add(localization);
-                    UpdateModel(DB.ProductModifierItems,mainEntity);
-                    return RequestResult<ProductModifierItemLocalization>.AsSuccess(localization);
-                }
-            });
+
+            CheckFromProductModifierOption(itemId);
+            return (ProductModifierItemLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.ProductModifierItems, mainEntity, model);
         }
 
 
 
 
         [HttpPut, Route("UpdateProductModifierOptionMain")]
-        public async Task<RequestResult<ProductModifierItem>> UpdateProductCategoryMain(ProductModifierItemDTO model)
+        [ShopSectionAccess(5)]
+        public async Task<ProductModifierItemDTO> UpdateProductModifierOptionMain(ProductModifierItemDTO model)
         {
             var item = GetProductModifiersItemsList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryFinishAllRequestes<ProductModifierItem>(new[]
-            {
-                 () => CheckAccess(5),
-                 () => RequestResult.FromBoolean(item != null, 404,  "Запись по данному id не найдена"),
-                 () => CheckFromProductModifier(item.ProductModifierId),
-                 () => RequestResult.FromBoolean(model.IsValid(),400,"Проверьте корректность заполнения данных"),
-                 () => UpdateModel(DB.ProductModifierItems, model, item)
-            });
+
+            CheckFromProductModifierOption(model.Id);
+            return (ProductModifierItemDTO)DbService.TryUpdateEntity(DB.ProductModifierItems, model, item);
         }
       
         [HttpPut, Route("UpdateProductModifierOptionLocalization")]
-        public async Task<RequestResult<ProductModifierItemLocalization>> UpdateProductModifierOptionLocalization(ProductModifierItemLocalizationDTO model)
+        [ShopSectionAccess(6)]
+        public async Task<ProductModifierItemLocalizationDTO> UpdateProductModifierOptionLocalization(ProductModifierItemLocalizationDTO model)
         {
             var localization = DB.ProductModifierItemLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            if (localization == null) return RequestResult<ProductModifierItemLocalization>.AsError(404, "Локализация с данным id не найдена");
+            var mainEntity = GetProductModifiersItemsList().FirstOrDefault(o => o.Id == localization?.ProductModifierItemId && !o.IsDeleted);
 
-            return TryFinishAllRequestes<ProductModifierItemLocalization>(new[]
-            {
-                 () => CheckAccess(6),
-                 () => CheckFromProductModifierOption(localization.ProductModifierItemId),
-                 () => RequestResult.FromBoolean(model.IsValid(),400,"Проверьте корректность заполнения данных"),
-                 () => UpdateModel(DB.ProductModifierItemLocalizations, model, localization)
-            });
+            CheckFromProductModifier(localization.ProductModifierItemId);
+            return (ProductModifierItemLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.ProductModifierItemLocalizations, localization, model, mainEntity);
         }
 
 
@@ -549,29 +405,24 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpDelete, Route("DeleteProductModifierOption")]
-        public async Task<RequestResult> DeleteProductModifierOption(int id)
+        [ShopSectionAccess(9)]
+        public async Task DeleteProductModifierOption(int id)
         {
             var item = GetProductModifiersItemsList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                 () => CheckAccess(9),
-                 () => RequestResult.FromBoolean(item != null,404, "Сущность с данным id не найдена"),
-                 () => CheckFromProductModifier(item.ProductModifierId),
-                 () => DeleteModel(DB.ProductModifierItems, item)
-            });
+
+            CheckFromProductModifierOption(id);
+            DbService.TryDeleteEntity(DB.ProductModifierItems, item);
         }
       
         [HttpDelete, Route("DeleteProductModifierOptionLocalization")]
-        public async Task<RequestResult> DeleteProductModifierOptionLocalization(int id)
+        [ShopSectionAccess(9)]
+        public async Task DeleteProductModifierOptionLocalization(int id)
         {
-            var localization = DB.ProductModifierItemLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                 () => CheckAccess(9),
-                 () => RequestResult.FromBoolean(localization != null,404, "Локализация с данным id не найдена"),
-                 () => CheckFromProductModifierOption(localization.ProductModifierItemId),
-                 () => DeleteModel(DB.ProductModifierItemLocalizations, localization, false)
-            });
+            var item = DB.ProductModifierItemLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var mainModel = GetProductModifiersItemsList().FirstOrDefault(o => o.Id == item?.ProductModifierItemId && !o.IsDeleted);
+
+            CheckFromProductModifierOption(item?.ProductModifierItemId);
+            DbService.TryDeleteLocalizationEntity(DB.ProductModifierItemLocalizations, item, mainModel);
         }
 
         #endregion
@@ -579,49 +430,28 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Категории товаров
 
         [HttpGet, Route("GetProductCategories")]
-        public async Task<RequestResult<IEnumerable<ShopProductCategoryDTO>>> GetProductCategories(int offset, int count = 20)
+        [ShopSectionAccess(1)]
+        public async Task<IEnumerable<ShopProductCategoryDTO>> GetProductCategories(int offset, int count = 20)
         {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<ShopProductCategoryDTO>>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(1),
-                () => {
-                    var items = GetAvailableModels(GetSessionWithRoleInclude().User, GetProductCategoriesList(), offset, count);
-                    var models = ShopProductCategoryDTO.CreateItemsWithLocalization(items.Cast<ShopProductCategory>(), LanguageId) as IEnumerable<ShopProductCategoryDTO>;
-                    return RequestResult<IEnumerable<ShopProductCategoryDTO>>.AsSuccess(models);
-                }
-            });
+            var items = GetAvailableShopProductCategories().Skip(offset).Take(count);
+            return new ShopProductCategoryDTO().CreateDTOs(items).Cast<ShopProductCategoryDTO>();
         }
 
         [HttpGet, Route("GetProductCategory")]
-        public async Task<RequestResult<ShopProductCategory>> GetProductCategory(int id)
+        [ShopSectionAccess(1)]
+        public async Task<ShopProductCategoryDTO> GetProductCategory(int id)
         {
-            var item = GetProductCategoriesList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<ShopProductCategory>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(1),
-                () => RequestResult.FromBoolean(item != null, 404, "Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(this.CheckBasePermissions(user, item),403, "У данного пользователя нет доступа к записи"),
-                () => RequestResult<ShopProductCategory>.AsSuccess(item)
-            });
+            return (ShopProductCategoryDTO)DbService.TryGetOne(GetAvailableShopProductCategories(), id, new ShopProductCategoryDTO());
         }
 
         [HttpGet, Route("GetProductCategoryLocalization")]
-        public async Task<RequestResult<ShopProductCategoryLocalization>> GetProductCategoryLocalization(int id)
+        [ShopSectionAccess(1)]
+        public async Task<ShopProductCategoryLocalizationDTO> GetProductCategoryLocalization(int id)
         {
             var localization = DB.ShopProductCategoryLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null) return RequestResult<ShopProductCategoryLocalization>.AsError(404, "Локализация с данным id не найдена");
+            var mainEntity = GetAvailableShopProductCategories().FirstOrDefault(o => o.Id == localization?.ShopProductCategoryId && !o.IsDeleted);
 
-            var mainEntity = GetProductsList().FirstOrDefault(o => o.Id == localization.ShopProductCategoryId);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<ShopProductCategoryLocalization>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(1),
-                () => RequestResult.FromBoolean(mainEntity != null, 500, "Внутренняя ошибка"),
-                () => RequestResult.FromBoolean(this.CheckBasePermissions(user, mainEntity),403, "У данного пользователя нет доступа к записи"),
-                () => RequestResult<ShopProductCategoryLocalization>.AsSuccess(localization)
-            });
+            return (ShopProductCategoryLocalizationDTO)DbService.GetLocalizationModel(localization, mainEntity, new ShopProductCategoryLocalizationDTO());
         }
 
 
@@ -629,73 +459,39 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPost, Route("CreateProductCategory")]
-        public async Task<RequestResult<ShopProductCategory>> CreateProductCategory(ShopProductCategory item)
+        [ShopSectionAccess(8)]
+        public async Task<ShopProductCategoryDTO> CreateProductCategory(ShopProductCategoryDTO model)
         {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<ShopProductCategory>(new[]
-            {
-                () => CheckSession(session),
-                () => CheckAccess(8),
-                () => RequestResult.FromBoolean(item.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () => CanSetAvailabilityCountries(session.User, item.Availability),
-                () => CreateModel(DB.ShopProductCategories,item)
-            });
+            return (ShopProductCategoryDTO)DbService.TryCreateAvailabilityEntity(DB.ShopProductCategories, model, this.Session);
         }
 
         [HttpPost, Route("CreateProductCategoryLocalization")]
-        public async Task<RequestResult<ShopProductCategoryLocalization>> CreateProductCategoryLocalization(int itemId, ShopProductCategoryLocalization localization)
+        [ShopSectionAccess(8)]
+        public async Task<ShopProductCategoryLocalizationDTO> CreateProductCategoryLocalization(int itemId, ShopProductCategoryLocalizationDTO localization)
         {
-            var mainEntity = GetProductCategoriesList().FirstOrDefault(o => o.Id == itemId);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<ShopProductCategoryLocalization>(new[]
-            {
-                () => CheckAccess(8),
-                () => RequestResult.FromBoolean(mainEntity != null, 404, "Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(this.CheckBasePermissions(user, mainEntity), 403, "У данного пользователя нет доступа к записи"),
-                () => RequestResult.FromBoolean(localization.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () =>
-                {
-                    mainEntity.Localizations.Add(localization);
-                    UpdateModel(DB.ShopProductCategories,mainEntity);
-                    return RequestResult<ShopProductCategoryLocalization>.AsSuccess(localization);
-                }
-            });
+            var mainEntity = GetAvailableShopProductCategories().FirstOrDefault(o => o.Id == itemId);
+            return (ShopProductCategoryLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.ShopProductCategories, mainEntity, localization);
         }
 
 
 
 
         [HttpPut, Route("UpdateProductCategoryMain")]
-        public async Task<RequestResult<ShopProductCategory>> UpdateProductCategoryMain(ShopProductCategoryDTO model)
+        [ShopSectionAccess(5)]
+        public async Task<ShopProductCategoryDTO> UpdateProductCategoryMain(ShopProductCategoryDTO model)
         {
-            var item = GetProductCategoriesList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<ShopProductCategory>(new[]
-            {
-                 () => CheckAccess(5),
-                 () => RequestResult.FromBoolean(item != null, 404,  "Запись по данному id не найдена"),
-                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, item), 403, "У данного пользователя нет доступа к записи"),
-                 () => RequestResult.FromBoolean(model.IsValid(),400,"Проверьте корректность заполнения данных"),
-                 () => UpdateModel(DB.ShopProductCategories, model, item)
-            });
+            var item = GetAvailableShopProductCategories().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return (ShopProductCategoryDTO)DbService.TryUpdateEntity(DB.ShopProductCategories, model, item);
         }
 
         [HttpPut, Route("UpdateProductCategoryLocalization")]
-        public async Task<RequestResult<ShopProductCategoryLocalization>> UpdateProductCategoryLocalization(ShopProductCategoryLocalizationDTO model)
+        [ShopSectionAccess(6)]
+        public async Task<ShopProductCategoryLocalizationDTO> UpdateProductCategoryLocalization(ShopProductCategoryLocalizationDTO model)
         {
             var localization = DB.ShopProductCategoryLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            if (localization == null) return RequestResult<ShopProductCategoryLocalization>.AsError(404, "Локализация с данным id не найдена");
-       
-            var mainEntity = GetProductCategoriesList().FirstOrDefault(o => o.Id == localization.ShopProductCategoryId);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<ShopProductCategoryLocalization>(new[]
-            {
-                 () => CheckAccess(6),
-                 () => RequestResult.FromBoolean(mainEntity != null, 500, "Внутренняя ошибка"),
-                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, mainEntity), 403, "У данного пользователя нет доступа к записи"),
-                 () => RequestResult.FromBoolean(model.IsValid(),400,"Проверьте корректность заполнения данных"),
-                 () => UpdateModel(DB.ShopProductCategoryLocalizations, model, localization)
-            });
+            var mainEntity = GetAvailableShopProductCategories().FirstOrDefault(o => o.Id == localization.ShopProductCategoryId && !o.IsDeleted);
+
+            return (ShopProductCategoryLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.ShopProductCategoryLocalizations, localization, model, mainEntity);
         }
 
 
@@ -704,35 +500,21 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpDelete, Route("DeleteProductCategory")]
-        public async Task<RequestResult> DeleteProductCategory(int id)
+        [ShopSectionAccess(9)]
+        public async Task DeleteProductCategory(int id)
         {
-            var item = GetProductCategoriesList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-
-            return TryFinishAllRequestes(new[]
-            {
-                 () => CheckAccess(9),
-                 () => RequestResult.FromBoolean(item != null, 404, "Сущность по данному id не найдена"),
-                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, item), 403, "У данного пользователя нет доступа к записи"),
-                 () => DeleteModel(DB.ShopProductCategories, item)
-            });
+            var item = GetAvailableShopProductCategories().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            DbService.TryDeleteEntity(DB.ShopProductCategories, item);
         }
 
         [HttpDelete, Route("DeleteProductCategoryLocalization")]
-        public async Task<RequestResult> DeleteProductCategoryLocalization(int id)
+        [ShopSectionAccess(9)]
+        public async Task DeleteProductCategoryLocalization(int id)
         {
-            var localization = DB.ShopProductCategoryLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null) return RequestResult.AsError(404, "Запись по данному id не найдена");
+            var item = DB.ShopProductCategoryLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var mainModel = GetAvailableShopProductCategories().FirstOrDefault(o => o.Id == item.ShopProductCategoryId && !o.IsDeleted);
 
-            var mainEntity = DB.ShopProducts.FirstOrDefault(o => o.Id == localization.ShopProductCategoryId && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes(new[]
-            {
-                 () => CheckAccess(9),
-                 () => RequestResult.FromBoolean(mainEntity != null, 500, "Внутренняя ошибка"),
-                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, mainEntity), 403, "У данного пользователя нет доступа к записи"),
-                 () => DeleteModel(DB.ShopProductCategoryLocalizations, localization,false)
-            });
+            DbService.TryDeleteLocalizationEntity(DB.ShopProductCategoryLocalizations, item, mainModel);
         }
 
 
@@ -741,55 +523,28 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Заказы
 
         [HttpGet, Route("GetOrders")]
-        public async Task<RequestResult<IEnumerable<ShopOrderDTO>>> GetOrders(int offset, int count = 20)
+        [ShopSectionAccess(2)]
+        public async Task<IEnumerable<ShopOrderDTO>> GetOrders(int offset, int count = 20)
         {
-            var checkAccessResult = CheckAccess(2);
-            if (!checkAccessResult.Success)
-            {
-                return new RequestResult<IEnumerable<ShopOrderDTO>>().FillFromRequestResult(checkAccessResult);
-            }
-
-            var user = GetSessionWithRoleInclude().User;
-            var orders = GetAvailableOrders(user,offset,count);
-            var models = ShopOrderDTO.CreateItems(orders, LanguageId, CountryId);
-            return new RequestResult<IEnumerable<ShopOrderDTO>>().SetSuccess(models);
+            return new ShopOrderDTO().CreateDTOs(GetAvailableOrders(offset, count)).Cast<ShopOrderDTO>();
         }
 
         [HttpGet, Route("GetOrder")]
-        public async Task<RequestResult<ShopOrder>> GetOrder(int id)
+        [ShopSectionAccess(2)]
+        public async Task<ShopOrderDTO> GetOrder(int id)
         {
-            var user = GetSessionWithRoleInclude()?.User;
-            var item = GetAvailableOrders(user).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes<ShopOrder>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(2),
-                () => RequestResult.FromBoolean(item != null, 404, "Сущность по данному id не найдена"),
-                () => RequestResult<ShopOrder>.AsSuccess(item)
-            });
+            return (ShopOrderDTO)DbService.TryGetOne(GetAvailableOrders(), id, new ShopOrderDTO());
         }
 
         [HttpPut, Route("UpdateOrderData")]
-        public async Task<RequestResult> UpdateOrderData(EditOrderAdminModel model)
+        [ShopSectionAccess(3)]
+        public async Task UpdateOrderData(EditOrderAdminModel model)
         {
-            var item = GetOrdersList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            var item = GetAvailableOrders().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             if (item == null)
             {
-                return RequestResult.AsError(404, "Запись по данному id не найдена");
+                throw new Exception404("Запись по данному id не найдена");
             }
-
-            var checkAccessResult = CheckAccess(3);
-            if (!checkAccessResult.Success)
-            {
-                return checkAccessResult;
-            }
-
-            var user = GetSessionWithRoleInclude().User;
-            var orders = GetAvailableOrders(user);
-            if(!orders.Any(o => o.Id == item.Id))
-            {
-                return RequestResult.AsError(403, "У пользователя нет доступа к данному заказы");
-            }
-
 
             if (model.Status == ShopOrderStatus.Basket
                 || model.Status == ShopOrderStatus.Unpaid
@@ -797,46 +552,32 @@ namespace Alfateam.Website.API.Controllers.Admin
                 || model.Status == ShopOrderStatus.ReturnedByCustomer
                 || model.Status == ShopOrderStatus.ReturnedByDeliveryService)
             {
-                return RequestResult.AsError(400, "Неправильный статус");
+                throw new Exception400("Неправильный статус");
             }
 
-
-            return UpdateModel(DB.ShopOrders, model, item);
+            DbService.UpdateEntity(DB.ShopOrders, model, item);
         }
 
         [HttpPut, Route("CancelOrder")]
-        public async Task<RequestResult> CancelOrder(int orderId, ShopOrderStatus status, ShopOrderReturn returnInfo)
+        [ShopSectionAccess(4)]
+        public async Task CancelOrder(int orderId, ShopOrderStatus status, ShopOrderReturn returnInfo)
         {
-            var item = GetOrdersList().FirstOrDefault(o => o.Id == orderId && !o.IsDeleted);
+            var item = GetAvailableOrders().FirstOrDefault(o => o.Id == orderId && !o.IsDeleted);
             if (item == null)
             {
-                return RequestResult.AsError(404, "Запись по данному id не найдена");
-            }
-
-            var checkAccessResult = CheckAccess(4);
-            if (!checkAccessResult.Success)
-            {
-                return new RequestResult().FillFromRequestResult(checkAccessResult);
-            }
-
-            var user = GetSessionWithRoleInclude().User;
-            var orders = GetAvailableOrders(user);
-            if (!orders.Any(o => o.Id == item.Id))
-            {
-                return RequestResult.AsError(403, "У пользователя нет доступа к данному заказы");
+                throw new Exception404("Запись по данному id не найдена");
             }
 
             if (status != ShopOrderStatus.Canceled 
                 && status != ShopOrderStatus.ReturnedByCustomer
                 && status != ShopOrderStatus.ReturnedByDeliveryService)
             {
-                return RequestResult.AsError(400, "Неправильный статус");
+                throw new Exception400("Неправильный статус");
             }
-
 
             item.Return = returnInfo;
             item.Status = status;
-            return UpdateModel(DB.ShopOrders, item);
+            DbService.UpdateEntity(DB.ShopOrders, item);
         }
 
 
@@ -845,79 +586,46 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Промокоды
 
         [HttpGet, Route("GetPromocodes")]
-        public async Task<RequestResult<IEnumerable<PromocodeDTO>>> GetPromocodes(int offset, int count = 20)
+        [ShopSectionAccess(1)]
+        public async Task<IEnumerable<PromocodeDTO>> GetPromocodes(int offset, int count = 20)
         {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<PromocodeDTO>>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(1),
-                () => {
-                    var items = GetAvailableModels(GetSessionWithRoleInclude().User, GetPromocodesList(), offset, count);
-                    var models = PromocodeDTO.CreateItems(items.Cast<Promocode>(), LanguageId,(int)CurrencyId) as IEnumerable<PromocodeDTO>;
-                    return RequestResult<IEnumerable<PromocodeDTO>>.AsSuccess(models);
-                }
-            });
+            return new PromocodeDTO().CreateDTOs(GetAvailablePromocodes().Skip(offset).Take(20)).Cast<PromocodeDTO>();
         }
 
         [HttpGet, Route("GetPromocode")]
-        public async Task<RequestResult<Promocode>> GetPromocode(int id)
+        [ShopSectionAccess(1)]
+        public async Task<PromocodeDTO> GetPromocode(int id)
         {
-            var item = GetPromocodesFullIncludedList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<Promocode>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(1),
-                () => RequestResult.FromBoolean(item != null, 404, "Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(this.CheckBasePermissions(user, item),403, "У данного пользователя нет доступа к записи"),
-                () => RequestResult<Promocode>.AsSuccess(item)
-            });
+            return (PromocodeDTO)DbService.TryGetOne(GetAvailablePromocodes(), id, new PromocodeDTO());
         }
 
 
 
         [HttpPost, Route("CreatePromocode")]
-        public async Task<RequestResult<ShopProduct>> CreatePromocode(Promocode item)
+        [ShopSectionAccess(8)]
+        public async Task<PromocodeDTO> CreatePromocode(PromocodeDTO model)
         {
-            return TryFinishAllRequestes<ShopProduct>(new[]
-            {
-                () => CheckAccess(8),
-                () => RequestResult.FromBoolean(item.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () => CreateModel(DB.Promocodes,item)
-             });
+            return (PromocodeDTO)DbService.TryCreateAvailabilityEntity(DB.Promocodes, model, this.Session);
         }
 
 
 
         [HttpPut, Route("UpdatePromocode")]
-        public async Task<RequestResult<Promocode>> UpdatePromocode(PromocodeDTO model)
+        [ShopSectionAccess(5)]
+        public async Task<PromocodeDTO> UpdatePromocode(PromocodeDTO model)
         {
-            var item = GetPromocodesList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<Promocode>(new Func<RequestResult>[]
-            {
-                 () => CheckAccess(5),
-                 () => RequestResult.FromBoolean(item != null, 404,  "Запись по данному id не найдена"),
-                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, item), 403, "У данного пользователя нет доступа к записи"),
-                 () => RequestResult.FromBoolean(model.IsValid(),400,"Проверьте корректность заполнения данных"),
-                 () => UpdateModel(DB.Promocodes, model, item)
-            });
+            var item = GetAvailablePromocodes().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return (PromocodeDTO)DbService.TryUpdateEntity(DB.Promocodes, model, item);
         }
 
 
 
         [HttpDelete, Route("DeletePromocode")]
-        public async Task<RequestResult> DeletePromocode(int id)
+        [ShopSectionAccess(9)]
+        public async Task DeletePromocode(int id)
         {
-            var item = GetPromocodesList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-
-            return TryFinishAllRequestes(new[]
-            {
-                 () => CheckAccess(9),
-                 () => RequestResult.FromBoolean(item != null, 404, "Сущность по данному id не найдена"),
-                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, item), 403, "У данного пользователя нет доступа к записи"),
-                 () => DeleteModel(DB.Promocodes, item)
-            });
+            var item = GetAvailablePromocodes().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            DbService.TryDeleteEntity(DB.Promocodes, item);
         }
 
         #endregion
@@ -927,80 +635,62 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Матрицы цен
         [HttpPut, Route("UpdatePricingMatrix")]
-        public async Task<RequestResult<PricingMatrix>> UpdatePricingMatrix(PricingMatrixDTO model)
+        [ShopSectionAccess(7)]
+        public async Task<PricingMatrixDTO> UpdatePricingMatrix(PricingMatrixDTO model)
         {
-           var matrix = DB.GetIncludedPricingMatrix(model.Id);
-         
-           return TryFinishAllRequestes<PricingMatrix>(new[]
-           {
-                () => CheckAccess(7),
-                () => RequestResult.FromBoolean(matrix != null, 404, "Запись по данному id не найдена"),
-                () => RequestResult.FromBoolean(matrix.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () => UpdateModel(DB.PricingMatrices, model, matrix)
-            });
+            var matrix = DB.GetIncludedPricingMatrix(model.Id);
+            return (PricingMatrixDTO)DbService.TryUpdateEntity(DB.PricingMatrices, model, matrix);
         }
 
         [HttpPut, Route("SetDefaultProductPricingMatrix")]
-        public async Task<RequestResult<PricingMatrix>> SetDefaultProductPricingMatrix(int productId)
+        [ShopSectionAccess(8)]
+        public async Task<PricingMatrixDTO> SetDefaultProductPricingMatrix(int productId)
         {
-            var product = GetProductsFullIncludedList().FirstOrDefault(o => o.Id == productId);
-            var user = GetSessionWithRoleInclude()?.User;
-
-            return TryFinishAllRequestes<PricingMatrix>(new[]
+            var product = GetAvailableShopProducts().FirstOrDefault(o => o.Id == productId);
+            if (product is null)
             {
-                () => CheckAccess(8),
-                () => RequestResult.FromBoolean(product != null, 404, "Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(this.CheckBasePermissions(user, product), 403, "У данного пользователя нет доступа к записи"),
-                () =>
-                {
-                    product.BasePricing = CreateDefaultPricingMatrix();
-                    return UpdateModel(DB.ShopProducts,product);
-                }
-            });
+                throw new Exception404("Сущность с данным id не найдена");
+            }
+
+            product.BasePricing = CreateDefaultPricingMatrix();
+            DbService.UpdateEntity(DB.ShopProducts, product);
+
+            return (PricingMatrixDTO)new PricingMatrixDTO().CreateDTO(product.BasePricing);
         }
     
         [HttpPut, Route("SetDefaultProductModifierItemPricingMatrix")]
-        public async Task<RequestResult<PricingMatrix>> SetDefaultProductModifierItemPricingMatrix(int optionId)
+        [ShopSectionAccess(8)]
+        public async Task<PricingMatrixDTO> SetDefaultProductModifierItemPricingMatrix(int optionId)
         {
             var option = GetProductModifiersItemsList().FirstOrDefault(o => o.Id == optionId);
-            var user = GetSessionWithRoleInclude()?.User;
+            CheckFromProductModifierOption(optionId);
 
-            return TryFinishAllRequestes<PricingMatrix>(new[]
-            {
-                () => CheckAccess(8),
-                () => RequestResult.FromBoolean(option != null, 404, "Сущность по данному id не найдена"),
-                () => CheckFromProductModifier(option.ProductModifierId),
-                () =>
-                {
-                    option.Pricing = CreateDefaultPricingMatrix();
-                    return UpdateModel(DB.ProductModifierItems,option);
-                }
-            });
+            option.Pricing = CreateDefaultPricingMatrix();
+            DbService.UpdateEntity(DB.ProductModifierItems, option);
+
+            return (PricingMatrixDTO)new PricingMatrixDTO().CreateDTO(option.Pricing);
         }
         #endregion
 
         [HttpPut, Route("UpdateAvailability")]
-        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityDTO model)
+        [ShopSectionAccess(5)]
+        public async Task<AvailabilityDTO> UpdateAvailability(AvailabilityDTO model)
         {
             bool hasThisModel = false;
 
-            var user = GetSessionWithRoleInclude().User;
-            hasThisModel |= GetAvailableModels(user, DB.ShopProducts.IncludeAvailability()).Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
-            hasThisModel |= GetAvailableModels(user, DB.ShopProductCategories.IncludeAvailability()).Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            var admin = this.Session.User;
+
+            hasThisModel |= DbService.GetAvailableModels(admin, DB.ShopProducts.IncludeAvailability())
+                                     .Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            hasThisModel |= DbService.GetAvailableModels(admin, DB.ShopProductCategories.IncludeAvailability())
+                                     .Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
 
             if (!hasThisModel)
             {
-                return new RequestResult<Availability>().SetError(403, "У данного пользователя нет прав на редактирование матрицы доступности");
+                throw new Exception403("У данного пользователя нет прав на редактирование матрицы доступности");
             }
 
-            var availability = DB.GetIncludedAvailability(model.Id);
-            return TryFinishAllRequestes<Availability>(new[]
-            {
-                () => RequestResult.FromBoolean(availability != null, 404, "Запись по данному id не найдена"),
-                () => CanSetAvailabilityCountries(user, availability),
-                () => CheckAccess(5),
-                () => UpdateModel(DB.Availabilities, model, availability)
-            });
+            return DbService.TryUpdateAvailability(model, this.Session);
         }
 
 
@@ -1008,13 +698,30 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
 
-        #region Private get available orders
-        private List<ShopOrder> GetAvailableOrders(User user, int offset, int count = 20)
+
+        #region Private get available methods
+        private IEnumerable<ShopProduct> GetAvailableShopProducts()
         {
-            return GetAvailableOrders(user).Skip(offset).Take(count).ToList();
+            return DbService.GetAvailableModels(this.Session.User, GetProductsFullIncludedList()).Cast<ShopProduct>();
         }
-        private List<ShopOrder> GetAvailableOrders(User user)
+        private IEnumerable<ShopProductCategory> GetAvailableShopProductCategories()
         {
+            return DbService.GetAvailableModels(this.Session.User, GetProductCategoriesList()).Cast<ShopProductCategory>();
+        }
+        private IEnumerable<Promocode> GetAvailablePromocodes()
+        {
+            return DbService.GetAvailableModels(this.Session.User, GetPromocodesList()).Cast<Promocode>();
+        }
+
+
+        private List<ShopOrder> GetAvailableOrders(int offset, int count = 20)
+        {
+            return GetAvailableOrders().Skip(offset).Take(count).ToList();
+        }
+        private List<ShopOrder> GetAvailableOrders()
+        {
+            var user = this.Session.User;
+
             var allOrders = GetOrdersList();
             var availableOrders = new List<ShopOrder>();
 
@@ -1023,15 +730,15 @@ namespace Alfateam.Website.API.Controllers.Admin
                 return allOrders.ToList();
             }
 
-            foreach(var order in allOrders)
+            foreach (var order in allOrders)
             {
                 if (user.RoleModel.IsAllCountriesAccess)
                 {
                     bool isForbidden = false;
 
-                    foreach(var country in user.RoleModel.ForbiddenCountries)
+                    foreach (var country in user.RoleModel.ForbiddenCountries)
                     {
-                        if(order.CountryId == country.Id)
+                        if (order.CountryId == country.Id)
                         {
                             isForbidden = true;
                             break;
@@ -1041,7 +748,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                     if (!isForbidden)
                     {
                         availableOrders.Add(order);
-                    }                 
+                    }
                 }
                 else
                 {
@@ -1065,188 +772,99 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Private check access methods
 
-        private RequestResult CheckAccess(int requiredLevel)
-        {
-           var session = GetSessionWithRoleInclude();
-           return TryFinishAllRequestes(new Func<RequestResult>[]
-           {
-                () => CheckSession(session),
-                () => CheckForBan(session.User,BanType.AdminPanel),
-                () => RequestResult.FromBoolean(session.User.RoleModel.Role != UserRole.User,
-                        403, "У данного пользователя нет доступа в администраторскую панель"),  
-                () => RequestResult.FromBoolean(session.User.RoleModel.ShopAccess.AccessLevel >= requiredLevel 
-                            || session.User.RoleModel.Role == UserRole.Owner || session.User.RoleModel.Role == UserRole.LocalDirector,
-                       403, "У данного пользователя нет прав на выполнение данного действия")
-            });
-        }
-
-        private RequestResult CheckFromProductModifierOption(int optionId)
+        private void CheckFromProductModifierOption(int? optionId)
         {
             var option = GetProductModifiersItemsList().FirstOrDefault(o => o.Id == optionId && !o.IsDeleted);
-            if (option == null) return RequestResult.AsError(500, "Внутренняя ошибка");
+            if (optionId == null || option == null)
+            {
+                throw new Exception500("Внутренняя ошибка");
+            }
 
-            return CheckFromProductModifier(option.ProductModifierId);
+            CheckFromProductModifier(option.ProductModifierId);
         }
-        private RequestResult CheckFromProductModifier(int modifierId)
+        private void CheckFromProductModifier(int? modifierId)
         {
             var modifier = GetProductModifiersList().FirstOrDefault(o => o.Id == modifierId);
-            if (modifier == null) return RequestResult<ProductModifierItem>.AsError(500, "Внутренняя ошибка");
+            if (modifierId == null || modifier == null)
+            {
+                throw new Exception500("Внутренняя ошибка");
+            }
 
-            return CheckFromProduct(modifier.ShopProductId);
+            CheckFromProduct(modifier.ShopProductId);
         }
-        private RequestResult CheckFromProduct(int productId)
+        private void CheckFromProduct(int? productId)
         {
             var product = GetProductsFullIncludedList().FirstOrDefault(o => o.Id == productId && !o.IsDeleted);
-            if (product == null) return RequestResult.AsError(500, "Внутренняя ошибка");
-
-            var user = GetSessionWithRoleInclude()?.User;
-            return RequestResult.FromBoolean(this.CheckBasePermissions(user, product), 403, "У данного пользователя нет доступа к записи");
+            if (productId == null || product == null)
+            {
+                throw new Exception500("Внутренняя ошибка");
+            }
         }
 
         #endregion 
 
         #region Private prepare model methods
 
-        private async Task<RequestResult> CheckAndPrepareProductBeforeCreate(ShopProduct product)
+
+        private async Task HandleProduct(ShopProduct entity, DBModelFillMode mode)
         {
-            //Загрузка главной картинки
-            var mainFileUploadResult = await TryUploadFile($"mainImg", FileType.Image);
-            if (!mainFileUploadResult.Success)
-            {
-                return mainFileUploadResult;
-            }
+            const string formFilename = "mainImg";
 
-            if (product.MainImage is null)
+            if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
+               || mode == DBModelFillMode.Create)
             {
-                product.MainImage = new ShopProductImage();
-            }
-            product.MainImage.ImgPath = mainFileUploadResult.Value;
-
-
-            //Загружаем остальные картинки
-            product.Images = new List<ShopProductImage>();
-            var files = Request.Form.Files.Where(o => o.Name.StartsWith("main_") && o.Name.EndsWith("_shopImg"));
-            foreach (var file in files)
-            {
-                var imgUploadResult = await TryUploadFile(file, FileType.Image);
-                if (!imgUploadResult.Success)
+                if(entity.MainImage == null)
                 {
-                    return imgUploadResult;
+                    entity.MainImage = new ShopProductImage();
                 }
 
-                product.Images.Add(new ShopProductImage
-                {
-                    ImgPath = imgUploadResult.Value
-                });
+                entity.MainImage.ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
             }
-
-
-            foreach (var localization in product.Localizations)
-            {
-                var localizationPrepareResult = await CheckAndPrepareProductLocalizationBeforeCreate(localization);
-                if (!localizationPrepareResult.Success)
-                {
-                    return localizationPrepareResult;
-                }   
-            }
-
-
-            return RequestResult.AsSuccess();
         }
-        private async Task<RequestResult> CheckAndPrepareProductLocalizationBeforeCreate(ShopProductLocalization localization)
+        private async Task HandleProductLocalization(ShopProductLocalization entity, DBModelFillMode mode)
         {
+            const string formFilename = "mainImg";
 
-            if (localization.UseLocalizationImages)
+            if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
+               || mode == DBModelFillMode.Create)
             {
-                //Загрузка главной картинки
-                var mainFileUploadResult = await TryUploadFile($"localization_{localization.LanguageEntityId}_mainImg", FileType.Image);
-                if (!mainFileUploadResult.Success)
+                if (entity.MainImage == null)
                 {
-                    return mainFileUploadResult;
+                    entity.MainImage = new ShopProductImage();
                 }
 
-
-                localization.MainImage ??= new ShopProductImage();
-                localization.MainImage.ImgPath = mainFileUploadResult.Value;
-
-
-                
-                //Загружаем остальные картинки
-                localization.Images = new List<ShopProductImage>();
-                var files = Request.Form.Files.Where(o => o.Name.StartsWith("localization_") && o.Name.EndsWith("_shopImg"));
-                foreach (var file in files)
-                {
-                    var imgUploadResult = await TryUploadFile(file, FileType.Image);
-                    if (!imgUploadResult.Success)
-                    {
-                        return imgUploadResult;
-                    }
-
-                    localization.Images.Add(new ShopProductImage
-                    {
-                        ImgPath = imgUploadResult.Value
-                    });
-                }
-
+                entity.MainImage.ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
             }
-
-
-            if (!localization.IsValid())
-            {
-                return RequestResult.AsError(400, "Проверьте корректность заполнения полей");
-            }
-
-            return RequestResult.AsSuccess();
         }
 
 
-        private async Task<RequestResult> CheckAndPrepareProductBeforeUpdate(ShopProduct product, ShopProductDTO model)
+
+        private async Task HandleProductAddPhoto(ShopProduct entity)
         {
-            //Загрузка главной картинки
-            if (Request.Form.Files.Any(o => o.Name == "mainImg"))
-            {
-                var mainFileUploadResult = await TryUploadFile($"mainImg", FileType.Image);
-                if (!mainFileUploadResult.Success)
-                {
-                    return mainFileUploadResult;
-                }
-                product.MainImage.ImgPath = mainFileUploadResult.Value;
-            }
+            const string formFilename = "mainImg";
 
-            return RequestResult.AsSuccess();
+            entity.Images.Add(new ShopProductImage
+            {
+                ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image),
+            });
         }
-        private async Task<RequestResult> CheckAndPrepareProductLocalizationBeforeUpdate(ShopProductLocalization localization, ShopProductLocalizationDTO model)
+        private async Task HandleProductLocalizationAddPhoto(ShopProductLocalization entity)
         {
+            const string formFilename = "mainImg";
 
-            if (model.UseLocalizationImages)
+            entity.Images.Add(new ShopProductImage
             {
-                string formFileName = $"localization_{localization.LanguageEntityId}_mainImg";
-                if (Request.Form.Files.Any(o => o.Name == formFileName))
-                {
-                    //Загрузка главной картинки
-                    var mainFileUploadResult = await TryUploadFile($"localization_{localization.LanguageEntityId}_mainImg", FileType.Image);
-                    if (!mainFileUploadResult.Success)
-                    {
-                        return mainFileUploadResult;
-                    }
-                    localization.MainImage.ImgPath = mainFileUploadResult.Value;
-                }
-            }
-
-
-            if (!localization.IsValid())
-            {
-                return RequestResult.AsError(400, "Проверьте корректность заполнения полей");
-            }
-
-            return RequestResult.AsSuccess();
+                ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image),
+            });
         }
+
+
         #endregion
 
         #region Private get included methods
 
 
-        private IQueryable<ShopProduct> GetProductsList()
+        private IEnumerable<ShopProduct> GetProductsList()
         {
             return DB.ShopProducts.IncludeAvailability()
                                   .IncludePricing()
@@ -1255,7 +873,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                                   .Include(o => o.MainLanguage)
                                   .Where(o => !o.IsDeleted);
         }
-        private IQueryable<ShopProduct> GetProductsFullIncludedList()
+        private IEnumerable<ShopProduct> GetProductsFullIncludedList()
         {
             return DB.ShopProducts.IncludeAvailability()
                                   .Include(o => o.Category).ThenInclude(o => o.Localizations)
@@ -1272,7 +890,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
 
-        private IQueryable<ProductModifier> GetProductModifiersList()
+        private IEnumerable<ProductModifier> GetProductModifiersList()
         {
             return DB.ProductModifiers.Include(o => o.Localizations)
                                       .Include(o => o.Options).ThenInclude(o => o.Localizations)
@@ -1280,7 +898,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                                       .Include(o => o.Options).ThenInclude(o => o.Pricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
                                       .Where(o => !o.IsDeleted);
         }
-        private IQueryable<ProductModifierItem> GetProductModifiersItemsList()
+        private IEnumerable<ProductModifierItem> GetProductModifiersItemsList()
         {
             return DB.ProductModifierItems.Include(o => o.Localizations)
                                           .Include(o => o.Pricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
@@ -1289,7 +907,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
 
-        private IQueryable<ShopProductCategory> GetProductCategoriesList()
+        private IEnumerable<ShopProductCategory> GetProductCategoriesList()
         {
             return DB.ShopProductCategories.IncludeAvailability()
                                            .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
@@ -1298,7 +916,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
 
-        private IQueryable<ShopOrder> GetOrdersList()
+        private IEnumerable<ShopOrder> GetOrdersList()
         {
             var orders = DB.ShopOrders.Include(o => o.Items).ThenInclude(o => o.Item).ThenInclude(o => o.MainImage)
                                        .Include(o => o.Items).ThenInclude(o => o.SelectedModifiers).ThenInclude(o => o.Modifier)
@@ -1314,14 +932,14 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
 
-        private IQueryable<Promocode> GetPromocodesList()
+        private IEnumerable<Promocode> GetPromocodesList()
         {
             return DB.Promocodes.IncludeAvailability()
                                 .Include(o => o.PriceFrom).ThenInclude(o => o.Costs)
                                 .Include(o => o.PriceTo).ThenInclude(o => o.Costs)
                                 .Where(o => !o.IsDeleted);
         }
-        private IQueryable<Promocode> GetPromocodesFullIncludedList()
+        private IEnumerable<Promocode> GetPromocodesFullIncludedList()
         {
             return DB.Promocodes.IncludeAvailability()
                                 .Include(o => o.PriceFrom).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)

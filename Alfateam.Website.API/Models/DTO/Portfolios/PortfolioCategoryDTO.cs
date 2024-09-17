@@ -4,7 +4,7 @@ using Alfateam2._0.Models.Portfolios;
 
 namespace Alfateam.Website.API.Models.DTO.Portfolios
 {
-    public class PortfolioCategoryDTO : DTOModel<PortfolioCategory>
+    public class PortfolioCategoryDTO : AvailabilityDTOModel<PortfolioCategory>
     {
         public string Title { get; set; }
         public string Slug => SlugHelper.GetLatynSlug(Title);

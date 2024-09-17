@@ -3,7 +3,7 @@ using Alfateam2._0.Models.Localization.Items;
 
 namespace Alfateam.Website.API.Models.DTOLocalization
 {
-    public class ComplianceDocumentLocalizationDTO : DTOModel<ComplianceDocumentLocalization>
+    public class ComplianceDocumentLocalizationDTO : LocalizationDTOModel<ComplianceDocumentLocalization>
     {
 
         /// <summary>

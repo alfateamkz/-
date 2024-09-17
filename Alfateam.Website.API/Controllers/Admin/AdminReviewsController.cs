@@ -1,6 +1,11 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
+using Alfateam.Website.API.Exceptions;
+using Alfateam.Website.API.Filters.Access;
+using Alfateam.Website.API.Models;
+using Alfateam.Website.API.Models.DTO.HR;
+using Alfateam.Website.API.Models.DTO.Reviews;
 using Alfateam.Website.API.Models.DTO.Shop.Orders;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
@@ -12,99 +17,66 @@ namespace Alfateam.Website.API.Controllers.Admin
 {
     public class AdminReviewsController : AbsAdminController
     {
-        public AdminReviewsController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
+        public AdminReviewsController(ControllerParams @params) : base(@params)
         {
         }
 
         #region Отзывы
 
         [HttpGet, Route("GetReviews")]
-        public async Task<RequestResult<IEnumerable<Review>>> GetReviews(int offset, int count = 20)
+        [ReviewsSectionAccess(1)]
+        public async Task<IEnumerable<ReviewDTO>> GetReviews(int offset, int count = 20)
         {
-            var checkAccessResult = CheckAccess(1);
-            if (!checkAccessResult.Success)
-            {
-                return new RequestResult<IEnumerable<Review>>().FillFromRequestResult(checkAccessResult);
-            }
-
-            var user = GetSessionWithRoleInclude().User;
-            var reviews = GetAvailableReviews(user, offset, count);
-            return RequestResult<IEnumerable<Review>>.AsSuccess(reviews);
+            var reviews = GetAvailableReviews(offset, count);
+            return new ReviewDTO().CreateDTOsWithLocalization(reviews, LanguageId).Cast<ReviewDTO>();
         }
 
 
         [HttpGet, Route("GetReview")]
-        public async Task<RequestResult<Review>> GetReview(int id)
+        [ReviewsSectionAccess(1)]
+        public async Task<ReviewDTO> GetReview(int id)
         {
-            var user = GetSessionWithRoleInclude()?.User;
-            var item = GetAvailableReviews(user).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes<Review>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(1),
-                () => RequestResult.FromBoolean(item != null, 404, "Сущность по данному id не найдена"),
-                () => RequestResult<Review>.AsSuccess(item)
-            });
+            return (ReviewDTO)DbService.TryGetOne(GetAvailableReviews(), id, new ReviewDTO());
         }
 
 
         [HttpPut, Route("SetReviewHidden")]
-        public async Task<RequestResult<Review>> SetReviewHidden(int id,bool val)
+        [ReviewsSectionAccess(2)]
+        public async Task SetReviewHidden(int id,bool val)
         {
-            var user = GetSessionWithRoleInclude()?.User;
-            var item = GetAvailableReviews(user).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes<Review>(new Func<RequestResult>[]
+            var item = GetAvailableReviews().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if(item == null)
             {
-                () => CheckAccess(2),
-                () => RequestResult.FromBoolean(item != null, 404, "Сущность по данному id не найдена"),
-                () =>
-                {
-                    item.IsHidden = val;
-                    return UpdateModel(DB.Reviews,item);
-                }
-            });
+                throw new Exception404("Сущность по данному id не найдена");
+            }
+
+            item.IsHidden = val;
+            DbService.UpdateEntity(DB.Reviews, item);
         }
+
+
 
         [HttpDelete, Route("DeleteReview")]
-        public async Task<RequestResult<Review>> DeleteReview(int id)
+        [ReviewsSectionAccess(3)]
+        public async Task DeleteReview(int id)
         {
-            var user = GetSessionWithRoleInclude()?.User;
-            var item = GetAvailableReviews(user).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes<Review>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(3),
-                () => RequestResult.FromBoolean(item != null, 404, "Сущность по данному id не найдена"),
-                () => DeleteModel(DB.Reviews, item)
-            });
+            var item = GetAvailableReviews().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            DbService.TryDeleteEntity(DB.Reviews, item);
         }
 
         #endregion
 
 
 
-
-        #region Private check access methods
-
-        private RequestResult CheckAccess(int requiredLevel)
-        {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes(new Func<RequestResult>[]
-            {
-                () => RequestResult.FromBoolean(session.User.RoleModel.Role != UserRole.User,
-                        403, "У данного пользователя нет доступа в администраторскую панель"),
-                () => CheckSession(session),
-                () => RequestResult.FromBoolean(session.User.RoleModel.ReviewsAccess.AccessLevel >= requiredLevel || session.User.RoleModel.Role == UserRole.Owner,
-                       403, "У данного пользователя нет прав на выполнение данного действия")
-             });
-        }
-
-        #endregion
 
         #region Private get available reviews
 
-        private List<Review> GetAvailableReviews(User user)
+        private List<Review> GetAvailableReviews()
         {
             var allReviews = GetReviewsList();
             var availableReviews = new List<Review>();
+
+            var user = this.Session.User;
 
             if (user.RoleModel.Role == UserRole.Owner)
             {
@@ -148,9 +120,9 @@ namespace Alfateam.Website.API.Controllers.Admin
 
             return availableReviews;
         }
-        private List<Review> GetAvailableReviews(User user, int offset, int count = 20)
+        private List<Review> GetAvailableReviews(int offset, int count = 20)
         {
-            return GetAvailableReviews(user).Skip(offset).Take(count).ToList();
+            return GetAvailableReviews().Skip(offset).Take(count).ToList();
         }
 
 

@@ -3,7 +3,11 @@ using Alfateam.Gateways.Abstractions;
 using Alfateam.Gateways.Models.Messages;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
+using Alfateam.Website.API.Exceptions;
+using Alfateam.Website.API.Filters;
 using Alfateam.Website.API.Helpers;
+using Alfateam.Website.API.Models;
+using Alfateam.Website.API.Models.DTO.General;
 using Alfateam.Website.API.Models.UserModels;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Roles;
@@ -11,76 +15,48 @@ using Alfateam2._0.Models.Shop.Orders;
 using Alfateam2._0.Models.Shop.Wishes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Alfateam.Website.API.Controllers.General
 {
     public class UsersController : AbsController
     {
-        private readonly IMailGateway MailGateway;
-        public UsersController(WebsiteDBContext db, IWebHostEnvironment appEnv, IMailGateway mailGateway) : base(db, appEnv)
+
+
+        public UsersController(ControllerParams @params) : base(@params)
         {
-            MailGateway = mailGateway;
         }
 
         [HttpGet, Route("Login")]
-        public AuthResponseModel Login(string email,string password)
+        public async Task<string> Login(string email,string password)
         {
-            var res = new AuthResponseModel();
-
-
-            var sdfsf = DB.Users
-                .Include(o => o.RoleModel).ThenInclude(o => o.AvailableCountries)
-                .Include(o => o.Country)
-                .ToList();
-
-            var user = DB.Users
-                .Include(o => o.RoleModel).ThenInclude(o => o.AvailableCountries)
-                .Include(o => o.Country)
-                .ToList()
-                .FirstOrDefault(o => o.Email.Equals(email, StringComparison.OrdinalIgnoreCase)
+            var user = DB.Users.FirstOrDefault(o => o.Email.Equals(email, StringComparison.OrdinalIgnoreCase)
                                 && PasswordHelper.CheckEncryptedPassword(password, o.Password));
 
-            if(user != null)
+            if(user == null)
             {
-                var session = new Session
-                {
-                    User = user,
-                };
-                DB.Sessions.Add(session);
-                DB.SaveChanges();
+                throw new Exception404("Неверный логин или пароль");
 
-                res.User = user;
-                res.Sessid = session.SessID;
             }
 
-            return res;
+            var session = new Session
+            {
+                User = user,
+            };
+            DbService.CreateEntity(DB.Sessions, session);
+
+            DB.Sessions.Add(session);
+            DB.SaveChanges();
+
+            return session.SessID;
         }
 
 
         [HttpGet, Route("GetUserBySessionToken")]
-        public RequestResult<User> GetUserBySessionToken()
+        [UserActionsFilter]
+        public async Task<UserDTO> GetUserBySessionToken()
         {
-            var res = new RequestResult<User>();
-
-            var sessionUser = GetUserBySessid();
-
-            if (sessionUser.Session == null)
-            {
-                res.Code = 404;
-                res.Error = "Токен не найден в системе";
-            }
-            else if(sessionUser.Session.ExpiresAt < DateTime.UtcNow)
-            {
-                res.Code = 403;
-                res.Error = "Срок действия токена закончился";
-            }
-            else
-            {
-                res.Value = sessionUser.User;
-                res.Success = true;
-            }
-
-            return res;
+            return (UserDTO)new UserDTO().CreateDTO(this.Session.User);
         }
 
 
@@ -88,49 +64,27 @@ namespace Alfateam.Website.API.Controllers.General
 
 
         [HttpPost, Route("RegisterUser")]
-        public RequestResult<User> RegisterUser(RegisterUserModel model)
+        public async Task<UserDTO> RegisterUser(RegisterUserModel model)
         {
-            var res = new RequestResult<User>();
-
             if (model.RegisteredFromCountryId == null)
             {
-                res.Code = 400;
-                res.Error = "Необходимо указать id страны, из которой зарегистрирован пользователь";
+                throw new Exception400("Необходимо указать id страны, из которой зарегистрирован пользователь");
             }
-            if (model.CountryId == null)
+            else if (model.CountryId == null)
             {
-                res.Code = 400;
-                res.Error = "Необходимо указать id страны, в которой находится пользователь";
+                throw new Exception400("Необходимо указать id страны, в которой находится пользователь");
             }
-            if (DB.Users.ToList().Any(o => o.Email.Equals(model.Email,StringComparison.OrdinalIgnoreCase)))
+            else if(DB.Users.ToList().Any(o => o.Email.Equals(model.Email,StringComparison.OrdinalIgnoreCase)))
             {
-                res.Code = 400;
-                res.Error = "Пользователь с данным email уже зарегистрирован";
+                throw new Exception400("Пользователь с данным email уже зарегистрирован");
             }
-            else
+
+            return (UserDTO)DbService.TryCreateEntity(DB.Users, model, (entity) =>
             {
-                var user = new User();
-                model.SetData(user);
-
-                user.Password = PasswordHelper.EncryptPassword(user.Password);
-                user.RoleModel = UserRoleModel.CreateDefault();
-
-                user.Wishlist = new ShopWishlist();
-
-                DB.Users.Add(user);
-                DB.SaveChanges();
-
-
-
-                user.Wishlist.User = null;
-
-
-                res.Success = true;
-                res.Value = user;
-            }
-
-
-            return res;
+                entity.Password = PasswordHelper.EncryptPassword(model.Password);
+                entity.RoleModel = UserRoleModel.CreateDefault();
+                entity.Wishlist = new ShopWishlist();
+            });
         }
 
 
@@ -140,51 +94,25 @@ namespace Alfateam.Website.API.Controllers.General
 
 
         [HttpPut, Route("UpdateUser")]
-        public async Task<RequestResult<User>> UpdateUser(UpdateUserModel model)
+        [UserActionsFilter]
+        public async Task<UpdateUserModel> UpdateUser(UpdateUserModel model)
         {
-            var session = DB.Sessions.Include(o => o.User).FirstOrDefault(o => o.SessID == this.UserSessid);
-            return TryFinishAllRequestes<User>(new[]
-            {
-                () => CheckSession(session),
-                () => RequestResult.FromBoolean(session.User != null,404,"Пользователь не найден"),
-                () =>
-                {
-                    model.Id = session.UserId;
-                    return RequestResult.FromBoolean(model.ValidateModel(),400,"Заполните необходимые данные");
-                },
-                () =>
-                {
-                    model.SetData(session.User);
-                    DB.Users.Update(session.User);
-                    DB.SaveChanges();
-                    return RequestResult<User>.AsSuccess(session.User);
-                }
-            });
+            return (UpdateUserModel)DbService.TryUpdateEntity(DB.Users, model, this.Session.User);
         }
 
 
         [HttpPut, Route("UploadAvatar")]
-        public async Task<RequestResult<User>> UploadAvatar()
+        [UserActionsFilter]
+        [SwaggerOperation(description: "Нужно загрузить аватар через форму с именем avatar")]
+        public async Task<string> UploadAvatar()
         {
-            var session = DB.Sessions.Include(o => o.User).FirstOrDefault(o => o.SessID == this.UserSessid);
-            var checkSessionRes = CheckSession(session);
-            if (!checkSessionRes.Success)
-            {
-                return new RequestResult<User>().FillFromRequestResult(checkSessionRes);
-            }
-            else
-            {
-                var uploadRes = await TryUploadFile("avatar", Enums.FileType.Image);
-                if(!uploadRes.Success)
-                {
-                    return new RequestResult<User>().FillFromRequestResult(uploadRes);
-                }
+            const string formFilename = "avatar";
 
-                session.User.AvatarPath = uploadRes.Value;
-                DB.Users.Update(session.User);
-                DB.SaveChanges();
-                return RequestResult<User>.AsSuccess(session.User);
-            }
+            var user = this.Session.User;
+            user.AvatarPath = await FilesService.TryUploadFile(formFilename, Enums.FileType.Image);
+            DbService.UpdateEntity(DB.Users, user);
+
+            return this.Session.User.AvatarPath;
         }
 
 
@@ -192,41 +120,45 @@ namespace Alfateam.Website.API.Controllers.General
 
 
         [HttpPut, Route("ChangePassword")]
-        public RequestResult ChangePassword(string oldPwd, string newPwd)
+        [UserActionsFilter]
+        public async Task ChangePassword(string oldPwd, string newPwd)
         {
-            var session = DB.Sessions.Include(o => o.User).FirstOrDefault(o => o.SessID == this.UserSessid);
-            return TryFinishAllRequestes(new[]
+            var session = this.Session;
+            var user = session.User;
+
+            if(!PasswordHelper.CheckEncryptedPassword(oldPwd, user.Password))
             {
-                () => CheckSession(session),
-                () => RequestResult.FromBoolean(PasswordHelper.CheckEncryptedPassword(oldPwd, session.User.Password),
-                                                   403, "Старый пароль не совпадает"),
-                () => RequestResult.FromBoolean(newPwd != null ,400, "Укажите новый пароль"),
-                () => RequestResult.FromBoolean(newPwd.Length < 8 ,400, "Длина пароля должна быть не менее 8 символов"),
-                () =>
-                {
-                    session.User.Password = PasswordHelper.EncryptPassword(newPwd);
-                    DB.Users.Update(session.User);
+                throw new Exception403("Старый пароль не совпадает");
+            }
+            else if (string.IsNullOrEmpty(newPwd))
+            {
+                throw new Exception400("Укажите новый пароль");
+            }
+            else if (newPwd.Length < 8)
+            {
+                throw new Exception400("Длина пароля должна быть не менее 8 символов");
+            }
 
-                    var otherSessions = DB.Sessions.Where(o => o.UserId == session.UserId && o.Id != session.Id);
-                    foreach(var otherSession in otherSessions)
-                    {
-                        otherSession.IsDeactivated = true;
-                    }
-                    DB.Sessions.UpdateRange(otherSessions);
+            user.Password = PasswordHelper.EncryptPassword(newPwd);
+            DB.Users.Update(user);
 
-                    DB.SaveChanges();
-                    return RequestResult.AsSuccess();
-                }
-            });
+            var otherSessions = DB.Sessions.Where(o => o.UserId == user.Id && o.Id != session.Id);
+            foreach (var otherSession in otherSessions)
+            {
+                otherSession.IsDeactivated = true;
+            }
+            DB.Sessions.UpdateRange(otherSessions);
+            DB.SaveChanges();
         }
 
+
         [HttpPut, Route("ResetPassword")]
-        public RequestResult ResetPassword(string email)
+        public async Task ResetPassword(string email)
         {
             var found = DB.Users.FirstOrDefault(o => o.Email == email);
             if (found == null)
             {
-                return RequestResult.AsError(404, "Пользователь не найден");
+                throw new Exception404("Пользователь не найден");
             }
 
             var pwd = PasswordHelper.GeneratePassword(12);
@@ -250,8 +182,6 @@ namespace Alfateam.Website.API.Controllers.General
                 ToDisplayName = $"{found.Name} {found.Surname}",
                 ToEmail = found.Email
             });
-
-            return RequestResult.AsSuccess();
         }
     }
 }

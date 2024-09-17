@@ -6,7 +6,7 @@ using Alfateam2._0.Models.Portfolios;
 
 namespace Alfateam.Website.API.Models.DTO.Portfolios
 {
-    public class PortfolioDTO : DTOModel<Portfolio>
+    public class PortfolioDTO : AvailabilityDTOModel<Portfolio>
     {
         public string Title { get; set; }
         public string ImgPath { get; set; }

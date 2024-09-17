@@ -18,145 +18,107 @@ using Alfateam2._0.Models.Shop.Wishes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using Alfateam.Website.API.Models;
+using Alfateam.Website.API.Exceptions;
+using Alfateam.Website.API.Models.DTO.Shop.Orders;
+using Alfateam.Website.API.Models.DTO.Shop.Wishes;
+using Alfateam.Website.API.Models.DTO.Reviews;
+using Alfateam.Website.API.Models.DTO.Posts;
+using Alfateam.Website.API.Filters.Access;
+
+
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
     public class AdminUsersController : AbsAdminController
     {
-        public AdminUsersController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
+        public AdminUsersController(ControllerParams @params) : base(@params)
         {
         }
 
 
 
         [HttpGet,Route("GetUsers")]
-        public async Task<RequestResult<IEnumerable<UserDTO>>> GetUsers(int offset, int count = 20)
+        public async Task<IEnumerable<UserDTO>> GetUsers(int offset, int count = 20)
         {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<UserDTO>>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(),
-                () => {
-
-                    var users = GetAvailableUsers(GetSessionWithRoleInclude().User,offset,count);
-                    var models = UserDTO.CreateItemsWithLocalization(users,LanguageId) as IEnumerable<UserDTO>;
-                    return RequestResult<IEnumerable<UserDTO>>.AsSuccess(models);
-                }
-            });
+            var items = GetAvailableUsers().Skip(offset).Take(count);
+            return new UserDTO().CreateDTOs(items).Cast<UserDTO>();
         }
 
 
 
 
         [HttpGet, Route("GetUserMainInfo")]
-        public async Task<RequestResult<User>> GetUserMainInfo(int id)
+        public async Task<UserDTO> GetUserMainInfo(int id)
         {
-            var user = GetUsersList().FirstOrDefault(o => o.Id == id);
-            var admin = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<User>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(),
-                () => RequestResult.FromBoolean(user != null,404,"Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(GetAvailableUsers(admin).Any(o => o.Id == id), 403, "Нет доступа"),
-                () => RequestResult<User>.AsSuccess(user)
-             });
+            return (UserDTO)DbService.TryGetOne(GetAvailableUsers(), id, new UserDTO());
         }
 
         [HttpGet, Route("GetUserBasket")]
-        public async Task<RequestResult<ShopOrder>> GetUserBasket(int id)
+        public async Task<ShopOrderDTO> GetUserBasket(int id)
         {
-            var user = DB.Users.Include(o => o.Basket).ThenInclude(o => o.Items).ThenInclude(o => o.Item).ThenInclude(o => o.MainImage)
-                               .Include(o => o.Basket).ThenInclude(o => o.Items).ThenInclude(o => o.SelectedModifiers).ThenInclude(o => o.Modifier)
-                               .Include(o => o.Basket).ThenInclude(o => o.Items).ThenInclude(o => o.SelectedModifiers).ThenInclude(o => o.SelectedOptions).ThenInclude(o => o.Option)
-                               .Include(o => o.Basket).ThenInclude(o => o.Address).ThenInclude(o => o.Country)
-                               .Include(o => o.Basket).ThenInclude(o => o.Currency)
-                               .Include(o => o.Basket).ThenInclude(o => o.Payments).ThenInclude(o => o.Currency)
-                               .Include(o => o.Basket).ThenInclude(o => o.Return)
-                               .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            var admin = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<ShopOrder>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(),
-                () => RequestResult.FromBoolean(user != null,404,"Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(GetAvailableUsers(admin).Any(o => o.Id == id), 403, "Нет доступа"),
-                () => RequestResult<ShopOrder>.AsSuccess(user.Basket)
-             });
+            var users = DB.Users.Include(o => o.Basket).ThenInclude(o => o.Items).ThenInclude(o => o.Item).ThenInclude(o => o.MainImage)
+                                .Include(o => o.Basket).ThenInclude(o => o.Items).ThenInclude(o => o.SelectedModifiers).ThenInclude(o => o.Modifier)
+                                .Include(o => o.Basket).ThenInclude(o => o.Items).ThenInclude(o => o.SelectedModifiers).ThenInclude(o => o.SelectedOptions).ThenInclude(o => o.Option)
+                                .Include(o => o.Basket).ThenInclude(o => o.Address).ThenInclude(o => o.Country)
+                                .Include(o => o.Basket).ThenInclude(o => o.Currency)
+                                .Include(o => o.Basket).ThenInclude(o => o.Payments).ThenInclude(o => o.Currency)
+                                .Include(o => o.Basket).ThenInclude(o => o.Return);
+
+            var user = GetAvailableUser(users, id);
+            return (ShopOrderDTO)new ShopOrderDTO().CreateDTO(user.Basket);
         }
 
         [HttpGet, Route("GetUserOrders")]
-        public async Task<RequestResult<IEnumerable<ShopOrder>>> GetUserOrders(int id)
+        public async Task<IEnumerable<ShopOrderDTO>> GetUserOrders(int id)
         {
-            var user = DB.Users.Include(o => o.Orders).ThenInclude(o => o.Items).ThenInclude(o => o.Item).ThenInclude(o => o.MainImage)
-                               .Include(o => o.Orders).ThenInclude(o => o.Items).ThenInclude(o => o.SelectedModifiers).ThenInclude(o => o.Modifier)
-                               .Include(o => o.Orders).ThenInclude(o => o.Items).ThenInclude(o => o.SelectedModifiers).ThenInclude(o => o.SelectedOptions).ThenInclude(o => o.Option)
-                               .Include(o => o.Orders).ThenInclude(o => o.Address).ThenInclude(o => o.Country)
-                               .Include(o => o.Orders).ThenInclude(o => o.Currency)
-                               .Include(o => o.Orders).ThenInclude(o => o.Payments).ThenInclude(o => o.Currency)
-                               .Include(o => o.Orders).ThenInclude(o => o.Return)
-                               .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            var admin = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<IEnumerable<ShopOrder>>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(),
-                () => RequestResult.FromBoolean(user != null,404,"Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(GetAvailableUsers(admin).Any(o => o.Id == id), 403, "Нет доступа"),
-                () => RequestResult<IEnumerable<ShopOrder>>.AsSuccess(user.Orders)
-             });
+            var users = DB.Users.Include(o => o.Orders).ThenInclude(o => o.Items).ThenInclude(o => o.Item).ThenInclude(o => o.MainImage)
+                                .Include(o => o.Orders).ThenInclude(o => o.Items).ThenInclude(o => o.SelectedModifiers).ThenInclude(o => o.Modifier)
+                                .Include(o => o.Orders).ThenInclude(o => o.Items).ThenInclude(o => o.SelectedModifiers).ThenInclude(o => o.SelectedOptions).ThenInclude(o => o.Option)
+                                .Include(o => o.Orders).ThenInclude(o => o.Address).ThenInclude(o => o.Country)
+                                .Include(o => o.Orders).ThenInclude(o => o.Currency)
+                                .Include(o => o.Orders).ThenInclude(o => o.Payments).ThenInclude(o => o.Currency)
+                                .Include(o => o.Orders).ThenInclude(o => o.Return);
+
+            var user = GetAvailableUser(users, id);
+            return new ShopOrderDTO().CreateDTOs(user.Orders).Cast<ShopOrderDTO>();
         }
     
         [HttpGet, Route("GetUserWishlist")]
-        public async Task<RequestResult<ShopWishlist>> GetUserWishlist(int id)
+        public async Task<ShopWishlistDTO> GetUserWishlist(int id)
         {
-            var user = DB.Users.Include(o => o.Wishlist).ThenInclude(o => o.Items).ThenInclude(o => o.Product).ThenInclude(o => o.MainImage)
-                               .Include(o => o.Wishlist).ThenInclude(o => o.Items).ThenInclude(o => o.Product).ThenInclude(o => o.Localizations)
-                               .Include(o => o.Wishlist).ThenInclude(o => o.Items).ThenInclude(o => o.Product).ThenInclude(o => o.Category).ThenInclude(o => o.Localizations)
-                               .Include(o => o.Wishlist).ThenInclude(o => o.Items).ThenInclude(o => o.Product).ThenInclude(o => o.BasePricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
-                               .Include(o => o.Wishlist).ThenInclude(o => o.Items).ThenInclude(o => o.Product).ThenInclude(o => o.BasePricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
-                               .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            var admin = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<ShopWishlist>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(),
-                () => RequestResult.FromBoolean(user != null,404,"Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(GetAvailableUsers(admin).Any(o => o.Id == id), 403, "Нет доступа"),
-                () => RequestResult<ShopWishlist>.AsSuccess(user.Wishlist)
-             });
+            var users = DB.Users.Include(o => o.Wishlist).ThenInclude(o => o.Items).ThenInclude(o => o.Product).ThenInclude(o => o.MainImage)
+                                .Include(o => o.Wishlist).ThenInclude(o => o.Items).ThenInclude(o => o.Product).ThenInclude(o => o.Localizations)
+                                .Include(o => o.Wishlist).ThenInclude(o => o.Items).ThenInclude(o => o.Product).ThenInclude(o => o.Category).ThenInclude(o => o.Localizations)
+                                .Include(o => o.Wishlist).ThenInclude(o => o.Items).ThenInclude(o => o.Product).ThenInclude(o => o.BasePricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
+                                .Include(o => o.Wishlist).ThenInclude(o => o.Items).ThenInclude(o => o.Product).ThenInclude(o => o.BasePricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Country);
+
+            var user = GetAvailableUser(users, id);
+            return (ShopWishlistDTO)new ShopWishlistDTO().CreateDTO(user.Wishlist);
         }
 
         [HttpGet, Route("GetUserRoleModel")]
-        public async Task<RequestResult<UserRoleModel>> GetUserRoleModel(int id)
+        public async Task<UserRoleModel> GetUserRoleModel(int id)
         {
-            var user = DB.Users.Include(o => o.RoleModel).ThenInclude(o => o.AvailableCountries)
-                               .Include(o => o.RoleModel).ThenInclude(o => o.ForbiddenCountries)
-                               .Include(o => o.RoleModel).ThenInclude(o => o.ContentAccessTypes)
-                               .Include(o => o.RoleModel).ThenInclude(o => o.ReviewsAccess)
-                               .Include(o => o.RoleModel).ThenInclude(o => o.HRAccess)
-                               .Include(o => o.RoleModel).ThenInclude(o => o.ShopAccess)
-                               .Include(o => o.RoleModel).ThenInclude(o => o.OutstaffAccess)
-                               .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            var admin = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<UserRoleModel>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(),
-                () => RequestResult.FromBoolean(user != null,404,"Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(GetAvailableUsers(admin).Any(o => o.Id == id), 403, "Нет доступа"),
-                () => RequestResult<UserRoleModel>.AsSuccess(user.RoleModel)
-             });
+            var users = DB.Users.Include(o => o.RoleModel).ThenInclude(o => o.AvailableCountries)
+                                .Include(o => o.RoleModel).ThenInclude(o => o.ForbiddenCountries)
+                                .Include(o => o.RoleModel).ThenInclude(o => o.ContentAccessTypes)
+                                .Include(o => o.RoleModel).ThenInclude(o => o.ReviewsAccess)
+                                .Include(o => o.RoleModel).ThenInclude(o => o.HRAccess)
+                                .Include(o => o.RoleModel).ThenInclude(o => o.ShopAccess)
+                                .Include(o => o.RoleModel).ThenInclude(o => o.OutstaffAccess);
+
+            var user = GetAvailableUser(users, id);
+            return user.RoleModel;
         }
 
         [HttpGet, Route("GetUserReviews")]
-        public async Task<RequestResult<IEnumerable<Review>>> GetUserReviews(int id)
+        public async Task<IEnumerable<ReviewDTO>> GetUserReviews(int id)
         {
-            var user = DB.Users.Include(o => o.Reviews).ThenInclude(o => o.Country)
-                               .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            var admin = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<IEnumerable<Review>>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(),
-                () => RequestResult.FromBoolean(user != null,404,"Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(GetAvailableUsers(admin).Any(o => o.Id == id), 403, "Нет доступа"),
-                () => RequestResult<IEnumerable<Review>>.AsSuccess(user.Reviews)
-             });
+            var users = DB.Users.Include(o => o.Reviews).ThenInclude(o => o.Country);
+         
+            var user = GetAvailableUser(users, id);
+            return new ReviewDTO().CreateDTOs(user.Reviews).Cast<ReviewDTO>();
         }
 
 
@@ -167,69 +129,36 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPost, Route("CreateUser")]
-        public async Task<RequestResult<User>> CreateUser(User user)
+        [UsersSectionAccess]
+        public async Task<UserDTO> CreateUser(RegisterUserAdminModel model)
         {
+            var admin = this.Session.User;
 
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<User>(new Func<RequestResult>[]
+            if(model.Role == UserRole.Owner && admin.RoleModel.Role != UserRole.Owner)
             {
-                () => CheckAccess(),
-                () => RequestResult.FromBoolean(user.Id == 0,400,"Невозможно создать пользователя с явно заданным идентификатором"),
-                () => RequestResult.FromBoolean(user.RegisteredFromCountryId != null 
-                                                  ,400,"Необходимо указать id страны, из которой зарегистрирован пользователь"),
-                () => RequestResult.FromBoolean(user.CountryId != null
-                                                  ,400,"Необходимо указать id страны, в которой находится пользователь"),
-                () => RequestResult.FromBoolean(user.RoleModel != null
-                                                  ,400,"Необходимо проинициализировать роли пользователя"),
-                () => RequestResult.FromBoolean(user.RoleModel.Role != UserRole.User, 403,"Нельзя создать пользователя - не админа"),
-                () => {
+                throw new Exception403("Нельзя назначить роль Owner, не являясь Owner");
+            }
+            else if(model.Role == UserRole.User)
+            {
+                throw new Exception403("Нельзя создать пользователя - не админа");
+            }
 
+            var createdUser = model.CreateDBModelFromDTO();
 
+            createdUser.Wishlist = new ShopWishlist();
+            createdUser.Basket = new ShopOrder();
+            createdUser.RegisteredFromCountryId = this.CountryId;
+            createdUser.Password = PasswordHelper.EncryptPassword(model.Password);
 
-                    if(user.RoleModel.Role == UserRole.Owner
-                        && session.User.RoleModel.Role != UserRole.Owner)
-                    {
-                        return RequestResult.AsError(403,"Нельзя назначить роль Owner, не являясь Owner");
-                    }
+            createdUser.RoleModel = UserRoleModel.CreateDefault();
+            createdUser.RoleModel.IsAllCountriesAccess = admin.RoleModel.IsAllCountriesAccess;
+            createdUser.RoleModel.AvailableCountries = admin.RoleModel.AvailableCountries;
+            createdUser.RoleModel.ForbiddenCountries = admin.RoleModel.ForbiddenCountries;
 
+            DB.Users.Update(createdUser);
+            DB.SaveChanges();
 
-                    user.Wishlist = new ShopWishlist();
-                    user.Basket = new ShopOrder();
-      
-                    if(session.User.RoleModel.Role == UserRole.Owner)
-                    {
-                        return CreateModel(DB.Users,user);
-                    }
-                    else if(session.User.RoleModel.Role == UserRole.LocalDirector)
-                    {
-                        var allCountries = DB.Countries.Where(o => !o.IsDeleted).ToList();
-                        var adminAvailableCountries = session.User.RoleModel.GetAvailableCountries(allCountries);
-
-
-
-                        var newUserAvailableCountries = user.RoleModel.GetAvailableCountries(allCountries);
-
-                        bool success = true;
-                        string errorText = "Данный пользователь не может установить страны: \r\n";
-
-                        foreach(var country in newUserAvailableCountries)
-                        {
-                            if(!adminAvailableCountries.Any(o => o.Id == country.Id))
-                            {
-                                errorText += $"{country.Title} \r\n";
-                            }
-                        }
-
-                        if (!success)
-                        {
-                            return RequestResult<User>.AsError(403,errorText);
-                        }
-
-                        return CreateModel(DB.Users,user);
-                    }
-                    return RequestResult<User>.AsError(500,"Внутренняя ошибка");
-                }
-            });
+            return (UserDTO)new UserDTO().CreateDTO(createdUser);
         }
 
 
@@ -238,53 +167,51 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateUser")]
-        public async Task<RequestResult<User>> UpdateUser(UpdateUserModel model)
+        [UsersSectionAccess]
+        public async Task UpdateUser(UpdateUserModel model)
         {
-            var found = DB.Users.FirstOrDefault(o => o.Id == model.Id);
-            var admin = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<User>(new[]
-            {
-                () => CheckAccess(),
-                () => RequestResult.FromBoolean(found != null,404,"Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(GetAvailableUsers(admin).Any(o => o.Id == model.Id), 403, "Нет доступа"),
-                () => RequestResult.FromBoolean(model.ValidateModel(),400,"Заполните необходимые данные"),
-                () =>
-                {
-                    model.SetData(found);
-                    DB.Users.Update(found);
-                    DB.SaveChanges();
-                    return RequestResult<User>.AsSuccess(found);
-                }
-            });
+            var found = GetAvailableUsers().FirstOrDefault(o => o.Id == model.Id);
+            DbService.TryUpdateEntity(DB.Users, model, found);
         }
 
         [HttpPut, Route("UpdateUserRoles")]
-        public async Task<RequestResult<User>> UpdateUserRoles(UserRoleDTO model)
+        [UsersSectionAccess]
+        public async Task UpdateUserRoles(int userId, UserRoleDTO model)
         {
-            var found = DB.Users.Include(o => o.RoleModel).ThenInclude(o => o.AvailableCountries)
-                                .Include(o => o.RoleModel).ThenInclude(o => o.ForbiddenCountries)
-                                .Include(o => o.RoleModel).ThenInclude(o => o.ContentAccessTypes)
-                                .Include(o => o.RoleModel).ThenInclude(o => o.ReviewsAccess)
-                                .Include(o => o.RoleModel).ThenInclude(o => o.HRAccess)
-                                .Include(o => o.RoleModel).ThenInclude(o => o.ShopAccess)
-                                .Include(o => o.RoleModel).ThenInclude(o => o.OutstaffAccess)
-                                .FirstOrDefault(o => o.Id == model.Id);
-            var admin = GetSessionWithRoleInclude()?.User;
+            var admin = this.Session.User;
+            var editingUser = GetAvailableUser(GetUsersList(), userId);
 
-            return TryFinishAllRequestes<User>(new[]
+            if (admin.RoleModel.Role == UserRole.LocalDirector)
             {
-                () => CheckAccess(),
-                () => RequestResult.FromBoolean(found != null,404,"Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(GetAvailableUsers(admin).Any(o => o.Id == model.Id), 403, "Нет доступа"),
-                () => RequestResult.FromBoolean(model.IsValid(),400,"Заполните необходимые данные"),
-                () =>
+                var allCountries = DB.Countries.Where(o => !o.IsDeleted).ToList();
+                var adminAvailableCountries = admin.RoleModel.GetAvailableCountries(allCountries);
+
+
+                bool success = true;
+                string errorText = "Данный пользователь не может установить страны: \r\n";
+
+                foreach (var countryId in model.AvailableCountriesIds)
                 {
-                    model.Fill(found.RoleModel, DB.Countries.Where(o => !o.IsDeleted).ToList());
-                    DB.Users.Update(found);
-                    DB.SaveChanges();
-                    return RequestResult<User>.AsSuccess(found);
+                    if (!adminAvailableCountries.Any(o => o.Id == countryId))
+                    {
+                        errorText += $"{allCountries.FirstOrDefault(o => o.Id == countryId)?.Title} \r\n";
+                    }
                 }
-            });
+
+                if (!success)
+                {
+                    throw new Exception403(errorText);
+                }
+            }
+
+            var oldRoleModel = editingUser.RoleModel;
+
+            editingUser.RoleModel = model.CreateDBModelFromDTO();
+            editingUser.RoleModelId = 0;
+
+            DB.UserRoleModels.Remove(oldRoleModel);
+            DB.Users.Update(editingUser);
+            DB.SaveChanges();
         }
 
 
@@ -292,52 +219,45 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("BanUser")]
-        public RequestResult BanUser(int id,BanInfo info)
+        [UsersSectionAccess]
+        public async Task<BanInfoDTO> BanUser(int id,BanInfoDTO model)
         {
-            var found = DB.Users.FirstOrDefault(o => o.Id == id);
-            var admin = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes(new[]
-            {
-                () => CheckAccess(),
-                () => RequestResult.FromBoolean(found != null,404,"Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(GetAvailableUsers(admin).Any(o => o.Id == id), 403, "Нет доступа"),
-                () =>
-                {
-                    found.BanInfo = info;
-                    return UpdateModel(DB.Users,found);
-                }
-            });
+            var found = GetAvailableUser(GetUsersList(), id);
+            found.BanInfo = new BanInfoDTO().CreateDBModelFromDTO();
+
+            DbService.UpdateEntity(DB.Users, found);
+            model.Id = found.BanInfo.Id;
+
+            return model;
         }
 
         [HttpPut, Route("UnbanUser")]
-        public RequestResult UnbanUser(int id)
+        [UsersSectionAccess]
+        public async Task UnbanUser(int id)
         {
-            var found = DB.Users.FirstOrDefault(o => o.Id == id);
-            var admin = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes(new[]
-            {
-                () => CheckAccess(),
-                () => RequestResult.FromBoolean(found != null,404,"Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(GetAvailableUsers(admin).Any(o => o.Id == id), 403, "Нет доступа"),
-                () =>
-                {
-                    found.BanInfo = null;
-                    found.BanInfoId = null;
-                    return UpdateModel(DB.Users,found);
-                }
-            });
+            var found = GetAvailableUser(GetUsersList(), id);
+
+            found.BanInfo = null;
+            found.BanInfoId = null;
+
+            DbService.UpdateEntity(DB.Users, found);
         }
 
 
 
         #region Private get available users
-        private List<User> GetAvailableUsers(User user, int offset, int count = 20)
+        private List<User> GetAvailableUsers(int offset, int count = 20)
         {
-            return GetAvailableUsers(user).Skip(offset).Take(count).ToList();
+            return GetAvailableUsers().Skip(offset).Take(count).ToList();
         }
-        private List<User> GetAvailableUsers(User user)
+        private List<User> GetAvailableUsers()
         {
-            IQueryable<User> allUsers = GetUsersList();
+            return GetAvailableUsers(GetUsersList());
+        }
+        private List<User> GetAvailableUsers(IEnumerable<User> allUsers)
+        {
+            var user = this.Session.User;
+
             var availableUsers = new List<User>();
 
             if (user.RoleModel.Role == UserRole.Owner)
@@ -383,22 +303,19 @@ namespace Alfateam.Website.API.Controllers.Admin
             return availableUsers;
         }
 
-        #endregion
 
-        #region Private check access methods
-        private RequestResult CheckAccess()
+
+        private User GetAvailableUser(IEnumerable<User> users, int id)
         {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes(new Func<RequestResult>[]
+            var user = GetAvailableUsers(users).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (user == null)
             {
-                () => CheckSession(session),
-                () => CheckForBan(session.User,BanType.AdminPanel),
-                () => RequestResult.FromBoolean(session.User.RoleModel.Role != UserRole.User,
-                        403, "У данного пользователя нет доступа в администраторскую панель"),
-                () => RequestResult.FromBoolean(session.User.RoleModel.Role == UserRole.Owner || session.User.RoleModel.Role == UserRole.LocalDirector,
-                       403, "У данного пользователя нет прав доступа к разделу пользователей"),
-             });
+                throw new Exception404("Сущность по данному id не найдена");
+            }
+
+            return user;
         }
+
 
         #endregion
 

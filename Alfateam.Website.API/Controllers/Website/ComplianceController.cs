@@ -1,6 +1,7 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Extensions;
+using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTO;
 using Alfateam2._0.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -10,9 +11,10 @@ namespace Alfateam.Website.API.Controllers.Website
 {
     public class ComplianceController : AbsController
     {
-        public ComplianceController(WebsiteDBContext db) : base(db)
+        public ComplianceController(ControllerParams @params) : base(@params)
         {
         }
+    
 
 
         [HttpGet, Route("GetComplianceDocuments")]
@@ -22,7 +24,7 @@ namespace Alfateam.Website.API.Controllers.Website
                                               .Include(o => o.Localizations)
                                               .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
                                               .ToList();
-            return ComplianceDocumentDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<ComplianceDocumentDTO>;
+            return new ComplianceDocumentDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<ComplianceDocumentDTO>();
         }
     }
 }

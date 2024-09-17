@@ -4,7 +4,7 @@ using Alfateam2._0.Models.Localization.Items.Team;
 
 namespace Alfateam.Website.API.Models.DTOLocalization.Team
 {
-    public class TeamMemberLocalizationDTO : DTOModel<TeamMemberLocalization>
+    public class TeamMemberLocalizationDTO : LocalizationDTOModel<TeamMemberLocalization>
     {
         public string Name { get; set; }
         public string Surname { get; set; }

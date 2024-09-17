@@ -5,7 +5,7 @@ using Alfateam2._0.Models.Events;
 
 namespace Alfateam.Website.API.Models.DTO.Events
 {
-    public class EventCategoryDTO : DTOModel<EventCategory>
+    public class EventCategoryDTO : AvailabilityDTOModel<EventCategory>
     {
         public string Title { get; set; }
         public string? Description { get; set; }
@@ -13,8 +13,6 @@ namespace Alfateam.Website.API.Models.DTO.Events
 
         [HiddenFromClient]
         public int MainLanguageId { get; set; }
-
-
         public string Slug => SlugHelper.GetLatynSlug(Title);
     }
 }

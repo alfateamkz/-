@@ -4,7 +4,7 @@ using Alfateam2._0.Models.ContentItems;
 
 namespace Alfateam.Website.API.Models.DTO
 {
-    public class PartnerDTO : DTOModel<Partner>
+    public class PartnerDTO : AvailabilityDTOModel<Partner>
     {
         public string Title { get; set; }
         public string LogoPath { get; set; }

@@ -16,5 +16,10 @@ namespace Alfateam2._0.Models.ServicePages
 
 
         public string Text { get; set; }
+
+
+
+        public int? ServicePageId { get; set; }
+        public int? ServicePageLocalizationId { get; set; }
     }
 }

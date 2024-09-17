@@ -16,7 +16,7 @@ namespace Alfateam.Website.API.Controllers.General
 {
     public class CommonController : AbsController
     {
-        public CommonController(WebsiteDBContext db) : base(db)
+        public CommonController(ControllerParams @params) : base(@params)
         {
         }
 
@@ -27,7 +27,7 @@ namespace Alfateam.Website.API.Controllers.General
             var items = DB.Languages.Include(o => o.Localizations)
                                     .Where(o => !o.IsDeleted && !o.IsHidden)
                                     .ToList();
-            return LanguageDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<LanguageDTO>;
+            return new LanguageDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<LanguageDTO>();
         }
 
         [HttpGet, Route("GetCurrencies")]
@@ -36,7 +36,7 @@ namespace Alfateam.Website.API.Controllers.General
             var items = DB.Currencies.Include(o => o.Localizations)
                                      .Where(o => !o.IsDeleted && !o.IsHidden)
                                      .ToList();
-            return CurrencyDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<CurrencyDTO>;
+            return new CurrencyDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<CurrencyDTO>();
         }
 
         [HttpGet, Route("GetCountries")]
@@ -45,20 +45,16 @@ namespace Alfateam.Website.API.Controllers.General
             var items = DB.Countries.Include(o => o.Localizations)
                                     .Where(o => !o.IsDeleted && !o.IsHidden)
                                     .ToList();
-            return CountryDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<CountryDTO>;
+            return new CountryDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<CountryDTO>();
         }
 
 
 
 
         [HttpPut, Route("AddSiteVisit")]
-        public async Task<bool> AddSiteVisit(SiteVisitDTO model)
+        public async Task AddSiteVisit(SiteVisitDTO model)
         {
-            if (!model.IsValid()) return false;
-
-            CreateModel(DB.SiteVisits, model);
-
-            return true;
+            DbService.TryCreateEntity(DB.SiteVisits, model);
         }
 
 

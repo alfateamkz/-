@@ -1,8 +1,10 @@
-﻿using Alfateam2._0.Models.Abstractions;
+﻿using Alfateam.Website.API.Attributes.DTO;
+using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Shop;
 using System.Collections;
+using System.Reflection;
 
 namespace Alfateam.Website.API.Abstractions
 {
@@ -113,39 +115,38 @@ namespace Alfateam.Website.API.Abstractions
             return isValid;
         }
 
+       
+
+
+        public static bool IsModelTypeOf(Type modelType, Type requiredType)
+        {
+            if (modelType == requiredType) return true;
+
+            var baseModel = modelType.BaseType;
+
+            if (baseModel == requiredType)
+            {
+                return true;
+            }
+            else if (baseModel != typeof(Object))
+            {
+                return IsModelTypeOf(baseModel, requiredType);
+            }
+            return false;
+        }
+
+
     }
 
     public class DTOModel<T> : DTOModel where T : AbsModel, new()
     {
         #region Клиентские модели (для просмотра)
+
         public DTOModel<T> CreateDTO(T item)
         {
-            return DTOModel<T>.Create(item);
-        }
-        public DTOModel<T> CreateDTOWithLocalization(T item, int? languageId)
-        {
-            return DTOModel<T>.CreateWithLocalization(item, languageId);
-        }
+            var clone = this.Clone();
 
-
-
-        public IEnumerable<DTOModel<T>> CreateDTOs(IEnumerable<T> items)
-        {
-            return DTOModel<T>.CreateItems(items);
-        }    
-        public IEnumerable<DTOModel<T>> CreateDTOsWithLocalization(IEnumerable<T> items, int? languageId)
-        {
-            return DTOModel<T>.CreateItemsWithLocalization(items, languageId);
-        }
-
-
-
-
-        public static DTOModel<T> Create(T item)
-        {
-            var model = new DTOModel<T>();
-
-            var thisProps = model.GetType().GetProperties();
+            var thisProps = clone.GetType().GetProperties();
             var props = item.GetType().GetProperties();
             foreach (var prop in props)
             {
@@ -159,24 +160,43 @@ namespace Alfateam.Website.API.Abstractions
                         //TODO: этот кусок кода тщательно протестировать
                         if (val is IEnumerable<T> enumerable)
                         {
-                            val = DTOModel<T>.CreateItems(enumerable);
+                            val = this.CreateDTOs(enumerable);
                         }
                         else if (val is T singleModel)
                         {
-                            val = DTOModel<T>.Create(singleModel);
+                            val = this.CreateDTO(singleModel);
                         }
                     }
+                    else if(DTOModel.IsModelTypeOf(thisProp.PropertyType, typeof(DTOModel)))
+                    {
+                        var thisPropValue = thisProp.GetValue(clone);
+                        if(thisPropValue == null && val != null)
+                        {
+                            thisPropValue = Activator.CreateInstance(thisProp.PropertyType);
 
-                    thisProp.SetValue(model, val);
+                            thisProp.SetValue(clone, thisPropValue);
+                            thisPropValue = thisProp.GetValue(clone);
+                        }
+
+                        if(val != null)
+                        {
+                            thisPropValue = thisPropValue.GetType().GetMethod("CreateDTO").Invoke(thisPropValue, new[] { val});
+                            thisProp.SetValue(clone, thisPropValue);
+                        }
+                    }
+                    else if (prop.PropertyType == thisProp.PropertyType)
+                    {
+                        thisProp.SetValue(clone, prop.GetValue(item));
+                    }
                 }
             }
 
 
-            return model;
+            return clone;
         }
-        public static DTOModel<T> CreateWithLocalization(T item, int? languageId)
+        public DTOModel<T> CreateDTOWithLocalization(T item, int? languageId)
         {
-            var model = Create(item);
+            var dto = CreateDTO(item);
 
             var localizationsListProp = item.GetType().GetProperties().FirstOrDefault(o => o.Name == "Localizations");
             var mainLangIdProp = item.GetType().GetProperties().FirstOrDefault(o => o.Name == "MainLanguageId");
@@ -193,37 +213,180 @@ namespace Alfateam.Website.API.Abstractions
                     if (localization != null)
                     {
                         //TODO: этот кусок кода доработать и тщательно протестировать
-                        SetObjectLocalizationTexts(model, localization);
+                        SetObjectLocalizationTexts(dto, localization);
                     }
                 }
 
             }
 
 
-            return model;
+            return dto;
         }
 
 
-        public static IEnumerable<DTOModel<T>> CreateItems(IEnumerable<T> items)
+
+
+        public IEnumerable<DTOModel<T>> CreateDTOs(IEnumerable<T> items)
         {
             var models = new List<DTOModel<T>>();
             foreach (var item in items)
             {
-                models.Add(Create(item));
+                models.Add(CreateDTO(item));
             }
             return models;
-        }
-        public static IEnumerable<DTOModel<T>> CreateItemsWithLocalization(IEnumerable<T> items, int? languageId)
+        }    
+        public IEnumerable<DTOModel<T>> CreateDTOsWithLocalization(IEnumerable<T> items, int? languageId)
         {
             var models = new List<DTOModel<T>>();
             foreach (var item in items)
             {
-                models.Add(CreateWithLocalization(item, languageId));
+                models.Add(CreateDTOWithLocalization(item, languageId));
             }
             return models;
         }
 
 
+   
+
+
+
+
+        //public static DTOModel<T> Create(T item)
+        //{
+        //     throw new NotImplementedException();
+        //}
+        //public static DTOModel<T> CreateWithLocalization(T item, int? languageId)
+        //{
+        //    var model = Create(item);
+
+        //    var localizationsListProp = item.GetType().GetProperties().FirstOrDefault(o => o.Name == "Localizations");
+        //    var mainLangIdProp = item.GetType().GetProperties().FirstOrDefault(o => o.Name == "MainLanguageId");
+        //    if (localizationsListProp != null && mainLangIdProp != null)
+        //    {
+        //        var listBaseValue = localizationsListProp.GetValue(item) as IList;
+        //        var listValue = listBaseValue.Cast<LocalizableModel>();
+
+        //        var mainLangId = (int)mainLangIdProp.GetValue(item);
+
+        //        if (mainLangId != languageId)
+        //        {
+        //            var localization = listValue.FirstOrDefault(o => o.LanguageEntityId == languageId);
+        //            if (localization != null)
+        //            {
+        //                //TODO: этот кусок кода доработать и тщательно протестировать
+        //                SetObjectLocalizationTexts(model, localization);
+        //            }
+        //        }
+
+        //    }
+
+
+        //    return model;
+        //}
+
+
+        //public static IEnumerable<DTOModel<T>> CreateItems(IEnumerable<T> items)
+        //{
+        //    var models = new List<DTOModel<T>>();
+        //    foreach (var item in items)
+        //    {
+        //        models.Add(Create(item));
+        //    }
+        //    return models;
+        //}
+        //public static IEnumerable<DTOModel<T>> CreateItemsWithLocalization(IEnumerable<T> items, int? languageId)
+        //{
+        //    var models = new List<DTOModel<T>>();
+        //    foreach (var item in items)
+        //    {
+        //        models.Add(CreateWithLocalization(item, languageId));
+        //    }
+        //    return models;
+        //}
+
+
+
+        //public static DTOModel<T> Create(T item)
+        //{
+        //    var model = new DTOModel<T>();
+
+        //    var thisProps = model.GetType().GetProperties();
+        //    var props = item.GetType().GetProperties();
+        //    foreach (var prop in props)
+        //    {
+        //        var val = prop.GetValue(item);
+
+        //        var thisProp = thisProps.FirstOrDefault(o => o.Name == prop.Name);
+        //        if (thisProp != null && thisProp.CanWrite)
+        //        {
+        //            if (thisProp.PropertyType.GetType() == typeof(DTOModel<T>))
+        //            {
+        //                //TODO: этот кусок кода тщательно протестировать
+        //                if (val is IEnumerable<T> enumerable)
+        //                {
+        //                    val = DTOModel<T>.CreateItems(enumerable);
+        //                }
+        //                else if (val is T singleModel)
+        //                {
+        //                    val = DTOModel<T>.Create(singleModel);
+        //                }
+        //            }
+
+        //            thisProp.SetValue(model, val);
+        //        }
+        //    }
+
+
+        //    return model;
+        //}
+        //public static DTOModel<T> CreateWithLocalization(T item, int? languageId)
+        //{
+        //    var model = Create(item);
+
+        //    var localizationsListProp = item.GetType().GetProperties().FirstOrDefault(o => o.Name == "Localizations");
+        //    var mainLangIdProp = item.GetType().GetProperties().FirstOrDefault(o => o.Name == "MainLanguageId");
+        //    if (localizationsListProp != null && mainLangIdProp != null)
+        //    {
+        //        var listBaseValue = localizationsListProp.GetValue(item) as IList;
+        //        var listValue = listBaseValue.Cast<LocalizableModel>();
+
+        //        var mainLangId = (int)mainLangIdProp.GetValue(item);
+
+        //        if (mainLangId != languageId)
+        //        {
+        //            var localization = listValue.FirstOrDefault(o => o.LanguageEntityId == languageId);
+        //            if (localization != null)
+        //            {
+        //                //TODO: этот кусок кода доработать и тщательно протестировать
+        //                SetObjectLocalizationTexts(model, localization);
+        //            }
+        //        }
+
+        //    }
+
+
+        //    return model;
+        //}
+
+
+        //public static IEnumerable<DTOModel<T>> CreateItems(IEnumerable<T> items)
+        //{
+        //    var models = new List<DTOModel<T>>();
+        //    foreach (var item in items)
+        //    {
+        //        models.Add(Create(item));
+        //    }
+        //    return models;
+        //}
+        //public static IEnumerable<DTOModel<T>> CreateItemsWithLocalization(IEnumerable<T> items, int? languageId)
+        //{
+        //    var models = new List<DTOModel<T>>();
+        //    foreach (var item in items)
+        //    {
+        //        models.Add(CreateWithLocalization(item, languageId));
+        //    }
+        //    return models;
+        //}
 
 
         private static void SetObjectLocalizationTexts(DTOModel<T> model, LocalizableModel localization)
@@ -295,12 +458,53 @@ namespace Alfateam.Website.API.Abstractions
                 var itemSameProp = itemProps.FirstOrDefault(o => o.Name == prop.Name);
                 if (itemSameProp != null && itemSameProp.CanWrite)
                 {
-                    itemSameProp.SetValue(item, prop.GetValue(this));
+                    var restrictionAttr = prop.GetCustomAttributes().FirstOrDefault(o => o.GetType() == typeof(DTOFieldFor)) as DTOFieldFor;
+                    if (restrictionAttr != null)
+                    {
+                        if(restrictionAttr.For == DTOFieldForType.UpdateOnly && mode != DBModelFillMode.Update)
+                        {
+                            continue;
+                        }
+                        if (restrictionAttr.For == DTOFieldForType.CreationOnly && mode != DBModelFillMode.Create)
+                        {
+                            continue;
+                        }
+                    }
+
+
+                    if (prop.GetValue(this) is DTOModel dtoModel)
+                    {
+                       
+
+                        if(mode == DBModelFillMode.Update)
+                        {
+                            var a = itemSameProp.GetValue(item);
+                            prop.GetValue(this).GetType().GetMethod("FillDBModel").Invoke(prop.GetValue(this), new[] { itemSameProp.GetValue(item), mode });
+                        }
+                        else if(mode == DBModelFillMode.Create)
+                        {
+                            var createdDbEntity = prop.GetValue(this).GetType().GetMethod("CreateDBModelFromDTO").Invoke(prop.GetValue(this), Array.Empty<object>());
+                            itemSameProp.SetValue(item, createdDbEntity);
+                        }                     
+                    }
+                    else if(itemSameProp.PropertyType == prop.PropertyType)
+                    {
+                        itemSameProp.SetValue(item, prop.GetValue(this));
+                    }
+  
                 }
             }
         }
 
+
+
         #endregion
+
+
+        public DTOModel<T> Clone()
+        {
+            return this.MemberwiseClone() as DTOModel<T>;
+        }
 
     }
 

@@ -4,7 +4,7 @@ using Alfateam2._0.Models.Localization.Items.Portfolios;
 
 namespace Alfateam.Website.API.Models.DTOLocalization.Portfolios
 {
-    public class PortfolioCategoryLocalizationDTO : DTOModel<PortfolioCategoryLocalization>
+    public class PortfolioCategoryLocalizationDTO : LocalizationDTOModel<PortfolioCategoryLocalization>
     {
         public string Title { get; set; }
     }

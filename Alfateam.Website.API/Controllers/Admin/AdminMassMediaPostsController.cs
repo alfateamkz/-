@@ -9,60 +9,52 @@ using Alfateam.Website.API.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Alfateam.Website.API.Models.DTO.Posts;
 using Alfateam.Website.API.Enums;
-using Alfateam.Website.API.Models.DTO;
 using Alfateam.Website.API.Models.DTOLocalization;
 using Alfateam2._0.Models.Localization.Items;
 using Alfateam.Website.API.Models.DTO.General;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Localization.Items.Posts;
 using Alfateam.Website.API.Core;
+using Alfateam.Website.API.Models;
+using Alfateam.Website.API.Filters.Access;
+using Alfateam.Website.API.Exceptions;
+using Alfateam.Website.API.Models.DTO.Events;
+using Alfateam.Website.API.Models.DTOLocalization.Events;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
     public class AdminMassMediaPostsController : AbsAdminController
     {
-        public AdminMassMediaPostsController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
+        public AdminMassMediaPostsController(ControllerParams @params) : base(@params)
         {
-
         }
 
         #region Посты
 
         [HttpGet, Route("GetPosts")]
-        public async Task<RequestResult<IEnumerable<MassMediaPostDTO>>> GetPosts(int offset, int count = 20)
+        [CheckContentAreaRights(ContentAccessModelType.MassMediaPosts, 1)]
+        public async Task<IEnumerable<MassMediaPostDTO>> GetPosts(int offset, int count = 20)
         {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<MassMediaPostDTO>>(new Func<RequestResult>[]
-            {
-                () => CheckContentAreaRights(session, ContentAccessModelType.MassMediaPosts, 1),
-                () => {
-                    var items = GetAvailableModels(session.User, GetPostsList(), offset, count);
-                    var models = MassMediaPostDTO.CreateItemsWithLocalization(items.Cast<MassMediaPost>(), LanguageId) as IEnumerable<MassMediaPostDTO>;
-                    return RequestResult<IEnumerable<MassMediaPostDTO>>.AsSuccess(models);
-                }
-            });
+            var items = GetAvailablePosts().Skip(offset).Take(count);
+            return new MassMediaPostDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<MassMediaPostDTO>();
         }
 
         [HttpGet, Route("GetPost")]
-        public async Task<RequestResult<MassMediaPost>> GetPost(int id)
+        [CheckContentAreaRights(ContentAccessModelType.MassMediaPosts, 1)]
+        public async Task<MassMediaPostDTO> GetPost(int id)
         {
-            return TryGetOne(GetPostsList(), id, ContentAccessModelType.MassMediaPosts);
+            return (MassMediaPostDTO)DbService.TryGetOne(GetAvailablePosts(), id, new MassMediaPostDTO());
         }
 
         [HttpGet, Route("GetPostLocalization")]
-        public async Task<RequestResult<MassMediaPostLocalization>> GetPostLocalization(int id)
+        [CheckContentAreaRights(ContentAccessModelType.MassMediaPosts, 1)]
+        public async Task<MassMediaPostLocalizationDTO> GetPostLocalization(int id)
         {
             var localization = DB.MassMediaPostLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null) return RequestResult<MassMediaPostLocalization>.AsError(404, "Сущность с данным id не найдена");
+            var mainEntity = GetAvailablePosts().FirstOrDefault(o => o.Id == localization?.MassMediaPostId && !o.IsDeleted);
 
-            var mainEntity = GetPostsList().FirstOrDefault(o => o.Id == localization.MassMediaPostId && !o.IsDeleted);
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<MassMediaPostLocalization>(new Func<RequestResult>[]
-            {
-                () => RequestResult.FromBoolean(mainEntity != null, 500, "Внутренняя ошибка"),
-                () => CheckContentAreaRights(session, mainEntity, ContentAccessModelType.MassMediaPosts, 1),
-                () => RequestResult<MassMediaPostLocalization>.AsSuccess(localization)
-            });
+            return (MassMediaPostLocalizationDTO)DbService.GetLocalizationModel(localization, mainEntity, new MassMediaPostLocalizationDTO());
         }
 
 
@@ -70,25 +62,22 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPost, Route("CreatePost")]
-        public async Task<RequestResult<MassMediaPost>> CreatePost(MassMediaPost item)
+        [CheckContentAreaRights(ContentAccessModelType.MassMediaPosts, 4)]
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
+        public async Task<MassMediaPostDTO> CreatePost(MassMediaPostDTO model)
         {
-            return await TryCreate(DB.MassMediaPosts, item, ContentAccessModelType.MassMediaPosts, async () => await PreparePostBeforeCreate(item));
+            return (MassMediaPostDTO)DbService.TryCreateAvailabilityEntity(DB.MassMediaPosts, model, this.Session, async (entity) =>
+            {
+                await HandleMassMediaPost(entity, DBModelFillMode.Create);
+            });
         }
 
         [HttpPost, Route("CreatePostLocalization")]
-        public async Task<RequestResult<MassMediaPostLocalization>> CreatePostLocalization(int itemId,MassMediaPostLocalization localization)
+        [CheckContentAreaRights(ContentAccessModelType.MassMediaPosts, 3)]
+        public async Task<MassMediaPostLocalizationDTO> CreatePostLocalization(int itemId, MassMediaPostLocalizationDTO localization)
         {
-            var mainEntity = GetPostsList().FirstOrDefault(o => o.Id == itemId);
-            return TryFinishAllRequestes<MassMediaPostLocalization>(new[]
-            {
-                () => CheckLocalizationModelBeforeCreate(localization, mainEntity, ContentAccessModelType.MassMediaPosts),
-                () =>
-                {
-                    mainEntity.Localizations.Add(localization);
-                    UpdateModel(DB.MassMediaPosts,mainEntity);
-                    return RequestResult<MassMediaPostLocalization>.AsSuccess(localization);
-                }
-            });
+            var mainEntity = GetAvailablePosts().FirstOrDefault(o => o.Id == itemId);
+            return (MassMediaPostLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.MassMediaPosts, mainEntity, localization);
         }
 
 
@@ -96,31 +85,25 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdatePostMain")]
-        public async Task<RequestResult<MassMediaPost>> UpdatePostMain(MassMediaPostDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.MassMediaPosts, 3)]
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg, если изменяем картинку")]
+        public async Task<MassMediaPostDTO> UpdatePostMain(MassMediaPostDTO model)
         {
-            var post = GetPostsList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<MassMediaPost>(new[]
+            var item = GetAvailablePosts().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return (MassMediaPostDTO)DbService.TryUpdateEntity(DB.MassMediaPosts, model, item, async (entity) =>
             {
-                () => RequestResult.FromBoolean(post != null,404, "Запись по данному id не найдена"),
-                () => CheckContentAreaRights(session, post, ContentAccessModelType.MassMediaPosts, 2),
-                () => RequestResult.FromBoolean(model.IsValid(), 400, "Не заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз"),
-                () => RequestResult.FromBoolean(DB.Languages.Any(o => o.Id == model.MainLanguageId && !o.IsDeleted)  ,404, "Языка с данным id не существует"),
-                () => PreparePostBeforeUpdate(post).Result,
-                () => UpdateModel(DB.MassMediaPosts, model, post)
+                await HandleMassMediaPost(entity, DBModelFillMode.Update);
             });
         }
 
         [HttpPut, Route("UpdatePostLocalization")]
-        public async Task<RequestResult<MassMediaPostLocalization>> UpdatePostLocalization(MassMediaPostLocalizationDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.MassMediaPosts, 3)]
+        public async Task<MassMediaPostLocalizationDTO> UpdatePostLocalization(MassMediaPostLocalizationDTO model)
         {
             var localization = DB.MassMediaPostLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryFinishAllRequestes<MassMediaPostLocalization>(new[]
-            {
-                () => RequestResult.FromBoolean(localization != null,404, "Локализация с данным id не найдена"),
-                () => CheckLocalizationModelBeforeUpdate(GetPostsList(), model, localization.MassMediaPostId, ContentAccessModelType.MassMediaPosts),
-                () => UpdateModel(DB.MassMediaPostLocalizations, model, localization)
-            });
+            var mainEntity = GetAvailablePosts().FirstOrDefault(o => o.Id == localization.MassMediaPostId && !o.IsDeleted);
+
+            return (MassMediaPostLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.MassMediaPostLocalizations, localization, model, mainEntity);
         }
 
 
@@ -128,73 +111,64 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpDelete, Route("DeletePost")]
-        public async Task<RequestResult> DeletePost(int id)
+        [CheckContentAreaRights(ContentAccessModelType.MassMediaPosts, 5)]
+        public async Task DeletePost(int id)
         {
-            var item = GetPostsList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                () => RequestResult.FromBoolean(item != null,404, "Запись по данному id не найдена"),
-                () => TryDelete(DB.MassMediaPosts, item, ContentAccessModelType.MassMediaPosts)
-            });
+            var item = GetAvailablePosts().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            DbService.TryDeleteEntity(DB.MassMediaPosts, item);
         }
 
         [HttpDelete, Route("DeletePostLocalization")]
-        public async Task<RequestResult> DeletePostLocalization(int id)
+        [CheckContentAreaRights(ContentAccessModelType.MassMediaPosts, 5)]
+        public async Task DeletePostLocalization(int id)
         {
             var item = DB.MassMediaPostLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                () => RequestResult.FromBoolean(item != null,404, "Запись по данному id не найдена"),
-                () => CheckLocalizationModelBeforeDelete(GetPostsList(), item.MassMediaPostId, ContentAccessModelType.MassMediaPosts),
-                () => DeleteModel(DB.MassMediaPostLocalizations, item, false)
-            });
+            var mainModel = DB.Events.FirstOrDefault(o => o.Id == item.MassMediaPostId && !o.IsDeleted);
+
+            DbService.TryDeleteLocalizationEntity(DB.MassMediaPostLocalizations, item, mainModel);
         }
 
         #endregion
 
+
+
         [HttpPut, Route("UpdateAvailability")]
-        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.MassMediaPosts, 2)]
+        public async Task<AvailabilityDTO> UpdateAvailability(AvailabilityDTO model)
         {
             bool hasThisModel = false;
 
-            var user = GetSessionWithRoleInclude().User;
-            hasThisModel |= GetAvailableModels(user, DB.MassMediaPosts.IncludeAvailability()).Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            hasThisModel |= DbService.GetAvailableModels(this.Session.User, DB.MassMediaPosts.IncludeAvailability())
+                                     .Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
 
             if (!hasThisModel)
             {
-                return new RequestResult<Availability>().SetError(403, "У данного пользователя нет прав на редактирование матрицы доступности");
+                throw new Exception403("У данного пользователя нет прав на редактирование матрицы доступности");
             }
 
-            return TryUpdateAvailability(model, ContentAccessModelType.MassMediaPosts);
+            return DbService.TryUpdateAvailability(model, this.Session);
         }
 
 
 
+        #region Private get available methods
+        private IEnumerable<MassMediaPost> GetAvailablePosts()
+        {
+            return DbService.GetAvailableModels(this.Session.User, GetPostsList()).Cast<MassMediaPost>();
+        }
 
+        #endregion
 
         #region Private prepare methods
-
-        private async Task<RequestResult> PreparePostBeforeCreate(MassMediaPost item)
+        private async Task HandleMassMediaPost(MassMediaPost entity, DBModelFillMode mode)
         {
-            var fileUploadResult = await TryUploadFile("mainImg", FileType.Image);
-            if (!fileUploadResult.Success) return fileUploadResult;
+            const string formFilename = "mainImg";
 
-            item.ImgPath = fileUploadResult.Value;
-            item.ClicksCount = 0;
-
-            return new RequestResult().SetSuccess();
-        }
-        private async Task<RequestResult> PreparePostBeforeUpdate(MassMediaPost item)
-        {
-            if (Request.Form.Files.Any(o => o.Name == "mainImg"))
+            if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
+               || mode == DBModelFillMode.Create)
             {
-                var fileUploadResult = await TryUploadFile("mainImg", FileType.Image);
-                if (!fileUploadResult.Success) return fileUploadResult;
-
-                item.ImgPath = fileUploadResult.Value;
+                entity.ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
             }
-
-            return new RequestResult().SetSuccess();
         }
 
         #endregion

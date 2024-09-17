@@ -5,7 +5,6 @@ using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Filters;
 using Alfateam.Website.API.Models.DTO;
 using Alfateam.Website.API.Models.DTO.Posts;
-using Alfateam.Website.API.Models.DTO;
 using Alfateam.Website.API.Models.DTO.General;
 using Alfateam.Website.API.Models.DTOLocalization;
 using Alfateam.Website.API.Models.DTOLocalization.Posts;
@@ -19,56 +18,50 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using Alfateam.Website.API.Models;
+using Alfateam.Website.API.Models.DTO.Events;
+using Alfateam.Website.API.Models.DTOLocalization.Events;
+using Alfateam.Website.API.Enums;
+using Alfateam.Website.API.Exceptions;
+using Swashbuckle.AspNetCore.Annotations;
+using Alfateam.Website.API.Filters.Access;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
 
     public class AdminComplianceController : AbsAdminController
     {
-        public AdminComplianceController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
+        public AdminComplianceController(ControllerParams @params) : base(@params)
         {
-         
         }
-       
-   
+
+
 
         #region Комплаенс-документы
 
         [HttpGet, Route("GetComplianceDocuments")]
-        public async Task<RequestResult<IEnumerable<ComplianceDocumentDTO>>> GetComplianceDocuments(int offset, int count = 20)
+        [CheckContentAreaRights(ContentAccessModelType.Compliance, 1)]
+        public async Task<IEnumerable<ComplianceDocumentDTO>> GetComplianceDocuments(int offset, int count = 20)
         {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<ComplianceDocumentDTO>>(new Func<RequestResult>[]
-            {
-                () => CheckContentAreaRights(session, ContentAccessModelType.Compliance, 1),
-                () => {
-                    var items = GetAvailableModels(session.User, ComplianceDocuments(), offset, count);
-                    var models = ComplianceDocumentDTO.CreateItemsWithLocalization(items.Cast<ComplianceDocument>(), LanguageId) as IEnumerable<ComplianceDocumentDTO>;
-                    return RequestResult<IEnumerable<ComplianceDocumentDTO>>.AsSuccess(models);
-                }
-            });
+            var items = GetAvailableComplianceDocuments().Skip(offset).Take(count);
+            return new ComplianceDocumentDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<ComplianceDocumentDTO>();
         }
 
         [HttpGet, Route("GetComplianceDocument")]
-        public async Task<RequestResult<ComplianceDocument>> GetComplianceDocument(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Compliance, 1)]
+        public async Task<ComplianceDocumentDTO> GetComplianceDocument(int id)
         {
-            return TryGetOne(ComplianceDocuments(), id, ContentAccessModelType.Compliance);
+            return (ComplianceDocumentDTO)DbService.TryGetOne(GetAvailableComplianceDocuments(), id, new ComplianceDocumentDTO());
         }
 
         [HttpGet, Route("GetComplianceDocumentLocalization")]
-        public async Task<RequestResult<ComplianceDocumentLocalization>> GetComplianceDocumentLocalization(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Compliance, 1)]
+        public async Task<ComplianceDocumentLocalizationDTO> GetComplianceDocumentLocalization(int id)
         {
             var localization = DB.ComplianceDocumentLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null) return RequestResult<ComplianceDocumentLocalization>.AsError(404, "Сущность с данным id не найдена");
+            var mainEntity = GetAvailableComplianceDocuments().FirstOrDefault(o => o.Id == localization?.ComplianceDocumentId && !o.IsDeleted);
 
-            var mainEntity = ComplianceDocuments().FirstOrDefault(o => o.Id == localization.ComplianceDocumentId && !o.IsDeleted);
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<ComplianceDocumentLocalization>(new Func<RequestResult>[]
-            {
-                () => RequestResult.FromBoolean(mainEntity != null, 500, "Внутренняя ошибка"),
-                () => CheckContentAreaRights(session, mainEntity, ContentAccessModelType.Compliance, 1),
-                () => RequestResult<ComplianceDocumentLocalization>.AsSuccess(localization)
-            });
+            return (ComplianceDocumentLocalizationDTO)DbService.GetLocalizationModel(localization, mainEntity, new ComplianceDocumentLocalizationDTO());
         }
 
 
@@ -77,25 +70,25 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPost, Route("CreateComplianceDocument")]
-        public async Task<RequestResult<ComplianceDocument>> CreateComplianceDocument(ComplianceDocument item)
+        [CheckContentAreaRights(ContentAccessModelType.Compliance, 4)]
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем previewImg и документ с именем docFile")]
+        public async Task<ComplianceDocumentDTO> CreateComplianceDocument(ComplianceDocumentDTO model)
         {
-            return await TryCreate(DB.ComplianceDocuments, item, ContentAccessModelType.Compliance, async () => await PrepareDocumentBeforeCreate(item));
+            return (ComplianceDocumentDTO)DbService.TryCreateAvailabilityEntity(DB.ComplianceDocuments, model, this.Session, async (entity) =>
+            {
+                await HandleComplianceDocument(entity, DBModelFillMode.Create);
+            });
         }
      
         [HttpPost, Route("CreateComplianceDocumentLocalization")]
-        public async Task<RequestResult<ComplianceDocumentLocalization>> CreateComplianceDocumentLocalization(int itemId, ComplianceDocumentLocalization localization)
+        [CheckContentAreaRights(ContentAccessModelType.Compliance, 3)]
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем previewImg и документ с именем docFile")]
+        public async Task<ComplianceDocumentLocalizationDTO> CreateComplianceDocumentLocalization(int itemId, ComplianceDocumentLocalizationDTO localization)
         {
-            var mainEntity = ComplianceDocuments().FirstOrDefault(o => o.Id == itemId);
-            return TryFinishAllRequestes<ComplianceDocumentLocalization>(new[]
+            var mainEntity = GetAvailableComplianceDocuments().FirstOrDefault(o => o.Id == itemId);
+            return (ComplianceDocumentLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.ComplianceDocuments, mainEntity, localization, async (entity) =>
             {
-                () => CheckLocalizationModelBeforeCreate(localization, mainEntity, ContentAccessModelType.Posts),
-                () => PrepareDocumentLocalizationBeforeCreate(localization).Result,
-                () =>
-                {
-                    mainEntity.Localizations.Add(localization);
-                    UpdateModel(DB.ComplianceDocuments,mainEntity);
-                    return RequestResult<ComplianceDocumentLocalization>.AsSuccess(localization);
-                }
+                await HandleComplianceDocumentLocalization(entity, DBModelFillMode.Create);
             });
         }
 
@@ -104,32 +97,26 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateComplianceDocumentMain")]
-        public async Task<RequestResult<ComplianceDocument>> UpdateComplianceDocumentMain(ComplianceDocumentDTO model)
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем previewImg и документ с именем docFile, если заливаем новый файл")]
+        public async Task<ComplianceDocumentDTO> UpdateComplianceDocumentMain(ComplianceDocumentDTO model)
         {
-            var item = ComplianceDocuments().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<ComplianceDocument>(new Func<RequestResult>[]
+            var item = GetAvailableComplianceDocuments().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return (ComplianceDocumentDTO)DbService.TryUpdateEntity(DB.ComplianceDocuments, model, item, async (entity) =>
             {
-                () => RequestResult.FromBoolean(item != null,404, "Сущность по данному id не найдена"),
-                () => CheckContentAreaRights(session, item, ContentAccessModelType.Compliance, 2),
-                () => RequestResult.FromBoolean(model.IsValid(), 400, "Не заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз"),
-                () => PrepareDocumentBeforeUpdate(item).Result,
-                () => RequestResult.FromBoolean(DB.Languages.Any(o => o.Id == model.MainLanguageId && !o.IsDeleted),
-                                                    404, "Языка с данным id не существует"),
-                () => UpdateModel(DB.ComplianceDocuments, model, item)
+                await HandleComplianceDocument(entity, DBModelFillMode.Update);
             });
         }
 
         [HttpPut, Route("UpdateComplianceDocumentLocalization")]
-        public async Task<RequestResult<ComplianceDocumentLocalization>> UpdateComplianceDocumentLocalization(ComplianceDocumentLocalizationDTO model)
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем previewImg и документ с именем docFile, если заливаем новый файл")]
+        public async Task<ComplianceDocumentLocalizationDTO> UpdateComplianceDocumentLocalization(ComplianceDocumentLocalizationDTO model)
         {
             var localization = DB.ComplianceDocumentLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryFinishAllRequestes<ComplianceDocumentLocalization>(new[]
+            var mainEntity = GetAvailableComplianceDocuments().FirstOrDefault(o => o.Id == localization.ComplianceDocumentId && !o.IsDeleted);
+
+            return (ComplianceDocumentLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.ComplianceDocumentLocalizations, localization, model, mainEntity, async (entity) =>
             {
-                () => RequestResult.FromBoolean(localization != null,404, "Локализация с данным id не найдена"),
-                () => CheckLocalizationModelBeforeUpdate(ComplianceDocuments(), model, localization.ComplianceDocumentId, ContentAccessModelType.Compliance),
-                () => PrepareDocumentLocalizationBeforeUpdate(localization).Result,
-                () => UpdateModel(DB.ComplianceDocumentLocalizations, model, localization)
+                await HandleComplianceDocumentLocalization(entity, DBModelFillMode.Update);
             });
         }
 
@@ -139,177 +126,96 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpDelete, Route("DeleteComplianceDocument")]
-        public async Task<RequestResult> DeleteComplianceDocument(int id)
+        public async Task DeleteComplianceDocument(int id)
         {
-            var item = ComplianceDocuments().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                () => RequestResult.FromBoolean(item != null,404, "Категория по данному id не найдена"),
-                () => TryDelete(DB.ComplianceDocuments, item, ContentAccessModelType.Compliance)
-            });
+            var item = GetAvailableComplianceDocuments().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            DbService.TryDeleteEntity(DB.ComplianceDocuments, item);
         }
 
         [HttpDelete, Route("DeleteComplianceDocumentLocalization")]
-        public async Task<RequestResult> DeleteComplianceDocumentLocalization(int id)
+        public async Task DeleteComplianceDocumentLocalization(int id)
         {
             var item = DB.ComplianceDocumentLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                () => RequestResult.FromBoolean(item != null,404, "Запись по данному id не найдена"),
-                () => CheckLocalizationModelBeforeDelete(ComplianceDocuments(), item.ComplianceDocumentId, ContentAccessModelType.Compliance),
-                () => DeleteModel(DB.ComplianceDocumentLocalizations, item, false)
-            });
+            var mainModel = DB.ComplianceDocuments.FirstOrDefault(o => o.Id == item.ComplianceDocumentId && !o.IsDeleted);
+
+            DbService.TryDeleteLocalizationEntity(DB.ComplianceDocumentLocalizations, item, mainModel);
         }
         #endregion
 
         [HttpPut, Route("UpdateAvailability")]
-        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.Compliance, 2)]
+        public async Task<AvailabilityDTO> UpdateAvailability(AvailabilityDTO model)
         {
             bool hasThisModel = false;
 
-            var user = GetSessionWithRoleInclude().User;
-            hasThisModel |= GetAvailableModels(user, DB.ComplianceDocuments.IncludeAvailability()).Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            hasThisModel |= DbService.GetAvailableModels(this.Session.User, DB.ComplianceDocuments.IncludeAvailability())
+                                     .Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
 
             if (!hasThisModel)
             {
-                return new RequestResult<Availability>().SetError(403, "У данного пользователя нет прав на редактирование матрицы доступности");
+                throw new Exception403("У данного пользователя нет прав на редактирование матрицы доступности");
             }
 
-            return TryUpdateAvailability(model, ContentAccessModelType.Compliance);
+            return DbService.TryUpdateAvailability(model, this.Session);
         }
 
 
+
+
+
+
+
+
+
+        #region Private get available methods
+
+        private IEnumerable<ComplianceDocument> GetAvailableComplianceDocuments()
+        {
+            return DbService.GetAvailableModels(this.Session.User, ComplianceDocuments()).Cast<ComplianceDocument>();
+        }
+
+        #endregion
 
         #region Private prepare methods
 
-        private async Task<RequestResult> PrepareDocumentBeforeCreate(ComplianceDocument item)
+        private async Task HandleComplianceDocument(ComplianceDocument entity, DBModelFillMode mode)
         {
-            return await PrepareDocumentBefore(item, false);
-        }
-        private async Task<RequestResult> PrepareDocumentBeforeUpdate(ComplianceDocument item)
-        {
-            return await PrepareDocumentBefore(item, true);
-        }
+            const string previewImgName = "previewImg";
+            const string docFileName = "docFile";
 
-
-        private async Task<RequestResult> PrepareDocumentLocalizationBeforeCreate(ComplianceDocumentLocalization localization)
-        {
-            return await UploadComplianceDocLocalizaionFiles(localization, false);
-        }
-        private async Task<RequestResult> PrepareDocumentLocalizationBeforeUpdate(ComplianceDocumentLocalization localization)
-        {
-            return await UploadComplianceDocLocalizaionFiles(localization, true);
-        }
-
-
-
-
-
-        private async Task<RequestResult> PrepareDocumentBefore(ComplianceDocument item,bool isUpdate)
-        {
-            var res = new RequestResult();
-
-            var uploadRes = await UploadComplianceDocMainFiles(item, isUpdate);
-            if (!uploadRes.Success)
+            if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(previewImgName))
+              || mode == DBModelFillMode.Create)
             {
-                return res.FillFromRequestResult(uploadRes);
+                entity.ImgPreviewPath = await FilesService.TryUploadFile(previewImgName, FileType.Image);
             }
 
-            if (!isUpdate)
+            if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(docFileName))
+              || mode == DBModelFillMode.Create)
             {
-                //Проходимся по локализациям
-                foreach (var localization in item.Localizations)
-                {
-                    var uploadLocalizationRes = await UploadComplianceDocLocalizaionFiles(localization, isUpdate);
-                    if (!uploadLocalizationRes.Success)
-                    {
-                        return res.FillFromRequestResult(uploadRes);
-                    }
-                }
-            }    
-
-            return res.SetSuccess();
+                entity.DocumentPath = await FilesService.TryUploadFile(docFileName, FileType.Document);
+                entity.KBSize = FilesService.GetFileSizeInBytes(entity.DocumentPath) * 1024;
+            }
         }
-        private async Task<RequestResult> UploadComplianceDocMainFiles(ComplianceDocument item, bool isUpdate)
+        private async Task HandleComplianceDocumentLocalization(ComplianceDocumentLocalization entity, DBModelFillMode mode)
         {
-            var res = new RequestResult();
+            const string previewImgName = "previewImg";
+            const string docFileName = "docFile";
 
-            string previewFormFileName = $"previewImg";
-            if (!isUpdate || (isUpdate && Request.Form.Files.Any(o => o.Name == previewFormFileName)))
+            if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(previewImgName))
+              || mode == DBModelFillMode.Create)
             {
-                //Загрузка превью
-                var previewFile = Request.Form.Files.FirstOrDefault(o => o.Name == previewFormFileName);
-                var previewFileCheckRes = this.CheckImageFile(previewFile);
-                if (!previewFileCheckRes.Success)
-                {
-                    res.FillFromRequestResult(previewFileCheckRes);
-                    res.Error += $"\r\nПроблема с файлом {previewFormFileName}";
-                    return res;
-                }
-
-                item.ImgPreviewPath = await this.UploadFile(previewFile);
+                entity.ImgPreviewPath = await FilesService.TryUploadFile(previewImgName, FileType.Image);
             }
 
-
-            string documentFormFileName = $"docFile";
-            if (!isUpdate || (isUpdate && Request.Form.Files.Any(o => o.Name == previewFormFileName)))
+            if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(docFileName))
+              || mode == DBModelFillMode.Create)
             {
-                //Загрузка документа
-                var docFile = Request.Form.Files.FirstOrDefault(o => o.Name == documentFormFileName);
-                var docFileCheckRes = this.CheckDocumentFile(docFile);
-                if (!docFileCheckRes.Success)
-                {
-                    res.FillFromRequestResult(docFileCheckRes);
-                    res.Error += $"\r\nПроблема с файлом docFile";
-                    return res;
-                }
-
-                item.DocumentPath = await this.UploadFile(docFile);
-                item.KBSize = this.GetFileSizeInBytes(item.DocumentPath) * 1024;
+                entity.DocumentPath = await FilesService.TryUploadFile(docFileName, FileType.Document);
+                entity.KBSize = FilesService.GetFileSizeInBytes(entity.DocumentPath) * 1024;
             }
-      
-            return res.SetSuccess();
         }
-        private async Task<RequestResult> UploadComplianceDocLocalizaionFiles(ComplianceDocumentLocalization localization,bool isUpdate)
-        {
-
-            var res = new RequestResult();
-
-            string previewFormFileName = $"{localization.LanguageEntityId}_previewImg";
-            if (!isUpdate || (isUpdate && Request.Form.Files.Any(o => o.Name == previewFormFileName)))
-            {
-                var localizationPreviewFile = Request.Form.Files.FirstOrDefault(o => o.Name == $"{localization.LanguageEntityId}_previewImg");
-                var localizationPreviewFileCheckRes = this.CheckImageFile(localizationPreviewFile);
-
-                if (!localizationPreviewFileCheckRes.Success)
-                {
-                    res.FillFromRequestResult(localizationPreviewFileCheckRes);
-                    res.Error += $"\r\nПроблема с файлом {localization.LanguageEntityId}_previewImg";
-                    return res;
-                }
-                localization.ImgPreviewPath = await this.UploadFile(localizationPreviewFile);
-            }
 
 
-            string documentFormFileName = $"{localization.LanguageEntityId}_doc";
-            if (!isUpdate || (isUpdate && Request.Form.Files.Any(o => o.Name == previewFormFileName)))
-            {
-                var localizationDocFile = Request.Form.Files.FirstOrDefault(o => o.Name == documentFormFileName);
-                var localizationDocFileCheckRes = this.CheckImageFile(localizationDocFile);
-
-                if (!localizationDocFileCheckRes.Success)
-                {
-                    res.FillFromRequestResult(localizationDocFileCheckRes);
-                    res.Error += $"\r\nПроблема с файлом {localization.LanguageEntityId}_doc";
-                    return res;
-                }
-
-                localization.DocumentPath = await this.UploadFile(localizationDocFile);
-                localization.KBSize = this.GetFileSizeInBytes(localization.DocumentPath) * 1024;
-            }
-
-            return res.SetSuccess();
-        }
         #endregion
 
         #region Private get included methods

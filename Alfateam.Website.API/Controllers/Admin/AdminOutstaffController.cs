@@ -1,11 +1,17 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
+using Alfateam.Website.API.Exceptions;
+using Alfateam.Website.API.Filters.Access;
+using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTO.General;
 using Alfateam.Website.API.Models.DTO.Outstaff;
+using Alfateam.Website.API.Models.DTO.Posts;
 using Alfateam.Website.API.Models.DTO.Shop;
+using Alfateam.Website.API.Models.DTO.Team;
 using Alfateam.Website.API.Models.DTOLocalization.Outstaff;
 using Alfateam.Website.API.Models.DTOLocalization.Shop;
+using Alfateam.Website.API.Models.DTOLocalization.Team;
 using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
@@ -22,78 +28,58 @@ namespace Alfateam.Website.API.Controllers.Admin
 {
     public class AdminOutstaffController : AbsAdminController
     {
-        public AdminOutstaffController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
+        public AdminOutstaffController(ControllerParams @params) : base(@params)
         {
-
         }
 
         #region Сетка аутстафф
 
 
         [HttpGet, Route("GetOutstaffMatrix")]
-        public async Task<RequestResult<OutstaffMatrix>> GetOutstaffMatrix()
+        [OutstaffSectionAccess(1)]
+        public async Task<OutstaffMatrixDTO> GetOutstaffMatrix()
         {
-            return TryFinishAllRequestes<OutstaffMatrix>(new[]
-            {
-                () => CheckAccess(1),
-                () => RequestResult<OutstaffMatrix>.AsSuccess(DB.GetOutstaffMatrix())
-            });
+            return (OutstaffMatrixDTO)new OutstaffMatrixDTO().CreateDTO(DB.GetOutstaffMatrix());
         }
 
         #endregion
 
         #region Колонки сетки аутстафф
 
+
         [HttpGet, Route("GetOutstaffColumn")]
-        public async Task<RequestResult<OutstaffColumn>> GetOutstaffColumn(int id)
+        [OutstaffSectionAccess(1)]
+        public async Task<OutstaffColumnDTO> GetOutstaffColumn(int id)
         {
-            var column = DB.GetOutstaffMatrix().Columns.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryGetOutstaffModel(column);
+            return (OutstaffColumnDTO)DbService.TryGetOne(DB.GetOutstaffMatrix().Columns, id, new OutstaffColumnDTO());
         }
 
         [HttpGet, Route("GetOutstaffColumnLocalization")]
-        public async Task<RequestResult<OutstaffColumnLocalization>> GetOutstaffColumnLocalization(int id)
+        [OutstaffSectionAccess(1)]
+        public async Task<OutstaffColumnLocalizationDTO> GetOutstaffColumnLocalization(int id)
         {
-            var localization = DB.GetOutstaffMatrix().Columns.Where(o => !o.IsDeleted)
-                                                             .SelectMany(o => o.Localizations)
-                                                             .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryGetOutstaffModel(localization);
+            var localization = DB.OutstaffColumnLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var mainEntity = DB.GetOutstaffMatrix().Columns.FirstOrDefault(o => o.Id == localization?.OutstaffColumnId && !o.IsDeleted);
+
+            return (OutstaffColumnLocalizationDTO)DbService.GetLocalizationModel(localization, mainEntity, new OutstaffColumnLocalizationDTO());
         }
 
 
 
 
         [HttpPost, Route("CreateOutstaffColumn")]
-        public async Task<RequestResult<OutstaffColumn>> CreateOutstaffColumn(OutstaffColumn item)
+        [OutstaffSectionAccess(5)]
+        public async Task<OutstaffColumnDTO> CreateOutstaffColumn(OutstaffColumnDTO model)
         {
-            return TryFinishAllRequestes<OutstaffColumn>(new[]
-            {
-                () => CheckAccess(5),
-                () => RequestResult.FromBoolean(item.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () =>
-                {
-                    var matrix = DB.GetOutstaffMatrix();
-                    matrix.Columns.Add(item);
-                    return UpdateModel(DB.OutstaffMatrices, matrix);
-                }
-           });
+            return (OutstaffColumnDTO)DbService.TryCreateEntity(DB.OutstaffColumns, model);
         }
      
         [HttpPost, Route("CreateOutstaffColumnLocalization")]
-        public async Task<RequestResult<OutstaffColumnLocalization>> CreateOutstaffColumnLocalization(int itemId, OutstaffColumnLocalization localization)
+        [OutstaffSectionAccess(5)]
+        public async Task<OutstaffColumnLocalizationDTO> CreateOutstaffColumnLocalization(int itemId, OutstaffColumnLocalizationDTO model)
         {
-            var column = DB.GetOutstaffMatrix().Columns.FirstOrDefault(o => o.Id == itemId && !o.IsDeleted);
-            return TryFinishAllRequestes<OutstaffColumnLocalization>(new[]
-            {
-                () => CheckAccess(5),
-                () => RequestResult.FromBoolean(localization.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () => RequestResult.FromBoolean(column != null, 404, "Сущность с данным id не найдена"),
-                () =>
-                {
-                    column.Localizations.Add(localization);
-                    return UpdateModel(DB.OutstaffColumns, column);
-                }
-           });
+            var mainEntity = DB.GetOutstaffMatrix().Columns.FirstOrDefault(o => o.Id == itemId && !o.IsDeleted);
+            return (OutstaffColumnLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.OutstaffColumns, mainEntity, model);
         }
 
 
@@ -101,16 +87,20 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateOutstaffColumnMain")]
-        public async Task<RequestResult<OutstaffColumn>> UpdateOutstaffColumnMain(OutstaffColumnDTO model)
+        [OutstaffSectionAccess(2)]
+        public async Task<OutstaffColumnDTO> UpdateOutstaffColumnMain(OutstaffColumnDTO model)
         {
-            var column = DB.GetOutstaffMatrix().Columns.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryUpdateOutstaffModel(DB.OutstaffColumns, model, column);
+            var item = DB.GetOutstaffMatrix().Columns.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return (OutstaffColumnDTO)DbService.TryUpdateEntity(DB.OutstaffColumns, model, item);
         }
         [HttpPut, Route("UpdateOutstaffColumnLocalization")]
-        public async Task<RequestResult<OutstaffColumnLocalization>> UpdateOutstaffColumnLocalization(OutstaffColumnLocalizationDTO model)
+        [OutstaffSectionAccess(3)]
+        public async Task<OutstaffColumnLocalizationDTO> UpdateOutstaffColumnLocalization(OutstaffColumnLocalizationDTO model)
         {
             var localization = DB.OutstaffColumnLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryUpdateOutstaffLocalizationModel(DB.OutstaffColumnLocalizations, model, localization);
+            var mainEntity = DB.GetOutstaffMatrix().Columns.FirstOrDefault(o => o.Id == localization.OutstaffColumnId && !o.IsDeleted);
+
+            return (OutstaffColumnLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.OutstaffColumnLocalizations, localization, model, mainEntity);
         }
 
 
@@ -120,19 +110,21 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpDelete, Route("DeleteOutstaffColumn")]
-        public async Task<RequestResult> DeleteOutstaffColumn(int id)
+        [OutstaffSectionAccess(6)]
+        public async Task DeleteOutstaffColumn(int id)
         {
-            var column = DB.GetOutstaffMatrix().Columns.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryDeleteOutstaffModel(DB.OutstaffColumns, column);
+            var item = DB.GetOutstaffMatrix().Columns.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            DbService.TryDeleteEntity(DB.OutstaffColumns, item);
         }
 
         [HttpDelete, Route("DeleteOutstaffColumnLocalization")]
-        public async Task<RequestResult> DeleteOutstaffColumnLocalization(int id)
+        [OutstaffSectionAccess(6)]
+        public async Task DeleteOutstaffColumnLocalization(int id)
         {
-            var localization = DB.GetOutstaffMatrix().Columns.Where(o => !o.IsDeleted)
-                                                             .SelectMany(o => o.Localizations)
-                                                             .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryDeleteOutstaffModel(DB.OutstaffColumnLocalizations, localization, false);
+            var item = DB.OutstaffColumnLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var mainModel = DB.GetOutstaffMatrix().Columns.FirstOrDefault(o => o.Id == item?.OutstaffColumnId && !o.IsDeleted);
+
+            DbService.TryDeleteLocalizationEntity(DB.OutstaffColumnLocalizations, item, mainModel);
         }
 
 
@@ -141,55 +133,38 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Услуги сетки аутстафф
 
         [HttpGet, Route("GetOutstaffItem")]
-        public async Task<RequestResult<OutstaffItem>> GetOutstaffItem(int id)
+        [OutstaffSectionAccess(1)]
+        public async Task<OutstaffItemDTO> GetOutstaffItem(int id)
         {
-            var item = DB.GetOutstaffMatrix().Items.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryGetOutstaffModel(item);
+            return (OutstaffItemDTO)DbService.TryGetOne(DB.GetOutstaffMatrix().Items, id, new OutstaffItemDTO());
         }
 
         [HttpGet, Route("GetOutstaffItemLocalization")]
-        public async Task<RequestResult<OutstaffItemLocalization>> GetOutstaffItemLocalization(int id)
+        [OutstaffSectionAccess(1)]
+        public async Task<OutstaffItemLocalizationDTO> GetOutstaffItemLocalization(int id)
         {
-            var item = DB.GetOutstaffMatrix().Items.Where(o => !o.IsDeleted)
-                                                   .SelectMany(o => o.Localizations)
-                                                   .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryGetOutstaffModel(item);
+            var localization = DB.OutstaffItemLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var mainEntity = DB.GetOutstaffMatrix().Items.FirstOrDefault(o => o.Id == localization?.OutstaffItemId && !o.IsDeleted);
+
+            return (OutstaffItemLocalizationDTO)DbService.GetLocalizationModel(localization, mainEntity, new OutstaffItemLocalizationDTO());
         }
 
 
 
 
         [HttpPost, Route("CreateOutstaffItem")]
-        public async Task<RequestResult<OutstaffItem>> CreateOutstaffItem(OutstaffItem item)
+        [OutstaffSectionAccess(5)]
+        public async Task<OutstaffItemDTO> CreateOutstaffItem(OutstaffItemDTO model)
         {
-            return TryFinishAllRequestes<OutstaffItem>(new[]
-            {
-                () => CheckAccess(5),
-                () => RequestResult.FromBoolean(item.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () =>
-                {
-                    var matrix = DB.GetOutstaffMatrix();
-                    matrix.Items.Add(item);
-                    return UpdateModel(DB.OutstaffMatrices, matrix);
-                }
-           });
+            return (OutstaffItemDTO)DbService.TryCreateEntity(DB.OutstaffItems, model);
         }
 
         [HttpPost, Route("CreateOutstaffItemLocalization")]
-        public async Task<RequestResult<OutstaffItemLocalization>> CreateOutstaffItemLocalization(int itemId, OutstaffItemLocalization localization)
+        [OutstaffSectionAccess(5)]
+        public async Task<OutstaffItemLocalizationDTO> CreateOutstaffItemLocalization(int itemId, OutstaffItemLocalizationDTO model)
         {
-            var outstaffItem = DB.GetOutstaffMatrix().Items.FirstOrDefault(o => o.Id == itemId && !o.IsDeleted);
-            return TryFinishAllRequestes<OutstaffItemLocalization>(new[]
-            {
-                () => CheckAccess(5),
-                () => RequestResult.FromBoolean(localization.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () => RequestResult.FromBoolean(outstaffItem != null, 404, "Сущность с данным id не найдена"),
-                () =>
-                {
-                    outstaffItem.Localizations.Add(localization);
-                    return UpdateModel(DB.OutstaffItems, outstaffItem);
-                }
-           });
+            var mainEntity = DB.GetOutstaffMatrix().Items.FirstOrDefault(o => o.Id == itemId && !o.IsDeleted);
+            return (OutstaffItemLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.OutstaffItems, mainEntity, model);
         }
 
 
@@ -197,17 +172,21 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateOutstaffItemMain")]
-        public async Task<RequestResult<OutstaffItem>> UpdateOutstaffItemMain(OutstaffItemDTO model)
+        [OutstaffSectionAccess(2)]
+        public async Task<OutstaffItemDTO> UpdateOutstaffItemMain(OutstaffItemDTO model)
         {
             var item = DB.GetOutstaffMatrix().Items.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryUpdateOutstaffModel(DB.OutstaffItems, model, item);
+            return (OutstaffItemDTO)DbService.TryUpdateEntity(DB.OutstaffItems, model, item);
         }
 
         [HttpPut, Route("UpdateOutstaffItemLocalization")]
-        public async Task<RequestResult<OutstaffItemLocalization>> UpdateOutstaffColumnLocalization(OutstaffItemLocalizationDTO model)
+        [OutstaffSectionAccess(3)]
+        public async Task<OutstaffItemLocalizationDTO> UpdateOutstaffColumnLocalization(OutstaffItemLocalizationDTO model)
         {
             var localization = DB.OutstaffItemLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryUpdateOutstaffLocalizationModel(DB.OutstaffItemLocalizations, model, localization);
+            var mainEntity = DB.GetOutstaffMatrix().Items.FirstOrDefault(o => o.Id == localization.OutstaffItemId && !o.IsDeleted);
+
+            return (OutstaffItemLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.OutstaffItemLocalizations, localization, model, mainEntity);
         }
 
 
@@ -215,19 +194,21 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpDelete, Route("DeleteOutstaffItem")]
-        public async Task<RequestResult> DeleteOutstaffItem(int id)
+        [OutstaffSectionAccess(6)]
+        public async Task DeleteOutstaffItem(int id)
         {
             var item = DB.GetOutstaffMatrix().Items.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryDeleteOutstaffModel(DB.OutstaffItems, item);
+            DbService.TryDeleteEntity(DB.OutstaffItems, item);
         }
 
         [HttpDelete, Route("DeleteOutstaffItemLocalization")]
-        public async Task<RequestResult> DeleteOutstaffItemLocalization(int id)
+        [OutstaffSectionAccess(6)]
+        public async Task DeleteOutstaffItemLocalization(int id)
         {
-            var item = DB.GetOutstaffMatrix().Items.Where(o => !o.IsDeleted)
-                                                   .SelectMany(o => o.Localizations)
-                                                   .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryDeleteOutstaffModel(DB.OutstaffItemLocalizations, item, false);
+            var item = DB.OutstaffItemLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var mainModel = DB.GetOutstaffMatrix().Items.FirstOrDefault(o => o.Id == item?.OutstaffItemId && !o.IsDeleted);
+
+            DbService.TryDeleteLocalizationEntity(DB.OutstaffItemLocalizations, item, mainModel);
         }
 
         #endregion
@@ -235,20 +216,20 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Пункты услуг сетки аутстафф
 
         [HttpGet, Route("GetOutstaffItemGrade")]
-        public async Task<RequestResult<OutstaffItemGrade>> GetOutstaffItemGrade(int id)
+        [OutstaffSectionAccess(1)]
+        public async Task<OutstaffItemGradeDTO> GetOutstaffItemGrade(int id)
         {
-            var grade = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryGetOutstaffModel(grade);
+            return (OutstaffItemGradeDTO)DbService.TryGetOne(DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades), id, new OutstaffItemGradeDTO());
         }
   
         [HttpGet, Route("GetOutstaffItemGradeLocalization")]
-        public async Task<RequestResult<OutstaffItemGradeLocalization>> GetOutstaffItemGradeLocalization(int id)
+        [OutstaffSectionAccess(1)]
+        public async Task<OutstaffItemGradeLocalizationDTO> GetOutstaffItemGradeLocalization(int id)
         {
-            var localization = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades)  
-                                                           .Where(o => !o.IsDeleted)
-                                                           .SelectMany(o => o.Localizations)
-                                                           .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryGetOutstaffModel(localization);
+            var localization = DB.OutstaffItemGradeLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var mainEntity = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades).FirstOrDefault(o => o.Id == localization?.OutstaffItemGradeId && !o.IsDeleted);
+
+            return (OutstaffItemGradeLocalizationDTO)DbService.GetLocalizationModel(localization, mainEntity, new OutstaffItemGradeLocalizationDTO());
         }
 
 
@@ -256,37 +237,18 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPost, Route("CreateOutstaffItemGrade")]
-        public async Task<RequestResult<OutstaffItemGrade>> CreateOutstaffItemGrade(int itemId,OutstaffItemGrade item)
+        [OutstaffSectionAccess(5)]
+        public async Task<OutstaffItemGradeDTO> CreateOutstaffItemGrade(int itemId,OutstaffItemGradeDTO model)
         {
-            var outstaffItem = DB.OutstaffItems.FirstOrDefault(o => o.Id == itemId && !o.IsDeleted);
-            return TryFinishAllRequestes<OutstaffItemGrade>(new[]
-            {
-                () => CheckAccess(5),
-                () => RequestResult.FromBoolean(item.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () => RequestResult.FromBoolean(outstaffItem != null, 404, "Сущность с данным id не найдена"),
-                () =>
-                {
-                    outstaffItem.Grades.Add(item);
-                    return UpdateModel(DB.OutstaffItems, outstaffItem);
-                }
-           });
+            return (OutstaffItemGradeDTO)DbService.TryCreateEntity(DB.OutstaffItemGrades, model);
         }
      
         [HttpPost, Route("CreateOutstaffItemGradeLocalization")]
-        public async Task<RequestResult<OutstaffItemGradeLocalization>> CreateOutstaffItemGradeLocalization(int itemId, OutstaffItemGradeLocalization localization)
+        [OutstaffSectionAccess(5)]
+        public async Task<OutstaffItemGradeLocalizationDTO> CreateOutstaffItemGradeLocalization(int itemId, OutstaffItemGradeLocalizationDTO model)
         {
-            var grade = DB.OutstaffItemGrades.FirstOrDefault(o => o.Id == itemId && !o.IsDeleted);
-            return TryFinishAllRequestes<OutstaffItemGradeLocalization>(new[]
-            {
-                () => CheckAccess(5),
-                () => RequestResult.FromBoolean(localization.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () => RequestResult.FromBoolean(grade != null, 404, "Сущность с данным id не найдена"),
-                () =>
-                {
-                    grade.Localizations.Add(localization);
-                    return UpdateModel(DB.OutstaffItemGrades, grade);
-                }
-           });
+            var mainEntity = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades).FirstOrDefault(o => o.Id == itemId && !o.IsDeleted);
+            return (OutstaffItemGradeLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.OutstaffItemGrades, mainEntity, model);
         }
 
 
@@ -296,36 +258,41 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateOutstaffItemGradeMain")]
-        public async Task<RequestResult<OutstaffItemGrade>> UpdateOutstaffItemGradeMain(OutstaffItemGradeDTO model)
+        [OutstaffSectionAccess(2)]
+        public async Task<OutstaffItemGradeDTO> UpdateOutstaffItemGradeMain(OutstaffItemGradeDTO model)
         {
-            var grade = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades).FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryUpdateOutstaffModel(DB.OutstaffItemGrades, model, grade);
+            var item = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades).FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return (OutstaffItemGradeDTO)DbService.TryUpdateEntity(DB.OutstaffItemGrades, model, item);
         }
         [HttpPut, Route("UpdateOutstaffItemGradeLocalization")]
-        public async Task<RequestResult<OutstaffItemGradeLocalization>> UpdateOutstaffItemGradeLocalization(OutstaffItemGradeLocalizationDTO model)
+        [OutstaffSectionAccess(3)]
+        public async Task<OutstaffItemGradeLocalizationDTO> UpdateOutstaffItemGradeLocalization(OutstaffItemGradeLocalizationDTO model)
         {
             var localization = DB.OutstaffItemGradeLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryUpdateOutstaffLocalizationModel(DB.OutstaffItemGradeLocalizations, model, localization);
+            var mainEntity = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades).FirstOrDefault(o => o.Id == localization.OutstaffItemGradeId && !o.IsDeleted);
+
+            return (OutstaffItemGradeLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.OutstaffItemGradeLocalizations, localization, model, mainEntity);
         }
 
 
 
 
         [HttpDelete, Route("DeleteOutstaffItemGrade")]
-        public async Task<RequestResult> DeleteOutstaffItemGrade(int id)
+        [OutstaffSectionAccess(6)]
+        public async Task DeleteOutstaffItemGrade(int id)
         {
-            var grade = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryDeleteOutstaffModel(DB.OutstaffItemGrades, grade);
+            var item = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            DbService.TryDeleteEntity(DB.OutstaffItemGrades, item);
         }
 
         [HttpDelete, Route("DeleteOutstaffItemGradeLocalization")]
-        public async Task<RequestResult> DeleteOutstaffItemGradeLocalization(int id)
+        [OutstaffSectionAccess(6)]
+        public async Task DeleteOutstaffItemGradeLocalization(int id)
         {
-            var localization = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades)
-                                                           .Where(o => !o.IsDeleted)
-                                                           .SelectMany(o => o.Localizations)
-                                                           .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryDeleteOutstaffModel(DB.OutstaffItemGradeLocalizations, localization, false);
+            var item = DB.OutstaffItemGradeLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var mainModel = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades).FirstOrDefault(o => o.Id == item?.OutstaffItemGradeId && !o.IsDeleted);
+
+            DbService.TryDeleteLocalizationEntity(DB.OutstaffItemGradeLocalizations, item, mainModel);
         }
 
 
@@ -334,12 +301,10 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Колонки пунктов услуг сетки аутстафф
 
         [HttpGet, Route("GetOutstaffItemGradeColumn")]
-        public async Task<RequestResult<OutstaffItemGradeColumn>> GetOutstaffItemGradeColumn(int id)
+        [OutstaffSectionAccess(1)]
+        public async Task<OutstaffItemGradeColumnDTO> GetOutstaffItemGradeColumn(int id)
         {
-            var column = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades)
-                                                     .SelectMany(o => o.Prices)
-                                                     .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryGetOutstaffModel(column);
+            return (OutstaffItemGradeColumnDTO)DbService.TryGetOne(DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades).SelectMany(o => o.Prices), id, new OutstaffItemGradeColumnDTO());
         }
 
 
@@ -347,42 +312,30 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPost, Route("CreateOutstaffItemGradeColumn")]
-        public async Task<RequestResult<OutstaffItemGrade>> CreateOutstaffItemGradeColumn(int gradeId, OutstaffItemGradeColumn item)
+        [OutstaffSectionAccess(5)]
+        public async Task<OutstaffItemGradeColumnDTO> CreateOutstaffItemGradeColumn(int gradeId, OutstaffItemGradeColumnDTO model)
         {
-            var grade = DB.OutstaffItemGrades.FirstOrDefault(o => o.Id == gradeId && !o.IsDeleted);
-            return TryFinishAllRequestes<OutstaffItemGrade>(new[]
-            {
-                () => CheckAccess(5),
-                () => RequestResult.FromBoolean(item.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () => RequestResult.FromBoolean(grade != null, 404, "Сущность с данным id не найдена"),
-                () =>
-                {
-                    grade.Prices.Add(item);
-                    return UpdateModel(DB.OutstaffItemGrades, grade);
-                }
-           });
+            return (OutstaffItemGradeColumnDTO)DbService.TryCreateEntity(DB.OutstaffItemGradeColumns, model);
         }
 
 
 
         [HttpPut, Route("UpdateOutstaffItemGradeColumn")]
-        public async Task<RequestResult<OutstaffItemGradeColumn>> UpdateOutstaffItemGradeColumn(OutstaffItemGradeColumnDTO model)
+        [OutstaffSectionAccess(2)]
+        public async Task<OutstaffItemGradeColumnDTO> UpdateOutstaffItemGradeColumn(OutstaffItemGradeColumnDTO model)
         {
-            var column = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades)
-                                                  .SelectMany(o => o.Prices)
-                                                  .FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryUpdateOutstaffModel(DB.OutstaffItemGradeColumns, model, column);
+            var item = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades).SelectMany(o => o.Prices).FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return (OutstaffItemGradeColumnDTO)DbService.TryUpdateEntity(DB.OutstaffItemGradeColumns, model, item);
         }
 
 
 
         [HttpDelete, Route("DeleteOutstaffItemGradeColumn")]
-        public async Task<RequestResult> DeleteOutstaffItemGradeColumn(int id)
+        [OutstaffSectionAccess(6)]
+        public async Task DeleteOutstaffItemGradeColumn(int id)
         {
-            var column = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades)
-                                                     .SelectMany(o => o.Prices)
-                                                     .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryDeleteOutstaffModel(DB.OutstaffItemGradeColumns, column);
+            var item = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades).SelectMany(o => o.Prices).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            DbService.TryDeleteEntity(DB.OutstaffItemGradeColumns, item);
         }
 
 
@@ -394,99 +347,35 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Матрицы цен
 
         [HttpPut, Route("UpdatePricingMatrix")]
-        public async Task<RequestResult<PricingMatrix>> UpdatePricingMatrix(PricingMatrixDTO model)
+        [OutstaffSectionAccess(4)]
+        public async Task<PricingMatrixDTO> UpdatePricingMatrix(PricingMatrixDTO model)
         {
             var matrix = DB.GetIncludedPricingMatrix(model.Id);
-
-            return TryFinishAllRequestes<PricingMatrix>(new[]
-            {
-                () => CheckAccess(7),
-                () => RequestResult.FromBoolean(matrix != null, 404, "Запись по данному id не найдена"),
-                () => RequestResult.FromBoolean(matrix.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () => UpdateModel(DB.PricingMatrices, model, matrix)
-            });
+            return (PricingMatrixDTO)DbService.TryUpdateEntity(DB.PricingMatrices, model, matrix);
         }
 
         [HttpPut, Route("SetDefaultCellPricingMatrix")]
-        public async Task<RequestResult<PricingMatrix>> SetDefaultProductPricingMatrix(int cellId)
+        [OutstaffSectionAccess(4)]
+        public async Task<PricingMatrixDTO> SetDefaultProductPricingMatrix(int cellId)
         {
             var column = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades)
                                                .SelectMany(o => o.Prices)
                                                .FirstOrDefault(o => o.Id == cellId && !o.IsDeleted);
 
-            return TryFinishAllRequestes<PricingMatrix>(new[]
+            if(column is null)
             {
-                () => CheckAccess(4),
-                () => RequestResult.FromBoolean(column != null, 404, "Сущность по данному id не найдена"),
-                () =>
-                {
-                    column.CostPerHour = CreateDefaultPricingMatrix();
-                    return UpdateModel(DB.OutstaffItemGradeColumns,column);
-                }
-            });
+                throw new Exception404("Сущность с данным id не найдена");
+            }
+
+            column.CostPerHour = CreateDefaultPricingMatrix();
+            DbService.UpdateEntity(DB.OutstaffItemGradeColumns, column);
+
+            return (PricingMatrixDTO)new PricingMatrixDTO().CreateDTO(column.CostPerHour);
         }
 
         #endregion
 
 
-
-        #region Private check access methods
-
-        private RequestResult CheckAccess(int requiredLevel)
-        {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes(new Func<RequestResult>[]
-            {
-                () => RequestResult.FromBoolean(session.User.RoleModel.Role != UserRole.User,
-                        403, "У данного пользователя нет доступа в администраторскую панель"),
-                () => CheckSession(session),
-                () => RequestResult.FromBoolean(session.User.RoleModel.OutstaffAccess.AccessLevel >= requiredLevel || session.User.RoleModel.Role == UserRole.Owner,
-                       403, "У данного пользователя нет прав на выполнение данного действия")
-             });
-        }
-
-        private RequestResult<T> TryGetOutstaffModel<T>(T item)
-        {
-            return TryFinishAllRequestes<T>(new[]
-            {
-                () => CheckAccess(1),
-                () => RequestResult.FromBoolean(item != null, 404, "Сущность по данному id не найдена"),
-                () => RequestResult<T>.AsSuccess(item)
-            });
-        }
-        private RequestResult<T> TryDeleteOutstaffModel<T>(DbSet<T> dbSet,T item,bool softDelete = true) where T: AbsModel
-        {
-            return TryFinishAllRequestes<T>(new[]
-            {
-                 () => CheckAccess(6),
-                 () => RequestResult.FromBoolean(item != null,404, "Сущность с данным id не найдена"),
-                 () => DeleteModel(dbSet, item, softDelete)
-            });
-        }
-
-
-        private RequestResult<T> TryUpdateOutstaffModel<T>(DbSet<T> dbSet, DTOModel<T> model, T localization) where T : AbsModel, new()
-        {
-            return TryFinishAllRequestes<T>(new[]
-            {
-                 () => CheckAccess(2),
-                 () => RequestResult.FromBoolean(localization != null, 404, "Локализация с данным id не найдена"),
-                 () => RequestResult.FromBoolean(model.IsValid(), 400, "Проверьте корректность заполнения данных"),
-                 () => UpdateModel(dbSet, model, localization)
-            });
-        }
-        private RequestResult<T> TryUpdateOutstaffLocalizationModel<T>(DbSet<T> dbSet, DTOModel<T> model, T localization) where T : AbsModel, new()
-        {
-            return TryFinishAllRequestes<T>(new[]
-            {
-                 () => CheckAccess(3),
-                 () => RequestResult.FromBoolean(localization != null, 404, "Локализация с данным id не найдена"),
-                 () => RequestResult.FromBoolean(model.IsValid(), 400, "Проверьте корректность заполнения данных"),
-                 () => UpdateModel(dbSet, model, localization)
-            });
-        }
-
-        #endregion
 
 
     }

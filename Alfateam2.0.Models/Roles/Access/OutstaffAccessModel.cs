@@ -18,5 +18,6 @@ namespace Alfateam2._0.Models.Roles.Access
         public bool CanEditPrices => AccessLevel >= 4;
         public bool CanAddNewItems => AccessLevel >= 5;
         public bool CanRemoveItems => AccessLevel >= 6;
+
     }
 }

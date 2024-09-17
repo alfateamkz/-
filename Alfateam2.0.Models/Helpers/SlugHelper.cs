@@ -55,6 +55,11 @@
         {
             var result = "";
 
+            if (string.IsNullOrEmpty(str))
+            {
+                return "";
+            }
+
             foreach (var ch in str.ToLower())
             {
                 var ss = "";

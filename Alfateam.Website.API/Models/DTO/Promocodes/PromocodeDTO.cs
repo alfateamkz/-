@@ -1,5 +1,6 @@
 ﻿using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Attributes.DTO;
+using Alfateam.Website.API.Models.DTO.General;
 using Alfateam.Website.API.Models.DTO.Promocodes;
 using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.Enums;
@@ -14,16 +15,20 @@ namespace Alfateam.Website.API.Models.DTO.Promocodes
     [JsonDiscriminator(Name = "Discriminator")]
     [JsonKnownType(typeof(PricePromocodeDTO), "PricePromocode")]
     [JsonKnownType(typeof(PercentPromocodeDTO), "PercentPromocode")]
-    public class PromocodeDTO : DTOModel<Promocode>
+    public class PromocodeDTO : AvailabilityDTOModel<Promocode>
     {
         public virtual string Discriminator { get; }
 
 
 
-        public string Promocode { get; set; }
+        public string Code { get; set; }
         public PromocodeType Type { get; set; }
 
-        public Currency Currency { get; set; }
+
+        public CurrencyDTO Currency { get; set; }
+        public int CurrencyId { get; set; }
+
+
         public double? Value { get; set; }
         public double? PriceFrom { get; set; }
         public double? PriceTo { get; set; }
@@ -32,8 +37,6 @@ namespace Alfateam.Website.API.Models.DTO.Promocodes
 
 
         #region Для админа
-        public string Code { get; set; }
-
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 
@@ -51,7 +54,7 @@ namespace Alfateam.Website.API.Models.DTO.Promocodes
             var model = new PromocodeDTO();
 
             model.Id = item.Id;
-            model.Promocode = item.Code;
+            model.Code = item.Code;
             model.Type = item.Type;
 
             model.PriceFrom = item.PriceFrom.GetPrice(countryId, currencyId)?.Value;

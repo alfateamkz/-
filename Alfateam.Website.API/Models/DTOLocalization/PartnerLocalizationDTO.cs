@@ -4,7 +4,7 @@ using Alfateam2._0.Models.Localization.Items;
 
 namespace Alfateam.Website.API.Models.DTOLocalization
 {
-    public class PartnerLocalizationDTO : DTOModel<PartnerLocalization>
+    public class PartnerLocalizationDTO : LocalizationDTOModel<PartnerLocalization>
     {
         public string Title { get; set; }
         public Content Content { get; set; }

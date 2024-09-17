@@ -19,61 +19,48 @@ using Alfateam2._0.Models.Localization.Items.Shop;
 using Alfateam2._0.Models.Shop;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Alfateam.Website.API.Models;
+using Alfateam.Website.API.Filters.Access;
+using Alfateam2._0.Models.ContentItems;
+using Alfateam2._0.Models.Localization.Items.HR;
+using Alfateam.Website.API.Models.DTO.HR;
+using Alfateam.Website.API.Models.DTOLocalization.HR;
+using Alfateam.Website.API.Exceptions;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
     public class AdminPartnersController : AbsAdminController
     {
-        public AdminPartnersController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
+        public AdminPartnersController(ControllerParams @params) : base(@params)
         {
-
         }
 
         #region Партнеры
 
         [HttpGet, Route("GetPartners")]
-        public async Task<RequestResult<IEnumerable<PartnerDTO>>> GetPartners(int offset, int count = 20)
+        [CheckContentAreaRights(ContentAccessModelType.Partners, 1)]
+        public async Task<IEnumerable<PartnerDTO>> GetPartners(int offset, int count = 20)
         {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<PartnerDTO>>(new Func<RequestResult>[]
-            {
-                () => CheckContentAreaRights(session, ContentAccessModelType.Partners, 1),
-                () => {
-                    var items = GetAvailableModels(session.User, GetPartnersIncluded(), offset, count);
-                    var models = PartnerDTO.CreateItemsWithLocalization(items.Cast<Partner>(), LanguageId) as IEnumerable<PartnerDTO>;
-                    return RequestResult<IEnumerable<PartnerDTO>>.AsSuccess(models);
-                }
-            });
+            var items = GetAvailablePartners().Skip(offset).Take(count);
+            return new PartnerDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<PartnerDTO>();
         }
 
         [HttpGet, Route("GetPartner")]
-        public async Task<RequestResult<Partner>> GetPartner(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Partners, 1)]
+        public async Task<PartnerDTO> GetPartner(int id)
         {
-            var item = GetPartnersIncluded().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<Partner>(new Func<RequestResult>[]
-            {
-                () => CheckContentAreaRights(session, item, ContentAccessModelType.Partners, 1),
-                () => RequestResult.FromBoolean(item != null, 404, "Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(this.CheckBasePermissions(session.User, item),403, "У данного пользователя нет доступа к записи"),
-                () => RequestResult<Partner>.AsSuccess(item)
-            });
+            return (PartnerDTO)DbService.TryGetOne(GetAvailablePartners(), id, new PartnerDTO());
         }
 
         [HttpGet, Route("GetPartnerLocalization")]
-        public async Task<RequestResult<PartnerLocalization>> GetPartnerLocalization(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Partners, 1)]
+        public async Task<PartnerLocalizationDTO> GetPartnerLocalization(int id)
         {
             var localization = DB.PartnerLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null) return RequestResult<PartnerLocalization>.AsError(404, "Сущность с данным id не найдена");
+            var mainEntity = GetAvailablePartners().FirstOrDefault(o => o.Id == localization?.PartnerId && !o.IsDeleted);
 
-            var partner = GetPartnersIncluded().FirstOrDefault(o => o.Id == localization.PartnerId && !o.IsDeleted);
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<PartnerLocalization>(new Func<RequestResult>[]
-            {
-                () => RequestResult.FromBoolean(partner != null, 500, "Внутренняя ошибка"),
-                () => CheckContentAreaRights(session, partner, ContentAccessModelType.Partners, 1),
-                () => RequestResult<PartnerLocalization>.AsSuccess(localization)
-            });
+            return (PartnerLocalizationDTO)DbService.GetLocalizationModel(localization, mainEntity, new PartnerLocalizationDTO());
         }
 
 
@@ -84,23 +71,24 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPost, Route("CreatePartner")]
-        public async Task<RequestResult<Partner>> CreatePartner(Partner item)
+        [CheckContentAreaRights(ContentAccessModelType.Partners, 4)]
+        [SwaggerOperation(description: "Нужно загрузить логотип через форму с именем logoImg")]
+        public async Task<PartnerDTO> CreatePartner(PartnerDTO model)
         {
-            return await TryCreate(DB.Partners, item, ContentAccessModelType.Partners, () => PreparePartnerBeforeCreate(item));
+            return (PartnerDTO)DbService.TryCreateAvailabilityEntity(DB.Partners, model, this.Session, async (entity) =>
+            {
+                await HandlePartner(entity, DBModelFillMode.Create, null);
+            });
         }
 
         [HttpPost, Route("CreatePartnerLocalization")]
-        public async Task<RequestResult<PartnerLocalization>> CreatePartnerLocalization(int itemId, PartnerLocalization localization)
+        [CheckContentAreaRights(ContentAccessModelType.Partners, 3)]
+        public async Task<PartnerLocalizationDTO> CreatePartnerLocalization(int itemId, PartnerLocalizationDTO localization)
         {
-            var mainEntity = GetPartnersIncluded().FirstOrDefault(o => o.Id == itemId);
-            return TryFinishAllRequestes<PartnerLocalization>(new[]
+            var mainEntity = GetAvailablePartners().FirstOrDefault(o => o.Id == itemId);
+            return (PartnerLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.Partners, mainEntity, localization, async (entity) =>
             {
-                () => CheckLocalizationModelBeforeCreate(localization, mainEntity, ContentAccessModelType.Partners),
-                () =>
-                {
-                    mainEntity.Localizations.Add(localization);
-                    return UpdateModel(DB.Partners,mainEntity);
-                }
+                await HandlePartnerLocalization(entity, DBModelFillMode.Create, null);
             });
         }
 
@@ -110,28 +98,27 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdatePartnerMain")]
-        public async Task<RequestResult<Partner>> UpdatePostCategoryMain(PartnerDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.Partners, 3)]
+        [SwaggerOperation(description: "Нужно загрузить логотип через форму с именем logoImg, если изменяем картинку")]
+        public async Task<PartnerDTO> UpdatePostCategoryMain(PartnerDTO model)
         {
-            var item = GetPartnersIncluded().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryFinishAllRequestes<Partner>(new[]
+            var item = GetAvailablePartners().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return (PartnerDTO)DbService.TryUpdateEntity(DB.Partners, model, item, async (entity) =>
             {
-                () => CheckMainModelBeforeUpdate(item, model,ContentAccessModelType.Partners),
-                () => RequestResult.FromBoolean(DB.Languages.Any(o => o.Id == model.MainLanguageId && !o.IsDeleted),
-                                                    404, "Языка с данным id не существует"),
-                () => PreparePartnerBeforeUpdate(item).Result,
-                () => UpdateModel(DB.Partners, model, item)
+                await HandlePartner(entity, DBModelFillMode.Update, model.Content);
             });
         }
 
         [HttpPut, Route("UpdatePartnerLocalization")]
-        public async Task<RequestResult<PartnerLocalization>> UpdatePartnerLocalization(PartnerLocalizationDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.Partners, 3)]
+        public async Task<PartnerLocalizationDTO> UpdatePartnerLocalization(PartnerLocalizationDTO model)
         {
             var localization = DB.PartnerLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryFinishAllRequestes<PartnerLocalization>(new[]
+            var mainEntity = GetAvailablePartners().FirstOrDefault(o => o.Id == localization.PartnerId && !o.IsDeleted);
+
+            return (PartnerLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.PartnerLocalizations, localization, model, mainEntity, async (entity) =>
             {
-                () => RequestResult.FromBoolean(localization != null,404, "Локализация с данным id не найдена"),
-                () => CheckLocalizationModelBeforeUpdate(GetPartnersIncluded(), model, localization.PartnerId, ContentAccessModelType.Partners),
-                () => UpdateModel(DB.PartnerLocalizations, model, localization)
+                await HandlePartnerLocalization(entity, DBModelFillMode.Update, model.Content);
             });
         }
 
@@ -139,44 +126,42 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpDelete, Route("DeletePartner")]
-        public async Task<RequestResult> DeletePartner(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Partners, 5)]
+        public async Task DeletePartner(int id)
         {
-            var item = GetPartnersIncluded().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                () => RequestResult.FromBoolean(item != null, 404, "Запись по данному id не найдена"),
-                () => TryDelete(DB.Partners, item, ContentAccessModelType.Partners)
-            });
+            var item = GetAvailablePartners().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            DbService.TryDeleteEntity(DB.Partners, item);
         }
+
+
         [HttpDelete, Route("DeletePartnerLocalization")]
-        public async Task<RequestResult> DeletePartnerLocalization(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Partners, 5)]
+        public async Task DeletePartnerLocalization(int id)
         {
             var item = DB.PartnerLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                () => RequestResult.FromBoolean(item != null,404, "Запись по данному id не найдена"),
-                () => CheckLocalizationModelBeforeDelete(GetPartnersIncluded(), item.PartnerId, ContentAccessModelType.Partners),
-                () => DeleteModel(DB.PartnerLocalizations, item, false)
-            });
+            var mainModel = DB.Partners.FirstOrDefault(o => o.Id == item.PartnerId && !o.IsDeleted);
+
+            DbService.TryDeleteLocalizationEntity(DB.PartnerLocalizations, item, mainModel);
         }
 
         #endregion
 
 
         [HttpPut, Route("UpdateAvailability")]
-        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.Partners, 2)]
+        public async Task<AvailabilityDTO> UpdateAvailability(AvailabilityDTO model)
         {
             bool hasThisModel = false;
 
-            var user = GetSessionWithRoleInclude().User;
-            hasThisModel |= GetAvailableModels(user, DB.Partners.IncludeAvailability()).Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            hasThisModel |= DbService.GetAvailableModels(this.Session.User, DB.Partners.IncludeAvailability())
+                                     .Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
 
             if (!hasThisModel)
             {
-                return new RequestResult<Availability>().SetError(403, "У данного пользователя нет прав на редактирование матрицы доступности");
+                throw new Exception403("У данного пользователя нет прав на редактирование матрицы доступности");
             }
 
-            return TryUpdateAvailability(model, ContentAccessModelType.Partners);
+            return DbService.TryUpdateAvailability(model, this.Session);
         }
 
 
@@ -185,30 +170,44 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Private prepare methods
 
-        private async Task<RequestResult> PreparePartnerBeforeCreate(Partner partner)
+        private async Task HandlePartner(Partner entity, DBModelFillMode mode, Content newContentForUpdate)
         {
-            //Загрузка главной картинки
-            var mainFileUploadResult = await TryUploadFile($"mainImg", FileType.Image);
-            if (!mainFileUploadResult.Success)
+            const string formFilename = "logoImg";
+
+            if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
+               || mode == DBModelFillMode.Create)
             {
-                return mainFileUploadResult;
+                entity.LogoPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
             }
-            partner.LogoPath = mainFileUploadResult.Value;
-            return RequestResult.AsSuccess();
+
+            if (mode == DBModelFillMode.Create)
+            {
+                await FilesService.UploadContentMedia(entity.Content);
+            }
+            else if (mode == DBModelFillMode.Update && !entity.Content.AreSame(newContentForUpdate))
+            {
+                await FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
+            }
         }
-        private async Task<RequestResult> PreparePartnerBeforeUpdate(Partner partner)
+        private async Task HandlePartnerLocalization(PartnerLocalization entity, DBModelFillMode mode, Content newContentForUpdate)
         {
-            if(Request.Form.Files.Any(o => o.Name == "mainImg"))
+            if (mode == DBModelFillMode.Create)
             {
-                //Загрузка главной картинки
-                var mainFileUploadResult = await TryUploadFile($"mainImg", FileType.Image);
-                if (!mainFileUploadResult.Success)
-                {
-                    return mainFileUploadResult;
-                }
-                partner.LogoPath = mainFileUploadResult.Value;
+                await FilesService.UploadContentMedia(entity.Content);
             }
-            return RequestResult.AsSuccess();
+            else if (mode == DBModelFillMode.Update && !entity.Content.AreSame(newContentForUpdate))
+            {
+                await FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
+            }
+        }
+
+
+        #endregion
+
+        #region Private get available methods
+        private IEnumerable<Partner> GetAvailablePartners()
+        {
+            return DbService.GetAvailableModels(this.Session.User, GetPartnersIncluded()).Cast<Partner>();
         }
 
         #endregion

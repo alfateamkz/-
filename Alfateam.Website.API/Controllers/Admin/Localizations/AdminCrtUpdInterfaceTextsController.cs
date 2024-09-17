@@ -3,6 +3,7 @@ using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Enums.LocalizationTexts;
 using Alfateam.Website.API.Enums.LocalizationTexts.ClientCabinet;
 using Alfateam.Website.API.Enums.LocalizationTexts.StaticPages;
+using Alfateam.Website.API.Models;
 using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.Localization.Texts;
 using Alfateam2._0.Models.Localization.Texts.ClientCabinet;
@@ -23,7 +24,7 @@ namespace Alfateam.Website.API.Controllers.Admin.Localizations
 {
     public class AdminCrtUpdInterfaceTextsController : AbsAdminController
     {
-        public AdminCrtUpdInterfaceTextsController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
+        public AdminCrtUpdInterfaceTextsController(ControllerParams @params) : base(@params)
         {
         }
 

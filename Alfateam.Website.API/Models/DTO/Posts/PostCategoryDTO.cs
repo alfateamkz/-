@@ -5,7 +5,7 @@ using Alfateam2._0.Models.Posts;
 
 namespace Alfateam.Website.API.Models.DTO.Posts
 {
-    public class PostCategoryDTO : DTOModel<PostCategory>
+    public class PostCategoryDTO : AvailabilityDTOModel<PostCategory>
     {
         public string Title { get; set; }
         public string Slug => SlugHelper.GetLatynSlug(Title);

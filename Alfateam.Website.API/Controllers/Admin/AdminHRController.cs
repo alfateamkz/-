@@ -6,8 +6,6 @@ using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTO.HR;
 using Alfateam.Website.API.Models.DTO.Shop;
 using Alfateam.Website.API.Models.DTO.General;
-using Alfateam.Website.API.Models.DTO.HR;
-using Alfateam.Website.API.Models.DTO.Shop;
 using Alfateam.Website.API.Models.DTOLocalization.HR;
 using Alfateam.Website.API.Models.DTOLocalization.Shop;
 using Alfateam2._0.Models.Enums;
@@ -18,61 +16,47 @@ using Alfateam2._0.Models.Localization.Items.Shop;
 using Alfateam2._0.Models.Shop;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Alfateam.Website.API.Filters;
+using Alfateam.Website.API.Models.DTO.Events;
+using Alfateam.Website.API.Filters.Access;
+using Alfateam.Website.API.Models.DTOLocalization.Events;
+using Alfateam.Website.API.Exceptions;
+using Alfateam2._0.Models.ContentItems;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
     public class AdminHRController : AbsAdminController
     {
-        public AdminHRController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
+        public AdminHRController(ControllerParams @params) : base(@params)
         {
-   
         }
 
 
         #region Вакансии
 
         [HttpGet, Route("GetJobVacancies")]
-        public async Task<RequestResult<IEnumerable<JobVacancyDTO>>> GetJobVacancies(int offset, int count = 20)
+        [HRSectionAccess(1)]
+        public async Task<IEnumerable<JobVacancyDTO>> GetJobVacancies(int offset, int count = 20)
         {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<JobVacancyDTO>>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(1),
-                () => {
-                    var items = GetAvailableModels(GetSessionWithRoleInclude().User, GetVacanciesList(), offset, count);
-                    var models = JobVacancyDTO.CreateItemsWithLocalization(items.Cast<JobVacancy>(), LanguageId) as IEnumerable<JobVacancyDTO>;
-                    return RequestResult<IEnumerable<JobVacancyDTO>>.AsSuccess(models);
-                }
-            });
+            var items = GetAvailableJobVacancies().Skip(offset).Take(count);
+            return new JobVacancyDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<JobVacancyDTO>();
         }
 
         [HttpGet, Route("GetJobVacancy")]
-        public async Task<RequestResult<JobVacancy>> GetJobVacancy(int id)
+        [HRSectionAccess(1)]
+        public async Task<JobVacancyDTO> GetJobVacancy(int id)
         {
-            var item = GetVacanciesFullIncludedList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<JobVacancy>(new[]
-            {
-                () => CheckAccess(1),
-                () => RequestResult.FromBoolean(item != null, 404, "Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(this.CheckBasePermissions(user, item),403, "У данного пользователя нет доступа к записи"),
-                () => RequestResult<JobVacancy>.AsSuccess(item)
-            });
+            return (JobVacancyDTO)DbService.TryGetOne(GetAvailableJobVacancies(), id, new JobVacancyDTO());
         }
 
         [HttpGet, Route("GetJobVacancyLocalization")]
-        public async Task<RequestResult<JobVacancyLocalization>> GetJobVacancyLocalization(int id)
+        [HRSectionAccess(1)]
+        public async Task<JobVacancyLocalizationDTO> GetJobVacancyLocalization(int id)
         {
             var localization = DB.JobVacancyLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null) return RequestResult<JobVacancyLocalization>.AsError(404, "Сущность с данным id не найдена");
+            var mainEntity = GetAvailableJobVacancies().FirstOrDefault(o => o.Id == localization?.JobVacancyId && !o.IsDeleted);
 
-            var vacancy = GetVacanciesList().FirstOrDefault(o => o.Id == localization.JobVacancyId);
-            return TryFinishAllRequestes<JobVacancyLocalization>(new Func<RequestResult>[]
-            {
-                () => CheckAccess(1),
-                () => RequestResult.FromBoolean(vacancy != null, 500, "Внутренняя ошибка"),
-                () => RequestResult<JobVacancyLocalization>.AsSuccess(localization)
-            });
+            return (JobVacancyLocalizationDTO)DbService.GetLocalizationModel(localization, mainEntity, new JobVacancyLocalizationDTO());
         }
 
 
@@ -81,39 +65,24 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPost, Route("CreateJobVacancy")]
-        public async Task<RequestResult<JobVacancy>> CreateProduct(JobVacancy item)
+        [HRSectionAccess(6)]
+        public async Task<JobVacancyDTO> CreateJobVacancy(JobVacancyDTO model)
         {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<JobVacancy>(new[]
+            return (JobVacancyDTO)DbService.TryCreateAvailabilityEntity(DB.JobVacancies, model, this.Session, async (entity) =>
             {
-                () => CheckSession(session),
-                () => CheckAccess(6),
-                () => RequestResult.FromBoolean(item.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () => CanSetAvailabilityCountries(session.User, item.Availability),
-                () => PrepareVacancyBeforeCreate(item).Result,
-                () => CreateModel(DB.JobVacancies,item)
-             });
+                await HandleJobVacancy(entity, DBModelFillMode.Create, null);
+            });
         }
       
         [HttpPost, Route("CreateJobVacancyLocalization")]
-        public async Task<RequestResult<JobVacancyLocalization>> CreateJobVacancyLocalization(int itemId, JobVacancyLocalization localization)
+        [HRSectionAccess(6)]
+        public async Task<JobVacancyLocalizationDTO> CreateJobVacancyLocalization(int itemId, JobVacancyLocalizationDTO localization)
         {
-            var mainEntity = GetVacanciesList().FirstOrDefault(o => o.Id == itemId);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<JobVacancyLocalization>(new[]
+            var mainEntity = GetAvailableJobVacancies().FirstOrDefault(o => o.Id == itemId);
+            return (JobVacancyLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.JobVacancies, mainEntity, localization, async (entity) =>
             {
-                () => CheckAccess(6),
-                () => RequestResult.FromBoolean(mainEntity != null, 404, "Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(this.CheckBasePermissions(user, mainEntity), 403, "У данного пользователя нет доступа к записи"),
-                () => RequestResult.FromBoolean(localization.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () => PrepareVacancyLocalizationBeforeCreate(localization).Result,
-                () =>
-                {
-                    mainEntity.Localizations.Add(localization);
-                    UpdateModel(DB.JobVacancies,mainEntity);
-                    return RequestResult<JobVacancyLocalization>.AsSuccess(localization);
-                }
-            });     
+                await HandleJobVacancyLocalization(entity, DBModelFillMode.Create, null);
+            });   
         }
 
 
@@ -121,37 +90,26 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateJobVacancyMain")]
-        public async Task<RequestResult<JobVacancy>> UpdateJobVacancyMain(JobVacancyDTO model)
+        [HRSectionAccess(4)]
+        public async Task<JobVacancyDTO> UpdateJobVacancyMain(JobVacancyDTO model)
         {
-            var item = GetVacanciesFullIncludedList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<JobVacancy>(new[]
+            var item = GetAvailableJobVacancies().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return (JobVacancyDTO)DbService.TryUpdateEntity(DB.JobVacancies, model, item, async (entity) =>
             {
-                 () => CheckAccess(4),
-                 () => RequestResult.FromBoolean(item != null, 404,  "Запись по данному id не найдена"),
-                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, item), 403, "У данного пользователя нет доступа к записи"),
-                 () => PrepareVacancyMainBeforeUpdate(item,model).Result,
-                 () => RequestResult.FromBoolean(model.IsValid(),400,"Проверьте корректность заполнения данных"),
-                 () => UpdateModel(DB.JobVacancies, model, item)
+                await HandleJobVacancy(entity, DBModelFillMode.Update, model.InnerContent);
             });
         }
    
         [HttpPut, Route("UpdateJobVacancyLocalization")]
-        public async Task<RequestResult<JobVacancyLocalization>> UpdateJobVacancyLocalization(JobVacancyLocalizationDTO model)
+        [HRSectionAccess(5)]
+        public async Task<JobVacancyLocalizationDTO> UpdateJobVacancyLocalization(JobVacancyLocalizationDTO model)
         {
             var localization = DB.JobVacancyLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            if (localization == null) return RequestResult<JobVacancyLocalization>.AsError(404, "Локализация с данным id не найдена");
+            var mainEntity = GetAvailableJobVacancies().FirstOrDefault(o => o.Id == localization.JobVacancyId && !o.IsDeleted);
 
-            var mainEntity = GetVacanciesList().FirstOrDefault(o => o.Id == localization.JobVacancyId);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<JobVacancyLocalization>(new[]
+            return (JobVacancyLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.JobVacancyLocalizations, localization, model, mainEntity, async (entity) =>
             {
-                 () => CheckAccess(5),
-                 () => RequestResult.FromBoolean(mainEntity != null, 500, "Внутренняя ошибка"),
-                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, mainEntity), 403, "У данного пользователя нет доступа к записи"),
-                 () => RequestResult.FromBoolean(model.IsValid(),400,"Проверьте корректность заполнения данных"),
-                 () => PrepareVacancyLocalizationBeforeUpdate(localization,model).Result,
-                 () => UpdateModel(DB.JobVacancyLocalizations, model, localization)
+                await HandleJobVacancyLocalization(entity, DBModelFillMode.Update, model.InnerContent);
             });
         }
 
@@ -161,35 +119,21 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpDelete, Route("DeleteJobVacancy")]
-        public async Task<RequestResult> DeleteJobVacancy(int id)
+        [HRSectionAccess(7)]
+        public async Task DeleteJobVacancy(int id)
         {
-            var item = GetVacanciesList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-
-            return TryFinishAllRequestes(new[]
-            {
-                 () => CheckAccess(7),
-                 () => RequestResult.FromBoolean(item != null, 404, "Сущность по данному id не найдена"),
-                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, item), 403, "У данного пользователя нет доступа к записи"),
-                 () => DeleteModel(DB.JobVacancies, item)
-            });
+            var item = GetAvailableJobVacancies().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            DbService.TryDeleteEntity(DB.JobVacancies, item);
         }
 
         [HttpDelete, Route("DeleteJobVacancyLocalization")]
-        public async Task<RequestResult> DeleteJobVacancyLocalization(int id)
+        [HRSectionAccess(7)]
+        public async Task DeleteJobVacancyLocalization(int id)
         {
-            var localization = DB.JobVacancyLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null) return RequestResult.AsError(404, "Запись по данному id не найдена");
+            var item = DB.JobVacancyLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var mainModel = DB.JobVacancies.FirstOrDefault(o => o.Id == item.JobVacancyId && !o.IsDeleted);
 
-            var mainEntity = DB.ShopProducts.FirstOrDefault(o => o.Id == localization.JobVacancyId && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes(new[]
-            {
-                 () => CheckAccess(7),
-                 () => RequestResult.FromBoolean(mainEntity != null, 500, "Внутренняя ошибка"),
-                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, mainEntity), 403, "У данного пользователя нет доступа к записи"),
-                 () => DeleteModel(DB.JobVacancyLocalizations, localization, false)
-            });
+            DbService.TryDeleteLocalizationEntity(DB.JobVacancyLocalizations, item, mainModel);
         }
 
 
@@ -199,58 +143,57 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Резюме
 
         [HttpGet, Route("GetJobSummaries")]
-        public async Task<RequestResult<IEnumerable<JobSummary>>> GetJobSummaries(int vacancyId, int offset, int count = 20)
+        [HRSectionAccess(2)]
+        public async Task<IEnumerable<JobSummaryDTO>> GetJobSummaries(int vacancyId, int offset, int count = 20)
         {
-            var vacancy = GetVacanciesFullIncludedList().FirstOrDefault(o => o.Id == vacancyId && !o.IsDeleted);
-            var user = GetSessionWithRoleInclude()?.User;
-
-            return TryFinishAllRequestes<IEnumerable<JobSummary>>(new[]
+            var vacancy = GetAvailableJobVacancies().FirstOrDefault(o => o.Id == vacancyId && !o.IsDeleted);
+            if(vacancy is null)
             {
-                () => CheckAccess(2),
-                () => RequestResult.FromBoolean(vacancy != null, 404, "Сущность по данному id не найдена"),
-                () => RequestResult.FromBoolean(this.CheckBasePermissions(user, vacancy),403, "У данного пользователя нет доступа к записи"),
-                () => {
-                    var summaries = GetSummariesList().Where(o => o.JobVacancyId == vacancyId).Skip(offset).Take(count);
-                    return RequestResult<IEnumerable<JobSummary>>.AsSuccess(summaries);
-                }
-            });
+                throw new Exception404("Сущность по данному id не найдена");
+            }
+
+            var summaries = GetSummariesList().Where(o => o.JobVacancyId == vacancyId && !o.IsDeleted).Skip(offset).Take(count);
+            return new JobSummaryDTO().CreateDTOsWithLocalization(summaries, LanguageId).Cast<JobSummaryDTO>();
         }
 
         [HttpGet, Route("GetJobSummary")]
-        public async Task<RequestResult<JobSummary>> GetJobSummary(int id)
+        [HRSectionAccess(2)]
+        public async Task<JobSummaryDTO> GetJobSummary(int id)
         {
             var summary = GetSummariesList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (summary == null) return RequestResult<JobSummary>.AsError(404, "Сущность по данному id не найдена");
-
-            var vacancy = GetVacanciesList().FirstOrDefault(o => o.Id == summary.JobVacancyId);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes<JobSummary>(new[]
+            if (summary == null)
             {
-                () => CheckAccess(2),
-                () => RequestResult.FromBoolean(vacancy != null, 500, "Внутренняя ошибка"),
-                () => RequestResult.FromBoolean(this.CheckBasePermissions(user, vacancy),403, "У данного пользователя нет доступа к записи"),
-                () => RequestResult<JobSummary>.AsSuccess(summary)
-            });
+                throw new Exception404("Сущность по данному id не найдена");
+            }
+
+            var vacancy = GetAvailableJobVacancies().FirstOrDefault(o => o.Id == summary.JobVacancyId);
+            if (vacancy is null)
+            {
+                throw new Exception500("Внутренняя ошибка");
+            }
+
+            return (JobSummaryDTO)new JobSummaryDTO().CreateDTOWithLocalization(summary, LanguageId);
         }
 
 
 
         [HttpPut, Route("UpdateJobSummaryInfo")]
-        public async Task<RequestResult> UpdateJobSummaryInfo(EditJobSummaryAdminModel model)
+        [HRSectionAccess(3)]
+        public async Task<JobSummaryDTO> UpdateJobSummaryInfo(EditJobSummaryAdminModel model)
         {
             var summary = GetSummariesList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            if (summary == null) return RequestResult<JobSummary>.AsError(404, "Сущность по данному id не найдена");
-
-            var vacancy = GetVacanciesList().FirstOrDefault(o => o.Id == summary.JobVacancyId);
-            var user = GetSessionWithRoleInclude()?.User;
-            return TryFinishAllRequestes(new[]
+            if (summary == null)
             {
-                 () => CheckAccess(3),
-                 () => RequestResult.FromBoolean(vacancy != null, 500, "Внутренняя ошибка"),
-                 () => RequestResult.FromBoolean(this.CheckBasePermissions(user, vacancy),403, "У данного пользователя нет доступа к записи"),
-                 () => RequestResult.FromBoolean(model.IsValid(),400,"Проверьте корректность заполнения данных"),
-                 () => UpdateModel(DB.JobSummaries, model, summary)
-            });
+                throw new Exception404("Сущность по данному id не найдена");
+            }
+
+            var vacancy = GetAvailableJobVacancies().FirstOrDefault(o => o.Id == summary.JobVacancyId);
+            if (vacancy is null)
+            {
+                throw new Exception500("Внутренняя ошибка");
+            }
+
+            return (JobSummaryDTO)DbService.TryUpdateEntity(DB.JobSummaries, model, summary);
         }
 
 
@@ -259,110 +202,71 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateAvailability")]
-        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityDTO model)
+        [HRSectionAccess(4)]
+        public async Task<AvailabilityDTO> UpdateAvailability(AvailabilityDTO model)
         {
             bool hasThisModel = false;
 
-            var user = GetSessionWithRoleInclude().User;
-            hasThisModel |= GetAvailableModels(user, DB.JobVacancies.IncludeAvailability()).Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            hasThisModel |= DbService.GetAvailableModels(this.Session.User, DB.JobVacancies.IncludeAvailability())
+                                     .Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
 
             if (!hasThisModel)
             {
-                return new RequestResult<Availability>().SetError(403, "У данного пользователя нет прав на редактирование матрицы доступности");
+                throw new Exception403("У данного пользователя нет прав на редактирование матрицы доступности");
             }
 
-            var availability = DB.GetIncludedAvailability(model.Id);
-            return TryFinishAllRequestes<Availability>(new[]
-            {
-                () => RequestResult.FromBoolean(availability != null, 404, "Запись по данному id не найдена"),
-                () => CheckAccess(4),
-                () => CanSetAvailabilityCountries(user, availability),
-                () => UpdateModel(DB.Availabilities, model, availability)
-            });
+            return DbService.TryUpdateAvailability(model, this.Session);
         }
 
 
 
 
 
-        #region Private check access methods
-        private RequestResult CheckAccess(int requiredLevel)
+        #region Private get available methods
+        private IEnumerable<JobVacancy> GetAvailableJobVacancies()
         {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes(new Func<RequestResult>[]
-            {
-                () => CheckSession(session),
-                () => CheckForBan(session.User,BanType.AdminPanel),
-                () => RequestResult.FromBoolean(session.User.RoleModel.Role != UserRole.User,
-                        403, "У данного пользователя нет доступа в администраторскую панель"),
-                () => RequestResult.FromBoolean(session.User.RoleModel.HRAccess.AccessLevel >= requiredLevel || session.User.RoleModel.Role == UserRole.Owner,
-                       403, "У данного пользователя нет прав на выполнение данного действия")
-             });
+            return DbService.GetAvailableModels(this.Session.User, GetVacanciesFullIncludedList()).Cast<JobVacancy>();
         }
 
         #endregion
 
         #region Private prepare methods
 
-        private async Task<RequestResult> PrepareVacancyBeforeCreate(JobVacancy item)
+        private async Task HandleJobVacancy(JobVacancy entity, DBModelFillMode mode, Content newContentForUpdate)
         {
-            item.Watches = 0;
-            item.WatchesList = new List<Watch>();
-
-            return TryFinishAllRequestes(new[]
+            if(!DB.Currencies.Any(o => o.Id == entity.CurrencyId && !o.IsDeleted))
             {
-                () => RequestResult.FromBoolean(DB.Currencies.Any(o => o.Id == item.CurrencyId && !o.IsDeleted),400,"Валюта с таким id не найдена"),
-                () => RequestResult.FromBoolean(DB.Languages.Any(o => o.Id == item.MainLanguageId && !o.IsDeleted),400,"Язык с таким id не найден"),
-                () => RequestResult.FromBoolean(item.Expierence != null,400,"Поле требуемый опыт должно быть заполнено"),
-                () => RequestResult.FromBoolean(item.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () => UploadContentMedia(item.InnerContent).Result,
-                () =>
-                {
-                    foreach(var localization in item.Localizations)
-                    {
-                        var res = PrepareVacancyLocalizationBeforeCreate(localization).Result;
-                        if (!res.Success)
-                        {
-                            return res;
-                        }
-                    }
-                    return RequestResult.AsSuccess();
-                }
-            });
-        }
-        private async Task<RequestResult> PrepareVacancyLocalizationBeforeCreate(JobVacancyLocalization item)
-        {
-            return await UploadContentMedia(item.InnerContent);
-        }
-
-
-        private async Task<RequestResult> PrepareVacancyMainBeforeUpdate(JobVacancy item,JobVacancyDTO model)
-        {
-            return TryFinishAllRequestes(new[]
-            {
-                () => RequestResult.FromBoolean(DB.Currencies.Any(o => o.Id == item.CurrencyId && !o.IsDeleted),400,"Валюта с таким id не найдена"),
-                () => RequestResult.FromBoolean(DB.Languages.Any(o => o.Id == item.MainLanguageId && !o.IsDeleted),400,"Язык с таким id не найден"),
-                () => RequestResult.FromBoolean(item.Expierence != null,400,"Поле требуемый опыт должно быть заполнено"),
-                () => RequestResult.FromBoolean(item.IsValid(), 400, "Проверьте корректность заполнения полей"),
-                () =>
-                {
-                    if (!item.InnerContent.AreSame(model.InnerContent))
-                    {
-                        item.InnerContent = model.InnerContent;
-                        return UploadContentMedia(model.InnerContent).Result;
-                    }
-                    return RequestResult.AsSuccess();
-                }
-            });
-        }
-        private async Task<RequestResult> PrepareVacancyLocalizationBeforeUpdate(JobVacancyLocalization item, JobVacancyLocalizationDTO model)
-        {
-            if (!item.InnerContent.AreSame(model.InnerContent))
-            {
-                item.InnerContent = model.InnerContent;
-                return await UploadContentMedia(model.InnerContent);
+                throw new Exception400("Валюта с таким id не найдена");
             }
-            return RequestResult.AsSuccess();
+            else if(!DB.Languages.Any(o => o.Id == entity.MainLanguageId && !o.IsDeleted))
+            {
+                throw new Exception400("Язык с таким id не найден");
+            }
+            else if (entity.Expierence == null)
+            {
+                throw new Exception400("Поле требуемый опыт должно быть заполнено");
+            }
+
+            if(mode == DBModelFillMode.Create)
+            {
+                await FilesService.UploadContentMedia(entity.InnerContent);
+            }
+            else if(mode == DBModelFillMode.Update && !entity.InnerContent.AreSame(newContentForUpdate))
+            {
+                await FilesService.UpdateContentMedia(entity.InnerContent, newContentForUpdate);
+            }
+            
+        }       
+        private async Task HandleJobVacancyLocalization(JobVacancyLocalization entity, DBModelFillMode mode, Content newContentForUpdate)
+        {
+            if (mode == DBModelFillMode.Create)
+            {
+                await FilesService.UploadContentMedia(entity.InnerContent);
+            }
+            else if (mode == DBModelFillMode.Update && !entity.InnerContent.AreSame(newContentForUpdate))
+            {
+                await FilesService.UpdateContentMedia(entity.InnerContent, newContentForUpdate);
+            }
         }
 
 

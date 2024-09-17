@@ -1,7 +1,10 @@
-﻿using Alfateam.DB;
+﻿using Alfateam.CRM2_0.Models.General;
+using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
+using Alfateam.Website.API.Exceptions;
 using Alfateam.Website.API.Filters;
+using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTO.HR;
 using Alfateam.Website.API.Models.DTO.Reviews;
 using Alfateam2._0.Models.General;
@@ -14,95 +17,74 @@ namespace Alfateam.Website.API.Controllers.Website
 {
     public class ReviewsController : AbsController
     {
-        public ReviewsController(WebsiteDBContext db) : base(db)
+        public ReviewsController(ControllerParams @params) : base(@params)
         {
         }
 
         [HttpGet, Route("GetReviews")]
-        public async Task<IEnumerable<Review>> GetReviews(int offset, int count = 20)
+        public async Task<IEnumerable<ReviewDTO>> GetReviews(int offset, int count = 20)
         {
-            return DB.Reviews.Include(o => o.User)
-                             .Where(o => !o.IsDeleted && o.CountryId == CountryId)
-                             .Skip(offset)
-                             .Take(count)
-                             .ToList();
+            var reviews = DB.Reviews.Include(o => o.User)
+                                    .Where(o => !o.IsDeleted && o.CountryId == CountryId)
+                                    .Skip(offset)
+                                    .Take(count)
+                                    .ToList();
+
+            return new ReviewDTO().CreateDTOsWithLocalization(reviews, this.LanguageId).Cast<ReviewDTO>();
         }
 
 
 
-        [HttpGet, Route("GetMyReviews"), UserActionsFilter]
-        public async Task<RequestResult<IEnumerable<Review>>> GetMyReviews()
+        [HttpGet, Route("GetMyReviews")]
+        [UserActionsFilter]
+        public async Task<IEnumerable<ReviewDTO>> GetMyReviews()
         {
+            var user = DB.Sessions.IgnoreAutoIncludes().Include(o => o.User).ThenInclude(o => o.Reviews)
+                                  .FirstOrDefault(o => o.SessID == UserSessid)
+                                  .User;
 
-            var session = DB.Sessions.IgnoreAutoIncludes().Include(o => o.User).ThenInclude(o => o.Reviews)
-                                     .FirstOrDefault(o => o.SessID == UserSessid);
-            var checkSessionResult = CheckSession(session);
-            if(checkSessionResult != null)
-            {
-                return new RequestResult<IEnumerable<Review>>().FillFromRequestResult(checkSessionResult);
-            }
-            return RequestResult<IEnumerable<Review>>.AsSuccess(session.User.Reviews);
+            return new ReviewDTO().CreateDTOsWithLocalization(user.Reviews, this.LanguageId).Cast<ReviewDTO>();
         }
 
-        [HttpPost, Route("CreateReview"), UserActionsFilter]
-        public async Task<RequestResult<Review>> CreateReview(Review review)
+        [HttpPost, Route("CreateReview")]
+        [UserActionsFilter]
+        public async Task<ReviewDTO> CreateReview(ReviewDTO model)
         {
-            var session = DB.Sessions.IgnoreAutoIncludes().Include(o => o.User).ThenInclude(o => o.Reviews)
-                                     .FirstOrDefault(o => o.SessID == UserSessid);
-
-            return TryFinishAllRequestes<Review>(new[]
+            return (ReviewDTO)DbService.TryCreateEntity(DB.Reviews, model, (entity) =>
             {
-                () => CheckSession(session),
-                () => RequestResult.FromBoolean(review.IsValid(), 400, "Проверьте корректность заполненных значений"),
-                () =>
-                {
-                    session.User.Reviews.Add(review);
-                    DB.Users.Update(session.User);
-                    DB.SaveChanges();
-                    return RequestResult<Review>.AsSuccess(review);
-                }
+                entity.UserId = (int)GetUserIdIfSessionValid();
             });
         }
 
-        [HttpPut, Route("UpdateReview"), UserActionsFilter]
-        public async Task<RequestResult<Review>> UpdateReview(ReviewDTO model)
+        [HttpPut, Route("UpdateReview")]
+        [UserActionsFilter]
+        public async Task<ReviewDTO> UpdateReview(ReviewDTO model)
         {
             var review = DB.Reviews.FirstOrDefault(o => o.Id == model.Id);
-            var session = DB.Sessions.FirstOrDefault(o => o.SessID == UserSessid);
-            return TryFinishAllRequestes<Review>(new[]
+            return (ReviewDTO)DbService.TryUpdateEntity(DB.Reviews, model, review, (entity) =>
             {
-                () => CheckSession(session),
-                () => RequestResult.FromBoolean(review != null, 404,"Сущность с данным id не найдена"),
-                () => RequestResult.FromBoolean(review.UserId == session.User.Id, 403, "Сущность не принадлежит текущему пользователю"),
-                () =>
+                if(entity.UserId != GetUserIdIfSessionValid())
                 {
-                    model.FillDBModel(review, DBModelFillMode.Update);
-                    DB.Reviews.Update(review);
-                    DB.SaveChanges();
-                    return RequestResult<Review>.AsSuccess(review);
+                    throw new Exception403("Отзыв не принадлежит текущему пользователю");
                 }
             });
         }
 
-        [HttpDelete, Route("DeleteReview"), UserActionsFilter]
-        public async Task<RequestResult> DeleteReview(int id)
+        [HttpDelete, Route("DeleteReview")]
+        [UserActionsFilter]
+        public async Task DeleteReview(int id)
         {
             var review = DB.Reviews.FirstOrDefault(o => o.Id == id);
-            var session = DB.Sessions.FirstOrDefault(o => o.SessID == UserSessid);
-
-            return TryFinishAllRequestes(new[]
+            if(review == null)
             {
-                () => CheckSession(session),
-                () => RequestResult.FromBoolean(review != null, 404,"Сущность с данным id не найдена"),
-                () => RequestResult.FromBoolean(review.UserId == session.User.Id, 403, "Сущность не принадлежит текущему пользователю"),
-                () =>
-                {
-                    review.IsDeleted = true;
-                    DB.Reviews.Update(review);
-                    DB.SaveChanges();
-                    return RequestResult.AsSuccess();
-                }
-            });
+                throw new Exception404("Сущность с данным id не найдена");
+            }
+            else if (review.UserId != GetUserIdIfSessionValid())
+            {
+                throw new Exception403("Отзыв не принадлежит текущему пользователю");
+            }
+
+            DbService.DeleteEntity(DB.Reviews, review);
         }
     }
 }

@@ -5,8 +5,8 @@ namespace Alfateam.Website.API.Models.DTO.General
 {
     public class AvailabilityDTO : DTOModel<Availability>
     {
-        public bool AvailableInAllCountries { get; set; } = true;
-        public List<int> AllowedCountries { get; set; } = new List<int>();
-        public List<int> DisallowedCountries { get; set; } = new List<int>();
+        public bool AvailableInAllCountries { get; set; } 
+        public List<int> AllowedCountriesIds { get; set; } = new List<int>();
+        public List<int> DisallowedCountriesIds { get; set; } = new List<int>();
     }
 }

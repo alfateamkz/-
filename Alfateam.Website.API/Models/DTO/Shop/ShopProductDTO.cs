@@ -5,7 +5,7 @@ using Alfateam2._0.Models.Shop;
 
 namespace Alfateam.Website.API.Models.DTO.Shop
 {
-    public class ShopProductDTO : DTOModel<ShopProduct>
+    public class ShopProductDTO : AvailabilityDTOModel<ShopProduct>
     {
         public string Title { get; set; }
         public string Description { get; set; }
@@ -45,7 +45,7 @@ namespace Alfateam.Website.API.Models.DTO.Shop
             model.Images = item.Images;
 
             var prices = GetLocalCosts(item.BasePricing, countryId);
-            model.BasePrices = CostDTO.CreateItemsWithLocalization(prices, langId) as List<CostDTO>;
+            model.BasePrices = new CostDTO().CreateDTOsWithLocalization(prices, langId).Cast<CostDTO>().ToList();
 
             if (item.MainLanguageId != langId)
             {
@@ -64,7 +64,7 @@ namespace Alfateam.Website.API.Models.DTO.Shop
                 }
             }
 
-            model.Category = ShopProductCategoryDTO.CreateWithLocalization(item.Category, langId) as ShopProductCategoryDTO;
+            model.Category = new ShopProductCategoryDTO().CreateDTOWithLocalization(item.Category, langId) as ShopProductCategoryDTO;
             model.Modifiers = ProductModifierDTO.CreateItems(item.Modifiers, langId, countryId);
 
             return model;

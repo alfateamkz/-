@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Alfateam2._0.Models.ServicePages
 {
-    public class ServicePage : AbsModel
+    public class ServicePage : AvailabilityModel
     {
         public string MainBlockHeader { get; set; }
         public string MainBlockShortText { get; set; }

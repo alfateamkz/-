@@ -6,7 +6,7 @@ using Alfateam2._0.Models.Posts;
 
 namespace Alfateam.Website.API.Models.DTO.Posts
 {
-    public class PostDTO : DTOModel<Post>
+    public class PostDTO : AvailabilityDTOModel<Post>
     {
         public string Title { get; set; }
         public string ImgPath { get; set; }

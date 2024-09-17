@@ -5,7 +5,7 @@ using Alfateam2._0.Models.Shop;
 
 namespace Alfateam.Website.API.Models.DTO.Shop
 {
-    public class ShopProductCategoryDTO : DTOModel<ShopProductCategory>
+    public class ShopProductCategoryDTO : AvailabilityDTOModel<ShopProductCategory>
     {
         public string Title { get; set; }
         public string Slug => SlugHelper.GetLatynSlug(Title);

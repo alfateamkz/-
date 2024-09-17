@@ -5,7 +5,7 @@ using Alfateam2._0.Models.Portfolios;
 
 namespace Alfateam.Website.API.Models.DTOLocalization.Portfolios
 {
-    public class PortfolioLocalizationDTO : DTOModel<PortfolioLocalization>
+    public class PortfolioLocalizationDTO : LocalizationDTOModel<PortfolioLocalization>
     {
         public string Title { get; set; }
         public string ImgPath { get; set; }

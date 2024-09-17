@@ -10,5 +10,9 @@ namespace Alfateam2._0.Models.ServicePages
     public class ServicePageServiceRibbonItem : AbsModel
     {
         public string Title { get; set; }
+
+
+        public int? ServicePageId { get; set; }
+        public int? ServicePageLocalizationId { get; set; }
     }
 }

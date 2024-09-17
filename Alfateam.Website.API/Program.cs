@@ -4,6 +4,8 @@ using Alfateam.Gateways;
 using Alfateam.Gateways.Abstractions;
 using Alfateam.Website.API.Filters;
 using Alfateam.Website.API.Jobs;
+using Alfateam.Website.API.Models;
+using Alfateam.Website.API.Services;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -20,12 +22,15 @@ namespace Alfateam.Website.API
             // Add services to the container.
 
             builder.Services.AddControllers().AddNewtonsoftJson();
-         
-            
+
+            builder.Services.AddHttpContextAccessor();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+
+           
             builder.Services.AddTransient<IMailGateway, MailGateway>();
 
             // Add services to the container.
@@ -37,11 +42,51 @@ namespace Alfateam.Website.API
                     o.EnableStringComparisonTranslations();
                 });
             });
+            builder.Services.AddTransient<DBService>();
+            builder.Services.AddTransient<FilesService>();
+            builder.Services.AddTransient<ControllerParams>();
 
             builder.Services.AddSwaggerGen(config =>
             {
-                config.SwaggerDoc("v1", new OpenApiInfo { Title = "Эта апишка для сайта и админки", Version = "V1" });
-
+                config.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Эта апишка для сайта и админки",
+                    Description = "Есть сущность Content. В ней есть ContentItems. Они есть нескольких типов: </br></br>" +
+                    "TextContentItem с полем Content. Сюда вставляется HTML контент из BBCode </br>" +
+                    "ImageContentItem - поля ImgPath(путь к картинке), Title и Description </br>" +
+                    "ImageSliderContentItem - поля Title, Description и Images(объекты ImageContentItem) </br>" +
+                    "VideoContentItem - поля VideoPath, Title, Description </br>" +
+                    "AudioContentItem - поля AudioPath, Title, Description </br></br>" +
+                    "" +
+                    "Во всех ContentItem имеется свойств Guid и Discriminator. Discriminator служит для указания типа, Guid для идентификации </br>" +
+                    "Guid задается с фронта. Для всех файлов контента(картинки, аудио, видео) при загрузки ставится Guid, по нему будет заливаться файл  </br>" +
+                    "При апдейте, если изменили файл, то меняем Guid. Если не меняли файл, то и не надо </br>" +
+                    "" +
+                    "</br></br></br>" +
+                    "Любой ответ api оборачивается в следующую модель</br>" +
+                    "{  </br>" +
+                    "&emsp;\"success\": false,</br>" +
+                    "&emsp;\"error\": \"Сущность с данным id не найдена\",</br>" +
+                    "&emsp;\"code\": 404,</br>" +
+                    "&emsp;\"data\": null</br>" +
+                    "}</br></br></br>" +
+                    "" +
+                    "" +
+                    "Сущность промокода. Есть нескольких типов</br></br>" +
+                    "PricePromocode - содержит валюту и сумму скидки</br>" +
+                    "PercentPromocodeDTO - содержит процент скидки</br>" +
+                    "Во всех Promocode имеется свойств Discriminator. Discriminator служит для указания типа </br>" +
+                    "</br></br></br>" +
+                    "" +
+                    "" +
+                    "" +
+                    "Сущность модификатора товара (ProductModifier)</br>" +
+                    "У него есть некоторые поля Type(Color,Combobox,CheckboxOrRadio), IsRequired и AllowMultipleSelection и Options(ProductModifierItem)</br>" +
+                    "ProductModifierItem есть нескольких типов</br>" +
+                    "ColorModifierItem - с полем ColorHex</br>" +
+                    "SimpleModifierItem - со стандартными полями в абстрактной сущности, а именно (Title, Pricing(PricingMatrix), Discriminator(для указания типа), MainLanguageId",
+                    Version = "V1" });
+                config.EnableAnnotations();
 
 
                 //config.SchemaFilter<EnumSchemaFilter>();

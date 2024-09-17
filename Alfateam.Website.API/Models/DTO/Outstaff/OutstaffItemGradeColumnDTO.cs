@@ -21,10 +21,10 @@ namespace Alfateam.Website.API.Models.DTO.Outstaff
             var model = new OutstaffItemGradeColumnDTO();
             model.Id = item.Id;
 
-            model.Column = OutstaffColumnDTO.CreateWithLocalization(item.Column, langId) as OutstaffColumnDTO;
+            model.Column = (OutstaffColumnDTO)new OutstaffColumnDTO().CreateDTOWithLocalization(item.Column, langId);
 
             var costs = GetLocalCosts(item.CostPerHour, countryId);
-            model.CostsPerHour = CostDTO.CreateItemsWithLocalization(costs, langId) as List<CostDTO>;
+            model.CostsPerHour = new CostDTO().CreateDTOsWithLocalization(costs, langId).Cast<CostDTO>().ToList();
 
             return model;
         }

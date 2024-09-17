@@ -1,5 +1,6 @@
 ﻿using Alfateam.Models.Helpers;
 using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Attributes.DTO;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.Team;
 
@@ -24,6 +25,10 @@ namespace Alfateam.Website.API.Models.DTO.Team
         public string? CVFilepath { get; set; }
 
 
+
+
+        [DTOFieldFor(DTOFieldForType.CreationOnly)]
+        public int TeamGroupId { get; set; }
         public int MainLanguageId { get; set; }
     }
 }

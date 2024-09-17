@@ -4,7 +4,7 @@ using Alfateam2._0.Models.Outstaff;
 
 namespace Alfateam.Website.API.Models.DTOLocalization.Outstaff
 {
-    public class OutstaffItemGradeLocalizationDTO : DTOModel<OutstaffItemGradeLocalization>
+    public class OutstaffItemGradeLocalizationDTO : LocalizationDTOModel<OutstaffItemGradeLocalization>
     {
         public string Title { get; set; }
     }

@@ -1,4 +1,5 @@
 ﻿using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Attributes.DTO;
 using Alfateam.Website.API.Models.DTO.Shop;
 using Alfateam2._0.Models;
 using Alfateam2._0.Models.Enums;
@@ -27,6 +28,8 @@ namespace Alfateam.Website.API.Models.DTO.Shop
         public int MainLanguageId { get; set; }
 
 
+        [DTOFieldFor(DTOFieldForType.CreationOnly)]
+        public int ShopProductId { get; set; }
 
 
         public static ProductModifierDTO Create(ProductModifier item, int? langId, int? countryId)

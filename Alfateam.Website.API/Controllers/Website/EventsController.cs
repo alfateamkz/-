@@ -1,6 +1,7 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Extensions;
+using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTO.Events;
 using Alfateam.Website.API.Models.Filters;
 using Alfateam2._0.Models.Events;
@@ -14,21 +15,21 @@ namespace Alfateam.Website.API.Controllers.Website
 {
     public class EventsController : AbsController
     {
-        public EventsController(WebsiteDBContext db) : base(db)
+        public EventsController(ControllerParams @params) : base(@params)
         {
         }
 
         [HttpGet, Route("GetEvents")]
         public async Task<IEnumerable<EventDTO>> GetEvents(int offset, int count = 20)
         {
-            var items = GetEvents().Skip(offset).Take(count).ToList();
-            return EventDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<EventDTO>;
+            var items = GetEventsWithIncludes().Skip(offset).Take(count).ToList();
+            return new EventDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<EventDTO>();
         }
   
         [HttpGet, Route("GetEventsByFilter")]
         public async Task<IEnumerable<EventDTO>> GetEventsByFilter(EventsSearchFilter filter)
         {
-            var events = GetEvents();
+            var events = GetEventsWithIncludes();
 
             if(filter.CategoryId > 0)
             {
@@ -44,14 +45,14 @@ namespace Alfateam.Website.API.Controllers.Website
             }
 
             events = events.Skip(filter.Offset).Take(filter.Count);
-            return EventDTO.CreateItemsWithLocalization(events.ToList(), LanguageId) as IEnumerable<EventDTO>;
+            return new EventDTO().CreateDTOsWithLocalization(events, LanguageId).Cast<EventDTO>();
         }
 
         [HttpGet, Route("GetEvent")]
         public async Task<EventDTO> GetEvent(int id)
         {
-            var item = GetEvents().FirstOrDefault(o => o.Id == id);
-            return EventDTO.CreateWithLocalization(item, LanguageId) as EventDTO;
+            var item = GetEventsWithIncludes().FirstOrDefault(o => o.Id == id);
+            return (EventDTO) new EventDTO().CreateDTOWithLocalization(item, LanguageId);
         }
 
 
@@ -60,31 +61,43 @@ namespace Alfateam.Website.API.Controllers.Website
         [HttpGet, Route("GetEventCategories")]
         public async Task<IEnumerable<EventCategoryDTO>> GetEventCategories()
         {
-            var items = DB.EventCategories.Include(o => o.Localizations)
-                                          .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
-                                          .ToList();
-            return EventCategoryDTO.CreateItemsWithLocalization(items,LanguageId) as IEnumerable<EventCategoryDTO>;
+            var items = GetEventCategoriesWithIncludes();
+            return new EventCategoryDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<EventCategoryDTO>();
         }
         [HttpGet, Route("GetEventFormats")]
         public async Task<IEnumerable<EventFormatDTO>> GetEventFormats()
         {
-            var items = DB.EventFormats.Include(o => o.Localizations)
-                                       .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
-                                       .ToList();
-            return EventFormatDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<EventFormatDTO>;
+            var items = GetEventFormatsWithIncludes();
+            return new EventFormatDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<EventFormatDTO>();
         }
 
 
 
         #region Private methods
-        private IQueryable<Event> GetEvents()
+        private IEnumerable<Event> GetEventsWithIncludes()
         {
             return DB.Events.IncludeAvailability()
                             .Include(o => o.Category).ThenInclude(o => o.Localizations)
                             .Include(o => o.Format).ThenInclude(o => o.Localizations)
                             .Include(o => o.TimeZone)
                             .Include(o => o.Localizations)
+                            .ToList()
                             .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
+        }
+        private IEnumerable<EventCategory> GetEventCategoriesWithIncludes()
+        {
+            return DB.EventCategories.IncludeAvailability()
+                                     .Include(o => o.Localizations)
+                                     .ToList()
+                                     .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
+        }
+
+        private IEnumerable<EventFormat> GetEventFormatsWithIncludes()
+        {
+            return DB.EventFormats.IncludeAvailability()
+                                  .Include(o => o.Localizations)
+                                  .ToList()
+                                  .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
         }
 
         #endregion

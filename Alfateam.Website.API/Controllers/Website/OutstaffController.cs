@@ -6,12 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using Alfateam2._0.Models.Portfolios;
+using Alfateam.Website.API.Models;
 
 namespace Alfateam.Website.API.Controllers.Website
 {
     public class OutstaffController : AbsController
     {
-        public OutstaffController(WebsiteDBContext db) : base(db)
+        public OutstaffController(ControllerParams @params) : base(@params)
         {
         }
 

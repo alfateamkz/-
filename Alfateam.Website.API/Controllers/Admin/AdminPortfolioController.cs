@@ -6,7 +6,6 @@ using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Models.DTO.Events;
 using Alfateam.Website.API.Models.DTO.Portfolios;
 using Alfateam.Website.API.Models.DTO.General;
-using Alfateam.Website.API.Models.DTO.Portfolios;
 using Alfateam.Website.API.Models.DTOLocalization.Events;
 using Alfateam.Website.API.Models.DTOLocalization.Portfolios;
 using Alfateam2._0.Models.Enums;
@@ -17,114 +16,101 @@ using Alfateam2._0.Models.Portfolios;
 using Alfateam2._0.Models.Team;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Alfateam.Website.API.Models;
+using Alfateam.Website.API.Filters.Access;
+using Alfateam.Website.API.Exceptions;
+using Alfateam2._0.Models.ContentItems;
+using Alfateam.Website.API.Models.DTO.HR;
+using Alfateam.Website.API.Models.DTOLocalization.HR;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
     public class AdminPortfolioController : AbsAdminController
     {
-        public AdminPortfolioController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
+        public AdminPortfolioController(ControllerParams @params) : base(@params)
         {
-        
         }
 
         #region Портфолио
 
         [HttpGet, Route("GetPortfolios")]
-        public async Task<RequestResult<IEnumerable<PortfolioDTO>>> GetPortfolios(int offset, int count = 20)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 1)]
+        public async Task<IEnumerable<PortfolioDTO>> GetPortfolios(int offset, int count = 20)
         {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<PortfolioDTO>>(new Func<RequestResult>[]
-            {
-                () => CheckContentAreaRights(session, ContentAccessModelType.Portfolio, 1),
-                () => {
-                    var items = GetAvailableModels(session.User, GetPortfoliosList(), offset, count);
-                    var models = PortfolioDTO.CreateItemsWithLocalization(items.Cast<Portfolio>(), LanguageId) as IEnumerable<PortfolioDTO>;
-                    return RequestResult<IEnumerable<PortfolioDTO>>.AsSuccess(models);
-                }
-            });
+            var items = GetAvailablePortfolio().Skip(offset).Take(count);
+            return new PortfolioDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<PortfolioDTO>();
         }
 
         [HttpGet, Route("GetPortfolio")]
-        public async Task<RequestResult<Portfolio>> GetPortfolio(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 1)]
+        public async Task<PortfolioDTO> GetPortfolio(int id)
         {
-            return TryGetOne(GetPortfoliosFullIncludedList(), id, ContentAccessModelType.Portfolio);
+            return (PortfolioDTO)DbService.TryGetOne(GetAvailablePortfolio(), id, new PortfolioDTO());
         }
 
         [HttpGet, Route("GetPortfolioLocalization")]
-        public async Task<RequestResult<PortfolioLocalization>> GetPortfolioLocalization(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 1)]
+        public async Task<PortfolioLocalizationDTO> GetPortfolioLocalization(int id)
         {
-            var localization = DB.PortfolioLocalizations.Include(o => o.LanguageEntity)
-                                                                .Include(o => o.Content).ThenInclude(o => o.Items)
-                                                                .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null) return RequestResult<PortfolioLocalization>.AsError(404, "Сущность с данным id не найдена");
+            var localization = DB.PortfolioLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var mainEntity = GetAvailablePortfolio().FirstOrDefault(o => o.Id == localization?.PortfolioId && !o.IsDeleted);
 
-            var mainEntity = GetPortfolioCategoriesList().FirstOrDefault(o => o.Id == localization.PortfolioId && !o.IsDeleted);
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<PortfolioLocalization>(new[]
-            {
-                () => RequestResult.FromBoolean(mainEntity != null, 500, "Внутренняя ошибка"),
-                () => CheckContentAreaRights(session, mainEntity, ContentAccessModelType.Portfolio, 1),
-                () => RequestResult<PortfolioLocalization>.AsSuccess(localization)
-            });
+            return (PortfolioLocalizationDTO)DbService.GetLocalizationModel(localization, mainEntity, new PortfolioLocalizationDTO());
         }
 
 
 
 
         [HttpPost, Route("CreatePortfolio")]
-        public async Task<RequestResult<Portfolio>> CreatePortfolio(Portfolio item)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 4)]
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
+        public async Task<PortfolioDTO> CreatePortfolio(PortfolioDTO model)
         {
-            return await TryCreate(DB.Portfolios, item, ContentAccessModelType.Portfolio, () =>  PreparePortfolioBeforeCreate(item));
+            return (PortfolioDTO)DbService.TryCreateAvailabilityEntity(DB.Portfolios, model, this.Session, async (entity) =>
+            {
+                await HandlePortfolio(entity, DBModelFillMode.Create, null);
+            });
         }
 
         [HttpPost, Route("CreatePortfolioLocalization")]
-        public async Task<RequestResult<PortfolioLocalization>> CreatePortfolioLocalization(int itemId, PortfolioLocalization localization)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 3)]
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
+        public async Task<PortfolioLocalizationDTO> CreatePortfolioLocalization(int itemId, PortfolioLocalizationDTO localization)
         {
-            var mainEntity = GetPortfoliosList().FirstOrDefault(o => o.Id == itemId);
-            return TryFinishAllRequestes<PortfolioLocalization>(new[]
+            var mainEntity = GetAvailablePortfolio().FirstOrDefault(o => o.Id == itemId);
+            return (PortfolioLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.Portfolios, mainEntity, localization, async (entity) =>
             {
-                () => CheckLocalizationModelBeforeCreate(localization, mainEntity, ContentAccessModelType.Portfolio),
-                () => PreparePortfolioLocalizationBeforeCreate(localization).Result,
-                () =>
-                {
-                    mainEntity.Localizations.Add(localization);
-                    UpdateModel(DB.Portfolios,mainEntity);
-                    return RequestResult<PortfolioLocalization>.AsSuccess(localization);
-                }
+                await HandlePortfolioLocalization(entity, DBModelFillMode.Create, null);
             });
-
-
         }
 
 
 
 
         [HttpPut, Route("UpdatePortfolioMain")]
-        public async Task<RequestResult<Portfolio>> UpdatePortfolioMain(PortfolioDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 3)]
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg, если изменяем картинку")]
+        public async Task<PortfolioDTO> UpdatePortfolioMain(PortfolioDTO model)
         {
-            var item = GetPortfoliosList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<Portfolio>(new[]
+            var item = GetAvailablePortfolio().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return (PortfolioDTO)DbService.TryUpdateEntity(DB.Portfolios, model, item, async (entity) =>
             {
-                () => RequestResult.FromBoolean(item != null,404, "Сущность по данному id не найдена"),
-                () => CheckContentAreaRights(session, item, ContentAccessModelType.Portfolio, 2),
-                () => RequestResult.FromBoolean(model.IsValid(), 400, "Не заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз"),
-                () => RequestResult.FromBoolean(DB.Languages.Any(o => o.Id == model.MainLanguageId && !o.IsDeleted),404, "Языка с данным id не существует"),
-                () => PreparePortfolioBeforeUpdate(item, model).Result,
-                () => UpdateModel(DB.Portfolios, item)
+                await HandlePortfolio(entity, DBModelFillMode.Update, model.Content);
             });
         }
 
         [HttpPut, Route("UpdatePortfolioLocalization")]
-        public async Task<RequestResult<PortfolioLocalization>> UpdatePortfolioLocalization(PortfolioLocalizationDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 3)]
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg, если изменяем картинку")]
+        public async Task<PortfolioLocalizationDTO> UpdatePortfolioLocalization(PortfolioLocalizationDTO model)
         {
             var localization = DB.PortfolioLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryFinishAllRequestes<PortfolioLocalization>(new[]
+            var mainEntity = GetAvailablePortfolio().FirstOrDefault(o => o.Id == localization.PortfolioId && !o.IsDeleted);
+
+            return (PortfolioLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.PortfolioLocalizations, localization, model, mainEntity, async (entity) =>
             {
-                () => RequestResult.FromBoolean(localization != null,404, "Локализация с данным id не найдена"),
-                () => CheckLocalizationModelBeforeUpdate(GetPortfoliosList(), model, localization.PortfolioId, ContentAccessModelType.Portfolio),
-                () => PreparePortfolioLocalizationBeforeUpdate(localization, model).Result,
-                () => UpdateModel(DB.PortfolioLocalizations, localization)
+                await HandlePortfolioLocalization(entity, DBModelFillMode.Update, model.Content);
             });
         }
 
@@ -134,26 +120,21 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpDelete, Route("DeletePortfolio")]
-        public async Task<RequestResult> DeletePortfolio(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 5)]
+        public async Task DeletePortfolio(int id)
         {
-            var item = GetPortfoliosList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                () => RequestResult.FromBoolean(item != null, 404, "Категория по данному id не найдена"),
-                () => TryDelete(DB.Portfolios, item, ContentAccessModelType.Portfolio)
-            });
+            var item = GetAvailablePortfolio().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            DbService.TryDeleteEntity(DB.Portfolios, item);
         }
 
         [HttpDelete, Route("DeletePortfolioLocalization")]
-        public async Task<RequestResult> DeletePortfolioLocalization(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 5)]
+        public async Task DeletePortfolioLocalization(int id)
         {
             var item = DB.PortfolioLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                () => RequestResult.FromBoolean(item != null,404, "Запись по данному id не найдена"),
-                () => CheckLocalizationModelBeforeDelete(GetPortfolioCategoriesList(), item.PortfolioId, ContentAccessModelType.Portfolio),
-                () => DeleteModel(DB.PortfolioLocalizations, item, false)
-            });
+            var mainModel = GetAvailablePortfolio().FirstOrDefault(o => o.Id == item.PortfolioId && !o.IsDeleted);
+
+            DbService.TryDeleteLocalizationEntity(DB.PortfolioLocalizations, item, mainModel);
         }
 
 
@@ -163,40 +144,28 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Категории портфолио
 
         [HttpGet, Route("GetPortfolioCategories")]
-        public async Task<RequestResult<IEnumerable<PortfolioCategoryDTO>>> GetPortfolioCategories(int offset, int count = 20)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 1)]
+        public async Task<IEnumerable<PortfolioCategoryDTO>> GetPortfolioCategories(int offset, int count = 20)
         {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<PortfolioCategoryDTO>>(new Func<RequestResult>[]
-            {
-                () => CheckContentAreaRights(session, ContentAccessModelType.Portfolio, 1),
-                () => {
-                    var items = GetAvailableModels(session.User, GetPortfolioCategoriesList(), offset, count);
-                    var models = PortfolioCategoryDTO.CreateItemsWithLocalization(items.Cast<PortfolioCategory>(), LanguageId) as IEnumerable<PortfolioCategoryDTO>;
-                    return RequestResult<IEnumerable<PortfolioCategoryDTO>>.AsSuccess(models);
-                }
-            });
+            var items = GetAvailablePortfolioCategories().Skip(offset).Take(count);
+            return new PortfolioCategoryDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<PortfolioCategoryDTO>();
         }
 
         [HttpGet, Route("GetPortfolioCategory")]
-        public async Task<RequestResult<PortfolioCategory>> GetPortfolioCategory(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 1)]
+        public async Task<PortfolioCategoryDTO> GetPortfolioCategory(int id)
         {
-            return TryGetOne(GetPortfolioCategoriesList(), id, ContentAccessModelType.Portfolio);
+            return (PortfolioCategoryDTO)DbService.TryGetOne(GetAvailablePortfolioCategories(), id, new PortfolioCategoryDTO());
         }
 
         [HttpGet, Route("GetPortfolioCategoryLocalization")]
-        public async Task<RequestResult<PortfolioCategoryLocalization>> GetPortfolioCategoryLocalization(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 1)]
+        public async Task<PortfolioCategoryLocalizationDTO> GetPortfolioCategoryLocalization(int id)
         {
             var localization = DB.PortfolioCategoryLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null) return RequestResult<PortfolioCategoryLocalization>.AsError(404, "Сущность с данным id не найдена");
+            var mainEntity = GetAvailablePortfolioCategories().FirstOrDefault(o => o.Id == localization?.PortfolioCategoryId && !o.IsDeleted);
 
-            var mainEntity = GetPortfolioCategoriesList().FirstOrDefault(o => o.Id == localization.PortfolioCategoryId && !o.IsDeleted);
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<PortfolioCategoryLocalization>(new[]
-            {
-                () => RequestResult.FromBoolean(mainEntity != null, 500, "Внутренняя ошибка"),
-                () => CheckContentAreaRights(session, mainEntity, ContentAccessModelType.Portfolio, 1),
-                () => RequestResult<PortfolioCategoryLocalization>.AsSuccess(localization)
-            });
+            return (PortfolioCategoryLocalizationDTO)DbService.GetLocalizationModel(localization, mainEntity, new PortfolioCategoryLocalizationDTO());
         }
 
         
@@ -205,25 +174,18 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPost, Route("CreatePortfolioCategory")]
-        public async Task<RequestResult<PortfolioCategory>> CreatePortfolioCategory(PortfolioCategory item)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 4)]
+        public async Task<PortfolioCategoryDTO> CreatePortfolioCategory(PortfolioCategoryDTO model)
         {
-            return TryCreate(DB.PortfolioCategories, item, ContentAccessModelType.Portfolio);
+            return (PortfolioCategoryDTO)DbService.TryCreateAvailabilityEntity(DB.PortfolioCategories, model, this.Session);
         }
 
         [HttpPost, Route("CreatePortfolioCategoryLocalization")]
-        public async Task<RequestResult<PortfolioCategoryLocalization>> CreatePortfolioCategoryLocalization(int itemId, PortfolioCategoryLocalization localization)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 3)]
+        public async Task<PortfolioCategoryLocalizationDTO> CreatePortfolioCategoryLocalization(int itemId, PortfolioCategoryLocalizationDTO localization)
         {
-            var mainEntity = GetPortfolioCategoriesList().FirstOrDefault(o => o.Id == itemId);
-            return TryFinishAllRequestes<PortfolioCategoryLocalization>(new[]
-            {
-                () => CheckLocalizationModelBeforeCreate(localization, mainEntity, ContentAccessModelType.Portfolio),
-                () =>
-                {
-                    mainEntity.Localizations.Add(localization);
-                    UpdateModel(DB.PortfolioCategories,mainEntity);
-                    return RequestResult<PortfolioCategoryLocalization>.AsSuccess(localization);
-                }
-            });
+            var mainEntity = GetAvailablePortfolioCategories().FirstOrDefault(o => o.Id == itemId);
+            return (PortfolioCategoryLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.PortfolioCategories, mainEntity, localization);
         }
 
 
@@ -231,28 +193,21 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdatePortfolioCategoryMain")]
-        public async Task<RequestResult<PortfolioCategory>> UpdatePortfolioCategoryMain(PortfolioCategoryDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 3)]
+        public async Task<PortfolioCategoryDTO> UpdatePortfolioCategoryMain(PortfolioCategoryDTO model)
         {
-            var item = GetPortfolioCategoriesList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryFinishAllRequestes<PortfolioCategory>(new[]
-            {
-                () => CheckMainModelBeforeUpdate(item, model,ContentAccessModelType.Portfolio),
-                () => RequestResult.FromBoolean(DB.Languages.Any(o => o.Id == model.MainLanguageId && !o.IsDeleted),
-                                                    404, "Языка с данным id не существует"),
-                () => UpdateModel(DB.PortfolioCategories, model, item)
-            });
+            var item = GetAvailablePortfolioCategories().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return (PortfolioCategoryDTO)DbService.TryUpdateEntity(DB.PortfolioCategories, model, item);
         }
        
         [HttpPut, Route("UpdatePortfolioCategoryLocalization")]
-        public async Task<RequestResult<PortfolioCategoryLocalization>> UpdatePortfolioCategoryLocalization(PortfolioCategoryLocalizationDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 3)]
+        public async Task<PortfolioCategoryLocalizationDTO> UpdatePortfolioCategoryLocalization(PortfolioCategoryLocalizationDTO model)
         {
             var localization = DB.PortfolioCategoryLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryFinishAllRequestes<PortfolioCategoryLocalization>(new[]
-            {
-                () => RequestResult.FromBoolean(localization != null,404, "Локализация с данным id не найдена"),
-                () => CheckLocalizationModelBeforeUpdate(GetPortfolioCategoriesList(), model, localization.PortfolioCategoryId, ContentAccessModelType.Portfolio),
-                () => UpdateModel(DB.PortfolioCategoryLocalizations, model, localization)
-            });
+            var mainEntity = GetAvailablePortfolioCategories().FirstOrDefault(o => o.Id == localization.PortfolioCategoryId && !o.IsDeleted);
+
+            return (PortfolioCategoryLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.PortfolioCategoryLocalizations, localization, model, mainEntity);
         }
 
 
@@ -261,26 +216,21 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpDelete, Route("DeletePortfolioCategory")]
-        public async Task<RequestResult> DeletePortfolioCategory(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 5)]
+        public async Task DeletePortfolioCategory(int id)
         {
-            var item = GetPortfolioCategoriesList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                () => RequestResult.FromBoolean(item != null, 404, "Категория по данному id не найдена"),
-                () => TryDelete(DB.PortfolioCategories, item, ContentAccessModelType.Portfolio)
-            });
+            var item = GetAvailablePortfolioCategories().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            DbService.TryDeleteEntity(DB.PortfolioCategories, item);
         }
 
         [HttpDelete, Route("DeletePortfolioCategoryLocalization")]
-        public async Task<RequestResult> DeletePortfolioCategoryLocalization(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 5)]
+        public async Task DeletePortfolioCategoryLocalization(int id)
         {
             var item = DB.PortfolioCategoryLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                () => RequestResult.FromBoolean(item != null,404, "Запись по данному id не найдена"),
-                () => CheckLocalizationModelBeforeDelete(GetPortfolioCategoriesList(), item.PortfolioCategoryId, ContentAccessModelType.Portfolio),
-                () => DeleteModel(DB.PortfolioCategoryLocalizations, item, false)
-            });
+            var mainModel = GetAvailablePortfolioCategories().FirstOrDefault(o => o.Id == item.PortfolioCategoryId && !o.IsDeleted);
+
+            DbService.TryDeleteLocalizationEntity(DB.PortfolioCategoryLocalizations, item, mainModel);
         }
 
         #endregion
@@ -288,65 +238,46 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Индустрии портфолио
 
         [HttpGet, Route("GetPortfolioIndustries")]
-        public async Task<RequestResult<IEnumerable<PortfolioIndustryDTO>>> GetPortfolioIndustries(int offset, int count = 20)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 1)]
+        public async Task<IEnumerable<PortfolioIndustryDTO>> GetPortfolioIndustries(int offset, int count = 20)
         {
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<IEnumerable<PortfolioIndustryDTO>>(new Func<RequestResult>[]
-            {
-                () => CheckContentAreaRights(session, ContentAccessModelType.Portfolio, 1),
-                () => {
-                    var items = GetAvailableModels(session.User, GetPortfolioIndustriesList(), offset, count);
-                    var models = PortfolioIndustryDTO.CreateItemsWithLocalization(items.Cast<PortfolioIndustry>(), LanguageId) as IEnumerable<PortfolioIndustryDTO>;
-                    return RequestResult<IEnumerable<PortfolioIndustryDTO>>.AsSuccess(models);
-                }
-            });
+            var items = GetAvailablePortfolioIndustries().Skip(offset).Take(count);
+            return new PortfolioIndustryDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<PortfolioIndustryDTO>();
         }
 
         [HttpGet, Route("GetPortfolioIndustry")]
-        public async Task<RequestResult<PortfolioIndustry>> GetPortfolioIndustry(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 1)]
+        public async Task<PortfolioIndustryDTO> GetPortfolioIndustry(int id)
         {
-            return TryGetOne(GetPortfolioIndustriesList(), id, ContentAccessModelType.Portfolio);
+            return (PortfolioIndustryDTO)DbService.TryGetOne(GetAvailablePortfolioIndustries(), id, new PortfolioIndustryDTO());
         }
 
         [HttpGet, Route("GetPortfolioIndustryLocalization")]
-        public async Task<RequestResult<PortfolioIndustryLocalization>> GetPortfolioIndustryLocalization(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 1)]
+        public async Task<PortfolioIndustryLocalizationDTO> GetPortfolioIndustryLocalization(int id)
         {
             var localization = DB.PortfolioIndustryLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (localization == null) return RequestResult<PortfolioIndustryLocalization>.AsError(404, "Сущность с данным id не найдена");
+            var mainEntity = GetAvailablePortfolioIndustries().FirstOrDefault(o => o.Id == localization?.PortfolioIndustryId && !o.IsDeleted);
 
-            var mainEntity = GetPortfolioIndustriesList().FirstOrDefault(o => o.Id == localization.PortfolioIndustryId && !o.IsDeleted);
-            var session = GetSessionWithRoleInclude();
-            return TryFinishAllRequestes<PortfolioIndustryLocalization>(new Func<RequestResult>[]
-            {
-                () => RequestResult.FromBoolean(mainEntity != null, 500, "Внутренняя ошибка"),
-                () => CheckContentAreaRights(session, mainEntity, ContentAccessModelType.Portfolio, 1),
-                () => RequestResult<PortfolioIndustryLocalization>.AsSuccess(localization)
-            });
+            return (PortfolioIndustryLocalizationDTO)DbService.GetLocalizationModel(localization, mainEntity, new PortfolioIndustryLocalizationDTO());
         }
 
 
 
 
         [HttpPost, Route("CreatePortfolioIndustry")]
-        public async Task<RequestResult<PortfolioIndustry>> CreatePortfolioIndustry(PortfolioIndustry item)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 4)]
+        public async Task<PortfolioIndustryDTO> CreatePortfolioIndustry(PortfolioIndustryDTO model)
         {
-            return TryCreate(DB.PortfolioIndustries, item, ContentAccessModelType.Portfolio);
+            return (PortfolioIndustryDTO)DbService.TryCreateAvailabilityEntity(DB.PortfolioIndustries, model, this.Session);
         }
 
         [HttpPost, Route("CreatePortfolioIndustryLocalization")]
-        public async Task<RequestResult<PortfolioIndustryLocalization>> CreatePortfolioIndustryLocalization(int itemId, PortfolioIndustryLocalization localization)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 3)]
+        public async Task<PortfolioIndustryLocalizationDTO> CreatePortfolioIndustryLocalization(int itemId, PortfolioIndustryLocalizationDTO localization)
         {
-            var mainEntity = GetPortfolioIndustriesList().FirstOrDefault(o => o.Id == itemId);
-            return TryFinishAllRequestes<PortfolioIndustryLocalization>(new[]
-            {
-                () => CheckLocalizationModelBeforeCreate(localization, mainEntity, ContentAccessModelType.Portfolio),
-                () =>
-                {
-                    mainEntity.Localizations.Add(localization);
-                    UpdateModel(DB.PortfolioIndustries,mainEntity);
-                    return RequestResult<PortfolioIndustryLocalization>.AsSuccess(localization);
-                }
-            });
+            var mainEntity = GetAvailablePortfolioIndustries().FirstOrDefault(o => o.Id == itemId);
+            return (PortfolioIndustryLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.PortfolioIndustries, mainEntity, localization);
         }
 
 
@@ -355,28 +286,21 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdatePortfolioIndustryMain")]
-        public async Task<RequestResult<PortfolioIndustry>> UpdatePortfolioIndustryMain(PortfolioIndustryDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 3)]
+        public async Task<PortfolioIndustryDTO> UpdatePortfolioIndustryMain(PortfolioIndustryDTO model)
         {
-            var item = GetPortfolioIndustriesList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryFinishAllRequestes<PortfolioIndustry>(new[]
-            {
-                () => CheckMainModelBeforeUpdate(item, model,ContentAccessModelType.Portfolio),
-                () => RequestResult.FromBoolean(DB.Languages.Any(o => o.Id == model.MainLanguageId && !o.IsDeleted),
-                                                    404, "Языка с данным id не существует"),
-                () => UpdateModel(DB.PortfolioIndustries, model, item)
-            });
+            var item = GetAvailablePortfolioIndustries().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return (PortfolioIndustryDTO)DbService.TryUpdateEntity(DB.PortfolioIndustries, model, item);
         }
         
         [HttpPut, Route("UpdatePortfolioIndustryLocalization")]
-        public async Task<RequestResult<PortfolioIndustryLocalization>> UpdatePortfolioIndustryLocalization(PortfolioIndustryLocalizationDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 3)]
+        public async Task<PortfolioIndustryLocalizationDTO> UpdatePortfolioIndustryLocalization(PortfolioIndustryLocalizationDTO model)
         {
             var localization = DB.PortfolioIndustryLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return TryFinishAllRequestes<PortfolioIndustryLocalization>(new[]
-            {
-                () => RequestResult.FromBoolean(localization != null,404, "Локализация с данным id не найдена"),
-                () => CheckLocalizationModelBeforeUpdate(GetPortfolioIndustriesList(), model, localization.PortfolioIndustryId, ContentAccessModelType.Portfolio),
-                () => UpdateModel(DB.PortfolioIndustryLocalizations, model, localization)
-            });
+            var mainEntity = GetAvailablePortfolioIndustries().FirstOrDefault(o => o.Id == localization.PortfolioIndustryId && !o.IsDeleted);
+
+            return (PortfolioIndustryLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.PortfolioIndustryLocalizations, localization, model, mainEntity);
         }
 
 
@@ -385,26 +309,21 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpDelete, Route("DeletePortfolioIndustry")]
-        public async Task<RequestResult> DeletePortfolioIndustry(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 5)]
+        public async Task DeletePortfolioIndustry(int id)
         {
-            var item = GetPortfolioIndustriesList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                () => RequestResult.FromBoolean(item != null, 404, "Категория по данному id не найдена"),
-                () => TryDelete(DB.PortfolioIndustries, item, ContentAccessModelType.Portfolio)
-            });
+            var item = GetAvailablePortfolioIndustries().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            DbService.TryDeleteEntity(DB.PortfolioIndustries, item);
         }
 
         [HttpDelete, Route("DeletePortfolioIndustryLocalization")]
-        public async Task<RequestResult> DeletePortfolioIndustryLocalization(int id)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 5)]
+        public async Task DeletePortfolioIndustryLocalization(int id)
         {
             var item = DB.PortfolioIndustryLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            return TryFinishAllRequestes(new[]
-            {
-                () => RequestResult.FromBoolean(item != null,404, "Запись по данному id не найдена"),
-                () => CheckLocalizationModelBeforeDelete(GetPortfolioIndustriesList(), item.PortfolioIndustryId, ContentAccessModelType.Portfolio),
-                () => DeleteModel(DB.PortfolioIndustryLocalizations, item, false)
-            });
+            var mainModel = GetAvailablePortfolioIndustries().FirstOrDefault(o => o.Id == item.PortfolioIndustryId && !o.IsDeleted);
+
+            DbService.TryDeleteLocalizationEntity(DB.PortfolioIndustryLocalizations, item, mainModel);
         }
 
 
@@ -413,132 +332,91 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpPut, Route("UpdateAvailability")]
-        public async Task<RequestResult<Availability>> UpdateAvailability(AvailabilityDTO model)
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 2)]
+        public async Task<AvailabilityDTO> UpdateAvailability(AvailabilityDTO model)
         {
             bool hasThisModel = false;
 
-            var user = GetSessionWithRoleInclude().User;
-            hasThisModel |= GetAvailableModels(user, DB.Portfolios.IncludeAvailability()).Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
-            hasThisModel |= GetAvailableModels(user, DB.PortfolioCategories.IncludeAvailability()).Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
-            hasThisModel |= GetAvailableModels(user, DB.PortfolioIndustries.IncludeAvailability()).Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+
+            hasThisModel |= DbService.GetAvailableModels(this.Session.User, DB.Portfolios.IncludeAvailability())
+                                     .Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            hasThisModel |= DbService.GetAvailableModels(this.Session.User, DB.PortfolioCategories.IncludeAvailability())
+                                     .Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+            hasThisModel |= DbService.GetAvailableModels(this.Session.User, DB.PortfolioIndustries.IncludeAvailability())
+                                     .Any(o => o.AvailabilityId == model.Id && !o.IsDeleted);
+
 
             if (!hasThisModel)
             {
-                return new RequestResult<Availability>().SetError(403, "У данного пользователя нет прав на редактирование матрицы доступности");
+                throw new Exception403("У данного пользователя нет прав на редактирование матрицы доступности");
             }
 
-            return TryUpdateAvailability(model, ContentAccessModelType.Portfolio);
+            return DbService.TryUpdateAvailability(model, this.Session);
         }
 
 
 
 
+
+
+
+
+        #region Private get available methods
+        private IEnumerable<Portfolio> GetAvailablePortfolio()
+        {
+            return DbService.GetAvailableModels(this.Session.User, GetPortfoliosFullIncludedList()).Cast<Portfolio>();
+        }
+        private IEnumerable<PortfolioCategory> GetAvailablePortfolioCategories()
+        {
+            return DbService.GetAvailableModels(this.Session.User, GetPortfolioCategoriesList()).Cast<PortfolioCategory>();
+        }
+        private IEnumerable<PortfolioIndustry> GetAvailablePortfolioIndustries()
+        {
+            return DbService.GetAvailableModels(this.Session.User, GetPortfolioIndustriesList()).Cast<PortfolioIndustry>();
+        }
+
+        #endregion
 
         #region Private methods
-        
-        private async Task<RequestResult> PreparePortfolioBeforeCreate(Portfolio item)
+        private async Task HandlePortfolio(Portfolio entity, DBModelFillMode mode, Content newContentForUpdate)
         {
-            item.Category = null;
-            item.Industry = null;
-            item.WatchesList = new List<Watch>();
-            item.LikesList = new List<RateVote>();
+            const string formFilename = "mainImg";
 
-            var imgUploadResult = await TryUploadFile("mainImg", FileType.Image);
-            if (!imgUploadResult.Success)
+            if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
+                || mode == DBModelFillMode.Create)
             {
-                return imgUploadResult;
-            }
-            item.ImgPath = imgUploadResult.Value;
-
-
-            var mainContentPageUploadRes = await this.UploadContentMedia(item.Content);
-            if (!mainContentPageUploadRes.Success)
-            {
-                return mainContentPageUploadRes;
-            }
-            
-            foreach(var localization in item.Localizations)
-            {
-                var localizationPrepareRes = await PreparePortfolioLocalizationBeforeCreate(localization);
-                if (!localizationPrepareRes.Success)
-                {
-                    return localizationPrepareRes;
-                }
+                entity.ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
             }
 
-            return RequestResult.AsSuccess();
+            if (mode == DBModelFillMode.Create)
+            {
+                await FilesService.UploadContentMedia(entity.Content);
+            }
+            else if (mode == DBModelFillMode.Update && !entity.Content.AreSame(newContentForUpdate))
+            {
+                await FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
+            }
         }
-        private async Task<RequestResult> PreparePortfolioBeforeUpdate(Portfolio item, PortfolioDTO model)
+        private async Task HandlePortfolioLocalization(PortfolioLocalization entity, DBModelFillMode mode, Content newContentForUpdate)
         {
+            const string formFilename = "mainImg";
 
-            if(Request.Form.Files.Any(o => o.Name == "mainImg"))
+            if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
+                || mode == DBModelFillMode.Create)
             {
-                var imgUploadResult = await TryUploadFile("mainImg", FileType.Image);
-                if (!imgUploadResult.Success)
-                {
-                    return imgUploadResult;
-                }
-                item.ImgPath = imgUploadResult.Value;
+                entity.ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
             }
 
-            if (!item.Content.AreSame(model.Content))
+            if (mode == DBModelFillMode.Create)
             {
-                var contentPageUploadRes = await this.UploadContentMedia(item.Content);
-                if (!contentPageUploadRes.Success)
-                {
-                    return contentPageUploadRes;
-                }
-                item.Content = model.Content;
+                await FilesService.UploadContentMedia(entity.Content);
             }
-
-            return RequestResult.AsSuccess();
+            else if (mode == DBModelFillMode.Update && !entity.Content.AreSame(newContentForUpdate))
+            {
+                await FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
+            }
         }
 
-
-        private async Task<RequestResult> PreparePortfolioLocalizationBeforeCreate(PortfolioLocalization item)
-        {
-            var imgUploadResult = await TryUploadFile($"{item.LanguageEntityId}_localization_Img", FileType.Image);
-            if (!imgUploadResult.Success)
-            {
-                return new RequestResult().FillFromRequestResult(imgUploadResult);
-            }
-            item.ImgPath = imgUploadResult.Value;
-
-
-            var mainContentPageUploadRes = await this.UploadContentMedia(item.Content);
-            if (!mainContentPageUploadRes.Success)
-            {
-                return new RequestResult().FillFromRequestResult(mainContentPageUploadRes);
-            }
-
-            return RequestResult.AsSuccess();
-        }
-        private async Task<RequestResult> PreparePortfolioLocalizationBeforeUpdate(PortfolioLocalization item, PortfolioLocalizationDTO model)
-        {
-            string formFileName = $"{item.LanguageEntityId}_localization_Img";
-            if (Request.Form.Files.Any(o => o.Name == formFileName))
-            {
-                var imgUploadResult = await TryUploadFile(formFileName, FileType.Image);
-                if (!imgUploadResult.Success)
-                {
-                    return imgUploadResult;
-                }
-                item.ImgPath = imgUploadResult.Value;
-            }
-
-            if (!item.Content.AreSame(model.Content))
-            {
-                var contentPageUploadRes = await this.UploadContentMedia(item.Content);
-                if (!contentPageUploadRes.Success)
-                {
-                    return contentPageUploadRes;
-                }
-                item.Content = model.Content;
-            }
-
-
-            return RequestResult.AsSuccess();
-        }
 
         #endregion
 

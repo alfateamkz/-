@@ -38,6 +38,7 @@ using Alfateam2._0.Models.Promocodes;
 using Alfateam2._0.Models.Reviews;
 using Alfateam2._0.Models.Roles;
 using Alfateam2._0.Models.Roles.Access;
+using Alfateam2._0.Models.ServicePages;
 using Alfateam2._0.Models.Shop;
 using Alfateam2._0.Models.Shop.Modifiers;
 using Alfateam2._0.Models.Shop.Orders;
@@ -169,6 +170,8 @@ namespace Alfateam.DB
         public DbSet<ComplianceDocumentLocalization> ComplianceDocumentLocalizations { get; set; }
         public DbSet<MassMediaPostLocalization> MassMediaPostLocalizations { get; set; }
         public DbSet<PartnerLocalization> PartnerLocalizations { get; set; }
+        public DbSet<ServicePageLocalization> ServicePageLocalizations { get; set; }
+        
         #endregion
 
         #region Outstaff
@@ -348,6 +351,13 @@ namespace Alfateam.DB
 
         public DbSet<UserRoleModel> UserRoleModels { get; set; }
 
+        #endregion
+
+        #region ServicePages
+        public DbSet<ServicePage> ServicePages { get; set; }
+        public DbSet<ServicePageFakeReview> ServicePageFakeReviews { get; set; }
+        public DbSet<ServicePageServiceRibbonItem> ServicePageServiceRibbonItems { get; set; }
+        public DbSet<ServicePageStackIcon> ServicePageStackIcons { get; set; }
         #endregion
 
         #region Shop

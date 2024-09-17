@@ -11,7 +11,7 @@ namespace Alfateam.Website.API.Controllers.Admin.Localizations
 {
     public class AdminInterfaceTextsStructureController : AbsAdminController
     {
-        public AdminInterfaceTextsStructureController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
+        public AdminInterfaceTextsStructureController(ControllerParams @params) : base(@params)
         {
         }
 

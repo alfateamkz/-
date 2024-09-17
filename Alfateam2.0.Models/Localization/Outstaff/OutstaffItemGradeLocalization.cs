@@ -10,5 +10,8 @@ namespace Alfateam2._0.Models.Localization.Outstaff
     public class OutstaffItemGradeLocalization : LocalizableModel
     {
         public string Title { get; set; }
+
+
+        public int OutstaffItemGradeId { get; set; }
     }
 }

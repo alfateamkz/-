@@ -3,7 +3,7 @@ using Alfateam2._0.Models.Localization.Items.Events;
 
 namespace Alfateam.Website.API.Models.DTOLocalization.Events
 {
-    public class EventFormatLocalizationDTO : DTOModel<EventFormatLocalization>
+    public class EventFormatLocalizationDTO : LocalizationDTOModel<EventFormatLocalization>
     {
         public string Title { get; set; }
     }

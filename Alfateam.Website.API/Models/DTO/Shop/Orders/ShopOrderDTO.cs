@@ -59,8 +59,8 @@ namespace Alfateam.Website.API.Models.DTO.Shop.Orders
             var model = new ShopOrderDTO();
 
             model.Id = item.Id;
-            model.Address = AddressDTO.CreateWithLocalization(item.Address, langId) as AddressDTO;
-            model.Currency = CurrencyDTO.CreateWithLocalization(item.Currency, langId) as CurrencyDTO;
+            model.Address = (AddressDTO)new AddressDTO().CreateDTOWithLocalization(item.Address, langId);
+            model.Currency = (CurrencyDTO)new CurrencyDTO().CreateDTOWithLocalization(item.Currency, langId);
 
 
             model.Status = item.Status;

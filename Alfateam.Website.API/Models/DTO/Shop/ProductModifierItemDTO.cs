@@ -20,6 +20,9 @@ namespace Alfateam.Website.API.Models.DTO.Shop
         public int MainLanguageId { get; set; }
 
 
+        [DTOFieldFor(DTOFieldForType.CreationOnly)]
+        public int ProductModifierId { get; set; }
+
         public static ProductModifierItemDTO Create(ProductModifierItem item, int? langId, int? countryId)
         {
 
@@ -29,7 +32,7 @@ namespace Alfateam.Website.API.Models.DTO.Shop
             model.Title = item.Title;
 
             var costs = GetLocalCosts(item.Pricing, countryId);
-            model.Costs = CostDTO.CreateItemsWithLocalization(costs, langId) as List<CostDTO>;
+            model.Costs = new CostDTO().CreateDTOsWithLocalization(costs, langId).Cast<CostDTO>().ToList();
 
             if (item.MainLanguageId != langId)
             {

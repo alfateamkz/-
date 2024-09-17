@@ -1,10 +1,10 @@
-﻿using Alfateam2._0.Models.General;
+﻿using Alfateam.Website.API.Abstractions;
+using Alfateam2._0.Models.General;
 
 namespace Alfateam.Website.API.Models.UserModels
 {
-    public class UpdateUserModel
+    public class UpdateUserModel : DTOModel<User>
     {
-        public int Id { get; set; }
 
         public string Name { get; set; }
         public string Surname { get; set; }
@@ -17,27 +17,5 @@ namespace Alfateam.Website.API.Models.UserModels
 
 
         public int? CountryId { get; set; }
-
-        public bool ValidateModel()
-        {
-            bool isValid = true;
-
-            isValid &= !string.IsNullOrEmpty(Name);
-            isValid &= !string.IsNullOrEmpty(Surname);
-            isValid &= Id > 0;
-
-            return isValid;
-        }
-
-        public void SetData(User user)
-        {
-            user.Name = Name;
-            user.Surname = Surname;
-            user.Patronymic = Patronymic;
-
-            user.BindedCRMUser = BindedCRMUser;
-
-            user.CountryId = CountryId;
-        }
     }
 }

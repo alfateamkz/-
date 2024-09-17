@@ -1,12 +1,15 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
+using Alfateam.Website.API.Exceptions;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Filters;
+using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTO;
 using Alfateam.Website.API.Models.DTO.Promocodes;
 using Alfateam.Website.API.Models.DTO.Shop;
 using Alfateam.Website.API.Models.DTO.Shop.Orders;
+using Alfateam.Website.API.Models.DTO.Shop.Wishes;
 using Alfateam.Website.API.Models.Filters;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
@@ -22,7 +25,7 @@ namespace Alfateam.Website.API.Controllers.Website
 {
     public class ShopController : AbsController
     {
-        public ShopController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
+        public ShopController(ControllerParams @params) : base(@params)
         {
         }
 
@@ -75,114 +78,81 @@ namespace Alfateam.Website.API.Controllers.Website
                                                 .Include(o => o.Localizations)
                                                 .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
                                                 .ToList();
-            return ShopProductCategoryDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<ShopProductCategoryDTO>;
+            return new ShopProductCategoryDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<ShopProductCategoryDTO>();
         }
 
         #endregion
 
         #region Корзина
 
-        [HttpGet, Route("GetBasket"), UserActionsFilter]
-        public async Task<RequestResult<ShopOrder>> GetBasket()
+        [HttpGet, Route("GetBasket")]
+        [UserActionsFilter]
+        public async Task<ShopOrderDTO> GetBasket()
         {
-            var res = new RequestResult<ShopOrder>();
-
-
-            var session = GetSessionWithBasketInclude();
-            var checkSessionRes = CheckSession(session);
-            if (!checkSessionRes.Success)
+            var user = GetSessionWithBasketInclude().User;
+            if (user.Basket == null)
             {
-                res.FillFromRequestResult(checkSessionRes);
-            }
-            else
-            {
-                if (session.User.Basket == null)
-                {
-                    session.User.Basket = new ShopOrder();
-                }
-
-                DB.Users.Update(session.User);
-                DB.SaveChanges();
-
-                res.Success = true;
-                res.Value = session.User.Basket;
+                user.Basket = new ShopOrder();
+                DbService.UpdateEntity(DB.Users, user);
             }
 
-            return res;
+            return (ShopOrderDTO)new ShopOrderDTO().CreateDTO(user.Basket);
         }
 
 
-        [HttpPut, Route("SetBasketCurrency"), UserActionsFilter]
-        public async Task<RequestResult> SetBasketCurrency()
+        [HttpPut, Route("SetBasketCurrency")]
+        [UserActionsFilter]
+        public async Task SetBasketCurrency()
         {
-            var res = new RequestResult();
+            var user = GetSessionWithBasketInclude().User;
 
-            var session = GetSessionWithBasketInclude();
-            var checkSessionRes = CheckSession(session);
-            if (!checkSessionRes.Success)
+            if(this.CurrencyId == null)
             {
-                return res.FillFromRequestResult(checkSessionRes);
-            }
-            else if(this.CurrencyId == null)
-            {
-                return res.SetError(400, "Id валюты за заголовке CurrencyId не должен быть равен null");
+                throw new Exception400("Id валюты за заголовке CurrencyId не должен быть равен null");
             }
             else if (!DB.Currencies.Any(o => o.Id == this.CurrencyId && !o.IsDeleted))
             {
-                return res.SetError(400, "По id, указанному в заголовке CurrencyId не найдено валюты");
+                throw new Exception400("По id, указанному в заголовке CurrencyId не найдено валюты");
             }
-            else if (session.User.Basket?.Items?.Any(o => !o.IsDeleted) == true)
+            else if (user.Basket?.Items?.Any(o => !o.IsDeleted) == true)
             {
-                return res.SetError(400, "Нельзя изменить валюту, когда в корзине есть товары. Сначала удалите из корзины все позиции");
+                throw new Exception400("Нельзя изменить валюту, когда в корзине есть товары. Сначала удалите из корзины все позиции");
             }
-            else
+
+
+            if (user.Basket == null)
             {
-                if (session.User.Basket == null)
-                {
-                    session.User.Basket = new ShopOrder();
-                }
-                session.User.Basket.CurrencyId = this.CurrencyId;
-
-                DB.Users.Update(session.User);
-                DB.SaveChanges();
-
-                return res.SetSuccess();
+                user.Basket = new ShopOrder();
             }
+            user.Basket.CurrencyId = this.CurrencyId;
 
-        
+            DbService.UpdateEntity(DB.Users, user);
         }
 
 
-        [HttpPut, Route("UsePromocode"), UserActionsFilter]
-        public async Task<RequestResult> UsePromocode(string code)
+        [HttpPut, Route("UsePromocode")]
+        [UserActionsFilter]
+        public async Task UsePromocode(string code)
         {
-
-            var session = GetSessionWithPromocodesInclude();
-            var checkSessionRes = CheckSession(session);
-            if (!checkSessionRes.Success)
-            {
-                return checkSessionRes;
-            }
-
-            var user = session.User;
+            var user = GetSessionWithPromocodesInclude().User;
             var promocode = DB.Promocodes.IncludeAvailability()
                                          .FirstOrDefault(o => o.Code == code && !o.IsDeleted 
                                                        && o.Availability.IsAvailable(CountryId));
             if(promocode == null)
             {
-                return RequestResult.AsError(404, "Данный промокод не найден");
+                throw new Exception404("Данный промокод не найден");
             }
-            if (promocode.IsExpired)
+            else if (promocode.IsExpired)
             {
-                return RequestResult.AsError(403, "Данный промокод уже не активен");
+                throw new Exception403("Данный промокод уже не активен");
             }
-            if(user.UsedPromocodes.Any(o => o.PromocodeId == promocode.Id) && !promocode.IsReusable)
+            else if(user.UsedPromocodes.Any(o => o.PromocodeId == promocode.Id) && !promocode.IsReusable)
             {
-                return RequestResult.AsError(403, "Данный промокод уже был использован Вами ранее");
+                throw new Exception403("Данный промокод уже был использован Вами ранее");
             }
-            if (user.Basket.UsedPromocodeId != null)
+            else if(user.Basket.UsedPromocodeId != null)
             {
-                return RequestResult.AsError(403, "Промокод на данную покупку уже активирован");
+                throw new Exception403("Промокод на данную покупку уже активирован");
             }
 
             user.Basket.UsedPromocodeId = promocode.Id;
@@ -191,322 +161,186 @@ namespace Alfateam.Website.API.Controllers.Website
                 PromocodeId = promocode.Id,
             });
 
-            DB.Users.Update(user);
-            DB.SaveChanges();
-            return RequestResult.AsSuccess();
+            DbService.UpdateEntity(DB.Users, user);
         }
 
 
 
-        [HttpPut, Route("AddToBasket"), UserActionsFilter]
-        public async Task<RequestResult> AddToBasket(ShopOrderItem item)
+        [HttpPut, Route("AddToBasket")]
+        [UserActionsFilter]
+        public async Task<ShopOrderItemDTO> AddToBasket(ShopOrderItemDTO model)
         {
-            var res = new RequestResult();
-
-
-            var session = GetSessionWithBasketInclude();
-            var checkSessionRes = CheckSession(session);
-            if (!checkSessionRes.Success)
+            var user = GetSessionWithBasketInclude().User;
+            if (user.Basket.CurrencyId == null)
             {
-                return res.FillFromRequestResult(checkSessionRes);
+                throw new Exception400("Невозможно добавить в корзину товар, пока не выбрана валюта");
             }
-
-            if(session.User.Basket.CurrencyId == null)
+            if (user.Basket.CountryId == null)
             {
-                return res.SetError(400, "Невозможно добавить в корзину товар, пока не выбрана валюта");
-            }
-            if (session.User.Basket.CountryId == null)
-            {
-                return res.SetError(400, "Невозможно добавить в корзину товар, пока не выбрана страна");
+                throw new Exception400("Невозможно добавить в корзину товар, пока не выбрана страна");
             }
 
 
-            var product = DB.ShopProducts.FirstOrDefault(o => o.Id == item.ItemId && !o.IsDeleted);
+            var product = DB.ShopProducts.FirstOrDefault(o => o.Id == model.ItemId && !o.IsDeleted);
             if(product == null)
             {
-                return res.SetError(404, "Товар с данным id не найден");
+                throw new Exception404("Товар с данным id не найден");
             }
 
-    
+            
 
-            SetItemActualPrices(session.User.Basket,item);
+            var item = model.CreateDBModelFromDTO();
+            SetItemActualPrices(user.Basket,item);
 
+            user.Basket.Items.Add(item);
+            DbService.UpdateEntity(DB.Users, user);
 
-            session.User.Basket.Items.Add(item);
-            DB.Users.Update(session.User);
-            DB.SaveChanges();
-
-            return res.SetSuccess();
+            model.Id = item.Id;
+            return model;
         }
 
-        [HttpPut, Route("EditBasketItem"), UserActionsFilter]
-        public async Task<RequestResult> EditBasketItem(ShopOrderItemDTO model)
+        [HttpPut, Route("EditBasketItem")]
+        [UserActionsFilter]
+        public async Task<ShopOrderItemDTO> EditBasketItem(ShopOrderItemDTO model)
         {
-            var res = new RequestResult();
+            var user = GetSessionWithBasketInclude().User;
 
-
-            var session = GetSessionWithBasketInclude();
-            var checkSessionRes = CheckSession(session);
-            if (!checkSessionRes.Success)
+            var item = DB.ShopOrderItems.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            if (item == null)
             {
-                res.FillFromRequestResult(checkSessionRes);
+                throw new Exception404("Товар в системе не найден");
             }
-            else
+            else if (item.ShopOrderId != user.Basket?.Id)
             {
-                var item = DB.ShopOrderItems.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-                if (item == null)
-                {
-                    res.SetError(404, "Товар в системе не найден");
-                }
-                else if (item.ShopOrderId != session.User.Basket?.Id)
-                {
-                    res.SetError(403, "Данная позиция не принадлежит пользователю");
-                }
-                else
-                {
-                    UpdateOrderItem(item, model);
-                    SetItemActualPrices(session.User.Basket, item);
-
-                    DB.ShopOrderItems.Update(item);
-                    DB.SaveChanges();
-
-                    res.SetSuccess();
-                }
+                throw new Exception403("Данная позиция не принадлежит пользователю");
             }
 
 
-            return res;
+            UpdateOrderItem(item, model);
+            SetItemActualPrices(user.Basket, item);
+
+            DbService.UpdateEntity(DB.ShopOrderItems, item);
+            return model;
         }
 
-        [HttpDelete, Route("RemoveBasketItem"), UserActionsFilter]
-        public async Task<RequestResult> RemoveBasketItem(int basketItemId)
+        [HttpDelete, Route("RemoveBasketItem")]
+        [UserActionsFilter]
+        public async Task RemoveBasketItem(int basketItemId)
         {
-            var res = new RequestResult();
+            var user = GetSessionWithBasketInclude().User;
 
-
-            var session = GetSessionWithBasketInclude();
-            var checkSessionRes = CheckSession(session);
-            if (!checkSessionRes.Success)
+            var item = DB.ShopOrderItems.FirstOrDefault(o => o.Id == basketItemId && !o.IsDeleted);
+            if (item == null)
             {
-                res.FillFromRequestResult(checkSessionRes);
+                throw new Exception404("Товар в системе не найден");
             }
-            else
+            else if (item.ShopOrderId != user.Basket?.Id)
             {
-                var item = DB.ShopOrderItems.FirstOrDefault(o => o.Id == basketItemId && !o.IsDeleted);
-                if (item == null)
-                {
-                    res.Code = 404;
-                    res.Error = "Товар в системе не найден";
-                }
-                else if (item.ShopOrderId != session.User.Basket?.Id)
-                {
-                    res.Code = 403;
-                    res.Error = "Данная позиция не принадлежит пользователю";
-                }
-                else
-                {
-                    //TODO: внимательно проверить удаление !!!
-                    session.User.Basket.Items.Remove(item);
-
-                    DB.Users.Update(session.User);
-                    DB.SaveChanges();
-
-                    res.Success = true;
-                }
+                throw new Exception403("Данная позиция не принадлежит пользователю");
             }
 
 
-            return res;
+            //TODO: внимательно проверить удаление !!!
+            user.Basket.Items.Remove(item);
+            DbService.UpdateEntity(DB.Users, user);
         }
 
         #endregion
 
         #region Избранное
 
-        [HttpGet, Route("GetWishlist"), UserActionsFilter]
-        public async Task<RequestResult<ShopWishlist>> GetWishlist()
+        [HttpGet, Route("GetWishlist")]
+        [UserActionsFilter]
+        public async Task<ShopWishlistDTO> GetWishlist()
         {
-            var res = new RequestResult<ShopWishlist>();
-
-            var session = GetSessionWithWishlistInclude();
-            if (session == null)
-            {
-                res.Code = 404;
-                res.Error = "Токен в системе не найден";
-            }
-            else if (session.IsExpired)
-            {
-                res.Code = 401;
-                res.Error = "Вышел срок действия токена";
-            }
-            else
-            {
-                res.Success = true;
-                res.Value = session.User.Wishlist;
-            }
-
-            return res;
+            var user = GetSessionWithWishlistInclude().User;
+            return (ShopWishlistDTO)new ShopWishlistDTO().CreateDTO(user.Wishlist);
         }
 
-        [HttpPut, Route("ToggleWishlistItem"), UserActionsFilter]
-        public async Task<RequestResult<bool>> ToggleWishlistItem(int productId)
+        [HttpPut, Route("ToggleWishlistItem")]
+        [UserActionsFilter]
+        public async Task<bool> ToggleWishlistItem(int productId)
         {
-            var res = new RequestResult<bool>();
+            var user = GetSessionWithWishlistInclude().User;
 
-            var session = GetSessionWithWishlistInclude();
-            var checkSessionRes = CheckSession(session);
-            if (!checkSessionRes.Success)
+            if (!DB.ShopProducts.Any(o => o.Id == productId && !o.IsDeleted))
             {
-                res.FillFromRequestResult(checkSessionRes);
-            }
-            else if (!DB.ShopProducts.Any(o => o.Id == productId && !o.IsDeleted))
-            {
-                res.Code = 404;
-                res.Error = "Товарная позиция по данному id не найдена";
-            }
-            else
-            {
-                //TODO: CHECK IT
-
-                var found = session.User.Wishlist.Items.FirstOrDefault(o => o.ProductId == productId);
-                if (found != null)
-                {
-                    res.Value = false;
-                    session.User.Wishlist.Items.Remove(found);
-                }
-                else
-                {
-                    res.Value = true;
-                    session.User.Wishlist.Items.Add(new ShopWishlistItem
-                    {
-                        ProductId = productId
-                    });
-                }
-
-
-                DB.Users.Update(session.User);
-                DB.SaveChanges();
-
-                res.Success = true;
+                throw new Exception404("Товарная позиция по данному id не найдена");
             }
 
+            //TODO: CHECK IT
+            var found = user.Wishlist.Items.FirstOrDefault(o => o.ProductId == productId);
+            if (found != null)
+            {
+                user.Wishlist.Items.Remove(found);
+                DbService.UpdateEntity(DB.Users, user);
+                return false;
+            }
 
-            return res;
+            user.Wishlist.Items.Add(new ShopWishlistItem
+            {
+                ProductId = productId
+            });
+            DbService.UpdateEntity(DB.Users, user);
+            return true;
         }
 
         #endregion
 
         #region Заказы
 
-        [HttpGet, Route("GetOrders"), UserActionsFilter]
-        public async Task<IEnumerable<ShopOrder>> GetOrders()
+        [HttpGet, Route("GetOrders")]
+        [UserActionsFilter]
+        public async Task<IEnumerable<ShopOrderDTO>> GetOrders()
         {
-            var res = new RequestResult<ShopWishlist>();
-
-            var session = GetSessionWithOrdersInclude();
-            var checkSessionRes = CheckSession(session);
-            if (!checkSessionRes.Success)
-            {
-                return new List<ShopOrder>();
-            }
-
-            return session.User.Orders.Where(o => !o.IsDeleted);
+            var user = GetSessionWithOrdersInclude().User;
+            return new ShopOrderDTO().CreateDTOsWithLocalization(user.Orders.Where(o => !o.IsDeleted), this.LanguageId).Cast<ShopOrderDTO>();
         }
 
-        [HttpGet, Route("GetOrder"), UserActionsFilter]
-        public async Task<RequestResult<ShopOrder>> GetOrders(int orderId)
+        [HttpGet, Route("GetOrder")]
+        [UserActionsFilter]
+        public async Task<ShopOrderDTO> GetOrders(int orderId)
         {
-            var res = new RequestResult<ShopOrder>();
-
-            var session = GetSessionWithOrdersInclude();
-            var checkSessionRes = CheckSession(session);
-            if (!checkSessionRes.Success)
-            {
-                res.FillFromRequestResult(checkSessionRes);
-            }
-            else if (!session.User.Orders.Any(o => o.Id == orderId && !o.IsDeleted))
-            {
-                res.Code = 404;
-                res.Error = "Заказ по данному id в системе не найден";
-            }
-            else
-            {
-                res.Value = session.User.Orders.FirstOrDefault(o => o.Id == orderId && !o.IsDeleted);
-                res.Success = true;
-            }
-
-            return res;
+            var user = GetSessionWithOrdersInclude().User;
+            return (ShopOrderDTO)DbService.TryGetOne(user.Orders, orderId,new ShopOrderDTO());
         }
 
-        [HttpPut, Route("CreateOrderFromBasket"), UserActionsFilter]
-        public async Task<RequestResult> CreateOrderFromBasket()
+        [HttpPut, Route("CreateOrderFromBasket")]
+        [UserActionsFilter]
+        public async Task CreateOrderFromBasket()
         {
-            var res = new RequestResult();
+            var user = GetSessionWithOrdersInclude().User;
 
-            var session = GetSessionWithOrdersInclude();
-            var checkSessionRes = CheckSession(session);
-            if (!checkSessionRes.Success)
+            if(!user.Basket.Items.Any(o => !o.IsDeleted))
             {
-                res.FillFromRequestResult(checkSessionRes);
-            }
-            else if(!session.User.Basket.Items.Any(o => !o.IsDeleted))
-            {
-                res.Code = 400;
-                res.Error = "Невозможно создать заказ, т.к. корзина пуста";
-            }
-            else
-            {
-                //TODO: внимательно чекнуть
-                var basket = session.User.Basket;
-                session.User.Orders.Add(basket);
-                session.User.Basket = new ShopOrder();
-
-                DB.Users.Update(session.User);
-                DB.SaveChanges();
-
-                res.Success = true;
+                throw new Exception400("Невозможно создать заказ, т.к. корзина пуста");
             }
 
-            return res;
+            //TODO: внимательно чекнуть
+            var basket = user.Basket;
+            user.Orders.Add(basket);
+            user.Basket = new ShopOrder();
+
+            DbService.UpdateEntity(DB.Users, user);
         }
 
 
-        [HttpDelete, Route("RemoveUnpaidOrder"), UserActionsFilter]
-        public async Task<RequestResult> RemoveUnpaidOrder(int orderId)
+        [HttpDelete, Route("RemoveUnpaidOrder")]
+        [UserActionsFilter]
+        public async Task RemoveUnpaidOrder(int orderId)
         {
-            var res = new RequestResult();
-
-            var session = GetSessionWithOrdersInclude();
-            var checkSessionRes = CheckSession(session);
-            if (!checkSessionRes.Success)
-            {
-                res.FillFromRequestResult(checkSessionRes);
-                return res;
-            }
-
-            var order = session.User.Orders.FirstOrDefault(o => o.Id == orderId && !o.IsDeleted);
+            var user = GetSessionWithOrdersInclude().User;
+            var order = user.Orders.FirstOrDefault(o => o.Id == orderId && !o.IsDeleted);
             if (order == null)
             {
-                res.Code = 404;
-                res.Error = "Заказ по данному id в системе не найден";
+                throw new Exception404("Заказ по данному id в системе не найден");
             }
             else if(order.Status != ShopOrderStatus.Unpaid)
             {
-                res.Code = 403;
-                res.Error = "Невозможно удалить заказ";
-            }
-            else
-            {
-                //TODO: внимательно проверить
-
-                order.IsDeleted = true;
-                DB.ShopOrders.Update(order);
-                DB.SaveChanges();
-
-                res.Success = true;
+                throw new Exception403("Невозможно удалить заказ");
             }
 
-            return res;
+            DbService.DeleteEntity(DB.ShopOrders, order);
         }
 
 
@@ -515,69 +349,51 @@ namespace Alfateam.Website.API.Controllers.Website
         #region Оплата заказа
 
         //TODO: пока нету, будем прикручивать юкассу и КЗ эквайринг
-        [HttpPut, Route("CreatePayment"), UserActionsFilter]
-        public async Task<RequestResult> CreatePayment(int orderId, MerchantServiceType merchantType)
+        [HttpPut, Route("CreatePayment")]
+        [UserActionsFilter]
+        public async Task CreatePayment(int orderId, MerchantServiceType merchantType)
         {
-            var res = new RequestResult();
+            var user = GetSessionWithOrdersInclude().User;
 
-            var session = GetSessionWithOrdersInclude();
-            var checkSessionRes = CheckSession(session);
-            if (!checkSessionRes.Success)
+            var order = user.Orders.FirstOrDefault(o => o.Id == orderId && !o.IsDeleted);
+            if (order == null)
             {
-                res.FillFromRequestResult(checkSessionRes);
-                return res;
+                throw new Exception404("Заказ по данному id в системе не найден");
             }
-            
-            var order = session.User.Orders.FirstOrDefault(o => o.Id == orderId && !o.IsDeleted);
-            if(order == null)
+            else if (order.Status != ShopOrderStatus.Unpaid)
             {
-                res.Code = 404;
-                res.Error = "Данный заказ в системе не найден";
+                throw new Exception403("Невозможно удалить заказ");
             }
-            else if(order.Status != ShopOrderStatus.Unpaid)
-            {
-                res.Code = 403;
-                res.Error = "Данный заказ уже оплачен";
-            }
-            else
-            {
-                var sum = order.SumWithoutDiscount;
 
-                if(order.UsedPromocode != null && order.UsedPromocode.IsCostInRange(new Cost(order.Currency, sum), order.CountryId))
+            var sum = order.SumWithoutDiscount;
+
+            if (order.UsedPromocode != null && order.UsedPromocode.IsCostInRange(new Cost(order.Currency, sum), order.CountryId))
+            {
+                if (order.UsedPromocode is PercentPromocode percentPromocode)
                 {
-                    if(order.UsedPromocode is PercentPromocode percentPromocode)
-                    {
-                        order.DiscountByPromocode = percentPromocode.Percent;
-                        sum -= sum / 100 * (double)order.DiscountByPromocode;
-                    }
-                    else if (order.UsedPromocode is PricePromocode pricePromocode)
-                    {
-                        var price = pricePromocode.Discount.GetPrice(order.CountryId, (int)order.CurrencyId);
-                        sum -= price.Value;
-                    }
+                    order.DiscountByPromocode = percentPromocode.Percent;
+                    sum -= sum / 100 * (double)order.DiscountByPromocode;
                 }
-
-
-                var payment = new ShopOrderPayment()
+                else if (order.UsedPromocode is PricePromocode pricePromocode)
                 {
-                    CurrencyId = (int)order.CurrencyId,
-                    MerchantService = merchantType,
-                    Description = $"Оплата заказа #{order.Id}",
-                    Sum = sum
-                };
-                order.Payments.Add(payment);
-
-                DB.ShopOrders.Update(order);
-                DB.SaveChanges();
-
-                //TODO: отправка платежа на эквайринг
-
-
-                res.Success = true;
+                    var price = pricePromocode.Discount.GetPrice(order.CountryId, (int)order.CurrencyId);
+                    sum -= price.Value;
+                }
             }
 
 
-            return res;
+            var payment = new ShopOrderPayment()
+            {
+                CurrencyId = (int)order.CurrencyId,
+                MerchantService = merchantType,
+                Description = $"Оплата заказа #{order.Id}",
+                Sum = sum
+            };
+            order.Payments.Add(payment);
+
+            DbService.UpdateEntity(DB.ShopOrders, order);
+
+            //TODO: отправка платежа на эквайринг
         }
 
         [HttpGet,HttpPost,HttpPut, Route("RU_YookassaWebhook")]
@@ -595,23 +411,26 @@ namespace Alfateam.Website.API.Controllers.Website
 
 
         [HttpGet, Route("GetPromocodeInfo")]
-        public async Task<RequestResult<PromocodeDTO>> GetPromocodeInfo(string code)
+        public async Task<PromocodeDTO> GetPromocodeInfo(string code)
         {
             var promocode = DB.Promocodes.IncludeAvailability()
-                                        .FirstOrDefault(o => o.Code == code && !o.IsDeleted
+                                         .FirstOrDefault(o => o.Code == code && !o.IsDeleted
                                                       && o.Availability.IsAvailable(CountryId));
             if (promocode == null)
             {
-                return RequestResult<PromocodeDTO>.AsError(404, "Данный промокод не найден");
+                throw new Exception404("Данный промокод не найден");
             }
             if (promocode.IsExpired)
             {
-                return RequestResult<PromocodeDTO>.AsError(403, "Данный промокод уже не активен");
+                throw new Exception403("Данный промокод уже не активен");
             }
 
-            var DTO = PromocodeDTO.Create(promocode, CountryId, (int)CurrencyId);
-            return RequestResult<PromocodeDTO>.AsSuccess(DTO);
+            return PromocodeDTO.Create(promocode, CountryId, (int)CurrencyId);
         }
+
+
+
+
 
 
 
@@ -679,7 +498,7 @@ namespace Alfateam.Website.API.Controllers.Website
         #endregion
 
         #region Private include methods
-        private IQueryable<ShopProduct> GetShopProducts()
+        private IEnumerable<ShopProduct> GetShopProducts()
         {
             return DB.ShopProducts.IncludeAvailability()
                                   .Include(o => o.Category).ThenInclude(o => o.Localizations)
@@ -691,6 +510,7 @@ namespace Alfateam.Website.API.Controllers.Website
                                   .Include(o => o.Modifiers).ThenInclude(o => o.Options).ThenInclude(o => o.Pricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
                                   .Include(o => o.Modifiers).ThenInclude(o => o.Options).ThenInclude(o => o.Pricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
                                   .Include(o => o.Localizations)
+                                  .ToList()
                                   .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
         }
 

@@ -1,6 +1,7 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Extensions;
+using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTO;
 using Alfateam2._0.Models;
 using Alfateam2._0.Models.HR;
@@ -11,7 +12,7 @@ namespace Alfateam.Website.API.Controllers.Website
 {
     public class MassMediaPostsController : AbsController
     {
-        public MassMediaPostsController(WebsiteDBContext db) : base(db)
+        public MassMediaPostsController(ControllerParams @params) : base(@params)
         {
         }
 
@@ -20,7 +21,7 @@ namespace Alfateam.Website.API.Controllers.Website
         public async Task<IEnumerable<MassMediaPostDTO>> GetPosts(int offset, int count = 20)
         {
             var items = GetMassMediaPosts().Skip(offset).Take(count).ToList();
-            return MassMediaPostDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<MassMediaPostDTO>;
+            return new MassMediaPostDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<MassMediaPostDTO>();
         }
 
         [HttpPut, Route("AddClick")]
@@ -30,9 +31,7 @@ namespace Alfateam.Website.API.Controllers.Website
             if(post != null)
             {
                 post.ClicksCount++;
-
-                DB.MassMediaPosts.Update(post);
-                DB.SaveChanges();
+                DbService.UpdateEntity(DB.MassMediaPosts, post);
 
                 return true;
             }

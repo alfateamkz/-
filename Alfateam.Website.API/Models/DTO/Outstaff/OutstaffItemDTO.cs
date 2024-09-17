@@ -1,4 +1,5 @@
 ﻿using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Attributes.DTO;
 using Alfateam.Website.API.Models.DTO.Outstaff;
 using Alfateam2._0.Models.Outstaff;
 
@@ -10,6 +11,8 @@ namespace Alfateam.Website.API.Models.DTO.Outstaff
         public List<OutstaffItemGradeDTO> Grades { get; set; } = new List<OutstaffItemGradeDTO>();
 
 
+        [DTOFieldFor(DTOFieldForType.CreationOnly)]
+        public int OutstaffMatrixId { get; set; }
 
 
         public static OutstaffItemDTO Create(OutstaffItem item, int? langId, int? countryId)

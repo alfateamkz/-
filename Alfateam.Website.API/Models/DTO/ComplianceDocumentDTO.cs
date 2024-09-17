@@ -4,7 +4,7 @@ using Alfateam2._0.Models.Team;
 
 namespace Alfateam.Website.API.Models.DTO
 {
-    public class ComplianceDocumentDTO : DTOModel<ComplianceDocument>
+    public class ComplianceDocumentDTO : AvailabilityDTOModel<ComplianceDocument>
     {
         /// <summary>
         /// Размер в килобайтах. 

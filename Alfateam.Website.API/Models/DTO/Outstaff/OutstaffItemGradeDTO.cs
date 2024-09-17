@@ -1,4 +1,5 @@
 ﻿using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Attributes.DTO;
 using Alfateam.Website.API.Models.DTO.Outstaff;
 using Alfateam2._0.Models.Outstaff;
 
@@ -13,6 +14,10 @@ namespace Alfateam.Website.API.Models.DTO.Outstaff
         public int MainLanguageId { get; set; }
 
 
+
+
+        [DTOFieldFor(DTOFieldForType.CreationOnly)]
+        public int OutstaffItemId { get; set; }
 
         public static OutstaffItemGradeDTO Create(OutstaffItemGrade item, int? langId, int? countryId)
         {

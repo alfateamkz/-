@@ -4,7 +4,7 @@ using Alfateam2._0.Models.Shop;
 
 namespace Alfateam.Website.API.Models.DTOLocalization.Shop
 {
-    public class ShopProductCategoryLocalizationDTO : DTOModel<ShopProductCategoryLocalization>
+    public class ShopProductCategoryLocalizationDTO : LocalizationDTOModel<ShopProductCategoryLocalization>
     {
         public string Title { get; set; }
 

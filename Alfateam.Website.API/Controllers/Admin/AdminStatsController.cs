@@ -1,9 +1,13 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
+using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTO.Portfolios;
+using Alfateam.Website.API.Models.DTO.Reviews;
+using Alfateam.Website.API.Models.DTO.Stats;
 using Alfateam.Website.API.Models.Filters.Admin;
 using Alfateam.Website.API.Models.Stats;
+using Alfateam2._0.Models.Reviews;
 using Alfateam2._0.Models.Stats;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,12 +15,12 @@ namespace Alfateam.Website.API.Controllers.Admin
 {
     public class AdminStatsController : AbsAdminController
     {
-        public AdminStatsController(WebsiteDBContext db, IWebHostEnvironment appEnv) : base(db, appEnv)
+        public AdminStatsController(ControllerParams @params) : base(@params)
         {
         }
 
         [HttpGet, Route("GetVisits")]
-        public async Task<RequestResult<IEnumerable<SiteVisit>>> GetVisits(SiteVisitFilter filter)
+        public async Task<IEnumerable<SiteVisitDTO>> GetVisits(SiteVisitFilter filter)
         {
             var allVisits = DB.SiteVisits.Where(o => o.VisitedAt >= filter.From && o.VisitedAt <= filter.To);
 
@@ -36,12 +40,11 @@ namespace Alfateam.Website.API.Controllers.Admin
             }
 
             var items = allVisits.Skip(filter.Offset).Take(filter.Count).ToList();
-            var res = new RequestResult<IEnumerable<SiteVisit>>();
-            return res.SetSuccess(items);
+            return new SiteVisitDTO().CreateDTOs(items).Cast<SiteVisitDTO>();
         }
 
         [HttpGet, Route("GetVisitsByDay")]
-        public async Task<RequestResult<IEnumerable<VisitsByDay>>> GetVisits(DateTime from,DateTime to)
+        public async Task<List<VisitsByDay>> GetVisits(DateTime from,DateTime to)
         {
             var allVisits = DB.SiteVisits.Where(o => o.VisitedAt >= from && o.VisitedAt <= to);
             var grouped = allVisits.GroupBy(o => o.VisitedAt.Date);
@@ -56,7 +59,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                 });
             }
 
-            return RequestResult<IEnumerable<VisitsByDay>>.AsSuccess(visits);
+            return visits;
         }
     }
 }

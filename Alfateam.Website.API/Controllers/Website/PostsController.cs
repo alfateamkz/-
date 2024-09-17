@@ -1,7 +1,9 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
+using Alfateam.Website.API.Exceptions;
 using Alfateam.Website.API.Extensions;
+using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTO.Posts;
 using Alfateam.Website.API.Models.Filters;
 using Alfateam2._0.Models;
@@ -14,7 +16,7 @@ namespace Alfateam.Website.API.Controllers.Website
 {
     public class PostsController : AbsController
     {
-        public PostsController(WebsiteDBContext db) : base(db)
+        public PostsController(ControllerParams @params) : base(@params)
         {
         }
 
@@ -22,8 +24,7 @@ namespace Alfateam.Website.API.Controllers.Website
         public async Task<IEnumerable<PostDTO>> GetPosts(int offset, int count = 20)
         {
             var items = GetPosts().Skip(offset).Take(count).ToList();
-
-            return PostDTO.CreateItemsWithLocalization(items,LanguageId) as IEnumerable<PostDTO>;
+            return new PostDTO().CreateDTOsWithLocalization(items,LanguageId).Cast<PostDTO>();
         }
 
         [HttpGet, Route("GetPostsByFilter")]
@@ -45,7 +46,7 @@ namespace Alfateam.Website.API.Controllers.Website
             }
             posts = posts.Skip(filter.Offset).Take(filter.Count);
 
-            return PostDTO.CreateItemsWithLocalization(posts.ToList(), LanguageId) as IEnumerable<PostDTO>;
+            return new PostDTO().CreateDTOsWithLocalization(posts.ToList(), LanguageId).Cast<PostDTO>();
         }
 
 
@@ -53,7 +54,7 @@ namespace Alfateam.Website.API.Controllers.Website
         public async Task<PostDTO> GetPost(int id)
         {
             var post = GetFullIncludedPosts().FirstOrDefault(o => o.Id == id);
-            return PostDTO.CreateWithLocalization(post, LanguageId) as PostDTO;
+            return (PostDTO)new PostDTO().CreateDTOWithLocalization(post, LanguageId);
         }
 
 
@@ -61,47 +62,22 @@ namespace Alfateam.Website.API.Controllers.Website
 
 
         [HttpPut, Route("AddWatch")]
-        public async Task<RequestResult> AddWatch(int id, string fingerprint)
+        public async Task AddWatch(int id, string fingerprint)
         {
-            var res = new RequestResult();
-
-            var post = DB.Posts.FirstOrDefault(o => o.Id == id);
-            if (post != null)
+            var post = DB.Posts.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (post == null)
             {
-
-                int? userId = null;
-                if (!string.IsNullOrEmpty(this.UserSessid))
-                {
-                    var session = DB.Sessions.Include(o => o.User)
-                                             .FirstOrDefault(o => o.SessID == this.UserSessid);
-
-                    var checkSessionRes = CheckSession(session);
-                    if (!checkSessionRes.Success)
-                    {
-                        res.FillFromRequestResult(checkSessionRes);
-                        return res;
-                    }
-                    userId = session.User.Id;
-                }
-
-
-                post.Watches++;
-                post.WatchesList.Add(new Watch
-                {
-                    WatchedByFingerprint = fingerprint,
-                    WatchedById = userId,
-                });
-
-                DB.Posts.Update(post);
-                DB.SaveChanges();
-            }
-            else
-            {
-                res.Code = 404;
-                res.Error = "Новость по данному id не найдена";
+                throw new Exception404("Новость по данному id не найдена");
             }
 
-            return res;
+            post.Watches++;
+            post.WatchesList.Add(new Watch
+            {
+                WatchedByFingerprint = fingerprint,
+                WatchedById = GetUserIdIfSessionValid(),
+            });
+
+            DbService.UpdateEntity(DB.Posts, post);
         }
 
 
@@ -116,7 +92,7 @@ namespace Alfateam.Website.API.Controllers.Website
                                          .Include(o => o.Localizations)
                                          .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
                                          .ToList();
-            return PostCategoryDTO.CreateItemsWithLocalization(items,LanguageId) as IEnumerable<PostCategoryDTO>;
+            return new PostCategoryDTO().CreateDTOsWithLocalization(items,LanguageId).Cast<PostCategoryDTO>();
         }
         [HttpGet, Route("GetPostIndustries")]
         public async Task<IEnumerable<PostIndustryDTO>> GetPostIndustries()
@@ -125,7 +101,7 @@ namespace Alfateam.Website.API.Controllers.Website
                                          .Include(o => o.Localizations)
                                          .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
                                          .ToList();
-            return PostIndustryDTO.CreateItemsWithLocalization(items, LanguageId) as IEnumerable<PostIndustryDTO>;
+            return new PostIndustryDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<PostIndustryDTO>();
         }
 
 

@@ -43,6 +43,7 @@ namespace Alfateam2._0.Models.General
         /// </summary>
         public int? BindedCRMUser { get; set; }
         public UserRoleModel RoleModel { get; set; }
+        public int RoleModelId { get; set; }
 
 
         public Country? Country { get; set; }

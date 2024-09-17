@@ -3,7 +3,7 @@ using Alfateam2._0.Models.Localization.Items;
 
 namespace Alfateam.Website.API.Models.DTOLocalization
 {
-    public class MassMediaPostLocalizationDTO : DTOModel<MassMediaPostLocalization>
+    public class MassMediaPostLocalizationDTO : LocalizationDTOModel<MassMediaPostLocalization>
     {
 
         public string Title { get; set; }
