@@ -1,6 +1,9 @@
 ﻿using Alfateam.Models.Helpers;
 using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Attributes.DTO;
 using Alfateam.Website.API.Models.DTO.General;
+using Alfateam.Website.API.Models.DTO.Outstaff;
+using Alfateam2._0.Models.Outstaff;
 using Alfateam2._0.Models.Shop;
 
 namespace Alfateam.Website.API.Models.DTO.Shop
@@ -13,70 +16,66 @@ namespace Alfateam.Website.API.Models.DTO.Shop
         public string Slug => SlugHelper.GetLatynSlug(Title);
 
 
-
+        [ForClientOnly]
         public ShopProductCategoryDTO Category { get; set; }
         public int CategoryId { get; set; }
+
+
 
 
         /// <summary>
         /// Стоимость без учета модификаторов
         /// </summary>
-        public List<CostDTO> BasePrices { get; set; } = new List<CostDTO>();
+        [ForClientOnly]
+        public CostDTO BasePrice { get; set; }
+
+        [ForClientOnly]
         public List<ProductModifierDTO> Modifiers { get; set; } = new List<ProductModifierDTO>();
 
+
+        [ForClientOnly]
         public ShopProductImage MainImage { get; set; }
+        [ForClientOnly]
         public List<ShopProductImage> Images { get; set; } = new List<ShopProductImage>();
 
 
 
         public int MainLanguageId { get; set; }
 
-
-
-        public static ShopProductDTO Create(ShopProduct item, int? langId, int? countryId)
+        public ShopProductDTO CreateDTOWithLocalization(ShopProduct item, int langId, int countryId, int currencyId)
         {
-
-            var model = new ShopProductDTO();
-
-            model.Id = item.Id;
-            model.Title = item.Title;
-            model.Description = item.Description;
-            model.MainImage = item.MainImage;
-            model.Images = item.Images;
+            var dto = (ShopProductDTO)this.CreateDTOWithLocalization(item, langId);
 
             var prices = GetLocalCosts(item.BasePricing, countryId);
-            model.BasePrices = new CostDTO().CreateDTOsWithLocalization(prices, langId).Cast<CostDTO>().ToList();
+            var price = prices.FirstOrDefault(o => o.CurrencyId == currencyId);
 
-            if (item.MainLanguageId != langId)
+            if (price != null)
             {
-                var localization = item.Localizations.FirstOrDefault(o => o.LanguageEntityId == langId);
-                if (localization != null)
+                BasePrice = (CostDTO)new CostDTO().CreateDTOWithLocalization(price, langId);
+            }
+
+            var localization = item.Localizations.FirstOrDefault(o => o.LanguageEntityId == langId);
+            if (localization != null)
+            {
+                if (localization.UseLocalizationImages && localization.Images.Any())
                 {
-                    model.Title = GetActualValue(model.Title, localization.Title);
-                    model.Description = GetActualValue(model.Description, localization.Description);
-                    model.MainImage = GetActualValue(model.MainImage, localization.MainImage) as ShopProductImage;
-
-
-                    if (localization.UseLocalizationImages && localization.Images.Any())
-                    {
-                        model.Images = localization.Images;
-                    }
+                    dto.Images = localization.Images;
                 }
             }
 
-            model.Category = new ShopProductCategoryDTO().CreateDTOWithLocalization(item.Category, langId) as ShopProductCategoryDTO;
-            model.Modifiers = ProductModifierDTO.CreateItems(item.Modifiers, langId, countryId);
+            dto.Modifiers = new ProductModifierDTO().CreateDTOsWithLocalization(item.Modifiers, langId, countryId, currencyId);
 
-            return model;
+            return dto;
         }
-        public static List<ShopProductDTO> CreateItems(IEnumerable<ShopProduct> items, int? langId, int? countryId)
+        public List<ShopProductDTO> CreateDTOsWithLocalization(List<ShopProduct> items, int langId, int countryId, int currencyId)
         {
             var models = new List<ShopProductDTO>();
             foreach (var item in items)
             {
-                models.Add(Create(item, langId, countryId));
+                models.Add(CreateDTOWithLocalization(item, langId, countryId, currencyId));
             }
             return models;
         }
+
     }
 }

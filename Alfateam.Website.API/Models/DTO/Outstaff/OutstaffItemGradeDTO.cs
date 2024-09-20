@@ -19,33 +19,21 @@ namespace Alfateam.Website.API.Models.DTO.Outstaff
         [DTOFieldFor(DTOFieldForType.CreationOnly)]
         public int OutstaffItemId { get; set; }
 
-        public static OutstaffItemGradeDTO Create(OutstaffItemGrade item, int? langId, int? countryId)
+
+
+        public OutstaffItemGradeDTO CreateDTOWithLocalization(OutstaffItemGrade item, int langId, int countryId, int currencyId)
         {
+            var dto = (OutstaffItemGradeDTO)this.CreateDTOWithLocalization(item, langId);
+            dto.Prices = new OutstaffItemGradeColumnDTO().CreateDTOsWithLocalization(item.Prices, langId, countryId, currencyId);
 
-            var model = new OutstaffItemGradeDTO();
-
-            model.Id = item.Id;
-            model.Title = item.Title;
-
-            if (item.MainLanguageId != langId)
-            {
-                var localization = item.Localizations.FirstOrDefault(o => o.LanguageEntityId == langId);
-                if (localization != null)
-                {
-                    model.Title = GetActualValue(model.Title, localization.Title);
-                }
-            }
-
-            model.Prices = OutstaffItemGradeColumnDTO.CreateItems(item.Prices, langId, countryId);
-
-            return model;
+            return dto;
         }
-        public static List<OutstaffItemGradeDTO> CreateItems(List<OutstaffItemGrade> items, int? langId, int? countryId)
+        public List<OutstaffItemGradeDTO> CreateDTOsWithLocalization(List<OutstaffItemGrade> items, int langId, int countryId, int currencyId)
         {
             var models = new List<OutstaffItemGradeDTO>();
             foreach (var item in items)
             {
-                models.Add(Create(item, langId, countryId));
+                models.Add(CreateDTOWithLocalization(item, langId, countryId, currencyId));
             }
             return models;
         }

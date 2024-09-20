@@ -11,7 +11,6 @@ using Alfateam.Website.API.Models.DTO.Shop.Orders;
 using Alfateam.Website.API.Models.DTO.Events;
 using Alfateam.Website.API.Models.DTO.General;
 using Alfateam.Website.API.Models.DTO.Promocodes;
-using Alfateam.Website.API.Models.DTO.Shop;
 using Alfateam.Website.API.Models.DTOLocalization.Events;
 using Alfateam.Website.API.Models.DTOLocalization.Shop;
 using Alfateam2._0.Models.Abstractions;
@@ -37,6 +36,7 @@ using Alfateam.Website.API.Models.DTOLocalization.Team;
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Swashbuckle.AspNetCore.Annotations;
+using Alfateam.Website.API.Models.DTO.Shop.ProductModifierItems;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -62,7 +62,17 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return (ShopProductDTO)DbService.TryGetOne(GetAvailableShopProducts(), id, new ShopProductDTO());
         }
-  
+
+        [HttpGet, Route("GetProductLocalizations")]
+        [ShopSectionAccess(1)]
+        public async Task<IEnumerable<ShopProductLocalizationDTO>> GetProductLocalizations(int id)
+        {
+            var localizations = DB.ShopProductLocalizations.Include(o => o.LanguageEntity).Where(o => o.ShopProductId == id && !o.IsDeleted);
+            var mainEntity = GetAvailableShopProducts().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new ShopProductLocalizationDTO()).Cast<ShopProductLocalizationDTO>();
+        }
+
         [HttpGet, Route("GetProductLocalization")]
         [ShopSectionAccess(1)]
         public async Task<ShopProductLocalizationDTO> GetProductLocalization(int id)
@@ -240,6 +250,17 @@ namespace Alfateam.Website.API.Controllers.Admin
             return (ProductModifierDTO)new ProductModifierDTO().CreateDTO(item);
         }
 
+        [HttpGet, Route("GetProductModifierLocalizations")]
+        [ShopSectionAccess(1)]
+        public async Task<IEnumerable<ProductModifierLocalizationDTO>> GetProductModifierLocalizations(int id)
+        {
+            var localizations = DB.ProductModifierLocalizations.Include(o => o.LanguageEntity).Where(o => o.ProductModifierId == id && !o.IsDeleted);
+            var mainEntity = GetProductModifiersList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            CheckFromProductModifier(id);
+            return DbService.GetLocalizationModels(localizations, mainEntity, new ProductModifierLocalizationDTO()).Cast<ProductModifierLocalizationDTO>();
+        }
+
         [HttpGet, Route("GetProductModifierLocalization")]
         [ShopSectionAccess(1)]
         public async Task<ProductModifierLocalizationDTO> GetProductModifierLocalization(int id)
@@ -339,6 +360,17 @@ namespace Alfateam.Website.API.Controllers.Admin
 
             CheckFromProductModifierOption(id);
             return (ProductModifierItemDTO)new ProductModifierItemDTO().CreateDTO(item);
+        }
+
+        [HttpGet, Route("GetProductModifierOptionLocalizations")]
+        [ShopSectionAccess(1)]
+        public async Task<IEnumerable<ProductModifierItemLocalizationDTO>> GetProductModifierOptionLocalizations(int id)
+        {
+            var localizations = DB.ProductModifierItemLocalizations.Include(o => o.LanguageEntity).Where(o => o.ProductModifierItemId == id && !o.IsDeleted);
+            var mainEntity = GetProductModifiersItemsList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            CheckFromProductModifierOption(id);
+            return DbService.GetLocalizationModels(localizations, mainEntity, new ProductModifierItemLocalizationDTO()).Cast<ProductModifierItemLocalizationDTO>();
         }
 
         [HttpGet, Route("GetProductModifierOptionLocalization")]
@@ -442,6 +474,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<ShopProductCategoryDTO> GetProductCategory(int id)
         {
             return (ShopProductCategoryDTO)DbService.TryGetOne(GetAvailableShopProductCategories(), id, new ShopProductCategoryDTO());
+        }
+
+        [HttpGet, Route("GetProductCategoryLocalizations")]
+        [ShopSectionAccess(1)]
+        public async Task<IEnumerable<ShopProductCategoryLocalizationDTO>> GetProductCategoryLocalizations(int id)
+        {
+            var localizations = DB.ShopProductCategoryLocalizations.Include(o => o.LanguageEntity).Where(o => o.ShopProductCategoryId == id && !o.IsDeleted);
+            var mainEntity = GetAvailableShopProductCategories().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new ShopProductCategoryLocalizationDTO()).Cast<ShopProductCategoryLocalizationDTO>();
         }
 
         [HttpGet, Route("GetProductCategoryLocalization")]

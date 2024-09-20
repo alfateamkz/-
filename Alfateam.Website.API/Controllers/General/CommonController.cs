@@ -1,6 +1,7 @@
 ﻿using Alfateam.DB;
 using Alfateam.Models.Helpers;
 using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Helpers;
 using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTO;
 using Alfateam.Website.API.Models.DTO.General;
@@ -43,10 +44,36 @@ namespace Alfateam.Website.API.Controllers.General
         public async Task<IEnumerable<CountryDTO>> GetCountries()
         {
             var items = DB.Countries.Include(o => o.Localizations)
+                                    .Include(o => o.Languages)
+                                    .Include(o => o.Currencies)
                                     .Where(o => !o.IsDeleted && !o.IsHidden)
                                     .ToList();
             return new CountryDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<CountryDTO>();
         }
+
+        [HttpGet, Route("GetCountryFromIp")]
+        public async Task<CountryDTO> GetCountryFromIp()
+        {           
+            var items = DB.Countries.Include(o => o.Localizations)
+                                    .Include(o => o.Languages)
+                                    .Include(o => o.Currencies)
+                                    .Where(o => !o.IsDeleted && !o.IsHidden)
+                                    .ToList();
+          
+            var userIp = HttpContext.Connection.RemoteIpAddress?.ToString();
+
+            //Структура {"ip":"77.1.2.3","country":"DE"}
+            var resp = await RequestHelper.ExecuteRequestReceiveModelAsync<dynamic>($"https://api.country.is/{userIp}", RestSharp.Method.Get);
+            var country = items.FirstOrDefault(o => o.Code == resp.country);
+
+            if(country == null)
+            {
+                country = items.FirstOrDefault(o => o.Code == "RU");
+            }
+
+            return (CountryDTO)new CountryDTO().CreateDTOWithLocalization(country, LanguageId);
+        }
+
 
 
 

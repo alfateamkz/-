@@ -15,16 +15,23 @@ namespace Alfateam2._0.Models.Abstractions
 
 
     [JsonConverter(typeof(JsonKnownTypesConverter<Promocode>))]
-    [JsonDiscriminator(Name = "Discriminator")]
+    [JsonDiscriminator(Name = "discriminator")]
     [JsonKnownType(typeof(PricePromocode), "PricePromocode")]
-    [JsonKnownType(typeof(UsedPromocode), "UsedPromocode")]
+    [JsonKnownType(typeof(PercentPromocode), "PercentPromocode")]
     /// <summary>
     /// Базовая сущность промокода
     /// </summary>
     public class Promocode : AvailabilityModel
     {
+        public Promocode()
+        {
+
+        }
+
+
         [NotMapped]
         public virtual PromocodeType Type { get; }
+        [JsonProperty("discriminator")]
         public string Discriminator { get; set; }
 
         public string Code { get; set; }

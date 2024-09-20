@@ -8,6 +8,6 @@ namespace Alfateam.Website.API.Models.DTO.Promocodes
     public class PricePromocodeDTO : PromocodeDTO
     {
         public override string Discriminator => "PricePromocode";
-        public PricingMatrix Discount { get; set; }
+        public General.PricingMatrixDTO Discount { get; set; }
     }
 }

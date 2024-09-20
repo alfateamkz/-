@@ -8,6 +8,7 @@ namespace Alfateam.Website.API.Models.DTO.Outstaff
     public class OutstaffItemDTO : DTOModel<OutstaffItem>
     {
         public string Title { get; set; }
+        [ForClientOnly]
         public List<OutstaffItemGradeDTO> Grades { get; set; } = new List<OutstaffItemGradeDTO>();
 
 
@@ -15,22 +16,24 @@ namespace Alfateam.Website.API.Models.DTO.Outstaff
         public int OutstaffMatrixId { get; set; }
 
 
-        public static OutstaffItemDTO Create(OutstaffItem item, int? langId, int? countryId)
+        public int MainLanguageId { get; set; }
+
+
+
+
+        public OutstaffItemDTO CreateDTOWithLocalization(OutstaffItem item, int langId, int countryId, int currencyId)
         {
+            var dto = (OutstaffItemDTO)this.CreateDTOWithLocalization(item, langId);
+            dto.Grades = new OutstaffItemGradeDTO().CreateDTOsWithLocalization(item.Grades, langId, countryId, currencyId);
 
-            var model = new OutstaffItemDTO();
-            model.Id = item.Id;
-
-            model.Grades = OutstaffItemGradeDTO.CreateItems(item.Grades, langId, countryId);
-
-            return model;
+            return dto;
         }
-        public static List<OutstaffItemDTO> CreateItems(List<OutstaffItem> items, int? langId, int? countryId)
+        public List<OutstaffItemDTO> CreateDTOsWithLocalization(List<OutstaffItem> items, int langId, int countryId, int currencyId)
         {
             var models = new List<OutstaffItemDTO>();
             foreach (var item in items)
             {
-                models.Add(Create(item, langId, countryId));
+                models.Add(CreateDTOWithLocalization(item, langId, countryId, currencyId));
             }
             return models;
         }

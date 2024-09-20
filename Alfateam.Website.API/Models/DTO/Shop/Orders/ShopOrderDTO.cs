@@ -1,4 +1,5 @@
 ﻿using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Attributes.DTO;
 using Alfateam.Website.API.Models.DTO.General;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.Shop.Orders;
@@ -9,6 +10,8 @@ namespace Alfateam.Website.API.Models.DTO.Shop.Orders
     {
         public AddressDTO Address { get; set; }
 
+
+        [ForClientOnly]
         public CurrencyDTO? Currency { get; set; }
         public double SumWithoutDiscount => Items.Sum(o => o.Sum);
         public double TotalSum
@@ -35,6 +38,8 @@ namespace Alfateam.Website.API.Models.DTO.Shop.Orders
 
 
         public ShopOrderStatus Status { get; set; } = ShopOrderStatus.Basket;
+
+        [ForClientOnly]
         public List<ShopOrderItemDTO> Items { get; set; } = new List<ShopOrderItemDTO>();
         public string? TrackingURL { get; set; }
 
@@ -50,38 +55,7 @@ namespace Alfateam.Website.API.Models.DTO.Shop.Orders
 
 
 
-        public ShopOrderReturn? Return { get; set; }
+        public ShopOrderReturnDTO? Return { get; set; }
 
-
-        public static ShopOrderDTO Create(ShopOrder item, int? langId, int? countryId)
-        {
-
-            var model = new ShopOrderDTO();
-
-            model.Id = item.Id;
-            model.Address = (AddressDTO)new AddressDTO().CreateDTOWithLocalization(item.Address, langId);
-            model.Currency = (CurrencyDTO)new CurrencyDTO().CreateDTOWithLocalization(item.Currency, langId);
-
-
-            model.Status = item.Status;
-
-            model.TrackingURL = item.TrackingURL;
-
-            model.UsedPromocodeType = item.UsedPromocodeType;
-            model.DiscountByPromocode = item.DiscountByPromocode;
-
-            model.Return = item.Return;
-
-            return model;
-        }
-        public static List<ShopOrderDTO> CreateItems(IEnumerable<ShopOrder> items, int? langId, int? countryId)
-        {
-            var models = new List<ShopOrderDTO>();
-            foreach (var item in items)
-            {
-                models.Add(Create(item, langId, countryId));
-            }
-            return models;
-        }
     }
 }

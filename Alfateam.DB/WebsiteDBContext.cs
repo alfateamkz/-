@@ -2,6 +2,7 @@
 using Alfateam.Website.API.Helpers;
 using Alfateam2._0.Models;
 using Alfateam2._0.Models.Abstractions;
+using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.Events;
 using Alfateam2._0.Models.General;
@@ -41,6 +42,7 @@ using Alfateam2._0.Models.Roles.Access;
 using Alfateam2._0.Models.ServicePages;
 using Alfateam2._0.Models.Shop;
 using Alfateam2._0.Models.Shop.Modifiers;
+using Alfateam2._0.Models.Shop.Modifiers.Items;
 using Alfateam2._0.Models.Shop.Orders;
 using Alfateam2._0.Models.Shop.Wishes;
 using Alfateam2._0.Models.Stats;
@@ -49,6 +51,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -58,6 +61,8 @@ namespace Alfateam.DB
     {
         public WebsiteDBContext()
         {
+            this.ChangeTracker.AutoDetectChangesEnabled = false;
+
             Database.EnsureCreated();
             MakeDefaultEntities();
 
@@ -68,6 +73,7 @@ namespace Alfateam.DB
         }
         public WebsiteDBContext(DbContextOptions<WebsiteDBContext> options)
         {
+
             Database.EnsureCreated();
             MakeDefaultEntities();
 
@@ -411,6 +417,24 @@ namespace Alfateam.DB
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            //Abstract ContentItem
+            modelBuilder.Entity<AudioContentItem>();
+            modelBuilder.Entity<ImageContentItem>();
+            modelBuilder.Entity<ImageSliderContentItem>();
+            modelBuilder.Entity<TextContentItem>();
+            modelBuilder.Entity<VideoContentItem>();
+
+            //Abstract Promocode
+            modelBuilder.Entity<Promocode>().HasDiscriminator(b => b.Discriminator);
+            modelBuilder.Entity<PricePromocode>();
+            modelBuilder.Entity<PercentPromocode>();
+
+            //Abstract ProductModifierItem
+            modelBuilder.Entity<ProductModifierItem>().HasDiscriminator(b => b.Discriminator);
+            modelBuilder.Entity<ColorModifierItem>();
+            modelBuilder.Entity<SimpleModifierItem>();
+
+
             modelBuilder.Entity<Country>().HasMany(o => o.Languages).WithMany(o => o.CountryManyToManyRefs);
             modelBuilder.Entity<Country>().HasMany(o => o.Currencies).WithMany(o => o.CountryManyToManyRefs);
             modelBuilder.Entity<Country>().HasOne(o => o.MainCurrency);
@@ -626,7 +650,12 @@ namespace Alfateam.DB
 
         #region Public methods
 
-            public Availability GetIncludedAvailability(int id)
+
+
+
+
+
+        public Availability GetIncludedAvailability(int id)
         {
             return this.Availabilities.Include(o => o.AllowedCountries)
                                       .Include(o => o.DisallowedCountries)
@@ -636,22 +665,33 @@ namespace Alfateam.DB
         {
             return this.PricingMatrices.Include(o => o.Costs).ThenInclude(o => o.Country)
                                        .Include(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
-                                      .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+                                       .FirstOrDefault(o => o.Id == id && !o.IsDeleted);
         }
 
         public OutstaffMatrix GetOutstaffMatrix()
         {
-            return OutstaffMatrices.Include(o => o.Columns).ThenInclude(o => o.Localizations)
-                                   .Include(o => o.Items).ThenInclude(o => o.Grades).ThenInclude(o => o.Prices).ThenInclude(o => o.CostPerHour).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
-                                   .Include(o => o.Items).ThenInclude(o => o.Grades).ThenInclude(o => o.Prices).ThenInclude(o => o.CostPerHour).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
-                                   .Include(o => o.Items).ThenInclude(o => o.Grades).ThenInclude(o => o.Prices).ThenInclude(o => o.Column).ThenInclude(o => o.Localizations)
-                                   .Include(o => o.Items).ThenInclude(o => o.Grades).ThenInclude(o => o.Localizations)
-                                   .Include(o => o.Items).ThenInclude(o => o.Localizations)
-                                   .FirstOrDefault();
+            var found = OutstaffMatrices.Include(o => o.Columns).ThenInclude(o => o.Localizations)
+                                        .Include(o => o.Items).ThenInclude(o => o.Grades).ThenInclude(o => o.Prices).ThenInclude(o => o.CostPerHour).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
+                                        .Include(o => o.Items).ThenInclude(o => o.Grades).ThenInclude(o => o.Prices).ThenInclude(o => o.CostPerHour).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
+                                        .Include(o => o.Items).ThenInclude(o => o.Grades).ThenInclude(o => o.Prices).ThenInclude(o => o.Column).ThenInclude(o => o.Localizations)
+                                        .Include(o => o.Items).ThenInclude(o => o.Grades).ThenInclude(o => o.Localizations)
+                                        .Include(o => o.Items).ThenInclude(o => o.Localizations)
+                                        .FirstOrDefault();
 
+            if(found == null)
+            {
+                found = new OutstaffMatrix();
+                OutstaffMatrices.Add(found);
+                SaveChanges();
+            }
+
+            return found;
         }
 
         #endregion
+
+
+
 
     }
 }

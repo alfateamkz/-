@@ -43,7 +43,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<PartnerDTO>> GetPartners(int offset, int count = 20)
         {
             var items = GetAvailablePartners().Skip(offset).Take(count);
-            return new PartnerDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<PartnerDTO>();
+            return new PartnerDTO().CreateDTOs(items).Cast<PartnerDTO>();
         }
 
         [HttpGet, Route("GetPartner")]
@@ -51,6 +51,17 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<PartnerDTO> GetPartner(int id)
         {
             return (PartnerDTO)DbService.TryGetOne(GetAvailablePartners(), id, new PartnerDTO());
+        }
+
+
+        [HttpGet, Route("GetPartnerLocalizations")]
+        [CheckContentAreaRights(ContentAccessModelType.Partners, 1)]
+        public async Task<IEnumerable<PartnerLocalizationDTO>> GetPartnerLocalizations(int id)
+        {
+            var localizations = DB.PartnerLocalizations.Include(o => o.LanguageEntity).Where(o => o.PartnerId == id && !o.IsDeleted);
+            var mainEntity = GetAvailablePartners().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new PartnerLocalizationDTO()).Cast<PartnerLocalizationDTO>();
         }
 
         [HttpGet, Route("GetPartnerLocalization")]

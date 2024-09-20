@@ -12,6 +12,7 @@ namespace Alfateam2._0.Models.Roles.Access
     {
         public int AccessLevel { get; set; }
 
+        
         public bool CanWatch => AccessLevel >= WatchLevel;
         public bool CanHide => AccessLevel >= HideLevel;
         public bool CanDelete => AccessLevel >= DeleteLevel;

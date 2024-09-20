@@ -10,6 +10,8 @@ namespace Alfateam.Website.API.Models.DTO.Team
     {
         public string Name { get; set; }
         public string Surname { get; set; }
+
+        [ForClientOnly]
         public string ImgPath { get; set; }
 
 

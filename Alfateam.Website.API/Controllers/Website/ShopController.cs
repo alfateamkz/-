@@ -38,7 +38,7 @@ namespace Alfateam.Website.API.Controllers.Website
         public async Task<IEnumerable<ShopProductDTO>> GetProducts(int offset, int count = 20)
         {
             var items = GetShopProducts().Skip(offset).Take(count).ToList();
-            return ShopProductDTO.CreateItems(items, LanguageId,CountryId);
+            return new ShopProductDTO().CreateDTOsWithLocalization(items, (int)LanguageId, (int)CountryId, (int)CurrencyId);
         }
 
         [HttpGet, Route("GetProductsByFilter")]
@@ -57,14 +57,14 @@ namespace Alfateam.Website.API.Controllers.Website
             }
 
             products = products.Skip(filter.Offset).Take(filter.Count);
-            return ShopProductDTO.CreateItems(products.ToList(), LanguageId, CountryId);
+            return new ShopProductDTO().CreateDTOsWithLocalization(products.ToList(), (int)LanguageId, (int)CountryId, (int)CurrencyId);
         }
 
         [HttpGet, Route("GetProduct")]
         public async Task<ShopProductDTO> GetProduct(int id)
         {
             var product = GetShopProducts().FirstOrDefault(o => o.Id == id);
-            return ShopProductDTO.Create(product,LanguageId,CountryId);
+            return new ShopProductDTO().CreateDTOWithLocalization(product, (int)LanguageId, (int)CountryId, (int)CurrencyId);
         }
 
 

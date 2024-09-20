@@ -23,6 +23,7 @@ namespace Alfateam2._0.Models.Outstaff
         public int MainLanguageId { get; set; }
         public List<OutstaffItemLocalization> Localizations { get; set; } = new List<OutstaffItemLocalization>();
 
-        
+
+        public int OutstaffMatrixId { get; set; }
     }
 }

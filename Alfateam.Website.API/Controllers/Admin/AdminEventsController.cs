@@ -10,6 +10,7 @@ using Alfateam.Website.API.Filters.Access;
 using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTO.Events;
 using Alfateam.Website.API.Models.DTO.General;
+using Alfateam.Website.API.Models.DTOLocalization;
 using Alfateam.Website.API.Models.DTOLocalization.Events;
 using Alfateam.Website.API.Results;
 using Alfateam.Website.API.Results.StatusCodes;
@@ -42,7 +43,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<EventDTO>> GetEvents(int offset, int count = 20)
         {
             var items = GetAvailableEvents().Skip(offset).Take(count);
-            return new EventDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<EventDTO>();
+            return new EventDTO().CreateDTOs(items).Cast<EventDTO>();
         }
 
 
@@ -54,6 +55,18 @@ namespace Alfateam.Website.API.Controllers.Admin
             return (EventDTO)DbService.TryGetOne(GetAvailableEvents(), id, new EventDTO());
         }
 
+
+
+
+        [HttpGet, Route("GetEventLocalizations")]
+        [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
+        public async Task<IEnumerable<EventLocalizationDTO>> GetEventLocalizations(int id)
+        {
+            var localizations = DB.EventLocalizations.Include(o => o.LanguageEntity).Where(o => o.EventId == id && !o.IsDeleted);
+            var mainEntity = GetAvailableEvents().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new EventLocalizationDTO()).Cast<EventLocalizationDTO>();
+        }
 
 
         [HttpGet, Route("GetEventLocalization")]
@@ -155,7 +168,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<EventCategoryDTO>> GetEventCategories(int offset, int count = 20)
         {
             var items = GetAvailableEventCategories().Skip(offset).Take(count);
-            return new EventCategoryDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<EventCategoryDTO>();
+            return new EventCategoryDTO().CreateDTOs(items).Cast<EventCategoryDTO>();
         }
 
         [HttpGet, Route("GetEventCategory")]
@@ -164,7 +177,17 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return (EventCategoryDTO)DbService.TryGetOne(GetAvailableEventCategories(), id, new EventCategoryDTO());
         }
-    
+
+        [HttpGet, Route("GetEventCategoryLocalizations")]
+        [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
+        public async Task<IEnumerable<EventCategoryLocalizationDTO>> GetEventCategoryLocalizations(int id)
+        {
+            var localizations = DB.EventCategoryLocalizations.Include(o => o.LanguageEntity).Where(o => o.EventCategoryId == id && !o.IsDeleted);
+            var mainEntity = GetAvailableEventCategories().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new EventCategoryLocalizationDTO()).Cast<EventCategoryLocalizationDTO>();
+        }
+
         [HttpGet, Route("GetEventCategoryLocalization")]
         [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
         public async Task<EventCategoryLocalizationDTO> GetEventCategoryLocalization(int id)
@@ -254,7 +277,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<EventFormatDTO>> GetEventFormats(int offset, int count = 20)
         {
             var items = GetAvailableEventFormats().Skip(offset).Take(count);
-            return new EventFormatDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<EventFormatDTO>();
+            return new EventFormatDTO().CreateDTOs(items).Cast<EventFormatDTO>();
         }
 
         [HttpGet, Route("GetEventFormat")]
@@ -264,6 +287,16 @@ namespace Alfateam.Website.API.Controllers.Admin
             return (EventFormatDTO)DbService.TryGetOne(GetAvailableEventFormats(), id, new EventFormatDTO());
         }
 
+
+        [HttpGet, Route("GetEventFormatLocalizations")]
+        [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
+        public async Task<IEnumerable<EventFormatLocalizationDTO>> GetEventFormatLocalizations(int id)
+        {
+            var localizations = DB.EventFormatLocalizations.Include(o => o.LanguageEntity).Where(o => o.EventFormatId == id && !o.IsDeleted);
+            var mainEntity = GetAvailableEventFormats().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new EventFormatLocalizationDTO()).Cast<EventFormatLocalizationDTO>();
+        }
 
         [HttpGet, Route("GetEventFormatLocalization")]
         [CheckContentAreaRights(ContentAccessModelType.Events, 1)]

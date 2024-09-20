@@ -28,7 +28,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<ReviewDTO>> GetReviews(int offset, int count = 20)
         {
             var reviews = GetAvailableReviews(offset, count);
-            return new ReviewDTO().CreateDTOsWithLocalization(reviews, LanguageId).Cast<ReviewDTO>();
+            return new ReviewDTO().CreateDTOs(reviews).Cast<ReviewDTO>();
         }
 
 

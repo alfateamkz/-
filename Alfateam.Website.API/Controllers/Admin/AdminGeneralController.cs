@@ -34,7 +34,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<CountryDTO>> GetCountries(int offset, int count = 20)
         {
             var items = GetCountriesList().Skip(offset).Take(count);
-            return new CountryDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<CountryDTO>();
+            return new CountryDTO().CreateDTOs(items).Cast<CountryDTO>();
         }
 
         [HttpGet, Route("GetCountry")]
@@ -42,7 +42,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return (CountryDTO)DbService.TryGetOne(GetCountriesList(), id, new CountryDTO());
         }
-      
+
+        [HttpGet, Route("GetCountryLocalizations")]
+        public async Task<IEnumerable<CountryLocalizationDTO>> GetCountryLocalizations(int id)
+        {
+            var localizations = DB.CountryLocalizations.Include(o => o.LanguageEntity).Where(o => o.CountryId == id && !o.IsDeleted);
+            var mainEntity = GetCountriesList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new CountryLocalizationDTO()).Cast<CountryLocalizationDTO>();
+        }
+
         [HttpGet, Route("GetCountryLocalization")]
         public async Task<CountryLocalizationDTO> GetCountryLocalization(int id)
         {
@@ -122,13 +131,23 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<LanguageDTO>> GetLanguages(int offset, int count = 20)
         {
             var items = GetLanguagesList().Skip(offset).Take(count);
-            return new LanguageDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<LanguageDTO>();
+            return new LanguageDTO().CreateDTOs(items).Cast<LanguageDTO>();
         }
      
         [HttpGet, Route("GetLanguage")]
         public async Task<LanguageDTO> GetLanguage(int id)
         {
             return (LanguageDTO)DbService.TryGetOne(GetLanguagesList(), id, new LanguageDTO());
+        }
+
+
+        [HttpGet, Route("GetLanguageLocalizations")]
+        public async Task<IEnumerable<LanguageLocalizationDTO>> GetLanguageLocalizations(int id)
+        {
+            var localizations = DB.LanguageLocalizations.Include(o => o.LanguageEntity).Where(o => o.LanguageMainModelId == id && !o.IsDeleted);
+            var mainEntity = GetLanguagesList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new LanguageLocalizationDTO()).Cast<LanguageLocalizationDTO>();
         }
 
         [HttpGet, Route("GetLanguageLocalization")]
@@ -213,7 +232,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<CurrencyDTO>> GetCurrencies(int offset, int count = 20)
         {
             var items = GetCurrenciesList().Skip(offset).Take(count);
-            return new CurrencyDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<CurrencyDTO>();
+            return new CurrencyDTO().CreateDTOs(items).Cast<CurrencyDTO>();
         }
   
         [HttpGet, Route("GetCurrency")]
@@ -221,7 +240,17 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return (CurrencyDTO)DbService.TryGetOne(GetCurrenciesList(), id, new CurrencyDTO());
         }
-        
+
+
+        [HttpGet, Route("GetCurrencyLocalizations")]
+        public async Task<IEnumerable<CurrencyLocalizationDTO>> GetCurrencyLocalizations(int id)
+        {
+            var localizations = DB.CurrencyLocalizations.Include(o => o.LanguageEntity).Where(o => o.CurrencyId == id && !o.IsDeleted);
+            var mainEntity = GetCurrenciesList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new CurrencyLocalizationDTO()).Cast<CurrencyLocalizationDTO>();
+        }
+
         [HttpGet, Route("GetCurrencyLocalization")]
         public async Task<CurrencyLocalizationDTO> GetCurrencyLocalization(int id)
         {
@@ -304,6 +333,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             return DB.Countries.Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                .Include(o => o.MainLanguage)
                                .Include(o => o.Languages)
+                               .Include(o => o.Currencies)
                                .Include(o => o.OfficialMainLanguage)
                                .Where(o => !o.IsDeleted)
                                .ToList();

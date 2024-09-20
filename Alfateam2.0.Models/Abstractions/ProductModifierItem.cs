@@ -14,7 +14,7 @@ namespace Alfateam2._0.Models.Abstractions
 {
 
     [JsonConverter(typeof(JsonKnownTypesConverter<ProductModifierItem>))]
-    [JsonDiscriminator(Name = "Discriminator")]
+    [JsonDiscriminator(Name = "discriminator")]
     [JsonKnownType(typeof(ColorModifierItem), "ColorModifierItem")]
     [JsonKnownType(typeof(SimpleModifierItem), "SimpleModifierItem")]
     /// <summary>
@@ -26,6 +26,7 @@ namespace Alfateam2._0.Models.Abstractions
         public PricingMatrix Pricing { get; set; }
 
 
+        [JsonProperty("discriminator")]
         public string Discriminator { get; set; }
 
 

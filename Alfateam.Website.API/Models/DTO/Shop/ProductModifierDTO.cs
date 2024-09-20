@@ -1,8 +1,11 @@
 ﻿using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Attributes.DTO;
+using Alfateam.Website.API.Models.DTO.Outstaff;
 using Alfateam.Website.API.Models.DTO.Shop;
+using Alfateam.Website.API.Models.DTO.Shop.ProductModifierItems;
 using Alfateam2._0.Models;
 using Alfateam2._0.Models.Enums;
+using Alfateam2._0.Models.Outstaff;
 using Alfateam2._0.Models.Shop.Modifiers;
 
 namespace Alfateam.Website.API.Models.DTO.Shop
@@ -20,6 +23,9 @@ namespace Alfateam.Website.API.Models.DTO.Shop
         public bool IsRequired { get; set; }
         public bool AllowMultipleSelection { get; set; }
 
+
+
+        [ForClientOnly]
         public List<ProductModifierItemDTO> Options { get; set; } = new List<ProductModifierItemDTO>();
 
 
@@ -32,37 +38,20 @@ namespace Alfateam.Website.API.Models.DTO.Shop
         public int ShopProductId { get; set; }
 
 
-        public static ProductModifierDTO Create(ProductModifier item, int? langId, int? countryId)
+
+        public ProductModifierDTO CreateDTOWithLocalization(ProductModifier item, int langId, int countryId, int currencyId)
         {
+            var dto = (ProductModifierDTO)this.CreateDTOWithLocalization(item, langId);
+            dto.Options = new ProductModifierItemDTO().CreateDTOsWithLocalization(item.Options, langId, countryId, currencyId);
 
-            var model = new ProductModifierDTO();
-
-            model.Id = item.Id;
-            model.Title = item.Title;
-
-            model.Type = item.Type;
-            model.IsRequired = item.IsRequired;
-            model.AllowMultipleSelection = item.AllowMultipleSelection;
-
-            if (item.MainLanguageId != langId)
-            {
-                var localization = item.Localizations.FirstOrDefault(o => o.LanguageEntityId == langId);
-                if (localization != null)
-                {
-                    model.Title = GetActualValue(model.Title, localization.Title);
-                }
-            }
-
-            model.Options = ProductModifierItemDTO.CreateItems(item.Options, langId, countryId);
-
-            return model;
+            return dto;
         }
-        public static List<ProductModifierDTO> CreateItems(List<ProductModifier> items, int? langId, int? countryId)
+        public List<ProductModifierDTO> CreateDTOsWithLocalization(List<ProductModifier> items, int langId, int countryId, int currencyId)
         {
             var models = new List<ProductModifierDTO>();
             foreach (var item in items)
             {
-                models.Add(Create(item, langId, countryId));
+                models.Add(CreateDTOWithLocalization(item, langId, countryId, currencyId));
             }
             return models;
         }

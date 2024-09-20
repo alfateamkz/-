@@ -12,10 +12,7 @@ namespace Alfateam.Website.API.Models.DTO.General
 
 
 
-        [HiddenFromClient]
         public bool IsHidden { get; set; }
-
-        [HiddenFromClient]
         public int MainLanguageId { get; set; }
     }
 }

@@ -10,8 +10,10 @@ namespace Alfateam.Website.API.Models.DTO.Shop.Orders
     public class ShopOrderPaymentDTO : DTOModel<ShopOrderPayment>
     {
         public double Sum { get; set; }
-        public CurrencyDTO Currency { get; set; }
 
+        [ForClientOnly]
+        public CurrencyDTO Currency { get; set; }
+        public int CurrencyId { get; set; }
 
 
         [ForClientOnly]

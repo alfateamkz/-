@@ -21,13 +21,16 @@ namespace Alfateam.Website.API
 
             // Add services to the container.
 
-            builder.Services.AddControllers().AddNewtonsoftJson();
+            builder.Services.AddControllers().AddNewtonsoftJson().ConfigureApiBehaviorOptions(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;
+                options.SuppressMapClientErrors = true;
+            }); ;
 
             builder.Services.AddHttpContextAccessor();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
 
 
            
@@ -89,7 +92,7 @@ namespace Alfateam.Website.API
                 config.EnableAnnotations();
 
 
-                //config.SchemaFilter<EnumSchemaFilter>();
+                config.SchemaFilter<EnumSchemaFilter>();
                 config.OperationFilter<SwaggerHeadersFilter>();
             });
 
@@ -104,14 +107,6 @@ namespace Alfateam.Website.API
 
 
             var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            //if (app.Environment.IsDevelopment())
-            //{
-            //    app.UseSwagger();
-            //    app.UseSwaggerUI();
-               
-            //}
 
             app.UseSwagger();
             app.UseSwaggerUI();

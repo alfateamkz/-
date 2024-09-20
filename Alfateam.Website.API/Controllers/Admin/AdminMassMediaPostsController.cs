@@ -37,7 +37,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<MassMediaPostDTO>> GetPosts(int offset, int count = 20)
         {
             var items = GetAvailablePosts().Skip(offset).Take(count);
-            return new MassMediaPostDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<MassMediaPostDTO>();
+            return new MassMediaPostDTO().CreateDTOs(items).Cast<MassMediaPostDTO>();
         }
 
         [HttpGet, Route("GetPost")]
@@ -45,6 +45,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<MassMediaPostDTO> GetPost(int id)
         {
             return (MassMediaPostDTO)DbService.TryGetOne(GetAvailablePosts(), id, new MassMediaPostDTO());
+        }
+
+        [HttpGet, Route("GetPostLocalizations")]
+        [CheckContentAreaRights(ContentAccessModelType.MassMediaPosts, 1)]
+        public async Task<IEnumerable<MassMediaPostLocalizationDTO>> GetPostLocalizations(int id)
+        {
+            var localizations = DB.MassMediaPostLocalizations.Include(o => o.LanguageEntity).Where(o => o.MassMediaPostId == id && !o.IsDeleted);
+            var mainEntity = GetAvailablePosts().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new MassMediaPostLocalizationDTO()).Cast<MassMediaPostLocalizationDTO>();
         }
 
         [HttpGet, Route("GetPostLocalization")]
@@ -148,6 +158,11 @@ namespace Alfateam.Website.API.Controllers.Admin
 
             return DbService.TryUpdateAvailability(model, this.Session);
         }
+
+
+
+
+
 
 
 

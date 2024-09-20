@@ -16,6 +16,16 @@ namespace Alfateam2._0.Models.Outstaff
         public OutstaffColumn Column { get; set; }
         public int ColumnId { get; set; }
 
+
+        public OutstaffItemGrade OutstaffItemGrade { get; set; }
+        public int OutstaffItemGradeId { get; set; }
+
+
         public PricingMatrix CostPerHour { get; set; }
+
+
+
+
+
     }
 }

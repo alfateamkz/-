@@ -44,7 +44,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<ComplianceDocumentDTO>> GetComplianceDocuments(int offset, int count = 20)
         {
             var items = GetAvailableComplianceDocuments().Skip(offset).Take(count);
-            return new ComplianceDocumentDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<ComplianceDocumentDTO>();
+            return new ComplianceDocumentDTO().CreateDTOs(items).Cast<ComplianceDocumentDTO>();
         }
 
         [HttpGet, Route("GetComplianceDocument")]
@@ -52,6 +52,19 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<ComplianceDocumentDTO> GetComplianceDocument(int id)
         {
             return (ComplianceDocumentDTO)DbService.TryGetOne(GetAvailableComplianceDocuments(), id, new ComplianceDocumentDTO());
+        }
+
+
+
+
+        [HttpGet, Route("GetComplianceDocumentLocalizations")]
+        [CheckContentAreaRights(ContentAccessModelType.Compliance, 1)]
+        public async Task<IEnumerable<ComplianceDocumentLocalizationDTO>> GetComplianceDocumentLocalizations(int id)
+        {
+            var localizations = DB.ComplianceDocumentLocalizations.Include(o => o.LanguageEntity).Where(o => o.ComplianceDocumentId == id && !o.IsDeleted);
+            var mainEntity = GetAvailableComplianceDocuments().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new ComplianceDocumentLocalizationDTO()).Cast<ComplianceDocumentLocalizationDTO>();
         }
 
         [HttpGet, Route("GetComplianceDocumentLocalization")]

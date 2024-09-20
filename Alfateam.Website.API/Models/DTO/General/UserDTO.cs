@@ -1,4 +1,5 @@
 ﻿using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Attributes.DTO;
 using Alfateam.Website.API.Models.DTO.General;
 using Alfateam2._0.Models.General;
 
@@ -17,8 +18,9 @@ namespace Alfateam.Website.API.Models.DTO.General
 
 
 
-
+        [ForClientOnly]
         public CountryDTO? Country { get; set; }
+        [ForClientOnly]
         public CountryDTO? RegisteredFromCountry { get; set; }
     }
 }

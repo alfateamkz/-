@@ -11,10 +11,7 @@ namespace Alfateam.Website.API.Models.DTO.General
         public bool IsRightToLeft { get; set; }
 
 
-        [HiddenFromClient]
         public bool IsHidden { get; set; }
-
-        [HiddenFromClient]
         public int MainLanguageId { get; set; }
     }
 }

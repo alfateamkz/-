@@ -13,7 +13,7 @@ namespace Alfateam2._0.Models.Abstractions
 
 
     [JsonConverter(typeof(JsonKnownTypesConverter<ContentItem>))]
-    [JsonDiscriminator(Name = "Discriminator")]
+    [JsonDiscriminator(Name = "discriminator")]
     [JsonKnownType(typeof(AudioContentItem), "AudioContentItem")]
     [JsonKnownType(typeof(ImageContentItem), "ImageContentItem")]
     [JsonKnownType(typeof(ImageSliderContentItem), "ImageSliderContentItem")]
@@ -22,9 +22,11 @@ namespace Alfateam2._0.Models.Abstractions
     /// <summary>
     /// Сущность блока контента
     /// </summary>
-    public class ContentItem : AbsModel
+    public abstract class ContentItem : AbsModel
     {
         public string Guid { get; set; } = System.Guid.NewGuid().ToString();
+
+        [JsonProperty("discriminator")]
         public string Discriminator { get; set; }
 
         public virtual bool AreSame(ContentItem other)

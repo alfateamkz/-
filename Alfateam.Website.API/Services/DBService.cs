@@ -67,9 +67,17 @@ namespace Alfateam.Website.API.Services
 
             return newDTO.CreateDTO(localization);
         }
- 
-        
-        
+        public IEnumerable<DTOModel<T>> GetLocalizationModels<T>(IEnumerable<T> localizations, AbsModel mainEntity, LocalizationDTOModel<T> newDTO) where T : LocalizableModel, new()
+        {
+            if (mainEntity == null)
+            {
+                throw new Exception500("Внутренняя ошибка");
+            }
+
+            return newDTO.CreateDTOs(localizations);
+        }
+
+
         public DTOModel<T> TryGetOne<T>(IEnumerable<T> fromModels, int id, DTOModel<T> dTOModel) where T : AbsModel, new()
         {
             var dbModel = TryGetOne(fromModels, id);
@@ -94,7 +102,10 @@ namespace Alfateam.Website.API.Services
                                               DTOModel<T> model,
                                               Action<T> callback = null) where T : AbsModel, new()
         {
+            model.SetDBContext(DB);
             ValidateToCreateEntity(model);
+
+           
 
 
             var dbModel = new T();
@@ -114,13 +125,14 @@ namespace Alfateam.Website.API.Services
                                                          Session session,
                                                          Action<T> callback = null) where T : AvailabilityModel, new()
         {
+            model.SetDBContext(DB);
             ValidateAvailabilityModel(session, model.Availability.CreateDBModelFromDTO());
             ValidateToCreateEntity(model);
 
 
-            var dbModel = new T();
-            model.FillDBModel(dbModel, DBModelFillMode.Create);
+           
 
+            var dbModel = model.CreateDBModelFromDTO();
             callback?.Invoke(dbModel);
 
             dbSet.Add(dbModel);
@@ -138,8 +150,10 @@ namespace Alfateam.Website.API.Services
                                                              Action<L> callback = null) where P : AbsModel, new() 
                                                                                 where L : LocalizableModel, new()
         {
+            model.SetDBContext(DB);
             ValidateLocalizationModelToCreate(model, parentEntity);
 
+           
 
             //Находим свойство Localizations и добавляем новую сущность
             var localizationsProp = parentEntity.GetType().GetProperties().FirstOrDefault(o => o.Name == "Localizations");
@@ -173,6 +187,8 @@ namespace Alfateam.Website.API.Services
         public T CreateEntity<T>(DbSet<T> dbSet, DTOModel<T> model) where T : AbsModel, new()
         {
             var item = new T();
+
+            model.SetDBContext(DB);
             model.FillDBModel(item, DBModelFillMode.Create);
 
             dbSet.Add(item);
@@ -298,6 +314,7 @@ namespace Alfateam.Website.API.Services
                 throw new Exception404("Запись по данному id не найдена");
             }
 
+            model.SetDBContext(DB);
             if (!model.IsValid())
             {
                 throw new Exception400("Некорректно заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз");
@@ -334,6 +351,7 @@ namespace Alfateam.Website.API.Services
                 throw new Exception400("Внутренняя ошибка");
             }
 
+            model.SetDBContext(DB);
             if (!model.IsValid())
             {
                 throw new Exception400("Некорректно заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз");
@@ -347,6 +365,8 @@ namespace Alfateam.Website.API.Services
         public AvailabilityDTO TryUpdateAvailability(AvailabilityDTO model, Session session)
         {
             var availability = DB.Availabilities.FirstOrDefault(o => o.Id == model.Id);
+
+            model.SetDBContext(DB);
             model.FillDBModel(availability, DBModelFillMode.Update);
 
             return (AvailabilityDTO)TryUpdateEntity(DB.Availabilities, model, availability, (entity) =>
@@ -359,6 +379,7 @@ namespace Alfateam.Website.API.Services
 
         public T UpdateEntity<T>(DbSet<T> dbSet, DTOModel<T> model, T item) where T : AbsModel, new()
         {
+            model.SetDBContext(DB);
             model.FillDBModel(item, DBModelFillMode.Update);
 
             dbSet.Update(item);

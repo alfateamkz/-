@@ -1,4 +1,5 @@
 ﻿using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Attributes.DTO;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.Localization.Items.Team;
 
@@ -16,6 +17,7 @@ namespace Alfateam.Website.API.Models.DTOLocalization.Team
 
 
         public Content DetailContent { get; set; }
+        [ForClientOnly]
         public string? CVFilepath { get; set; }
     }
 }

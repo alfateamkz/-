@@ -18,15 +18,16 @@ namespace Alfateam.Website.API.Models.DTO.Reviews
         /// </summary>
         public int Rate { get; set; }
 
-        
+
 
         /// <summary>
         /// Страна, из которой был оставлен отзыв
         /// </summary>
+        [ForClientOnly]
         public CountryDTO Country { get; set; }
 
 
-
+        [ForClientOnly]
         public UserDTO User { get; set; }
 
 

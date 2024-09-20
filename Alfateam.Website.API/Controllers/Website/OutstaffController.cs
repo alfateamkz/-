@@ -19,7 +19,7 @@ namespace Alfateam.Website.API.Controllers.Website
         [HttpGet, Route("GetOutstaffMatrix")]
         public async Task<OutstaffMatrixDTO> GetOutstaffMatrix()
         {
-            return OutstaffMatrixDTO.Create(DB.GetOutstaffMatrix(), LanguageId,CountryId);
+            return new OutstaffMatrixDTO().CreateDTOWithLocalization(DB.GetOutstaffMatrix(), (int)LanguageId, (int)CountryId, (int)CurrencyId);
         }
 
     }

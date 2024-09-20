@@ -8,30 +8,33 @@ using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Promocodes;
 using JsonKnownTypes;
 using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Alfateam.Website.API.Models.DTO.Promocodes
 {
+
     [JsonConverter(typeof(JsonKnownTypesConverter<PromocodeDTO>))]
-    [JsonDiscriminator(Name = "Discriminator")]
+    [JsonDiscriminator(Name = "discriminator")]
     [JsonKnownType(typeof(PricePromocodeDTO), "PricePromocode")]
     [JsonKnownType(typeof(PercentPromocodeDTO), "PercentPromocode")]
     public class PromocodeDTO : AvailabilityDTOModel<Promocode>
     {
+        [JsonProperty("discriminator")]
         public virtual string Discriminator { get; }
-
 
 
         public string Code { get; set; }
         public PromocodeType Type { get; set; }
 
 
+        [ForClientOnly]
         public CurrencyDTO Currency { get; set; }
         public int CurrencyId { get; set; }
 
 
         public double? Value { get; set; }
-        public double? PriceFrom { get; set; }
-        public double? PriceTo { get; set; }
+        public double? PriceFromValue { get; set; }
+        public double? PriceToValue { get; set; }
 
 
 
@@ -43,11 +46,12 @@ namespace Alfateam.Website.API.Models.DTO.Promocodes
         public bool IsReusable { get; set; }
 
 
-        public PricingMatrix? PriceFromMatrix { get; set; }
-        public PricingMatrix? PriceToMatrix { get; set; }
+        public PricingMatrixDTO? PriceFrom { get; set; }
+        public PricingMatrixDTO? PriceTo { get; set; }
         #endregion
 
 
+        public int MainLanguageId { get; set; }
 
         public static PromocodeDTO Create(Promocode item, int? countryId, int currencyId)
         {
@@ -57,8 +61,8 @@ namespace Alfateam.Website.API.Models.DTO.Promocodes
             model.Code = item.Code;
             model.Type = item.Type;
 
-            model.PriceFrom = item.PriceFrom.GetPrice(countryId, currencyId)?.Value;
-            model.PriceTo = item.PriceTo.GetPrice(countryId, currencyId)?.Value;
+            model.PriceFromValue = item.PriceFrom.GetPrice(countryId, currencyId)?.Value;
+            model.PriceToValue = item.PriceTo.GetPrice(countryId, currencyId)?.Value;
 
             if (item is PercentPromocode percent)
             {
@@ -81,4 +85,5 @@ namespace Alfateam.Website.API.Models.DTO.Promocodes
             return models;
         }
     }
+
 }

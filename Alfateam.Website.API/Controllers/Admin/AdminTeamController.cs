@@ -46,7 +46,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<TeamStructureDTO>> GetTeamStructures(int offset, int count = 20)
         {
             var items = GetAvailableTeamStructures().Skip(offset).Take(count);
-            return new TeamStructureDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<TeamStructureDTO>();
+            return new TeamStructureDTO().CreateDTOs(items).Cast<TeamStructureDTO>();
         }
 
         [HttpGet, Route("GetTeamStructure")]
@@ -90,6 +90,17 @@ namespace Alfateam.Website.API.Controllers.Admin
 
             CheckFromTeamGroup(id);
             return (TeamGroupDTO)new TeamGroupDTO().CreateDTO(group);
+        }
+
+        [HttpGet, Route("GetTeamGroupLocalizations")]
+        [CheckContentAreaRights(ContentAccessModelType.Team, 1)]
+        public async Task<IEnumerable<TeamGroupLocalizationDTO>> GetTeamGroupLocalizations(int id)
+        {
+            var localizations = DB.TeamGroupLocalizations.Include(o => o.LanguageEntity).Where(o => o.TeamGroupId == id && !o.IsDeleted);
+            var mainEntity = GetTeamGroupsList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            CheckFromTeamGroup(id);
+            return DbService.GetLocalizationModels(localizations, mainEntity, new TeamGroupLocalizationDTO()).Cast<TeamGroupLocalizationDTO>();
         }
 
         [HttpGet, Route("GetTeamGroupLocalization")]
@@ -185,6 +196,16 @@ namespace Alfateam.Website.API.Controllers.Admin
 
             CheckFromMember(id);
             return (TeamMemberDTO)new TeamMemberDTO().CreateDTO(member);
+        }
+
+        [HttpGet, Route("GetTeamMemberLocalizations")]
+        [CheckContentAreaRights(ContentAccessModelType.Team, 1)]
+        public async Task<IEnumerable<TeamMemberLocalizationDTO>> GetTeamMemberLocalizations(int id)
+        {
+            var localizations = DB.TeamMemberLocalizations.Include(o => o.LanguageEntity).Where(o => o.TeamMemberId == id && !o.IsDeleted);
+            var mainEntity = GetTeamMembersList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new TeamMemberLocalizationDTO()).Cast<TeamMemberLocalizationDTO>();
         }
 
         [HttpGet, Route("GetTeamMemberLocalization")]

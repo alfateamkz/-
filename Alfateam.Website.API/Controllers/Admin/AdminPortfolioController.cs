@@ -39,7 +39,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<PortfolioDTO>> GetPortfolios(int offset, int count = 20)
         {
             var items = GetAvailablePortfolio().Skip(offset).Take(count);
-            return new PortfolioDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<PortfolioDTO>();
+            return new PortfolioDTO().CreateDTOs(items).Cast<PortfolioDTO>();
         }
 
         [HttpGet, Route("GetPortfolio")]
@@ -47,6 +47,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<PortfolioDTO> GetPortfolio(int id)
         {
             return (PortfolioDTO)DbService.TryGetOne(GetAvailablePortfolio(), id, new PortfolioDTO());
+        }
+
+        [HttpGet, Route("GetPortfolioLocalizations")]
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 1)]
+        public async Task<IEnumerable<PortfolioLocalizationDTO>> GetPortfolioLocalizations(int id)
+        {
+            var localization = DB.PortfolioLocalizations.Include(o => o.LanguageEntity).Where(o => o.PortfolioId == id && !o.IsDeleted);
+            var mainEntity = GetAvailablePortfolio().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localization, mainEntity, new PortfolioLocalizationDTO()).Cast<PortfolioLocalizationDTO>();
         }
 
         [HttpGet, Route("GetPortfolioLocalization")]
@@ -148,7 +158,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<PortfolioCategoryDTO>> GetPortfolioCategories(int offset, int count = 20)
         {
             var items = GetAvailablePortfolioCategories().Skip(offset).Take(count);
-            return new PortfolioCategoryDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<PortfolioCategoryDTO>();
+            return new PortfolioCategoryDTO().CreateDTOs(items).Cast<PortfolioCategoryDTO>();
         }
 
         [HttpGet, Route("GetPortfolioCategory")]
@@ -156,6 +166,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<PortfolioCategoryDTO> GetPortfolioCategory(int id)
         {
             return (PortfolioCategoryDTO)DbService.TryGetOne(GetAvailablePortfolioCategories(), id, new PortfolioCategoryDTO());
+        }
+
+        [HttpGet, Route("GetPortfolioCategoryLocalizations")]
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 1)]
+        public async Task<IEnumerable<PortfolioCategoryLocalizationDTO>> GetPortfolioCategoryLocalizations(int id)
+        {
+            var localizations = DB.PortfolioCategoryLocalizations.Include(o => o.LanguageEntity).Where(o => o.PortfolioCategoryId == id && !o.IsDeleted);
+            var mainEntity = GetAvailablePortfolioCategories().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new PortfolioCategoryLocalizationDTO()).Cast<PortfolioCategoryLocalizationDTO>();
         }
 
         [HttpGet, Route("GetPortfolioCategoryLocalization")]
@@ -242,7 +262,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<PortfolioIndustryDTO>> GetPortfolioIndustries(int offset, int count = 20)
         {
             var items = GetAvailablePortfolioIndustries().Skip(offset).Take(count);
-            return new PortfolioIndustryDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<PortfolioIndustryDTO>();
+            return new PortfolioIndustryDTO().CreateDTOs(items).Cast<PortfolioIndustryDTO>();
         }
 
         [HttpGet, Route("GetPortfolioIndustry")]
@@ -250,6 +270,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<PortfolioIndustryDTO> GetPortfolioIndustry(int id)
         {
             return (PortfolioIndustryDTO)DbService.TryGetOne(GetAvailablePortfolioIndustries(), id, new PortfolioIndustryDTO());
+        }
+
+        [HttpGet, Route("GetPortfolioIndustryLocalizations")]
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 1)]
+        public async Task<IEnumerable<PortfolioIndustryLocalizationDTO>> GetPortfolioIndustryLocalizations(int id)
+        {
+            var localizations = DB.PortfolioIndustryLocalizations.Include(o => o.LanguageEntity).Where(o => o.PortfolioIndustryId == id && !o.IsDeleted);
+            var mainEntity = GetAvailablePortfolioIndustries().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new PortfolioIndustryLocalizationDTO()).Cast<PortfolioIndustryLocalizationDTO>();
         }
 
         [HttpGet, Route("GetPortfolioIndustryLocalization")]

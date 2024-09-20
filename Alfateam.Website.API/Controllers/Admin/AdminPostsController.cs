@@ -41,7 +41,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<PostDTO>> GetPosts(int offset, int count = 20)
         {
             var items = GetAvailablePosts().Skip(offset).Take(count);
-            return new PostDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<PostDTO>();
+            return new PostDTO().CreateDTOs(items).Cast<PostDTO>();
         }
 
         [HttpGet, Route("GetPost")]
@@ -49,6 +49,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<PostDTO> GetPost(int id)
         {
             return (PostDTO)DbService.TryGetOne(GetAvailablePosts(), id, new PostDTO());
+        }
+
+        [HttpGet, Route("GetPostLocalizations")]
+        [CheckContentAreaRights(ContentAccessModelType.Posts, 1)]
+        public async Task<IEnumerable<PostLocalizationDTO>> GetPostLocalizations(int id)
+        {
+            var localizations = DB.PostLocalizations.Include(o => o.LanguageEntity).Where(o => o.PostId == id && !o.IsDeleted);
+            var mainEntity = GetAvailablePosts().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new PostLocalizationDTO()).Cast<PostLocalizationDTO>();
         }
 
         [HttpGet, Route("GetPostLocalization")]
@@ -149,7 +159,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<PostCategoryDTO>> GetPostCategories(int offset, int count = 20)
         {
             var items = GetAvailablePostCategories().Skip(offset).Take(count);
-            return new PostCategoryDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<PostCategoryDTO>();
+            return new PostCategoryDTO().CreateDTOs(items).Cast<PostCategoryDTO>();
         }
 
         [HttpGet, Route("GetPostCategory")]
@@ -158,7 +168,17 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return (PostCategoryDTO)DbService.TryGetOne(GetAvailablePostCategories(), id, new PostCategoryDTO());
         }
-    
+
+        [HttpGet, Route("GetPostCategoryLocalizations")]
+        [CheckContentAreaRights(ContentAccessModelType.Posts, 1)]
+        public async Task<IEnumerable<PostCategoryLocalizationDTO>> GetPostCategoryLocalizations(int id)
+        {
+            var localizations = DB.PostCategoryLocalizations.Include(o => o.LanguageEntity).Where(o => o.PostCategoryId == id && !o.IsDeleted);
+            var mainEntity = GetAvailablePostCategories().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new PostCategoryLocalizationDTO()).Cast<PostCategoryLocalizationDTO>();
+        }
+
         [HttpGet, Route("GetPostCategoryLocalization")]
         [CheckContentAreaRights(ContentAccessModelType.Posts, 1)]
         public async Task<PostCategoryLocalizationDTO> GetPostCategoryLocalization(int id)
@@ -241,7 +261,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<PostIndustryDTO>> GetPostIndustries(int offset, int count = 20)
         {
             var items = GetAvailablePostIndustries().Skip(offset).Take(count);
-            return new PostIndustryDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<PostIndustryDTO>();
+            return new PostIndustryDTO().CreateDTOs(items).Cast<PostIndustryDTO>();
         }
 
         [HttpGet, Route("GetPostIndustry")]
@@ -249,6 +269,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<PostIndustryDTO> GetPostIndustry(int id)
         {
             return (PostIndustryDTO)DbService.TryGetOne(GetAvailablePostIndustries(), id, new PostIndustryDTO());
+        }
+
+        [HttpGet, Route("GetPostIndustryLocalizations")]
+        [CheckContentAreaRights(ContentAccessModelType.Posts, 1)]
+        public async Task<IEnumerable<PostIndustryLocalizationDTO>> GetPostIndustryLocalizations(int id)
+        {
+            var localizations = DB.PostIndustryLocalizations.Include(o => o.LanguageEntity).Where(o => o.PostIndustryId == id && !o.IsDeleted);
+            var mainEntity = GetAvailablePostIndustries().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new PostIndustryLocalizationDTO()).Cast<PostIndustryLocalizationDTO>();
         }
 
         [HttpGet, Route("GetPostIndustryLocalization")]

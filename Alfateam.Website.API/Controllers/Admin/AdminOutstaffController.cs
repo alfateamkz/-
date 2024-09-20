@@ -54,6 +54,17 @@ namespace Alfateam.Website.API.Controllers.Admin
             return (OutstaffColumnDTO)DbService.TryGetOne(DB.GetOutstaffMatrix().Columns, id, new OutstaffColumnDTO());
         }
 
+
+        [HttpGet, Route("GetOutstaffColumnLocalizations")]
+        [OutstaffSectionAccess(1)]
+        public async Task<IEnumerable<OutstaffColumnLocalizationDTO>> GetOutstaffColumnLocalizations(int id)
+        {
+            var localizations = DB.OutstaffColumnLocalizations.Include(o => o.LanguageEntity).Where(o => o.OutstaffColumnId == id && !o.IsDeleted);
+            var mainEntity = DB.GetOutstaffMatrix().Columns.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new OutstaffColumnLocalizationDTO()).Cast<OutstaffColumnLocalizationDTO>();
+        }
+
         [HttpGet, Route("GetOutstaffColumnLocalization")]
         [OutstaffSectionAccess(1)]
         public async Task<OutstaffColumnLocalizationDTO> GetOutstaffColumnLocalization(int id)
@@ -139,6 +150,16 @@ namespace Alfateam.Website.API.Controllers.Admin
             return (OutstaffItemDTO)DbService.TryGetOne(DB.GetOutstaffMatrix().Items, id, new OutstaffItemDTO());
         }
 
+        [HttpGet, Route("GetOutstaffItemLocalizations")]
+        [OutstaffSectionAccess(1)]
+        public async Task<IEnumerable<OutstaffItemLocalizationDTO>> GetOutstaffItemLocalizations(int id)
+        {
+            var localizations = DB.OutstaffItemLocalizations.Include(o => o.LanguageEntity).Where(o => o.OutstaffItemId == id && !o.IsDeleted);
+            var mainEntity = DB.GetOutstaffMatrix().Items.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new OutstaffItemLocalizationDTO()).Cast<OutstaffItemLocalizationDTO>();
+        }
+
         [HttpGet, Route("GetOutstaffItemLocalization")]
         [OutstaffSectionAccess(1)]
         public async Task<OutstaffItemLocalizationDTO> GetOutstaffItemLocalization(int id)
@@ -221,7 +242,19 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return (OutstaffItemGradeDTO)DbService.TryGetOne(DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades), id, new OutstaffItemGradeDTO());
         }
-  
+
+
+
+        [HttpGet, Route("GetOutstaffItemGradeLocalizations")]
+        [OutstaffSectionAccess(1)]
+        public async Task<IEnumerable<OutstaffItemGradeLocalizationDTO>> GetOutstaffItemGradeLocalizations(int id)
+        {
+            var localizations = DB.OutstaffItemGradeLocalizations.Include(o => o.LanguageEntity).Where(o => o.OutstaffItemGradeId == id && !o.IsDeleted);
+            var mainEntity = DB.GetOutstaffMatrix().Items.SelectMany(o => o.Grades).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new OutstaffItemGradeLocalizationDTO()).Cast<OutstaffItemGradeLocalizationDTO>();
+        }
+
         [HttpGet, Route("GetOutstaffItemGradeLocalization")]
         [OutstaffSectionAccess(1)]
         public async Task<OutstaffItemGradeLocalizationDTO> GetOutstaffItemGradeLocalization(int id)
@@ -238,7 +271,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         [HttpPost, Route("CreateOutstaffItemGrade")]
         [OutstaffSectionAccess(5)]
-        public async Task<OutstaffItemGradeDTO> CreateOutstaffItemGrade(int itemId,OutstaffItemGradeDTO model)
+        public async Task<OutstaffItemGradeDTO> CreateOutstaffItemGrade(OutstaffItemGradeDTO model)
         {
             return (OutstaffItemGradeDTO)DbService.TryCreateEntity(DB.OutstaffItemGrades, model);
         }
@@ -313,7 +346,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         [HttpPost, Route("CreateOutstaffItemGradeColumn")]
         [OutstaffSectionAccess(5)]
-        public async Task<OutstaffItemGradeColumnDTO> CreateOutstaffItemGradeColumn(int gradeId, OutstaffItemGradeColumnDTO model)
+        public async Task<OutstaffItemGradeColumnDTO> CreateOutstaffItemGradeColumn(OutstaffItemGradeColumnDTO model)
         {
             return (OutstaffItemGradeColumnDTO)DbService.TryCreateEntity(DB.OutstaffItemGradeColumns, model);
         }

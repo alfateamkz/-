@@ -8,7 +8,7 @@ namespace Alfateam.Website.API.Abstractions
     /// DTO с моделькой доступности по регионам
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class AvailabilityDTOModel<T> : DTOModel<T> where T : AvailabilityModel, new()  
+    public abstract class AvailabilityDTOModel<T> : DTOModel<T> where T : AvailabilityModel, new()  
     {
         [DTOFieldFor(DTOFieldForType.CreationOnly)]
         public AvailabilityDTO? Availability { get; set; }

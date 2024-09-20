@@ -45,6 +45,17 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
 
+
+        [HttpGet, Route("GetServicePageLocalizations")]
+        [CheckContentAreaRights(ContentAccessModelType.Services, 1)]
+        public async Task<IEnumerable<ServicePageLocalizationDTO>> GetServicePageLocalizations(int id)
+        {
+            var localizations = GetServicePageLocalizationsIncluded().Where(o => o.ServicePageId == id && !o.IsDeleted);
+            var mainEntity = GetAvailableServicePages().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new ServicePageLocalizationDTO()).Cast<ServicePageLocalizationDTO>();
+        }
+
         [HttpGet, Route("GetServicePageLocalization")]
         [CheckContentAreaRights(ContentAccessModelType.Services, 1)]
         public async Task<ServicePageLocalizationDTO> GetServicePageLocalization(int id)

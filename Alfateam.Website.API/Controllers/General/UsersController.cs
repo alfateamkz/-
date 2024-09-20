@@ -30,7 +30,8 @@ namespace Alfateam.Website.API.Controllers.General
         [HttpGet, Route("Login")]
         public async Task<string> Login(string email,string password)
         {
-            var user = DB.Users.FirstOrDefault(o => o.Email.Equals(email, StringComparison.OrdinalIgnoreCase)
+            var user = DB.Users.ToList()
+                               .FirstOrDefault(o => o.Email.Equals(email, StringComparison.OrdinalIgnoreCase)
                                 && PasswordHelper.CheckEncryptedPassword(password, o.Password));
 
             if(user == null)
@@ -44,9 +45,6 @@ namespace Alfateam.Website.API.Controllers.General
                 User = user,
             };
             DbService.CreateEntity(DB.Sessions, session);
-
-            DB.Sessions.Add(session);
-            DB.SaveChanges();
 
             return session.SessID;
         }

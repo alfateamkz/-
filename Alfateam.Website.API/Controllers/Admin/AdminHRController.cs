@@ -39,7 +39,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<JobVacancyDTO>> GetJobVacancies(int offset, int count = 20)
         {
             var items = GetAvailableJobVacancies().Skip(offset).Take(count);
-            return new JobVacancyDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<JobVacancyDTO>();
+            return new JobVacancyDTO().CreateDTOs(items).Cast<JobVacancyDTO>();
         }
 
         [HttpGet, Route("GetJobVacancy")]
@@ -47,6 +47,17 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<JobVacancyDTO> GetJobVacancy(int id)
         {
             return (JobVacancyDTO)DbService.TryGetOne(GetAvailableJobVacancies(), id, new JobVacancyDTO());
+        }
+
+
+        [HttpGet, Route("GetJobVacancyLocalizations")]
+        [HRSectionAccess(1)]
+        public async Task<IEnumerable<JobVacancyLocalizationDTO>> GetJobVacancyLocalizations(int id)
+        {
+            var localizations = DB.JobVacancyLocalizations.Include(o => o.LanguageEntity).Where(o => o.JobVacancyId == id && !o.IsDeleted);
+            var mainEntity = GetAvailableJobVacancies().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new JobVacancyLocalizationDTO()).Cast<JobVacancyLocalizationDTO>();
         }
 
         [HttpGet, Route("GetJobVacancyLocalization")]
@@ -153,7 +164,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             }
 
             var summaries = GetSummariesList().Where(o => o.JobVacancyId == vacancyId && !o.IsDeleted).Skip(offset).Take(count);
-            return new JobSummaryDTO().CreateDTOsWithLocalization(summaries, LanguageId).Cast<JobSummaryDTO>();
+            return new JobSummaryDTO().CreateDTOs(summaries).Cast<JobSummaryDTO>();
         }
 
         [HttpGet, Route("GetJobSummary")]

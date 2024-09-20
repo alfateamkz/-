@@ -1,5 +1,6 @@
 ﻿using Alfateam.Models.Helpers;
 using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Attributes.DTO;
 using Alfateam.Website.API.Models.DTO.Portfolios;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.Portfolios;
@@ -18,7 +19,9 @@ namespace Alfateam.Website.API.Models.DTO.Portfolios
         public string Slug => SlugHelper.GetLatynSlug(Title);
 
 
+        [ForClientOnly]
         public PortfolioCategoryDTO Category { get; set; }
+        [ForClientOnly]
         public PortfolioIndustryDTO Industry { get; set; }
 
 
