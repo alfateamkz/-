@@ -1,4 +1,5 @@
-﻿using Alfateam.DB;
+﻿using Alfateam.Core.Filters;
+using Alfateam.DB;
 using Alfateam.Gateways.Abstractions;
 using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Enums;
@@ -11,6 +12,7 @@ using Alfateam2._0.Models.General;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
+using Alfateam.Core;
 
 namespace Alfateam.Website.API.Abstractions
 {

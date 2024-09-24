@@ -21,8 +21,8 @@ using System.Linq;
 using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTO.Events;
 using Alfateam.Website.API.Models.DTOLocalization.Events;
-using Alfateam.Website.API.Enums;
-using Alfateam.Website.API.Exceptions;
+using Alfateam.Core.Enums;
+using Alfateam.Core.Exceptions;
 using Swashbuckle.AspNetCore.Annotations;
 using Alfateam.Website.API.Filters.Access;
 

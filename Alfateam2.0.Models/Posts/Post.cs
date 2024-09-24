@@ -42,31 +42,7 @@ namespace Alfateam2._0.Models.Posts
       
         public List<PostLocalization> Localizations { get; set; } = new List<PostLocalization>();
 
-        public override bool IsValid()
-        {
-            bool isValid = true;
-
-            isValid &= !string.IsNullOrEmpty(Title);
-            isValid &= !string.IsNullOrEmpty(ImgPath);
-            isValid &= !string.IsNullOrEmpty(ShortDescription);
-            isValid &= Content != null;
-            isValid &= CategoryId > 0;
-            isValid &= IndustryId > 0;
-            isValid &= MainLanguageId > 0;
-
-            foreach (var localization in Localizations)
-            {
-                isValid &= !string.IsNullOrEmpty(localization.Title);
-                isValid &= !string.IsNullOrEmpty(localization.ImgPath);
-                isValid &= !string.IsNullOrEmpty(localization.ShortDescription);
-                isValid &= localization.Content != null;
-
-                if (!isValid) break;
-            }
-
-
-            return isValid;
-        }
+        
 
     }
 }

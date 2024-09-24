@@ -61,7 +61,6 @@ namespace Alfateam.DB
     {
         public WebsiteDBContext()
         {
-            this.ChangeTracker.AutoDetectChangesEnabled = false;
 
             Database.EnsureCreated();
             MakeDefaultEntities();

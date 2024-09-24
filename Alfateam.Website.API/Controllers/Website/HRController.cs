@@ -1,7 +1,7 @@
 ﻿using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
-using Alfateam.Website.API.Exceptions;
+using Alfateam.Core.Exceptions;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTO.HR;
@@ -9,6 +9,7 @@ using Alfateam.Website.API.Models.DTO.Posts;
 using Alfateam.Website.API.Models.Filters;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.HR;
+using Alfateam.Core.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -210,7 +211,7 @@ namespace Alfateam.Website.API.Controllers.Website
 
             if (FilesService.IsFileUploaded(formFilename))
             {
-                summary.CVPath = await FilesService.TryUploadFile(formFilename, Enums.FileType.Document);
+                summary.CVPath = await FilesService.TryUploadFile(formFilename, FileType.Document);
             }
         }
 

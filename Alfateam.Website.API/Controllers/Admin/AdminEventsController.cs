@@ -3,7 +3,7 @@ using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Enums;
-using Alfateam.Website.API.Exceptions;
+using Alfateam.Core.Exceptions;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Filters;
 using Alfateam.Website.API.Filters.Access;
@@ -12,14 +12,14 @@ using Alfateam.Website.API.Models.DTO.Events;
 using Alfateam.Website.API.Models.DTO.General;
 using Alfateam.Website.API.Models.DTOLocalization;
 using Alfateam.Website.API.Models.DTOLocalization.Events;
-using Alfateam.Website.API.Results;
-using Alfateam.Website.API.Results.StatusCodes;
+using Alfateam.Core.Results.StatusCodes;
 using Alfateam.Website.API.Services;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.Events;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Localization.Items.Events;
 using Microsoft.AspNetCore.Mvc;
+using Alfateam.Core.Enums;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -452,11 +452,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         private async Task HandleEventLocalizationModel(EventLocalization entity, DBModelFillMode mode)
         {
             string formFilename = $"localization_{entity.LanguageEntityId}_mainImg";
-
-            if (!entity.IsValid())
-            {
-                throw new Exception400("Проверьте корректность заполения полей локализации события");
-            }
+         
             if (!DB.Languages.Any(o => o.Id == entity.LanguageEntityId && !o.IsDeleted))
             {
                 throw new Exception400("Язык с данным id не существует");

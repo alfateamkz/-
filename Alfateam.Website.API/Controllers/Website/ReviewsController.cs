@@ -2,7 +2,7 @@
 using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
-using Alfateam.Website.API.Exceptions;
+using Alfateam.Core.Exceptions;
 using Alfateam.Website.API.Filters;
 using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTO.HR;

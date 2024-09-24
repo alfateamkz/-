@@ -6,7 +6,6 @@ using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Models.DTO;
 using Alfateam.Website.API.Models.DTO.Posts;
 using Alfateam.Website.API.Models.DTO.Shop;
-using Alfateam.Website.API.Models.DTO;
 using Alfateam.Website.API.Models.DTO.General;
 using Alfateam.Website.API.Models.DTOLocalization;
 using Alfateam.Website.API.Models.DTOLocalization.Posts;
@@ -25,7 +24,8 @@ using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.Localization.Items.HR;
 using Alfateam.Website.API.Models.DTO.HR;
 using Alfateam.Website.API.Models.DTOLocalization.HR;
-using Alfateam.Website.API.Exceptions;
+using Alfateam.Core.Exceptions;
+using Alfateam.Core.Enums;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Alfateam.Website.API.Controllers.Admin

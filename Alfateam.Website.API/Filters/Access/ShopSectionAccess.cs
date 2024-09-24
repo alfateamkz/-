@@ -1,9 +1,10 @@
 ﻿using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
-using Alfateam.Website.API.Exceptions;
+using Alfateam.Core.Exceptions;
 using Alfateam2._0.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Alfateam.Core;
 
 namespace Alfateam.Website.API.Filters.Access
 {

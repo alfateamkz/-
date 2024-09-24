@@ -8,6 +8,7 @@ using Alfateam.Website.API.Models.DTO.General;
 using Alfateam.Website.API.Models.DTOLocalization.Posts;
 using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.Enums;
+using Alfateam.Core.Enums;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Localization.Items;
 using Alfateam2._0.Models.Localization.Items.Events;
@@ -21,7 +22,7 @@ using Alfateam.Website.API.Filters.Access;
 using Alfateam.Website.API.Models.DTO.Portfolios;
 using Alfateam2._0.Models.Portfolios;
 using Alfateam.Website.API.Models.DTOLocalization.Portfolios;
-using Alfateam.Website.API.Exceptions;
+using Alfateam.Core.Exceptions;
 using Alfateam2._0.Models.ContentItems;
 using Swashbuckle.AspNetCore.Annotations;
 

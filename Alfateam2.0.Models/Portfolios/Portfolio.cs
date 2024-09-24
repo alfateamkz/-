@@ -47,17 +47,5 @@ namespace Alfateam2._0.Models.Portfolios
         public List<PortfolioLocalization> Localizations { get; set; } = new List<PortfolioLocalization>();
 
 
-        public override bool IsValid()
-        {
-            bool isValid = base.IsValid();
-
-            foreach(var localization in Localizations)
-            {
-                isValid &= localization.IsValid();
-            }
-
-
-            return isValid;
-        }
     }
 }

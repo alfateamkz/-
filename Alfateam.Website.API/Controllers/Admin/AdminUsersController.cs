@@ -19,7 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using Alfateam.Website.API.Models;
-using Alfateam.Website.API.Exceptions;
+using Alfateam.Core.Exceptions;
 using Alfateam.Website.API.Models.DTO.Shop.Orders;
 using Alfateam.Website.API.Models.DTO.Shop.Wishes;
 using Alfateam.Website.API.Models.DTO.Reviews;

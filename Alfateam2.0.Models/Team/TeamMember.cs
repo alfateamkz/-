@@ -1,4 +1,5 @@
-﻿using Alfateam.Models.Helpers;
+﻿using Alfateam.Core;
+using Alfateam.Models.Helpers;
 using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.General;
@@ -47,16 +48,6 @@ namespace Alfateam2._0.Models.Team
 
 
 
-        public override bool IsValid()
-        {
-            var isValid = base.IsValid();
-
-            foreach(var localization in Localizations)
-            {
-                isValid = localization.IsValid();
-            }
-
-            return isValid;
-        }
+       
     }
 }

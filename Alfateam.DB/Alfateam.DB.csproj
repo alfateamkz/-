@@ -13,6 +13,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alfateam.CRM2_0.Models\Alfateam.CRM2_0.Models.csproj" />
+    <ProjectReference Include="..\Alfateam.EDM.Models\Alfateam.EDM.Models.csproj" />
+    <ProjectReference Include="..\Alfateam.ID.Models\Alfateam.ID.Models.csproj" />
     <ProjectReference Include="..\Alfateam2.0.Models\Alfateam2.0.Models.csproj" />
   </ItemGroup>
 

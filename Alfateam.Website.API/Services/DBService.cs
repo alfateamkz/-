@@ -1,20 +1,22 @@
-﻿using Alfateam.DB;
+﻿using Alfateam.Core;
+using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
-using Alfateam.Website.API.Exceptions;
+using Alfateam.Core.Exceptions;
 using Alfateam.Website.API.Models.DTO.General;
 using Alfateam.Website.API.Models.DTOLocalization.Events;
 using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
 using Microsoft.EntityFrameworkCore;
+using Alfateam.Core.Services;
 
 namespace Alfateam.Website.API.Services
 {
-    public class DBService
+    public class DBService : AbsDBService
     {
         public readonly WebsiteDBContext DB;
-        public DBService(WebsiteDBContext db)
+        public DBService(WebsiteDBContext db) : base(db)
         {
             DB = db;
         }
@@ -52,7 +54,7 @@ namespace Alfateam.Website.API.Services
         }
 
 
-        public DTOModel<T> GetLocalizationModel<T>(T localization, AbsModel mainEntity, LocalizationDTOModel<T> newDTO) where T: LocalizableModel, new()
+        public DTOModelAbs<T> GetLocalizationModel<T>(T localization, AbsModel mainEntity, LocalizationDTOModel<T> newDTO) where T: LocalizableModel, new()
         {
             if (localization == null)
             {
@@ -67,7 +69,7 @@ namespace Alfateam.Website.API.Services
 
             return newDTO.CreateDTO(localization);
         }
-        public IEnumerable<DTOModel<T>> GetLocalizationModels<T>(IEnumerable<T> localizations, AbsModel mainEntity, LocalizationDTOModel<T> newDTO) where T : LocalizableModel, new()
+        public IEnumerable<DTOModelAbs<T>> GetLocalizationModels<T>(IEnumerable<T> localizations, AbsModel mainEntity, LocalizationDTOModel<T> newDTO) where T : LocalizableModel, new()
         {
             if (mainEntity == null)
             {
@@ -78,47 +80,10 @@ namespace Alfateam.Website.API.Services
         }
 
 
-        public DTOModel<T> TryGetOne<T>(IEnumerable<T> fromModels, int id, DTOModel<T> dTOModel) where T : AbsModel, new()
-        {
-            var dbModel = TryGetOne(fromModels, id);
-            return dTOModel.CreateDTO(dbModel);
-        }
-        public T TryGetOne<T>(IEnumerable<T> fromModels, int id) where T : AbsModel, new()
-        {
-            var item = fromModels.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (item is null)
-            {
-                throw new Exception404("Запись по данному id не найдена");
-            }
-
-            return item;
-        }
-
         #endregion
 
         #region Create
 
-        public DTOModel<T> TryCreateEntity<T>(DbSet<T> dbSet,
-                                              DTOModel<T> model,
-                                              Action<T> callback = null) where T : AbsModel, new()
-        {
-            model.SetDBContext(DB);
-            ValidateToCreateEntity(model);
-
-           
-
-
-            var dbModel = new T();
-            model.FillDBModel(dbModel, DBModelFillMode.Create);
-
-            callback?.Invoke(dbModel);
-
-            dbSet.Add(dbModel);
-            DB.SaveChanges();
-
-            model.Id = dbModel.Id;
-            return model;
-        }
 
         public DTOModel<T> TryCreateAvailabilityEntity<T>(DbSet<T> dbSet,
                                                          AvailabilityDTOModel<T> model,
@@ -173,29 +138,6 @@ namespace Alfateam.Website.API.Services
         }
 
 
-
-
-
-
-        public T CreateEntity<T>(DbSet<T> dbSet, T item) where T : AbsModel, new()
-        {
-            dbSet.Add(item);
-            DB.SaveChanges();
-
-            return item;
-        }
-        public T CreateEntity<T>(DbSet<T> dbSet, DTOModel<T> model) where T : AbsModel, new()
-        {
-            var item = new T();
-
-            model.SetDBContext(DB);
-            model.FillDBModel(item, DBModelFillMode.Create);
-
-            dbSet.Add(item);
-            DB.SaveChanges();
-
-            return item;
-        }
 
 
 
@@ -259,31 +201,8 @@ namespace Alfateam.Website.API.Services
                 throw new Exception403(errorText);
             }
         }
-        private void ValidateToCreateEntity<T>(DTOModel<T> item) where T : AbsModel, new()
-        {
-            if (item.Id != 0)
-            {
-                throw new Exception400("Id должен быть нулевым");
-            }
-            if (!item.IsValid())
-            {
-                throw new Exception400("Некорректно заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз");
-            }
 
-            var mainLangIdProp = item.GetType().GetProperties().FirstOrDefault(o => o.Name == "MainLanguageId");
-            if (mainLangIdProp != null)
-            {
-                var mainLanguageId = (int)mainLangIdProp.GetValue(item);
-                if (!DB.Languages.Any(o => o.Id == mainLanguageId && !o.IsDeleted))
-                {
-                    throw new Exception404("Языка с данным id не существует");
-                }
-            }
-        }
-
-
-
-        private void ValidateLocalizationModelToCreate<T>(DTOModel model, T mainEntity) where T : AbsModel
+        private void ValidateLocalizationModelToCreate<T>(DTOModelAbs model, T mainEntity) where T : AbsModel
         {
             if (mainEntity == null)
             {
@@ -303,38 +222,6 @@ namespace Alfateam.Website.API.Services
 
         #region Update
 
-
-        public DTOModel<T> TryUpdateEntity<T>(DbSet<T> dbSet, 
-                                              DTOModel<T> model, 
-                                              T item, 
-                                              Action<T> callback = null) where T : AbsModel, new()
-        {
-            if (item == null)
-            {
-                throw new Exception404("Запись по данному id не найдена");
-            }
-
-            model.SetDBContext(DB);
-            if (!model.IsValid())
-            {
-                throw new Exception400("Некорректно заполнены все необходимые поля. Сверьтесь с документацией и попробуйте еще раз");
-            }
-
-            var mainLangProp = model.GetType().GetProperties().FirstOrDefault(o => o.Name == "MainLanguageId");
-            if(mainLangProp != null)
-            {
-                var mainLangId = (int)mainLangProp.GetValue(model);
-                if (!DB.Languages.Any(o => o.Id == mainLangId && !o.IsDeleted))
-                {
-                    throw new Exception404("Языка с данным id не существует");
-                }
-            }
-
-            callback?.Invoke(item);
-
-            UpdateEntity(dbSet, model, item);
-            return model;
-        }
         public DTOModel<T> TryUpdateLocalizationEntity<T>(DbSet<T> localizationsDbSet, 
                                                          T localizationEntity, 
                                                          DTOModel<T> model, 
@@ -376,35 +263,9 @@ namespace Alfateam.Website.API.Services
         }
 
 
-
-        public T UpdateEntity<T>(DbSet<T> dbSet, DTOModel<T> model, T item) where T : AbsModel, new()
-        {
-            model.SetDBContext(DB);
-            model.FillDBModel(item, DBModelFillMode.Update);
-
-            dbSet.Update(item);
-            DB.SaveChanges();
-
-            model.CreateDTO(item);
-            return item;
-        }
-        public void UpdateEntity<T>(DbSet<T> dbSet, T item) where T : AbsModel
-        {
-            dbSet.Update(item);
-            DB.SaveChanges();
-        }
-
         #endregion
 
         #region Delete
-        public void TryDeleteEntity<T>(DbSet<T> dbSet, T item, bool softDelete = true) where T : AbsModel
-        {
-            if (item == null)
-            {
-                throw new Exception404("Сущность по данному id не найдена");
-            }
-            DeleteEntity(dbSet, item, softDelete);
-        }
         public void TryDeleteLocalizationEntity<T>(DbSet<T> localizationsDbSet, T localizationEntity, AbsModel parentEntity) where T : LocalizableModel
         {
             if (parentEntity == null)
@@ -414,21 +275,39 @@ namespace Alfateam.Website.API.Services
 
             TryDeleteEntity(localizationsDbSet, localizationEntity);
         }
-        public void DeleteEntity<T>(DbSet<T> dbSet, T item, bool softDelete = true) where T : AbsModel
+
+        #endregion
+
+
+        #region Validate methods
+        public override void ValidateToCreateEntity<T>(DTOModelAbs<T> item)
         {
-            if (softDelete)
-            {
-                item.IsDeleted = true;
-                dbSet.Update(item);
-            }
-            else
-            {
-                dbSet.Remove(item);
-            }
+            base.ValidateToCreateEntity(item);
 
-            DB.SaveChanges();
+            var mainLangIdProp = item.GetType().GetProperties().FirstOrDefault(o => o.Name == "MainLanguageId");
+            if (mainLangIdProp != null)
+            {
+                var mainLanguageId = (int)mainLangIdProp.GetValue(item);
+                if (!DB.Languages.Any(o => o.Id == mainLanguageId && !o.IsDeleted))
+                {
+                    throw new Exception404("Языка с данным id не существует");
+                }
+            }
         }
+        public override void ValidateToUpdateEntity<T>(T item, DTOModelAbs<T> model)
+        {
+            base.ValidateToUpdateEntity(item, model);
 
+            var mainLangProp = model.GetType().GetProperties().FirstOrDefault(o => o.Name == "MainLanguageId");
+            if (mainLangProp != null)
+            {
+                var mainLangId = (int)mainLangProp.GetValue(model);
+                if (!DB.Languages.Any(o => o.Id == mainLangId && !o.IsDeleted))
+                {
+                    throw new Exception404("Языка с данным id не существует");
+                }
+            }
+        }
 
         #endregion
 

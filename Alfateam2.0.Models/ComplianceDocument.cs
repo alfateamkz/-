@@ -28,22 +28,6 @@ namespace Alfateam2._0.Models
 
         public List<ComplianceDocumentLocalization> Localizations { get; set; } = new List<ComplianceDocumentLocalization>();
 
-        public override bool IsValid()
-        {
-            bool isValid = true; 
-
-            isValid &= !string.IsNullOrEmpty(Title);
-            isValid &= !string.IsNullOrEmpty(ImgPreviewPath);
-            isValid &= !string.IsNullOrEmpty(DocumentPath);
-
-            foreach (var localization in Localizations)
-            {
-                isValid &= !string.IsNullOrEmpty(localization.Title);
-                isValid &= !string.IsNullOrEmpty(localization.ImgPreviewPath);
-                isValid &= !string.IsNullOrEmpty(localization.DocumentPath);
-            }
-
-            return isValid;
-        }
+       
     }
 }

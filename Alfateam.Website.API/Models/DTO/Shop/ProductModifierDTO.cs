@@ -1,5 +1,5 @@
 ﻿using Alfateam.Website.API.Abstractions;
-using Alfateam.Website.API.Attributes.DTO;
+using Alfateam.Core.Attributes.DTO;
 using Alfateam.Website.API.Models.DTO.Outstaff;
 using Alfateam.Website.API.Models.DTO.Shop;
 using Alfateam.Website.API.Models.DTO.Shop.ProductModifierItems;

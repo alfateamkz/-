@@ -1,6 +1,6 @@
 ﻿using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Enums;
-using Alfateam.Website.API.Exceptions;
+using Alfateam.Core.Exceptions;
 using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Filters.Access;
 using Alfateam.Website.API.Models;
@@ -12,6 +12,7 @@ using Alfateam.Website.API.Models.DTOLocalization;
 using Alfateam.Website.API.Models.DTOLocalization.Events;
 using Alfateam.Website.API.Models.DTOLocalization.Posts;
 using Alfateam2._0.Models.Enums;
+using Alfateam.Core.Enums;
 using Alfateam2._0.Models.Localization.Items;
 using Alfateam2._0.Models.ServicePages;
 using Alfateam2._0.Models.Shop;

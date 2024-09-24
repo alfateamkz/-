@@ -1,4 +1,5 @@
-﻿using Alfateam2._0.Models.ContentItems;
+﻿using Alfateam.Core;
+using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.Promocodes;
 using JsonKnownTypes;
 using Newtonsoft.Json;

@@ -25,17 +25,6 @@ namespace Alfateam2._0.Models.Posts
         public int MainLanguageId { get; set; }
         public List<PostCategoryLocalization> Localizations { get; set; } = new List<PostCategoryLocalization>();
 
-        public override bool IsValid()
-        {
-            bool isValid = true;
-
-            isValid &= !string.IsNullOrEmpty(Title);
-            foreach(var localization in Localizations)
-            {
-                isValid &= !string.IsNullOrEmpty(localization.Title);
-            }
-
-            return isValid;
-        }
+       
     }
 }

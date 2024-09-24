@@ -1,7 +1,7 @@
 ﻿using Alfateam.DB;
 using Alfateam.Models.Helpers;
 using Alfateam.Website.API.Abstractions;
-using Alfateam.Website.API.Helpers;
+using Alfateam.Core.Helpers;
 using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTO;
 using Alfateam.Website.API.Models.DTO.General;

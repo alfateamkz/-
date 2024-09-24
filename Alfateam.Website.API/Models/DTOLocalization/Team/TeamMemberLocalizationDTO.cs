@@ -1,5 +1,5 @@
 ﻿using Alfateam.Website.API.Abstractions;
-using Alfateam.Website.API.Attributes.DTO;
+using Alfateam.Core.Attributes.DTO;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.Localization.Items.Team;
 

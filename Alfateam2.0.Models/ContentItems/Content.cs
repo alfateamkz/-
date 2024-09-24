@@ -1,4 +1,5 @@
-﻿using Alfateam2._0.Models.Abstractions;
+﻿using Alfateam.Core;
+using Alfateam2._0.Models.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,10 +15,7 @@ namespace Alfateam2._0.Models.ContentItems
     {
         public List<ContentItem> Items { get; set; } = new List<ContentItem>();
 
-        public override bool IsValid()
-        {
-            return Items.Any();
-        }
+       
 
         public bool AreSame(Content content)
         {

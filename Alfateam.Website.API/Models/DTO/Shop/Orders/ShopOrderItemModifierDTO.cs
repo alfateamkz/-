@@ -2,7 +2,7 @@
 using Alfateam.Website.API.Models.DTO.Shop.Orders;
 using Alfateam.Website.API.Models.DTO.Shop;
 using Alfateam2._0.Models.Shop.Orders;
-using Alfateam.Website.API.Attributes.DTO;
+using Alfateam.Core.Attributes.DTO;
 
 namespace Alfateam.Website.API.Models.DTO.Shop.Orders
 {

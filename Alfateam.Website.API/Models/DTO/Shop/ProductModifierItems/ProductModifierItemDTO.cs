@@ -1,5 +1,5 @@
 ﻿using Alfateam.Website.API.Abstractions;
-using Alfateam.Website.API.Attributes.DTO;
+using Alfateam.Core.Attributes.DTO;
 using Alfateam.Website.API.Models.DTO.General;
 using Alfateam.Website.API.Models.DTO.Promocodes;
 using Alfateam2._0.Models.Abstractions;

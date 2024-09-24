@@ -26,17 +26,6 @@ namespace Alfateam2._0.Models.Posts
         public List<PostIndustryLocalization> Localizations { get; set; } = new List<PostIndustryLocalization>();
 
 
-        public override bool IsValid()
-        {
-            bool isValid = true;
-
-            isValid &= !string.IsNullOrEmpty(Title);
-            foreach (var localization in Localizations)
-            {
-                isValid &= !string.IsNullOrEmpty(localization.Title);
-            }
-
-            return isValid;
-        }
+       
     }
 }

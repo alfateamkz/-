@@ -3,7 +3,7 @@ using Alfateam.Gateways.Abstractions;
 using Alfateam.Gateways.Models.Messages;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
-using Alfateam.Website.API.Exceptions;
+using Alfateam.Core.Exceptions;
 using Alfateam.Website.API.Filters;
 using Alfateam.Website.API.Helpers;
 using Alfateam.Website.API.Models;
@@ -16,6 +16,7 @@ using Alfateam2._0.Models.Shop.Wishes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
+using Alfateam.Core.Enums;
 
 namespace Alfateam.Website.API.Controllers.General
 {
@@ -107,7 +108,7 @@ namespace Alfateam.Website.API.Controllers.General
             const string formFilename = "avatar";
 
             var user = this.Session.User;
-            user.AvatarPath = await FilesService.TryUploadFile(formFilename, Enums.FileType.Image);
+            user.AvatarPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
             DbService.UpdateEntity(DB.Users, user);
 
             return this.Session.User.AvatarPath;

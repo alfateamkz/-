@@ -1,4 +1,5 @@
-﻿using Alfateam2._0.Models.General;
+﻿using Alfateam.Core;
+using Alfateam2._0.Models.General;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;

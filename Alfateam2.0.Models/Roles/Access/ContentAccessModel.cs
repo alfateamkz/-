@@ -1,4 +1,5 @@
-﻿using Alfateam2._0.Models.Abstractions;
+﻿using Alfateam.Core;
+using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.Enums;
 using System;
 using System.Collections.Generic;
