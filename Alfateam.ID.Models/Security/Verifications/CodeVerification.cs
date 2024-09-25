@@ -17,7 +17,5 @@ namespace Alfateam.ID.Models.Security.Verifications
         /// </summary>
         public string SentTo { get; set; }
         public string Code { get; set; }
-        public DateTime ValidBefore { get; set; } = DateTime.UtcNow.AddMinutes(5);
-        public bool IsVerified { get; set; }
     }
 }

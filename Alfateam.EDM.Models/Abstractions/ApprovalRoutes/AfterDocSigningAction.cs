@@ -1,4 +1,5 @@
-﻿using Alfateam.EDM.Models.ApprovalRoutes.AfterDocSigning;
+﻿using Alfateam.Core;
+using Alfateam.EDM.Models.ApprovalRoutes.AfterDocSigning;
 using JsonKnownTypes;
 using Newtonsoft.Json;
 using System;

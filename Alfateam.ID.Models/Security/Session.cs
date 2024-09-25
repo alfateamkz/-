@@ -1,4 +1,4 @@
-﻿using Alfateam.ID.Models.Abstractions;
+﻿using Alfateam.Core;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

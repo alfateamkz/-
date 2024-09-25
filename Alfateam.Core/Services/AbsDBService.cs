@@ -61,7 +61,7 @@ namespace Alfateam.Core.Services
 
 
 
-        public T CreateEntity<T>(DbSet<T> dbSet, T item) where T : AbsModel, new()
+        public T CreateEntity<T>(DbSet<T> dbSet, T item) where T : AbsModel
         {
             dbSet.Add(item);
             DB.SaveChanges();

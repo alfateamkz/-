@@ -1,4 +1,5 @@
-﻿using Alfateam.ID.Models.Payments.Ways;
+﻿using Alfateam.Core;
+using Alfateam.ID.Models.Payments.Ways;
 using JsonKnownTypes;
 using Newtonsoft.Json;
 using System;
@@ -12,9 +13,12 @@ namespace Alfateam.ID.Models.Abstractions
     [JsonConverter(typeof(JsonKnownTypesConverter<BindedPaymentWay>))]
     [JsonDiscriminator(Name = "discriminator")]
     [JsonKnownType(typeof(BindedBankCard), "BindedBankCard")]
-    public abstract class BindedPaymentWay : AbsModel
+    public class BindedPaymentWay : AbsModel
     {
         [JsonProperty("discriminator")]
         public string Discriminator { get; set; }
+
+
+        public int UserId { get; set; }
     }
 }

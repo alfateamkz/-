@@ -1,6 +1,8 @@
 ﻿using Alfateam.Core.Services;
 using Alfateam.DB;
 using Alfateam.EDM.API.Models;
+using Alfateam.EDM.Models.General;
+using Alfateam.EDM.Models.General.Security;
 using Alfateam.Gateways.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,6 +26,20 @@ namespace Alfateam.EDM.API.Abstractions
             this.AppEnvironment = @params.AppEnvironment;
             this.MailGateway = @params.MailGateway;
             this.SMSGateway = @params.SMSGateway;
+        }
+
+
+        public string UserSessid => Request.Headers["Sessid"];
+
+        protected Session CreateSession(User user)
+        {
+            var session = new Session()
+            {
+                UserId = user.Id,
+            };
+
+            DBService.CreateEntity(DB.Sessions, session);
+            return session;
         }
     }
 }

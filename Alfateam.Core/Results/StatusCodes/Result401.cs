@@ -2,10 +2,10 @@
 
 namespace Alfateam.Core.Results.StatusCodes
 {
-    public class Result401 : UnauthorizedResult
+    public class Result401 : JsonResult
     {
         public string Error { get; set; }
-        public Result401(string error)
+        public Result401(string error) : base(RequestResult.AsError(401, error))
         {
             Error = error;
         }

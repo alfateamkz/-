@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Alfateam.Core;
 
 namespace Alfateam.EDM.Models.Documents.Templates
 {
-    public class DocumentTemplate
+    public class DocumentTemplate : AbsModel
     {
         public string Title { get; set; }
         public Document Document { get; set; }

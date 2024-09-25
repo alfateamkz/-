@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Alfateam.Core;
 
 namespace Alfateam.EDM.Models.ApprovalRoutes
 {
-    public class ApprovalRouteDocCondition
+    public class ApprovalRouteDocCondition : AbsModel
     {
 
         /// <summary>

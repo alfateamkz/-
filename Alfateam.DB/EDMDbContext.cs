@@ -76,7 +76,7 @@ namespace Alfateam.DB
         public DbSet<Business> Businesses { get; set; }
         public DbSet<Company> Companies { get; set; }
         public DbSet<Department> Departments { get; set; }
-
+        public DbSet<SubscriptionInfo> SubscriptionInfos { get; set; }
         public DbSet<TrustedUserIPAddress> TrustedUserIPAddresses { get; set; }
         public DbSet<User> Users { get; set; }
 

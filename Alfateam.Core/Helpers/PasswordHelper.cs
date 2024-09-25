@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace Alfateam.Website.API.Helpers
+namespace Alfateam.Core.Helpers
 {
     public static class PasswordHelper
     {

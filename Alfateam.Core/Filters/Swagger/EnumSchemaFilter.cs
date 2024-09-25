@@ -4,7 +4,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
 using System.Runtime.Serialization;
 
-namespace Alfateam.Website.API.Filters
+namespace Alfateam.Core.Filters.Swagger
 {
     public class EnumSchemaFilter : ISchemaFilter
     {
@@ -24,7 +24,7 @@ namespace Alfateam.Website.API.Filters
                      ? null
                      : memberInfo.GetCustomAttributes(typeof(EnumMemberAttribute), false).OfType<EnumMemberAttribute>().FirstOrDefault();
 
-                   
+
 
 
                     string label = enumMemberAttribute == null || string.IsNullOrWhiteSpace(enumMemberAttribute.Value)

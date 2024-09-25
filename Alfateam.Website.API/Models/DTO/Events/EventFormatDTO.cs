@@ -1,4 +1,4 @@
-﻿using Alfateam.Models.Helpers;
+﻿using Alfateam.Core.Helpers;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Core.Attributes.DTO;
 using Alfateam2._0.Models.Events;

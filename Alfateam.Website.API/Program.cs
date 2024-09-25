@@ -1,4 +1,5 @@
 
+using Alfateam.Core.Filters.Swagger;
 using Alfateam.DB;
 using Alfateam.Gateways;
 using Alfateam.Gateways.Abstractions;

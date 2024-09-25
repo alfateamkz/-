@@ -28,6 +28,7 @@ namespace Alfateam.Core
 
 
 
+        //public DateTime? DeletedAt { get; set; }
 
 
         private bool IsAbsModelType(Type type)

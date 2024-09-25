@@ -1,5 +1,5 @@
 ﻿using Alfateam.DB.Helpers;
-using Alfateam.Website.API.Helpers;
+using Alfateam.Core.Helpers;
 using Alfateam2._0.Models;
 using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.ContentItems;

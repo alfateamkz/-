@@ -1,10 +1,10 @@
-﻿using Alfateam.ID.Models.Abstractions;
-using Alfateam.ID.Models.Enums;
+﻿using Alfateam.ID.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Alfateam.Core;
 
 namespace Alfateam.ID.Models.Payments
 {
@@ -17,6 +17,10 @@ namespace Alfateam.ID.Models.Payments
         public string CurrencyCode { get; set; }    
         public decimal Sum { get; set; }
         public string Comment { get; set; }
+
+
+
+        public int UserId { get; set; }
 
     }
 }

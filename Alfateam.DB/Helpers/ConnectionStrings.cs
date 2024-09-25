@@ -13,6 +13,11 @@ namespace Alfateam.DB.Helpers
 
 #if DEBUG
 
+        public static string AlfateamID { get; set; } = "server=localhost;" +
+                                                        "user=root;" +
+                                                        "password=H2c7V7p6;" +
+                                                        "port=3306;" +
+                                                        "database=alfateam_id;";
         public static string Website { get; set; } = "server=localhost;" +
                                                     "user=root;" +
                                                     "password=H2c7V7p6;" +
@@ -24,6 +29,12 @@ namespace Alfateam.DB.Helpers
                                                  "port=3306;" +
                                                  "database=alfateam_co_crm;";
 #else
+
+        public static string AlfateamID { get; set; } = "server=localhost;" +
+                                                        "user=usp;" +
+                                                        "password=ErPvm!3;" +
+                                                        "port=3306;" +
+                                                        "database=alfateam_id;";
 
         public static string Website { get; set; } = "server=localhost;" +
                                                     "user=usp;" +

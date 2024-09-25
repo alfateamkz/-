@@ -1,4 +1,4 @@
-﻿namespace Alfateam.Models.Helpers
+﻿namespace Alfateam.Core.Helpers
 {
     public class SlugHelper
     {
