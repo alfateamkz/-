@@ -15,7 +15,7 @@ namespace Alfateam.EDM.Models.Abstractions.ApprovalRoutes
     [JsonDiscriminator(Name = "discriminator")]
     [JsonKnownType(typeof(RouteStageExecutorDepartment), "RouteStageExecutorDepartment")]
     [JsonKnownType(typeof(RouteStageExecutorUsers), "RouteStageExecutorUsers")]
-    public abstract class RouteStageExecutor : AbsModel
+    public class RouteStageExecutor : AbsModel
     {
         [JsonProperty("discriminator")]
         public string Discriminator { get; set; }

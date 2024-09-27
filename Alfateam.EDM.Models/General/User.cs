@@ -6,24 +6,36 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Alfateam.Core;
+using System.ComponentModel.DataAnnotations.Schema;
+using Alfateam.EDM.Models.Enums;
 
 namespace Alfateam.EDM.Models.General
 {
     public class User : AbsModel
     {
-        public string Surname { get; set; }
-        public string Name { get; set; }
-        public string? Patronymic { get; set; }
+        public string AlfateamID { get; set; }
+        public UserRole Role { get; set; } = UserRole.Employee;
 
 
         public string Position { get; set; }
 
-        public string Email { get; set; }   
-        public string Phone { get; set; }
 
+
+        public Department Department { get; set; }
+        public int DepartmentId { get; set; }
 
 
         public UserPermissions Permissions { get; set; }
+        public DocumentsAccess DocumentsAccess { get; set; }
+        public EmailNotificationSettings NotificationSettings { get; set; }
         public List<TrustedUserIPAddress> TrustedUserIPs { get; set; } = new List<TrustedUserIPAddress>();
+
+
+
+
+
+
+
+        public bool IsBlocked { get; set; }
     }
 }

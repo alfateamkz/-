@@ -45,6 +45,13 @@ namespace Alfateam.ID.API.Controllers
         }
 
 
+        [HttpGet, Route("HasUserByEmailOrPhone")]
+        public async Task<bool> HasUserByEmailOrPhone(string email, string phone)
+        {
+            return DB.Users.Any(o => o.Email == email || o.Phone == phone && !o.IsDeleted);
+        }
+
+
         #region Авторизация
 
         [HttpPut, Route("AuthWithEmailAndPassword")]

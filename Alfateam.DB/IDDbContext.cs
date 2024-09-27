@@ -62,6 +62,7 @@ namespace Alfateam.DB
             {
                 Users.Add(new User
                 {
+                    Guid = "artur-kachok-alfateam-hui",
                     Name = "Артур",
                     Surname = "Бондарев",
                     Patronymic = "Александрович",

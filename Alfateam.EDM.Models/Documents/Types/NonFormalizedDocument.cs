@@ -9,16 +9,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Alfateam.Core;
 
-namespace Alfateam.EDM.Models.Documents
+namespace Alfateam.EDM.Models.Documents.Types
 {
-    /// <summary>
-    /// Модель документа
-    /// </summary>
-    public class Document : AbsModel
+    
+    public class NonFormalizedDocument : Document
     {
 
-        public User CreatedBy { get; set; }
-		public int CreatedById { get; set; }
+   
 
 
 
@@ -27,9 +24,7 @@ namespace Alfateam.EDM.Models.Documents
 
 
 
-        public string Title { get; set; }
-		public string? DocumentNumber { get; set; }
-        public DateTime DocumentDate    { get; set; }
+      
         public List<DocumentVersion> Versions { get; set; } = new List<DocumentVersion>();
 
 

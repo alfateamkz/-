@@ -1,10 +1,13 @@
 ﻿using Alfateam.Core.Services;
 using Alfateam.DB;
 using Alfateam.EDM.API.Models;
+using Alfateam.EDM.API.Models.DTO.General;
 using Alfateam.EDM.Models.General;
 using Alfateam.EDM.Models.General.Security;
 using Alfateam.Gateways.Abstractions;
+using Alfateam.ID.Models.Security;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Alfateam.EDM.API.Abstractions
 {
@@ -13,6 +16,7 @@ namespace Alfateam.EDM.API.Abstractions
     public abstract class AbsController : ControllerBase
     {
         public readonly EDMDbContext DB;
+        public readonly IDDbContext IDDB;
         public readonly AbsDBService DBService;
         public readonly AbsFilesService FilesService;
         public readonly IWebHostEnvironment AppEnvironment;
@@ -21,6 +25,7 @@ namespace Alfateam.EDM.API.Abstractions
         public AbsController(ControllerParams @params)
         {
             this.DB = @params.DB;
+            this.IDDB = @params.IDDB;
             this.DBService = @params.DBService;
             this.FilesService = @params.FilesService;
             this.AppEnvironment = @params.AppEnvironment;
@@ -29,17 +34,46 @@ namespace Alfateam.EDM.API.Abstractions
         }
 
 
-        public string UserSessid => Request.Headers["Sessid"];
+        public string Domain => Request.Headers["Domain"];
+        public int? CompanyId => ParseIntValueFromHeader("CompanyId");
+        public string AlfateamSessionID => Request.Headers["AlfateamSessionID"];
 
-        protected Session CreateSession(User user)
+
+        public virtual Session? AlfateamSession => IDDB.Sessions.Include(o => o.User)
+                                                                .FirstOrDefault(o => o.SessID == this.AlfateamSessionID);
+        
+      
+
+        public int? BusinessId
         {
-            var session = new Session()
+            get
             {
-                UserId = user.Id,
-            };
+                var business = DB.Businesses.FirstOrDefault(o => o.Domain == this.Domain && !o.IsDeleted);
+                return business?.Id;
+            }
+        }
 
-            DBService.CreateEntity(DB.Sessions, session);
-            return session;
+
+        private int? ParseIntValueFromHeader(string key)
+        {
+            int? id = null;
+
+            if (Request.Headers.ContainsKey(key))
+            {
+                var str = Request.Headers[key].ToString();
+                if (str != null)
+                {
+                    int val = 0;
+                    int.TryParse(str, out val);
+
+                    if (val != 0)
+                    {
+                        id = val;
+                    }
+                }
+            }
+
+            return id;
         }
     }
 }

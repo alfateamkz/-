@@ -5,6 +5,9 @@ using Alfateam.Gateways.Abstractions;
 using Alfateam.Gateways;
 using Microsoft.EntityFrameworkCore;
 using Alfateam.EDM.API.Models;
+using Alfateam.Core.Filters.Swagger;
+using Microsoft.OpenApi.Models;
+using Alfateam.EDM.API.Filters;
 
 namespace Alfateam.EDM.API
 {
@@ -36,13 +39,31 @@ namespace Alfateam.EDM.API
                     o.EnableStringComparisonTranslations();
                 });
             });
-            builder.Services.AddTransient<AbsDBService>();
+            // Add services to the container.
+            builder.Services.AddDbContext<IDDbContext>(options =>
+            {
+                options.UseMySql(new MySqlServerVersion(new Version(8, 0, 11)), o =>
+                {
+                    o.EnableRetryOnFailure();
+                    o.EnableStringComparisonTranslations();
+                });
+            });
+            builder.Services.AddTransient<AbsDBService>(x => new AbsDBService(x.GetRequiredService<EDMDbContext>()));
             builder.Services.AddTransient<AbsFilesService>();
             builder.Services.AddTransient<ControllerParams>();
 
 
 
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(config =>
+            {
+                config.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Это API для Alfateam ЭДО",
+                    Description = "Здесь все эндпоинты для Alfateam ЭДО"
+                });
+                config.SchemaFilter<EnumSchemaFilter>();
+                config.OperationFilter<SwaggerHeadersFilter>();
+            });
 
             var app = builder.Build();
 

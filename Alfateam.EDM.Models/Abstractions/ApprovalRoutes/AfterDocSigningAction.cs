@@ -14,7 +14,7 @@ namespace Alfateam.EDM.Models.Abstractions.ApprovalRoutes
     [JsonDiscriminator(Name = "discriminator")]
     [JsonKnownType(typeof(AfterDocSigningMoveToDepartment), "AfterDocSigningMoveToDepartment")]
     [JsonKnownType(typeof(AfterDocSigningNotifyUsers), "AfterDocSigningNotifyUsers")]
-    public abstract class AfterDocSigningAction : AbsModel
+    public class AfterDocSigningAction : AbsModel
     {
         [JsonProperty("discriminator")]
         public string Discriminator { get; set; }

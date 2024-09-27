@@ -7,10 +7,17 @@ namespace Alfateam.Core.Services
 {
     public class AbsDBService
     {
-        public readonly DbContext DB;
+        public DbContext DB { get; private set; }
         public AbsDBService(DbContext db)
         {
             DB = db;
+        }
+
+
+        public AbsDBService SetDB(DbContext db)
+        {
+            DB = db;
+            return this;
         }
 
 
@@ -146,6 +153,25 @@ namespace Alfateam.Core.Services
             DB.SaveChanges();
         }
 
+
+
+        public void DeleteEntities<T>(DbSet<T> dbSet,IEnumerable<T> items, bool softDelete = true) where T : AbsModel
+        {
+            foreach (var item in items)
+            {
+                if (softDelete)
+                {
+                    item.IsDeleted = true;
+                    dbSet.Update(item);
+                }
+                else
+                {
+                    dbSet.Remove(item);
+                }
+            }
+
+            DB.SaveChanges();
+        }
 
         #endregion
 

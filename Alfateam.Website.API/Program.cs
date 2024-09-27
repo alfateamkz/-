@@ -14,11 +14,15 @@ using System.Threading.RateLimiting;
 
 namespace Alfateam.Website.API
 {
+
     public class Program
     {
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddCors();
+
 
             // Add services to the container.
 
@@ -33,8 +37,10 @@ namespace Alfateam.Website.API
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
 
+      
 
-           
+
+
             builder.Services.AddTransient<IMailGateway, MailGateway>();
 
             // Add services to the container.
@@ -108,6 +114,7 @@ namespace Alfateam.Website.API
 
 
             var app = builder.Build();
+            app.UseCors();
 
             app.UseSwagger();
             app.UseSwaggerUI();

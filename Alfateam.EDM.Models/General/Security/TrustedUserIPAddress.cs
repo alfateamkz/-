@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Alfateam.Core;
 
-namespace Alfateam.EDM.Models.General
+namespace Alfateam.EDM.Models.General.Security
 {
     public class TrustedUserIPAddress : AbsModel
     {

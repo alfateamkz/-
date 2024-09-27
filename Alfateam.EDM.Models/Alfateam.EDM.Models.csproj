@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="General\Security\Session.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="JsonKnownTypes" Version="0.6.0" />
   </ItemGroup>
 

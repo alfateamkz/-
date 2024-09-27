@@ -10,7 +10,13 @@ namespace Alfateam.EDM.Models.General
 {
     public class Business : AbsModel
     {
+        public string Domain { get; set; }
+
         public List<Company> Companies { get; set; } = new List<Company>();
-        public SubscriptionInfo Info { get; set; }
+        public SubscriptionInfo SubscriptionInfo { get; set; }
+
+
+        //Alfateam ID владельца бизнеса(домена). Нужен, чтобы не было на одном Alfateam ID несколько доменов
+        public string OwnerAlfateamID { get; set; }
     }
 }
