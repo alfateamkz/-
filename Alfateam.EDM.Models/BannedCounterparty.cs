@@ -15,5 +15,8 @@ namespace Alfateam.EDM.Models
 
 
         public string BanReason { get; set; }
+
+
+        public int EDMSubjectId { get; set; }
     }
 }

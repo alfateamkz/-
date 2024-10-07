@@ -114,7 +114,12 @@ namespace Alfateam.Website.API
 
 
             var app = builder.Build();
-            app.UseCors();
+            app.UseCors(options =>
+                         options.AllowAnyOrigin()
+                         .AllowAnyHeader()
+                         .AllowAnyMethod());
+
+            //app.UseRouting();
 
             app.UseSwagger();
             app.UseSwaggerUI();

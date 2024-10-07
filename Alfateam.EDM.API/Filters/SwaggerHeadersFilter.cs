@@ -27,9 +27,9 @@ namespace Alfateam.EDM.API.Filters
             });
             operation.Parameters.Add(new OpenApiParameter
             {
-                Name = "CompanyId",
+                Name = "EDMSubjectId",
                 In = ParameterLocation.Header,
-                Description = "Id компании бизнеса",
+                Description = "Id субъекта ЭДО",
                 Required = false
             });
         }

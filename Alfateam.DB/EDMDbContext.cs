@@ -12,6 +12,7 @@ using Alfateam.EDM.Models.Documents.Types;
 using Alfateam.EDM.Models.Enums;
 using Alfateam.EDM.Models.General;
 using Alfateam.EDM.Models.General.Security;
+using Alfateam.EDM.Models.General.Subjects;
 using Alfateam.ID.Models.Abstractions;
 using Alfateam.ID.Models.Payments.Ways;
 using Alfateam.ID.Models.Security.Verifications;
@@ -29,12 +30,16 @@ namespace Alfateam.DB
         public EDMDbContext()
         {
             Database.EnsureCreated();
+
             CreateDefaultBusiness();
+            CreateDefaultDocumentTypes();
         }
         public EDMDbContext(DbContextOptions<EDMDbContext> options)
         {
             Database.EnsureCreated();
+
             CreateDefaultBusiness();
+            CreateDefaultDocumentTypes();
         }
 
         #region Abstractions
@@ -42,8 +47,11 @@ namespace Alfateam.DB
         #region ApprovalRoutes
         public DbSet<AfterDocSigningAction> AfterDocSigningAction { get; set; }
         public DbSet<RouteStageExecutor> RouteStageExecutors { get; set; }
-       
+
         #endregion
+        public DbSet<Counterparty> Counterparties { get; set; }
+        public DbSet<Document> Documents { get; set; }
+        public DbSet<EDMSubject> EDMSubjects { get; set; }
 
         #endregion
 
@@ -69,7 +77,6 @@ namespace Alfateam.DB
         public DbSet<DocumentTemplatePlaceholder> DocumentTemplatePlaceholders { get; set; }
         #endregion
 
-        public DbSet<Document> Documents { get; set; }
         public DbSet<DocumentType> DocumentTypes { get; set; }
         public DbSet<DocumentTypeSide> DocumentTypeSides { get; set; }
         public DbSet<DocumentVersion> DocumentVersions { get; set; }
@@ -86,7 +93,6 @@ namespace Alfateam.DB
         #endregion
 
         public DbSet<Business> Businesses { get; set; }
-        public DbSet<Company> Companies { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<EmailNotificationSettings> EmailNotificationSettings { get; set; }
         public DbSet<SubscriptionInfo> SubscriptionInfos { get; set; }
@@ -98,7 +104,6 @@ namespace Alfateam.DB
         #endregion
 
         public DbSet<BannedCounterparty> BannedCounterparties { get; set; }
-        public DbSet<Counterparty> Counterparties { get; set; }
         public DbSet<CounterpartyGroup> CounterpartyGroups { get; set; }
         public DbSet<EDMProvider> EDMProviders { get; set; }
 
@@ -153,12 +158,75 @@ namespace Alfateam.DB
                 });
 
 
-                business.Companies.Add(company);
+                business.Subjects.Add(company);
                 Businesses.Add(business);
                 SaveChanges();
             }
         }
 
+        private void CreateDefaultDocumentTypes()
+        {
+            if(!DocumentTypes.Any(o => o.IsDefaultType))
+            {
+                DocumentTypes.Add(new DocumentType
+                {
+                    Title = "Договор оказания услуг",
+                    Description = "",
+                    IsDefaultType = true,
+                    Sides = new List<DocumentTypeSide>
+                    {
+                        new DocumentTypeSide
+                        {
+                            Title = "Заказчик",
+                            IsSignatureRequired = true,
+                        },
+                         new DocumentTypeSide
+                        {
+                            Title = "Исполнитель",
+                            IsSignatureRequired = true,
+                        },
+                    }
+                });
+                DocumentTypes.Add(new DocumentType
+                {
+                    Title = "Акт выполненных работ",
+                    Description = "",
+                    IsDefaultType = true,
+                    Sides = new List<DocumentTypeSide>
+                    {
+                        new DocumentTypeSide
+                        {
+                            Title = "Заказчик",
+                            IsSignatureRequired = true,
+                        },
+                         new DocumentTypeSide
+                        {
+                            Title = "Исполнитель",
+                            IsSignatureRequired = true,
+                        },
+                    }
+                });
+                DocumentTypes.Add(new DocumentType
+                {
+                    Title = "Счет на оплату",
+                    Description = "",
+                    IsDefaultType = true,
+                    Sides = new List<DocumentTypeSide>
+                    {
+                        new DocumentTypeSide
+                        {
+                            Title = "Заказчик",
+                            IsSignatureRequired = false,
+                        },
+                         new DocumentTypeSide
+                        {
+                            Title = "Исполнитель",
+                            IsSignatureRequired = true,
+                        },
+                    }
+                });
+            }
+        }
 
 
 
@@ -183,6 +251,11 @@ namespace Alfateam.DB
             //Abstract Document
             modelBuilder.Entity<Document>().HasDiscriminator(b => b.Discriminator);
             modelBuilder.Entity<NonFormalizedDocument>();
+
+            //Abstract EDMSubject
+            modelBuilder.Entity<EDMSubject>().HasDiscriminator(b => b.Discriminator);
+            modelBuilder.Entity<Company>();
+            modelBuilder.Entity<Individual>();
         }
     }
 }

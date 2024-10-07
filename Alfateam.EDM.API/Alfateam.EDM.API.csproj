@@ -17,4 +17,10 @@
     <ProjectReference Include="..\Alfateam.Gateways\Alfateam.Gateways.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\DTO\Documents\DocumentSigning\" />
+    <Folder Include="Models\DTO\Documents\Types\" />
+    <Folder Include="Models\DTO\Documents\Templates\" />
+  </ItemGroup>
+
 </Project>

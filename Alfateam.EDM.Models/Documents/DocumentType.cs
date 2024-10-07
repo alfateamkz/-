@@ -16,11 +16,19 @@ namespace Alfateam.EDM.Models.Documents
 
 
 
+        /// <summary>
+        /// Является ли документ для внутреннего пользования. Если да, то нельзя отсылать документ контрагентам
+        /// </summary>
+        public bool IsInternalDocument { get; set; }
+
 
         /// <summary>
         /// Вшит ли тип документа в систему. Если false, то тип кастомный, создан пользователем
         /// </summary>
         public bool IsDefaultType { get; set; }
         public List<DocumentTypeSide> Sides { get; set; } = new List<DocumentTypeSide>();
+
+
+        public int? EDMSubjectId { get; set; }
     }
 }

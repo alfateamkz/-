@@ -37,5 +37,10 @@ namespace Alfateam.EDM.Models.General
 
 
         public bool IsBlocked { get; set; }
+
+
+
+        public int? CompanyId { get; set; }
+        public int? IndividualId { get; set; }
     }
 }

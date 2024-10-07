@@ -13,5 +13,9 @@ namespace Alfateam.EDM.Models.ApprovalRoutes
     {
         public ApprovalRouteDocActionType ActionType { get; set; } = ApprovalRouteDocActionType.Approve;
         public ApprovalRouteDocActionResultType ResultType { get; set; } = ApprovalRouteDocActionResultType.GoToNextStage;
+
+
+
+        public int ApprovalRouteStageId  { get; set; }
     }
 }

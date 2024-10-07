@@ -2,6 +2,7 @@
 using Alfateam.DB;
 using Alfateam.EDM.API.Models;
 using Alfateam.EDM.API.Models.DTO.General;
+using Alfateam.EDM.Models.Abstractions;
 using Alfateam.EDM.Models.General;
 using Alfateam.EDM.Models.General.Security;
 using Alfateam.Gateways.Abstractions;
@@ -35,7 +36,7 @@ namespace Alfateam.EDM.API.Abstractions
 
 
         public string Domain => Request.Headers["Domain"];
-        public int? CompanyId => ParseIntValueFromHeader("CompanyId");
+        public int? EDMSubjectId => ParseIntValueFromHeader("EDMSubjectId");
         public string AlfateamSessionID => Request.Headers["AlfateamSessionID"];
 
 
@@ -52,6 +53,16 @@ namespace Alfateam.EDM.API.Abstractions
                 return business?.Id;
             }
         }
+
+        public EDMSubject EDMSubject
+        {
+            get
+            {
+                var companies = DB.EDMSubjects.Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
+                return DBService.TryGetOne(companies, (int)this.EDMSubjectId);
+            }
+        }
+
 
 
         private int? ParseIntValueFromHeader(string key)

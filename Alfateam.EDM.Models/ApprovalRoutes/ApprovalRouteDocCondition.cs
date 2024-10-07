@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Alfateam.Core;
+using Alfateam.EDM.Models.Abstractions;
 
 namespace Alfateam.EDM.Models.ApprovalRoutes
 {
@@ -25,5 +26,13 @@ namespace Alfateam.EDM.Models.ApprovalRoutes
         /// Если пусто, то для всех групп контрагентов применяется условие
         /// </summary>
         public List<CounterpartyGroup> CounterpartyGroups { get; set; } = new List<CounterpartyGroup>();
+
+
+
+
+        /// <summary>
+        /// Автоматическое поле, указывает на маршрут согласование
+        /// </summary>
+        public int ApprovalRouteId  { get; set; }
     }
 }

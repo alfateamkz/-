@@ -27,5 +27,11 @@ namespace Alfateam.EDM.Models.ApprovalRoutes
      
 
         public List<ApprovalRouteStageAction> Actions { get; set; } = new List<ApprovalRouteStageAction>();
+
+
+        /// <summary>
+        /// Автоматическое поле, указывает на маршрут согласование
+        /// </summary>
+        public int ApprovalRouteId { get; set; }
     }
 }

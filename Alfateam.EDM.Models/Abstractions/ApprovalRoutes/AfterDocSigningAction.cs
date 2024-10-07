@@ -18,5 +18,11 @@ namespace Alfateam.EDM.Models.Abstractions.ApprovalRoutes
     {
         [JsonProperty("discriminator")]
         public string Discriminator { get; set; }
+
+
+        /// <summary>
+        /// Автоматическое поле, указывает на маршрут согласование
+        /// </summary>
+        public int ApprovalRouteId { get; set; }
     }
 }

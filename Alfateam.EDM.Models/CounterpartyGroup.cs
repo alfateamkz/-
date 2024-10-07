@@ -12,5 +12,8 @@ namespace Alfateam.EDM.Models
     {
         public string Title { get; set; }
         public string? Description { get; set; }
+
+
+        public int EDMSubjectId { get; set; }
     }
 }

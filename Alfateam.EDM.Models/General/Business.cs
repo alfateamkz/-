@@ -12,7 +12,7 @@ namespace Alfateam.EDM.Models.General
     {
         public string Domain { get; set; }
 
-        public List<Company> Companies { get; set; } = new List<Company>();
+        public List<EDMSubject> Subjects { get; set; } = new List<EDMSubject>();
         public SubscriptionInfo SubscriptionInfo { get; set; }
 
 

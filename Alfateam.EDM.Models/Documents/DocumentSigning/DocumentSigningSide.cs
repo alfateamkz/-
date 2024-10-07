@@ -10,5 +10,6 @@ namespace Alfateam.EDM.Models.Documents.DocumentSigning
 {
     public class DocumentSigningSide : AbsModel
     {
+
     }
 }

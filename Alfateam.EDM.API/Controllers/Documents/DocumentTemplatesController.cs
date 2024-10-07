@@ -8,5 +8,7 @@ namespace Alfateam.EDM.API.Controllers.Documents
         public DocumentTemplatesController(ControllerParams @params) : base(@params)
         {
         }
+
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Alfateam.EDM.API.Filters;
 using Alfateam.EDM.API.Models;
+using Alfateam.EDM.Models.General.Subjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,22 +21,35 @@ namespace Alfateam.EDM.API.Abstractions
         {
             get
             {
-                var user = DB.Companies.Include(o => o.Users).ThenInclude(o => o.Permissions)
-                                       .Include(o => o.Users).ThenInclude(o => o.DocumentsAccess)
-                                       .Include(o => o.Users).ThenInclude(o => o.NotificationSettings)
-                                       .Include(o => o.Users).ThenInclude(o => o.TrustedUserIPs)
-                                       .FirstOrDefault(o => o.Id == this.CompanyId && o.BusinessId == this.BusinessId)
-                                       ?.Users?.FirstOrDefault(o => !o.IsDeleted && o.AlfateamID == this.AlfateamSession.User.Guid);
-                return user;
+                var users = DB.Users.Include(o => o.Permissions)
+                                    .Include(o => o.DocumentsAccess)
+                                    .Include(o => o.NotificationSettings)
+                                    .Include(o => o.TrustedUserIPs);
+
+                if (EDMSubject is Company)
+                {
+                    return users.FirstOrDefault(o => !o.IsDeleted && o.AlfateamID == this.AlfateamSession.User.Guid && o.CompanyId == this.EDMSubjectId);
+                }
+                else if(EDMSubject is Individual)
+                {
+                    return users.FirstOrDefault(o => !o.IsDeleted && o.AlfateamID == this.AlfateamSession.User.Guid && o.IndividualId == this.EDMSubjectId);
+                }
+                return null;
             }
         }
         public int? AuthorizedUserId
         {
             get
             {
-                var user = DB.Companies.FirstOrDefault(o => o.Id == this.CompanyId && o.BusinessId == this.BusinessId)
-                                      ?.Users?.FirstOrDefault(o => !o.IsDeleted && o.AlfateamID == this.AlfateamSession.User.Guid);
-                return user?.Id;
+                if (EDMSubject is Company)
+                {
+                    return DB.Users.FirstOrDefault(o => !o.IsDeleted && o.AlfateamID == this.AlfateamSession.User.Guid && o.CompanyId == this.EDMSubjectId)?.Id;
+                }
+                else if (EDMSubject is Individual)
+                {
+                    return DB.Users.FirstOrDefault(o => !o.IsDeleted && o.AlfateamID == this.AlfateamSession.User.Guid && o.IndividualId == this.EDMSubjectId)?.Id;
+                }
+                return null;
             }
         }
 

@@ -29,9 +29,9 @@ namespace Alfateam.EDM.Models.General
 
 
         /// <summary>
-        /// Указывает на компанию. Ставим всегда, даже в дочерних подразделениях
+        /// Указывает на субъект документооборота. Ставим всегда, даже в дочерних подразделениях
         /// </summary>
-        public int CompanyId { get; set; }
+        public int EDMSubjectId { get; set; }
 
 
         /// <summary>

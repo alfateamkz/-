@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
 using Alfateam.Core;
+using Microsoft.AspNetCore.Cors;
 
 namespace Alfateam.Website.API.Abstractions
 {
@@ -20,6 +21,7 @@ namespace Alfateam.Website.API.Abstractions
     [Route("[controller]")]
     [ErrorsFilter]
     [APIExceptionFilter]
+    [EnableCors]
     public abstract class AbsController : ControllerBase
     {
         public readonly IMailGateway MailGateway;

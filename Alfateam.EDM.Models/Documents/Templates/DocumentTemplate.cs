@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Alfateam.Core;
+using Alfateam.EDM.Models.Abstractions;
 
 namespace Alfateam.EDM.Models.Documents.Templates
 {

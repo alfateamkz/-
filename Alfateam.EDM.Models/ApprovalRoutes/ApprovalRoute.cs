@@ -25,5 +25,8 @@ namespace Alfateam.EDM.Models.ApprovalRoutes
 
         public ApprovalRouteDocCondition ForInboxDocCondition { get; set; }
         public ApprovalRouteDocCondition ForOutgoingDocCondition { get; set; }
+
+
+        public int CompanyId { get; set; }
     }
 }

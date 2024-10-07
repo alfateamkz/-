@@ -3,6 +3,7 @@ using Alfateam.EDM.API.Abstractions;
 using Alfateam.EDM.API.Filters;
 using Alfateam.EDM.API.Models;
 using Alfateam.EDM.API.Models.DTO.General;
+using Alfateam.EDM.Models.Abstractions;
 using Alfateam.EDM.Models.Documents;
 using Alfateam.EDM.Models.Enums;
 using Alfateam.EDM.Models.General;
@@ -12,6 +13,7 @@ using System.Collections.Generic;
 
 namespace Alfateam.EDM.API.Controllers.Director
 {
+    [MustBeCompany]
     [RequiredRole(UserRole.Owner)]
     public class DepartmentsController : AbsAuthorizedController
     {
@@ -23,23 +25,23 @@ namespace Alfateam.EDM.API.Controllers.Director
         [HttpGet, Route("GetDepartmentsTree")]
         public async Task<DepartmentDTO> GetDepartmentsTree()
         {
-            var companies = DB.Companies.Include(o => o.Department)
-                                        .Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
-            var company = DBService.TryGetOne(companies, (int)this.CompanyId);
+            var subjects = DB.EDMSubjects.Include(o => o.Department)
+                                         .Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
+            var subject = DBService.TryGetOne(subjects, (int)this.EDMSubjectId);
 
-            HideSoftDeletedDepartments(company.Department);
-            return (DepartmentDTO)new DepartmentDTO().CreateDTO(company.Department);
+            HideSoftDeletedDepartments(subject.Department);
+            return (DepartmentDTO)new DepartmentDTO().CreateDTO(subject.Department);
         }
 
 
         [HttpPost, Route("CreateDepartment")]
         public async Task<DepartmentDTO> CreateDepartment(int parentDepartmentId, DepartmentDTO model)
         {
-            var companies = DB.Companies.Include(o => o.Department).ThenInclude(o => o.Documents)
-                                       .Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
-            var company = DBService.TryGetOne(companies, (int)this.CompanyId);
+            var subjects = DB.EDMSubjects.Include(o => o.Department)
+                                    .Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
+            var subject = DBService.TryGetOne(subjects, (int)this.EDMSubjectId);
 
-            var allDepartments = DB.Departments.Where(o => o.CompanyId == company.Id && !o.IsDeleted);
+            var allDepartments = DB.Departments.Where(o => o.EDMSubjectId == subject.Id && !o.IsDeleted);
             DBService.TryGetOne(allDepartments, parentDepartmentId);
 
             return (DepartmentDTO)DBService.TryCreateEntity(DB.Departments, model, (entity) =>
@@ -51,11 +53,11 @@ namespace Alfateam.EDM.API.Controllers.Director
         [HttpPut, Route("UpdateDepartment")]
         public async Task<DepartmentDTO> UpdateDepartment(DepartmentDTO model)
         {
-            var companies = DB.Companies.Include(o => o.Department).ThenInclude(o => o.Documents)
-                                      .Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
-            var company = DBService.TryGetOne(companies, (int)this.CompanyId);
+            var subjects = DB.EDMSubjects.Include(o => o.Department)
+                                         .Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
+            var subject = DBService.TryGetOne(subjects, (int)this.EDMSubjectId);
 
-            var allDepartments = DB.Departments.Where(o => o.CompanyId == company.Id && !o.IsDeleted);
+            var allDepartments = DB.Departments.Where(o => o.EDMSubjectId == subject.Id && !o.IsDeleted);
             var department = DBService.TryGetOne(allDepartments, model.Id);
 
             return (DepartmentDTO)DBService.TryUpdateEntity(DB.Departments, model, department);
@@ -65,12 +67,12 @@ namespace Alfateam.EDM.API.Controllers.Director
         [HttpDelete, Route("DeleteDepartment")]
         public async Task DeleteDepartment(int id)
         {
-            var companies = DB.Companies.Include(o => o.Department).ThenInclude(o => o.Documents)
-                                        .Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
-            var company = DBService.TryGetOne(companies, (int)this.CompanyId);
+            var subjects = DB.EDMSubjects.Include(o => o.Department).ThenInclude(o => o.Documents)
+                                         .Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
+            var subject = DBService.TryGetOne(subjects, (int)this.EDMSubjectId);
 
 
-            var allDepartments = DB.Departments.Where(o => o.CompanyId == company.Id && !o.IsDeleted);
+            var allDepartments = DB.Departments.Where(o => o.EDMSubjectId == subject.Id && !o.IsDeleted);
             var department = DBService.TryGetOne(allDepartments, id);
 
             if (department.IsRoot)
@@ -88,10 +90,10 @@ namespace Alfateam.EDM.API.Controllers.Director
                 documentsToReplace.AddRange(dep.Documents);
                 dep.Documents = new List<Document>();
             }
-            company.Department.Documents.AddRange(documentsToReplace);
+            subject.Department.Documents.AddRange(documentsToReplace);
 
             DBService.DeleteEntities(DB.Departments, thisDepAndSubDepartments);
-            DBService.UpdateEntity(DB.Companies, company);
+            DBService.UpdateEntity(DB.EDMSubjects, subject);
         }
 
 

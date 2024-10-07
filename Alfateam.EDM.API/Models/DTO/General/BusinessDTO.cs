@@ -1,4 +1,5 @@
 ﻿using Alfateam.Core.Attributes.DTO;
+using Alfateam.EDM.API.Models.DTO.General.Subjects;
 using Alfateam.EDM.Models.General;
 using Alfateam.Website.API.Abstractions;
 
