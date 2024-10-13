@@ -12,9 +12,11 @@ namespace Alfateam.Website.API.Abstractions
 
     public abstract class DTOModelAbs
     {
-
+        [DTOFieldFor(DTOFieldForType.UpdateOnly)]
         public int Id { get; set; }
 
+        [ForClientOnly]
+        public DateTime CreatedAt { get; set; }
 
         public virtual bool IsValid()
         {
@@ -50,6 +52,11 @@ namespace Alfateam.Website.API.Abstractions
         }
         public static bool IsModelTypeOf(Type modelType, Type requiredType)
         {
+            if(modelType == null)
+            {
+                return false;
+            }
+
             if (modelType == requiredType) return true;
 
             var baseModel = modelType.BaseType;

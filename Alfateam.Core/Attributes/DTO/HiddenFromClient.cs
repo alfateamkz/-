@@ -1,4 +1,6 @@
-﻿namespace Alfateam.Core.Attributes.DTO
+﻿using Swashbuckle.AspNetCore.Annotations;
+
+namespace Alfateam.Core.Attributes.DTO
 {
     /// <summary>
     /// Поле используется для создания и обновления сущности из DTO, но не заполняется для клиентских моделей.

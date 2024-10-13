@@ -10,6 +10,6 @@ namespace Alfateam.EDM.Models.Enums.ApprovalRoutes
     {
         OneDayBeforeDeadline = 1,
         DayOfDeadline = 2,
-        OneDayAfterDeadline = 2,
+        OneDayAfterDeadline = 3,
     }
 }

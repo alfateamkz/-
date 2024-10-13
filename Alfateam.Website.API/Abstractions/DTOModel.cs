@@ -97,7 +97,7 @@ namespace Alfateam.Website.API.Abstractions
                 var listBaseValue = localizationsListProp.GetValue(item) as IList;
                 var listValue = listBaseValue.Cast<LocalizableModel>();
 
-                var mainLangId = (int)mainLangIdProp.GetValue(item);
+                var mainLangId = (int?)mainLangIdProp.GetValue(item);
 
                 if (mainLangId != languageId)
                 {

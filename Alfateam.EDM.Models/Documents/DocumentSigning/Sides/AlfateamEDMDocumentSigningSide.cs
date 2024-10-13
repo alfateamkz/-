@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Alfateam.EDM.Models.Documents.DocumentSigning.Sides
 {
-    public class AlfateamEDMDocumentSigningSide
+    public class AlfateamEDMDocumentSigningSide : DocumentSigningSide
     {
-        public Counterparty Counterparty { get; set; }
-        public int CounterpartyId { get; set; }
+        public EDMSubject Subject { get; set; }
+        public int SubjectId { get; set; }
     }
 }

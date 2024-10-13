@@ -85,7 +85,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreateComplianceDocument")]
         [CheckContentAreaRights(ContentAccessModelType.Compliance, 4)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем previewImg и документ с именем docFile")]
-        public async Task<ComplianceDocumentDTO> CreateComplianceDocument(ComplianceDocumentDTO model)
+        public async Task<ComplianceDocumentDTO> CreateComplianceDocument([FromForm(Name = "model")] ComplianceDocumentDTO model)
         {
             return (ComplianceDocumentDTO)DbService.TryCreateAvailabilityEntity(DB.ComplianceDocuments, model, this.Session, async (entity) =>
             {
@@ -96,7 +96,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreateComplianceDocumentLocalization")]
         [CheckContentAreaRights(ContentAccessModelType.Compliance, 3)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем previewImg и документ с именем docFile")]
-        public async Task<ComplianceDocumentLocalizationDTO> CreateComplianceDocumentLocalization(int itemId, ComplianceDocumentLocalizationDTO localization)
+        public async Task<ComplianceDocumentLocalizationDTO> CreateComplianceDocumentLocalization(int itemId, [FromForm(Name = "localization")] ComplianceDocumentLocalizationDTO localization)
         {
             var mainEntity = GetAvailableComplianceDocuments().FirstOrDefault(o => o.Id == itemId);
             return (ComplianceDocumentLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.ComplianceDocuments, mainEntity, localization, async (entity) =>
@@ -111,7 +111,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         [HttpPut, Route("UpdateComplianceDocumentMain")]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем previewImg и документ с именем docFile, если заливаем новый файл")]
-        public async Task<ComplianceDocumentDTO> UpdateComplianceDocumentMain(ComplianceDocumentDTO model)
+        public async Task<ComplianceDocumentDTO> UpdateComplianceDocumentMain([FromForm(Name = "model")] ComplianceDocumentDTO model)
         {
             var item = GetAvailableComplianceDocuments().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return (ComplianceDocumentDTO)DbService.TryUpdateEntity(DB.ComplianceDocuments, model, item, async (entity) =>
@@ -122,7 +122,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         [HttpPut, Route("UpdateComplianceDocumentLocalization")]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем previewImg и документ с именем docFile, если заливаем новый файл")]
-        public async Task<ComplianceDocumentLocalizationDTO> UpdateComplianceDocumentLocalization(ComplianceDocumentLocalizationDTO model)
+        public async Task<ComplianceDocumentLocalizationDTO> UpdateComplianceDocumentLocalization([FromForm(Name = "model")] ComplianceDocumentLocalizationDTO model)
         {
             var localization = DB.ComplianceDocumentLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var mainEntity = GetAvailableComplianceDocuments().FirstOrDefault(o => o.Id == localization.ComplianceDocumentId && !o.IsDeleted);

@@ -85,7 +85,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
         [HttpPost, Route("CreateEvent")]
         [CheckContentAreaRights(ContentAccessModelType.Events, 4)]
-        public async Task<EventDTO> CreateEvent(EventDTO model)
+        public async Task<EventDTO> CreateEvent([FromForm(Name = "model")] EventDTO model)
         {
             return (EventDTO)DbService.TryCreateAvailabilityEntity(DB.Events, model, this.Session, async (entity) =>
             {
@@ -96,7 +96,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем localization_{languageEntityId}_mainImg")]
         [HttpPost, Route("CreateEventLocalization")]
         [CheckContentAreaRights(ContentAccessModelType.Events, 3)]
-        public async Task<EventLocalizationDTO> CreateEventLocalization(int itemId, EventLocalizationDTO localization)
+        public async Task<EventLocalizationDTO> CreateEventLocalization(int itemId, [FromForm(Name = "localization")] EventLocalizationDTO localization)
         {
             var mainEntity = GetAvailableEvents().FirstOrDefault(o => o.Id == itemId);
             return (EventLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.Events, mainEntity, localization, async (entity) =>
@@ -111,7 +111,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg, если изменяем картинку")]
         [HttpPut, Route("UpdateEventMain")]
         [CheckContentAreaRights(ContentAccessModelType.Events, 3)]
-        public async Task<EventDTO> UpdateEventMain(EventDTO model)
+        public async Task<EventDTO> UpdateEventMain([FromForm(Name = "model")] EventDTO model)
         {
             var item = GetAvailableEvents().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return (EventDTO)DbService.TryUpdateEntity(DB.Events, model, item, async (entity) =>
@@ -123,7 +123,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем localization_{languageEntityId}_mainImg, если изменяем картинку")]
         [HttpPost, Route("UpdateEventLocalization")]
         [CheckContentAreaRights(ContentAccessModelType.Events, 3)]
-        public async Task<EventLocalizationDTO> UpdateEventLocalization(EventLocalizationDTO model)
+        public async Task<EventLocalizationDTO> UpdateEventLocalization([FromForm(Name = "model")] EventLocalizationDTO model)
         {
             var localization = DB.EventLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var mainEntity = GetAvailableEvents().FirstOrDefault(o => o.Id == localization.EventId && !o.IsDeleted);

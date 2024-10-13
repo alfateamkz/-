@@ -2,7 +2,7 @@
 {
     public class ColorModifierItemDTO : ProductModifierItemDTO
     {
-        public override string Discriminator => "ColorModifierItem";
+        public override string Discriminator { get; set; } = "ColorModifierItem";
 
         public string ColorHex { get; set; }
     }

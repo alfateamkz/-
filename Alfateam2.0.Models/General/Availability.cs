@@ -54,7 +54,7 @@ namespace Alfateam2._0.Models.General
                 countries = new List<Country>(fromAll);
                 foreach (var forbidden in DisallowedCountries)
                 {
-                    var found = countries.FirstOrDefault(o => o.Id == forbidden.Id);
+                    var found = countries.FirstOrDefault(o => o.Id == forbidden?.Id);
                     countries.Remove(found);
                 }
             }

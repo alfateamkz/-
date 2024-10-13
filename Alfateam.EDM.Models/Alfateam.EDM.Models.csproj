@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Enums\DocumentStatuses\DocumentCompletedStatus.cs" />
     <Compile Remove="General\Security\Session.cs" />
   </ItemGroup>
 

@@ -65,7 +65,35 @@ namespace Alfateam.Core.Services
             return model;
         }
 
+        public IEnumerable<DTOModelAbs<T>> TryCreateEntities<T>(DbSet<T> dbSet, 
+                                                                IEnumerable<DTOModelAbs<T>> models,
+                                                                Action<IEnumerable<T>> callback = null) where T : AbsModel, new()
+        {
+            var dbModels = new List<T>();
 
+            foreach(var model in models)
+            {
+                model.SetDBContext(DB);
+                ValidateToCreateEntity(model);
+
+                var dbModel = new T();
+                model.FillDBModel(dbModel, DBModelFillMode.Create);
+
+                dbModels.Add(dbModel);
+            }
+
+            callback?.Invoke(dbModels);
+            dbSet.AddRange(dbModels);
+
+            DB.SaveChanges();
+
+            for(int i = 0; i<models.Count(); i++)
+            {
+                models.ElementAt(i).Id = dbModels[i].Id;
+            }
+
+            return models;
+        }
 
 
         public T CreateEntity<T>(DbSet<T> dbSet, T item) where T : AbsModel
@@ -110,6 +138,7 @@ namespace Alfateam.Core.Services
             return model;
         }
 
+
         public T UpdateEntity<T>(DbSet<T> dbSet, DTOModelAbs<T> model, T item) where T : AbsModel, new()
         {
             model.SetDBContext(DB);
@@ -124,6 +153,11 @@ namespace Alfateam.Core.Services
         public void UpdateEntity<T>(DbSet<T> dbSet, T item) where T : AbsModel
         {
             dbSet.Update(item);
+            DB.SaveChanges();
+        }
+        public void UpdateEntities<T>(DbSet<T> dbSet, IEnumerable<T> items) where T : AbsModel
+        {
+            dbSet.UpdateRange(items);
             DB.SaveChanges();
         }
 

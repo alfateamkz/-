@@ -23,5 +23,10 @@ namespace Alfateam.EDM.Models.Counterparties
         /// </summary>
         public string BusinessNumber { get; set; }
 
+        /// <summary>
+        /// Паспортные данные или что-то в этом духе
+        /// </summary>
+        public string IdentificationDocumentData { get; set; }
+
     }
 }

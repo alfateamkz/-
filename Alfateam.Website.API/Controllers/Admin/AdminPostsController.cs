@@ -80,7 +80,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreatePost")]
         [CheckContentAreaRights(ContentAccessModelType.Posts, 4)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
-        public async Task<PostDTO> CreatePost(PostDTO model)
+        public async Task<PostDTO> CreatePost([FromForm(Name = "model")] PostDTO model)
         {
             return (PostDTO)DbService.TryCreateAvailabilityEntity(DB.Posts, model, this.Session, async (entity) =>
             {
@@ -91,7 +91,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreatePostLocalization")]
         [CheckContentAreaRights(ContentAccessModelType.Posts, 3)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
-        public async Task<PostLocalizationDTO> CreatePostLocalization(int itemId, PostLocalizationDTO localization)
+        public async Task<PostLocalizationDTO> CreatePostLocalization(int itemId, [FromForm(Name = "localization")] PostLocalizationDTO localization)
         {
             var mainEntity = GetAvailablePosts().FirstOrDefault(o => o.Id == itemId);
             return (PostLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.Posts, mainEntity, localization, async (entity) =>
@@ -106,7 +106,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("UpdatePostMain")]
         [CheckContentAreaRights(ContentAccessModelType.Posts, 3)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg, если изменяем картинку")]
-        public async Task<PostDTO> UpdatePostMain(PostDTO model)
+        public async Task<PostDTO> UpdatePostMain([FromForm(Name = "model")] PostDTO model)
         {
             var item = GetAvailablePosts().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return (PostDTO)DbService.TryUpdateEntity(DB.Posts, model, item, async (entity) =>
@@ -118,7 +118,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("UpdatePostLocalization")]
         [CheckContentAreaRights(ContentAccessModelType.Posts, 3)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg, если изменяем картинку")]
-        public async Task<PostLocalizationDTO> UpdatePostLocalization(PostLocalizationDTO model)
+        public async Task<PostLocalizationDTO> UpdatePostLocalization([FromForm(Name = "model")] PostLocalizationDTO model)
         {
             var localization = DB.PostLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var mainEntity = GetAvailablePosts().FirstOrDefault(o => o.Id == localization.PostId && !o.IsDeleted);

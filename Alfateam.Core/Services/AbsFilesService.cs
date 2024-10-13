@@ -110,7 +110,6 @@ namespace Alfateam.Core.Services
 
         #region UploadFile
 
-
         public async Task<string> TryUploadFile(string formFileName, FileType fileType)
         {
             var file = Request.Form.Files.FirstOrDefault(o => o.Name == formFileName);
@@ -156,6 +155,29 @@ namespace Alfateam.Core.Services
             string filepath = await this.UploadFile(file);
             return filepath;
         }
+        public async Task<string> TryUploadFile(int index, FileType fileType)
+        {
+            var file = Request.Form.Files[index];
+
+            switch (fileType)
+            {
+                case FileType.Image:
+                    this.CheckImageFile(file);
+                    break;
+                case FileType.Document:
+                    this.CheckDocumentFile(file);
+                    break;
+                case FileType.Video:
+                    this.CheckVideoFile(file);
+                    break;
+                case FileType.Audio:
+                    this.CheckAudioFile(file);
+                    break;
+            }
+
+            string filepath = await this.UploadFile(file);
+            return filepath;
+        }
 
         public async Task<string> UploadFile(int index = 0)
         {
@@ -175,12 +197,18 @@ namespace Alfateam.Core.Services
         }
         public async Task<string> UploadFile(IFormFile file)
         {
-            var filePath = "/uploads/" + Guid.NewGuid().ToString();
+            var folderPath = AppEnvironment.ContentRootPath + "/uploads/";
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
 
+            var filePath = "/uploads/" + Guid.NewGuid().ToString();
+       
             if (file != null && file.Length > 0)
             {
                 string path = filePath + file.FileName;
-                using (var fileStream = new FileStream(AppEnvironment.WebRootPath + path, FileMode.Create))
+                using (var fileStream = new FileStream(AppEnvironment.ContentRootPath + path, FileMode.Create))
                 {
                     await file.CopyToAsync(fileStream);
                 }

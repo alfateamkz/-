@@ -11,6 +11,8 @@ namespace Alfateam.Website.API.Filters
             if (operation.Parameters == null)
                 operation.Parameters = new List<OpenApiParameter>();
 
+ 
+
             
 
             operation.Parameters.Add(new OpenApiParameter
@@ -31,6 +33,7 @@ namespace Alfateam.Website.API.Filters
             {
                 Name = "CurrencyId",
                 In = ParameterLocation.Header,
+                
                 //Description = "int?",
                 Required = false
             });

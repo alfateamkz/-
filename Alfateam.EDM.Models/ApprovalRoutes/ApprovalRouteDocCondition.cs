@@ -34,5 +34,6 @@ namespace Alfateam.EDM.Models.ApprovalRoutes
         /// Автоматическое поле, указывает на маршрут согласование
         /// </summary>
         public int ApprovalRouteId  { get; set; }
+        public ApprovalRoute ApprovalRoute { get; set; }
     }
 }

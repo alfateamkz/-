@@ -84,7 +84,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreatePartner")]
         [CheckContentAreaRights(ContentAccessModelType.Partners, 4)]
         [SwaggerOperation(description: "Нужно загрузить логотип через форму с именем logoImg")]
-        public async Task<PartnerDTO> CreatePartner(PartnerDTO model)
+        public async Task<PartnerDTO> CreatePartner([FromForm(Name = "model")] PartnerDTO model)
         {
             return (PartnerDTO)DbService.TryCreateAvailabilityEntity(DB.Partners, model, this.Session, async (entity) =>
             {
@@ -111,7 +111,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("UpdatePartnerMain")]
         [CheckContentAreaRights(ContentAccessModelType.Partners, 3)]
         [SwaggerOperation(description: "Нужно загрузить логотип через форму с именем logoImg, если изменяем картинку")]
-        public async Task<PartnerDTO> UpdatePostCategoryMain(PartnerDTO model)
+        public async Task<PartnerDTO> UpdatePostCategoryMain([FromForm(Name = "model")] PartnerDTO model)
         {
             var item = GetAvailablePartners().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return (PartnerDTO)DbService.TryUpdateEntity(DB.Partners, model, item, async (entity) =>

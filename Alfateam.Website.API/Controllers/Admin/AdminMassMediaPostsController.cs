@@ -75,7 +75,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreatePost")]
         [CheckContentAreaRights(ContentAccessModelType.MassMediaPosts, 4)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
-        public async Task<MassMediaPostDTO> CreatePost(MassMediaPostDTO model)
+        public async Task<MassMediaPostDTO> CreatePost([FromForm(Name = "model")] MassMediaPostDTO model)
         {
             return (MassMediaPostDTO)DbService.TryCreateAvailabilityEntity(DB.MassMediaPosts, model, this.Session, async (entity) =>
             {
@@ -98,7 +98,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("UpdatePostMain")]
         [CheckContentAreaRights(ContentAccessModelType.MassMediaPosts, 3)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg, если изменяем картинку")]
-        public async Task<MassMediaPostDTO> UpdatePostMain(MassMediaPostDTO model)
+        public async Task<MassMediaPostDTO> UpdatePostMain([FromForm(Name = "model")] MassMediaPostDTO model)
         {
             var item = GetAvailablePosts().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return (MassMediaPostDTO)DbService.TryUpdateEntity(DB.MassMediaPosts, model, item, async (entity) =>

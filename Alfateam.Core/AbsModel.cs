@@ -21,7 +21,6 @@ namespace Alfateam.Core
 
         [JsonIgnore]
         public bool IsDeleted { get; set; }
-        [JsonIgnore]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         [JsonIgnore]
         public DateTime? UpdatedAt { get; set; }

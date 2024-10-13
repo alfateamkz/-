@@ -11,7 +11,7 @@ namespace Alfateam.EDM.Models
     public class EDMProvider : AbsModel
     {
         public string Title { get; set; }
-        public int CountryId { get; set; }
+        public string CountryCode { get; set; }
 
 
         /// <summary>

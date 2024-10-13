@@ -74,7 +74,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreateServicePage")]
         [CheckContentAreaRights(ContentAccessModelType.Services, 4)]
         [SwaggerOperation(description: "Нужно загрузить главную картинку через форму с именем mainBlockImg")]
-        public async Task<ServicePageDTO> CreateServicePage(ServicePageDTO model)
+        public async Task<ServicePageDTO> CreateServicePage([FromForm(Name = "model")] ServicePageDTO model)
         {
             return (ServicePageDTO)DbService.TryCreateAvailabilityEntity(DB.ServicePages, model, this.Session, async (entity) =>
             {
@@ -96,7 +96,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("UpdateServicePageMain")]
         [CheckContentAreaRights(ContentAccessModelType.Services, 3)]
         [SwaggerOperation(description: "Нужно загрузить главную картинку через форму с именем mainBlockImg, если изменяем изображение")]
-        public async Task<ServicePageDTO> UpdateServicePageMain(ServicePageDTO model)
+        public async Task<ServicePageDTO> UpdateServicePageMain([FromForm(Name = "model")] ServicePageDTO model)
         {
             var item = GetAvailableServicePages().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return (ServicePageDTO)DbService.TryUpdateEntity(DB.ServicePages, model, item, async (entity) =>
@@ -155,7 +155,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreateReview")]
         [CheckContentAreaRights(ContentAccessModelType.Services, 4)]
         [SwaggerOperation(description: "Нужно загрузить аватар через форму с именем avatarImg")]
-        public async Task<ServicePageFakeReviewDTO> CreateReview(IdFor mainEntityIdFor, int mainEntityId, ServicePageFakeReviewDTO model)
+        public async Task<ServicePageFakeReviewDTO> CreateReview(IdFor mainEntityIdFor, int mainEntityId, [FromForm(Name = "model")] ServicePageFakeReviewDTO model)
         {
             CheckFrom(mainEntityIdFor, mainEntityId);
             return (ServicePageFakeReviewDTO)DbService.TryCreateEntity(DB.ServicePageFakeReviews, model, async (entity) =>
@@ -179,7 +179,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("UpdateReview")]
         [CheckContentAreaRights(ContentAccessModelType.Services, 3)]
         [SwaggerOperation(description: "Нужно загрузить аватар через форму с именем avatarImg, если изменяем аватар")]
-        public async Task<ServicePageFakeReviewDTO> UpdateReview(IdFor mainEntityIdFor, int mainEntityId, ServicePageFakeReviewDTO model)
+        public async Task<ServicePageFakeReviewDTO> UpdateReview(IdFor mainEntityIdFor, int mainEntityId, [FromForm(Name = "model")] ServicePageFakeReviewDTO model)
         {
             var item = DB.ServicePageFakeReviews.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
 

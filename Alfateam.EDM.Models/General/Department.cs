@@ -20,6 +20,11 @@ namespace Alfateam.EDM.Models.General
 
 
         public List<Document> Documents { get; set; } = new List<Document>();
+        public List<Document> DraftDocuments { get; set; } = new List<Document>();
+
+
+
+
 
         /// <summary>
         /// Головное ли подразделение. Если да, то оно не может быть удалено
@@ -38,5 +43,9 @@ namespace Alfateam.EDM.Models.General
         /// Указывает на родительское подразделение, если оно имеется
         /// </summary>
         public int? DepartmentId { get; set; }
+
+
+
+        public int? DocumentsAccessId { get; set; }
     }
 }

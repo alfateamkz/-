@@ -59,8 +59,11 @@ namespace Alfateam.ID
                     Title = "Это API для Alfateam ID",
                     Description = "Здесь все эндпоинты для самого ЛК Alfateam ID и для проброса авторизации через Alfateam ID"
                 });
+                config.DocumentFilter<DTODocumentFilter>();
                 config.SchemaFilter<EnumSchemaFilter>();
+                config.SchemaFilter<DTOSchemaFilter>();
                 config.OperationFilter<SwaggerHeadersFilter>();
+                config.OperationFilter<SwaggerMethodsFilter>();
             });
 
             var app = builder.Build();

@@ -10,8 +10,8 @@ namespace Alfateam.EDM.Models.Documents.DocumentSigning
 {
     public class SignedDocumentRoamingInfo : AbsModel
     {
-        public EDMProvider SentToProvider { get; set; }
-        public int SentToProviderId { get; set; }
+        public EDMProvider Provider { get; set; }
+        public int ProviderId { get; set; }
 
     }
 

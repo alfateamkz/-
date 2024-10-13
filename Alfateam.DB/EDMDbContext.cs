@@ -5,10 +5,16 @@ using Alfateam.EDM.Models.Abstractions.ApprovalRoutes;
 using Alfateam.EDM.Models.ApprovalRoutes;
 using Alfateam.EDM.Models.ApprovalRoutes.AfterDocSigning;
 using Alfateam.EDM.Models.ApprovalRoutes.RouteStageExecutors;
+using Alfateam.EDM.Models.Counterparties;
 using Alfateam.EDM.Models.Documents;
 using Alfateam.EDM.Models.Documents.DocumentSigning;
+using Alfateam.EDM.Models.Documents.DocumentSigning.Results;
+using Alfateam.EDM.Models.Documents.DocumentSigning.Sides;
+using Alfateam.EDM.Models.Documents.DocumentSigning.Signatures;
 using Alfateam.EDM.Models.Documents.Templates;
 using Alfateam.EDM.Models.Documents.Types;
+using Alfateam.EDM.Models.Documents.Types.Items;
+using Alfateam.EDM.Models.Documents.TypesMetadata;
 using Alfateam.EDM.Models.Enums;
 using Alfateam.EDM.Models.General;
 using Alfateam.EDM.Models.General.Security;
@@ -50,8 +56,12 @@ namespace Alfateam.DB
 
         #endregion
         public DbSet<Counterparty> Counterparties { get; set; }
+        public DbSet<DocTypeMetadata> DocTypeMetadatas { get; set; }
         public DbSet<Document> Documents { get; set; }
+        public DbSet<DocumentSigningResult> DocumentSigningResults { get; set; }
+        public DbSet<DocumentSigningSide> DocumentSigningSides { get; set; }
         public DbSet<EDMSubject> EDMSubjects { get; set; }
+        public DbSet<Signature> Signatures { get; set; }
 
         #endregion
 
@@ -65,10 +75,9 @@ namespace Alfateam.DB
         #region Documents
 
         #region DocumentSigning
-        public DbSet<DocumentSigningSide> DocumentSigningSides { get; set; }
-        public DbSet<DocumentSigningSideComment> DocumentSigningSideComments { get; set; }
-        public DbSet<DocumentSigningSideScan> DocumentSigningSideScans { get; set; }
-        public DbSet<SignedDocument> SignedDocuments { get; set; }
+        public DbSet<DocumentApprovalMetadata> DocumentApprovalMetadatas { get; set; }
+        public DbSet<DocumentApprovalResult> DocumentApprovalResults { get; set; }
+        public DbSet<DocumentSigningMetadata> DocumentSigningMetadatas { get; set; }
         public DbSet<SignedDocumentRoamingInfo> SignedDocumentRoamingInfos { get; set; }
         #endregion
 
@@ -77,10 +86,18 @@ namespace Alfateam.DB
         public DbSet<DocumentTemplatePlaceholder> DocumentTemplatePlaceholders { get; set; }
         #endregion
 
+        #region Types
+
+        #region Items
+        public DbSet<DocumentPositionItem> DocumentPositionItems { get; set; }
+        public DbSet<DocumentPositionItemModifier> DocumentPositionItemModifiers { get; set; }
+        public DbSet<PriceListItem> PriceListItems { get; set; }
+        #endregion
+
+        #endregion
+        public DbSet<DocumentsParcel> DocumentsParcels { get; set; }
         public DbSet<DocumentType> DocumentTypes { get; set; }
         public DbSet<DocumentTypeSide> DocumentTypeSides { get; set; }
-        public DbSet<DocumentVersion> DocumentVersions { get; set; }
-        public DbSet<DocumentVersionSideFeedback> DocumentVersionSideFeedbacks { get; set; }
         #endregion
 
         #region General
@@ -238,6 +255,16 @@ namespace Alfateam.DB
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            //modelBuilder.Entity<ApprovalRoute>().HasOne(o => o.ForOutgoingDocCondition).WithOne(o => o.ApprovalRoute).HasForeignKey<ApprovalRouteDocCondition>(o => o.ApprovalRouteId);
+            //modelBuilder.Entity<ApprovalRoute>().HasOne(o => o.ForInboxDocCondition).WithOne(o => o.ApprovalRoute).HasForeignKey<ApprovalRouteDocCondition>(o => o.ApprovalRouteId);
+
+
+          
+
+            modelBuilder.Entity<Company>().HasOne(o => o.WorksWithCounterpartiesDocuments);
+            modelBuilder.Entity<Company>().HasOne(o => o.WorksWithCustomerDocuments);
+
             //Abstract AfterDocSigningAction
             modelBuilder.Entity<AfterDocSigningAction>().HasDiscriminator(b => b.Discriminator);
             modelBuilder.Entity<AfterDocSigningMoveToDepartment>();
@@ -250,12 +277,59 @@ namespace Alfateam.DB
 
             //Abstract Document
             modelBuilder.Entity<Document>().HasDiscriminator(b => b.Discriminator);
-            modelBuilder.Entity<NonFormalizedDocument>();
+            modelBuilder.Entity<Document>().HasMany(o => o.DepartmentsReferences).WithMany(o => o.Documents);
+            modelBuilder.Entity<DocumentWithFile>();
+            modelBuilder.Entity<PriceListDocument>();
+            modelBuilder.Entity<WithPositionItemsDocument>();
+       
 
             //Abstract EDMSubject
             modelBuilder.Entity<EDMSubject>().HasDiscriminator(b => b.Discriminator);
             modelBuilder.Entity<Company>();
             modelBuilder.Entity<Individual>();
+
+            //Abstract DocumentSigningSide
+            modelBuilder.Entity<DocumentSigningSide>().HasDiscriminator(b => b.Discriminator);
+            modelBuilder.Entity<AlfateamEDMDocumentSigningSide>();
+            modelBuilder.Entity<CompanyDocumentSigningSide>();
+            modelBuilder.Entity<IndividualDocumentSigningSide>();
+
+            //Abstract Counterparty
+            modelBuilder.Entity<Counterparty>().HasDiscriminator(b => b.Discriminator);
+            modelBuilder.Entity<CompanyCounterparty>();
+            modelBuilder.Entity<EDMCounterparty>();
+            modelBuilder.Entity<IndividualCounterparty>();
+
+            //Abstract Signature
+            modelBuilder.Entity<Signature>().HasDiscriminator(b => b.Discriminator);
+            modelBuilder.Entity<AlfateamEDMSignature>();
+            modelBuilder.Entity<MarkedAsElectronicallySignature>();
+            modelBuilder.Entity<ScanSignature>();
+            modelBuilder.Entity<ScanSignatureWithoutDocFlow>();
+
+            //Abstract Signature
+            modelBuilder.Entity<DocumentSigningResult>().HasDiscriminator(b => b.Discriminator);
+            modelBuilder.Entity<DocumentRejectedResult>();
+            modelBuilder.Entity<DocumentSuccessfullySignedResult>();
+
+            //Abstract DocTypeMetadata
+            modelBuilder.Entity<DocTypeMetadata>().HasDiscriminator(b => b.Discriminator);
+            modelBuilder.Entity<ActDisagreementDocTypeMetadata>();
+            modelBuilder.Entity<ActDocTypeMetadata>();
+            modelBuilder.Entity<ActReconciliationDocTypeMetadata>();
+            modelBuilder.Entity<AgreementDocTypeMetadata>();
+            modelBuilder.Entity<AttorneyDocTypeMetadata>();
+            modelBuilder.Entity<CertificateRegistryDocTypeMetadata>();
+            modelBuilder.Entity<ClaimDocTypeMetadata>();
+            modelBuilder.Entity<ConsignmentDocTypeMetadata>();
+            modelBuilder.Entity<DetalizationDocTypeMetadata>();
+            modelBuilder.Entity<InvoiceDocTypeMetadata>();
+            modelBuilder.Entity<LetterDocTypeMetadata>();
+            modelBuilder.Entity<NonFormalizedDocTypeMetadata>();
+            modelBuilder.Entity<PriceListAgreementDocTypeMetadata>();
+            modelBuilder.Entity<PriceListDocTypeMetadata>();
+            modelBuilder.Entity<SupplementaryAgreementDocTypeMetadata>();
+            modelBuilder.Entity<WaybillDocTypeMetadata>();
         }
     }
 }

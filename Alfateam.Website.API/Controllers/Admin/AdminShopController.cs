@@ -38,6 +38,7 @@ using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Swashbuckle.AspNetCore.Annotations;
 using Alfateam.Website.API.Models.DTO.Shop.ProductModifierItems;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -92,7 +93,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreateProduct")]
         [ShopSectionAccess(8)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
-        public async Task<ShopProductDTO> CreateProduct(ShopProductDTO model)
+        public async Task<ShopProductDTO> CreateProduct([FromForm(Name ="model")]ShopProductDTO model)
         {
             return (ShopProductDTO)DbService.TryCreateAvailabilityEntity(DB.ShopProducts, model, this.Session, async (entity) =>
             {
@@ -103,7 +104,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreateProductLocalization")]
         [ShopSectionAccess(6)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg (опционально)")]
-        public async Task<ShopProductLocalizationDTO> CreateProductCategoryLocalization(int itemId, ShopProductLocalizationDTO localization)
+        public async Task<ShopProductLocalizationDTO> CreateProductCategoryLocalization(int itemId, [FromForm(Name = "localization")] ShopProductLocalizationDTO localization)
         {
             var mainEntity = GetAvailableShopProducts().FirstOrDefault(o => o.Id == itemId);
             return (ShopProductLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.ShopProducts, mainEntity, localization, async (entity) =>
@@ -118,7 +119,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("UpdateProductMain")]
         [ShopSectionAccess(5)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg, если изменяем изображение")]
-        public async Task<ShopProductDTO> UpdateProductMain(ShopProductDTO model)
+        public async Task<ShopProductDTO> UpdateProductMain([FromForm(Name = "model")] ShopProductDTO model)
         {
             var item = GetAvailableShopProducts().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return (ShopProductDTO)DbService.TryUpdateEntity(DB.ShopProducts, model, item, async (entity) =>
@@ -130,7 +131,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("UpdateProductLocalization")]
         [ShopSectionAccess(6)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg (опционально), если изменяем изображение")]
-        public async Task<ShopProductLocalizationDTO> UpdateProductLocalization(ShopProductLocalizationDTO model)
+        public async Task<ShopProductLocalizationDTO> UpdateProductLocalization([FromForm(Name = "model")] ShopProductLocalizationDTO model)
         {
             var localization = DB.ShopProductLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var mainEntity = GetAvailableShopProducts().FirstOrDefault(o => o.Id == localization.ShopProductId && !o.IsDeleted);

@@ -42,5 +42,10 @@ namespace Alfateam.EDM.Models.General
 
         public int? CompanyId { get; set; }
         public int? IndividualId { get; set; }
+
+
+
+        public int? RouteStageExecutorUsersId { get; set; }
+        public int? RouteStageExecutorDepartmentId { get; set; }
     }
 }

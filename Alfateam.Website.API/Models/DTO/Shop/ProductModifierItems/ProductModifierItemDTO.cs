@@ -11,14 +11,14 @@ using Newtonsoft.Json;
 namespace Alfateam.Website.API.Models.DTO.Shop.ProductModifierItems
 {
 
-    [JsonConverter(typeof(JsonKnownTypesConverter<PromocodeDTO>))]
+    [JsonConverter(typeof(JsonKnownTypesConverter<ProductModifierItemDTO>))]
     [JsonDiscriminator(Name = "discriminator")]
     [JsonKnownType(typeof(ColorModifierItemDTO), "ColorModifierItem")]
     [JsonKnownType(typeof(SimpleModifierItemDTO), "SimpleModifierItem")]
     public class ProductModifierItemDTO : DTOModel<ProductModifierItem>
     {
         [JsonProperty("discriminator")]
-        public virtual string Discriminator { get; }
+        public virtual string Discriminator { get; set; } = "ColorModifierItem";
 
         public string Title { get; set; }
 

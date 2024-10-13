@@ -226,7 +226,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("AddTeamMember")]
         [CheckContentAreaRights(ContentAccessModelType.Team, 4)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg и резюме (опционально) с именем cvFile")]
-        public async Task<TeamMemberDTO> AddTeamMember(int groupId,TeamMemberDTO model)
+        public async Task<TeamMemberDTO> AddTeamMember(int groupId, [FromForm(Name = "model")] TeamMemberDTO model)
         {
             CheckFromTeamGroup(model.TeamGroupId);
             return (TeamMemberDTO)DbService.TryCreateEntity(DB.TeamMembers, model, (entity) =>
@@ -238,7 +238,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("AddTeamMemberLocalization")]
         [CheckContentAreaRights(ContentAccessModelType.Team, 3)]
         [SwaggerOperation(description: "Нужно загрузить резюме (опционально) с именем cvFile")]
-        public async Task<TeamMemberLocalizationDTO> AddTeamMemberLocalization(int itemId, TeamMemberLocalizationDTO model)
+        public async Task<TeamMemberLocalizationDTO> AddTeamMemberLocalization(int itemId, [FromForm(Name = "model")] TeamMemberLocalizationDTO model)
         {
             var mainEntity = GetTeamMembersList().FirstOrDefault(o => o.Id == itemId);
 
@@ -254,7 +254,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("UpdateTeamMemberMain")]
         [CheckContentAreaRights(ContentAccessModelType.Team, 2)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg и резюме (опционально) с именем cvFile, если изменяем файлы")]
-        public async Task<TeamMemberDTO> UpdateTeamMemberMain(TeamMemberDTO model)
+        public async Task<TeamMemberDTO> UpdateTeamMemberMain([FromForm(Name = "model")] TeamMemberDTO model)
         {
             var item = GetTeamMembersList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
 
@@ -268,7 +268,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("UpdateTeamMemberLocalization")]
         [CheckContentAreaRights(ContentAccessModelType.Team, 3)]
         [SwaggerOperation(description: "Нужно загрузить резюме (опционально) с именем cvFile, если изменяем файл")]
-        public async Task<TeamMemberLocalizationDTO> UpdateTeamMemberLocalization(TeamMemberLocalizationDTO model)
+        public async Task<TeamMemberLocalizationDTO> UpdateTeamMemberLocalization([FromForm(Name = "model")] TeamMemberLocalizationDTO model)
         {
             var localization = DB.TeamMemberLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var mainEntity = GetTeamMembersList().FirstOrDefault(o => o.Id == localization?.TeamMemberId && !o.IsDeleted);

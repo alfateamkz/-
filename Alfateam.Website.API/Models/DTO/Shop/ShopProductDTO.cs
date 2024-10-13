@@ -5,6 +5,9 @@ using Alfateam.Website.API.Models.DTO.General;
 using Alfateam.Website.API.Models.DTO.Outstaff;
 using Alfateam2._0.Models.Outstaff;
 using Alfateam2._0.Models.Shop;
+using Swashbuckle.AspNetCore.Annotations;
+using Alfateam2._0.Models.General;
+using System.ComponentModel;
 
 namespace Alfateam.Website.API.Models.DTO.Shop
 {
@@ -26,7 +29,16 @@ namespace Alfateam.Website.API.Models.DTO.Shop
         /// <summary>
         /// Стоимость без учета модификаторов
         /// </summary>
+        [Description("Цены для админки")]
+        public PricingMatrixDTO BasePricing { get; set; }
+
+
+
+        /// <summary>
+        /// Стоимость без учета модификаторов
+        /// </summary>
         [ForClientOnly]
+        [Description("Цена для клиента, получаем, передавая заголовки CountryId и CurrencyId")]
         public CostDTO BasePrice { get; set; }
 
         [ForClientOnly]

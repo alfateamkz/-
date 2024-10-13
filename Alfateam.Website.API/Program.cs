@@ -1,5 +1,6 @@
 
 using Alfateam.Core.Filters.Swagger;
+using Alfateam.Core.Forms;
 using Alfateam.DB;
 using Alfateam.Gateways;
 using Alfateam.Gateways.Abstractions;
@@ -9,6 +10,8 @@ using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Services;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using System.Threading.RateLimiting;
 
@@ -26,11 +29,16 @@ namespace Alfateam.Website.API
 
             // Add services to the container.
 
-            builder.Services.AddControllers().AddNewtonsoftJson().ConfigureApiBehaviorOptions(options =>
+            builder.Services.AddControllers(options =>
+            {
+                options.ModelBinderProviders.Insert(0, new FormDataJsonBinderProvider());
+            })
+            .AddNewtonsoftJson()
+            .ConfigureApiBehaviorOptions(options =>
             {
                 options.SuppressModelStateInvalidFilter = true;
                 options.SuppressMapClientErrors = true;
-            }); ;
+            }); 
 
             builder.Services.AddHttpContextAccessor();
 
@@ -95,12 +103,16 @@ namespace Alfateam.Website.API
                     "ProductModifierItem есть нескольких типов</br>" +
                     "ColorModifierItem - с полем ColorHex</br>" +
                     "SimpleModifierItem - со стандартными полями в абстрактной сущности, а именно (Title, Pricing(PricingMatrix), Discriminator(для указания типа), MainLanguageId",
-                    Version = "V1" });
+                    Version = "V1", });
                 config.EnableAnnotations();
 
 
+
+                config.DocumentFilter<DTODocumentFilter>();
                 config.SchemaFilter<EnumSchemaFilter>();
+                config.SchemaFilter<DTOSchemaFilter>();
                 config.OperationFilter<SwaggerHeadersFilter>();
+                config.OperationFilter<SwaggerMethodsFilter>();
             });
 
             //builder.Services.AddRateLimiter(_ => _

@@ -146,8 +146,6 @@ namespace Alfateam.Website.API.Controllers.Admin
 
             var createdUser = model.CreateDBModelFromDTO();
 
-            createdUser.Wishlist = new ShopWishlist();
-            createdUser.Basket = new ShopOrder();
             createdUser.RegisteredFromCountryId = this.CountryId;
             createdUser.Password = PasswordHelper.EncryptPassword(model.Password);
 
@@ -177,7 +175,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         [HttpPut, Route("UpdateUserRoles")]
         [UsersSectionAccess]
-        public async Task UpdateUserRoles(int userId, UserRoleDTO model)
+        public async Task UpdateUserRoles(int userId, UserRoleModelDTO model)
         {
             var admin = this.Session.User;
             var editingUser = GetAvailableUser(GetUsersList(), userId);
@@ -326,7 +324,13 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return DB.Users.Include(o => o.Country)
                            .Include(o => o.RegisteredFromCountry)
-                           .Include(o => o.RoleModel)
+                           .Include(o => o.RoleModel).ThenInclude(o => o.AvailableCountries)
+                           .Include(o => o.RoleModel).ThenInclude(o => o.ForbiddenCountries)
+                           .Include(o => o.RoleModel).ThenInclude(o => o.ContentAccessTypes)
+                           .Include(o => o.RoleModel).ThenInclude(o => o.ReviewsAccess)
+                           .Include(o => o.RoleModel).ThenInclude(o => o.HRAccess)
+                           .Include(o => o.RoleModel).ThenInclude(o => o.ShopAccess)
+                           .Include(o => o.RoleModel).ThenInclude(o => o.OutstaffAccess)
                            .Where(o => !o.IsDeleted);
         }
 
@@ -336,7 +340,13 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
             return DB.Users.Include(o => o.Country)
                            .Include(o => o.RegisteredFromCountry)
-                           .Include(o => o.RoleModel)
+                           .Include(o => o.RoleModel).ThenInclude(o => o.AvailableCountries)
+                           .Include(o => o.RoleModel).ThenInclude(o => o.ForbiddenCountries)
+                           .Include(o => o.RoleModel).ThenInclude(o => o.ContentAccessTypes)
+                           .Include(o => o.RoleModel).ThenInclude(o => o.ReviewsAccess)
+                           .Include(o => o.RoleModel).ThenInclude(o => o.HRAccess)
+                           .Include(o => o.RoleModel).ThenInclude(o => o.ShopAccess)
+                           .Include(o => o.RoleModel).ThenInclude(o => o.OutstaffAccess)
                            //Заказы
                            .Include(o => o.Orders).ThenInclude(o => o.Items).ThenInclude(o => o.Item).ThenInclude(o => o.MainImage)
                            .Include(o => o.Orders).ThenInclude(o => o.Items).ThenInclude(o => o.SelectedModifiers).ThenInclude(o => o.Modifier)

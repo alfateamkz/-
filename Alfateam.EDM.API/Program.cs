@@ -62,7 +62,9 @@ namespace Alfateam.EDM.API
                     Description = "Здесь все эндпоинты для Alfateam ЭДО"
                 });
                 config.SchemaFilter<EnumSchemaFilter>();
+                config.SchemaFilter<DTOSchemaFilter>();
                 config.OperationFilter<SwaggerHeadersFilter>();
+                config.OperationFilter<SwaggerMethodsFilter>();
             });
 
             var app = builder.Build();

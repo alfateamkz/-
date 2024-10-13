@@ -1,6 +1,7 @@
 ﻿using Alfateam.Core.Exceptions;
 using Alfateam.EDM.API.Abstractions;
 using Alfateam.EDM.API.Filters;
+using Alfateam.EDM.API.Helpers;
 using Alfateam.EDM.API.Models;
 using Alfateam.EDM.API.Models.DTO.General;
 using Alfateam.EDM.Models.Abstractions;
@@ -29,7 +30,7 @@ namespace Alfateam.EDM.API.Controllers.Director
                                          .Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
             var subject = DBService.TryGetOne(subjects, (int)this.EDMSubjectId);
 
-            HideSoftDeletedDepartments(subject.Department);
+            DepartmentsHelper.HideSoftDeletedDepartments(subject.Department);
             return (DepartmentDTO)new DepartmentDTO().CreateDTO(subject.Department);
         }
 
@@ -80,8 +81,8 @@ namespace Alfateam.EDM.API.Controllers.Director
                 throw new Exception403("Невозможно удалить головное подразделение");
             }
 
-            HideSoftDeletedDepartments(department);
-            var thisDepAndSubDepartments = GetThisAndAllSubDepartments(department, true);
+            DepartmentsHelper.HideSoftDeletedDepartments(department);
+            var thisDepAndSubDepartments = DepartmentsHelper.GetThisAndAllSubDepartments(department, true);
 
 
             var documentsToReplace = new List<Document>();
@@ -100,40 +101,6 @@ namespace Alfateam.EDM.API.Controllers.Director
 
 
 
-        #region Private methods
-        private void HideSoftDeletedDepartments(Department root)
-        {
-            for(int i= root.SubDepartments.Count-1; i>=0; i--)
-            {
-                var subDepartment = root.SubDepartments[i];
-                if (subDepartment.IsDeleted)
-                {
-                    root.SubDepartments.Remove(subDepartment);  
-                }
-            }
 
-            foreach(var subDepartment in root.SubDepartments)
-            {
-                HideSoftDeletedDepartments(subDepartment);
-            }
-        }
-        private List<Department> GetThisAndAllSubDepartments(Department department, bool isRoot)
-        {
-            List<Department> departments = new List<Department>();
-
-            if (isRoot)
-            {
-                departments.Add(department);
-            }
-
-            foreach(var subDepartment in department.SubDepartments)
-            {
-                departments.Add(subDepartment);
-                departments.AddRange(GetThisAndAllSubDepartments(subDepartment, false));
-            }
-
-            return departments;
-        }
-        #endregion
     }
 }

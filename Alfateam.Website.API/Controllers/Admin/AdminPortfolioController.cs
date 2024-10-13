@@ -76,7 +76,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreatePortfolio")]
         [CheckContentAreaRights(ContentAccessModelType.Portfolio, 4)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
-        public async Task<PortfolioDTO> CreatePortfolio(PortfolioDTO model)
+        public async Task<PortfolioDTO> CreatePortfolio([FromForm(Name = "model")] PortfolioDTO model)
         {
             return (PortfolioDTO)DbService.TryCreateAvailabilityEntity(DB.Portfolios, model, this.Session, async (entity) =>
             {
@@ -87,7 +87,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreatePortfolioLocalization")]
         [CheckContentAreaRights(ContentAccessModelType.Portfolio, 3)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
-        public async Task<PortfolioLocalizationDTO> CreatePortfolioLocalization(int itemId, PortfolioLocalizationDTO localization)
+        public async Task<PortfolioLocalizationDTO> CreatePortfolioLocalization(int itemId, [FromForm(Name = "localization")] PortfolioLocalizationDTO localization)
         {
             var mainEntity = GetAvailablePortfolio().FirstOrDefault(o => o.Id == itemId);
             return (PortfolioLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.Portfolios, mainEntity, localization, async (entity) =>
@@ -102,7 +102,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("UpdatePortfolioMain")]
         [CheckContentAreaRights(ContentAccessModelType.Portfolio, 3)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg, если изменяем картинку")]
-        public async Task<PortfolioDTO> UpdatePortfolioMain(PortfolioDTO model)
+        public async Task<PortfolioDTO> UpdatePortfolioMain([FromForm(Name = "model")] PortfolioDTO model)
         {
             var item = GetAvailablePortfolio().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return (PortfolioDTO)DbService.TryUpdateEntity(DB.Portfolios, model, item, async (entity) =>
@@ -114,7 +114,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("UpdatePortfolioLocalization")]
         [CheckContentAreaRights(ContentAccessModelType.Portfolio, 3)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg, если изменяем картинку")]
-        public async Task<PortfolioLocalizationDTO> UpdatePortfolioLocalization(PortfolioLocalizationDTO model)
+        public async Task<PortfolioLocalizationDTO> UpdatePortfolioLocalization([FromForm(Name = "model")] PortfolioLocalizationDTO model)
         {
             var localization = DB.PortfolioLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var mainEntity = GetAvailablePortfolio().FirstOrDefault(o => o.Id == localization.PortfolioId && !o.IsDeleted);

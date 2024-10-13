@@ -19,6 +19,10 @@ namespace Alfateam.EDM.Models.Abstractions
     [JsonKnownType(typeof(IndividualCounterparty), "IndividualCounterparty")]
     public class Counterparty : AbsModel
     {
+        [JsonProperty("discriminator")]
+        public string Discriminator { get; set; }
+
+
         public CounterpartyGroup Group { get; set; }
         public int GroupId { get; set; }
 

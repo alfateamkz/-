@@ -18,6 +18,9 @@ namespace Alfateam.Website.API.Models.DTO.General
 
 
 
+        public UserRoleModelDTO RoleModel { get; set; }
+
+
         [ForClientOnly]
         public CountryDTO? Country { get; set; }
         [ForClientOnly]

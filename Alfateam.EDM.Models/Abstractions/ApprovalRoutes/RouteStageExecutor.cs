@@ -19,5 +19,7 @@ namespace Alfateam.EDM.Models.Abstractions.ApprovalRoutes
     {
         [JsonProperty("discriminator")]
         public string Discriminator { get; set; }
+
+        public int ApprovalRouteStageId { get; set; }
     }
 }
