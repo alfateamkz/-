@@ -39,6 +39,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Swashbuckle.AspNetCore.Annotations;
 using Alfateam.Website.API.Models.DTO.Shop.ProductModifierItems;
 using Microsoft.AspNetCore.Http.Features;
+using Alfateam.Website.API.Filters.AdminSearch;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -57,6 +58,15 @@ namespace Alfateam.Website.API.Controllers.Admin
             var items = GetAvailableShopProducts().Skip(offset).Take(count);
             return new ShopProductDTO().CreateDTOs(items).Cast<ShopProductDTO>();
         }
+
+        [HttpGet, Route("GetProductsFiltered")]
+        [ShopSectionAccess(1)]
+        public async Task<IEnumerable<ShopProductDTO>> GetProductsFiltered([FromQuery] ShopProductSearchFilter filter)
+        {
+            var items = filter.Filter(GetAvailableShopProducts(), (item) => item.Title);
+            return new ShopProductDTO().CreateDTOs(items).Cast<ShopProductDTO>();
+        }
+
 
         [HttpGet, Route("GetProduct")]
         [ShopSectionAccess(1)]
@@ -468,6 +478,14 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<ShopProductCategoryDTO>> GetProductCategories(int offset, int count = 20)
         {
             var items = GetAvailableShopProductCategories().Skip(offset).Take(count);
+            return new ShopProductCategoryDTO().CreateDTOs(items).Cast<ShopProductCategoryDTO>();
+        }
+
+        [HttpGet, Route("GetProductCategoriesFiltered")]
+        [ShopSectionAccess(1)]
+        public async Task<IEnumerable<ShopProductCategoryDTO>> GetProductCategoriesFiltered([FromQuery] SearchFilter filter)
+        {
+            var items = filter.FilterBase(GetAvailableShopProductCategories(), (item) => item.Title);
             return new ShopProductCategoryDTO().CreateDTOs(items).Cast<ShopProductCategoryDTO>();
         }
 

@@ -41,6 +41,13 @@ namespace Alfateam.Website.API.Controllers.Admin
             var items = GetAvailableJobVacancies().Skip(offset).Take(count);
             return new JobVacancyDTO().CreateDTOs(items).Cast<JobVacancyDTO>();
         }
+        [HttpGet, Route("GetJobVacanciesFiltered")]
+        [HRSectionAccess(1)]
+        public async Task<IEnumerable<JobVacancyDTO>> GetJobVacanciesFiltered([FromQuery] SearchFilter filter)
+        {
+            var items = filter.FilterBase(GetAvailableJobVacancies(), (item) => item.Title);
+            return new JobVacancyDTO().CreateDTOs(items).Cast<JobVacancyDTO>();
+        }
 
         [HttpGet, Route("GetJobVacancy")]
         [HRSectionAccess(1)]

@@ -2,6 +2,7 @@
 using Alfateam.DB;
 using Alfateam.EDM.API.Models;
 using Alfateam.EDM.API.Models.DTO.General;
+using Alfateam.EDM.API.Services;
 using Alfateam.EDM.Models.Abstractions;
 using Alfateam.EDM.Models.General;
 using Alfateam.EDM.Models.General.Security;
@@ -23,6 +24,10 @@ namespace Alfateam.EDM.API.Abstractions
         public readonly IWebHostEnvironment AppEnvironment;
         public readonly IMailGateway MailGateway;
         public readonly ISMSGateway SMSGateway;
+
+
+        public readonly DocumentsService DocService;
+        public readonly DocumentApprovalService DocApprovalService;
         public AbsController(ControllerParams @params)
         {
             this.DB = @params.DB;
@@ -32,6 +37,10 @@ namespace Alfateam.EDM.API.Abstractions
             this.AppEnvironment = @params.AppEnvironment;
             this.MailGateway = @params.MailGateway;
             this.SMSGateway = @params.SMSGateway;
+
+
+            this.DocService = @params.DocService;
+            this.DocApprovalService = @params.DocApprovalService;
         }
 
 

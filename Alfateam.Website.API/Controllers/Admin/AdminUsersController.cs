@@ -45,6 +45,13 @@ namespace Alfateam.Website.API.Controllers.Admin
             var items = GetAvailableUsers().Skip(offset).Take(count);
             return new UserDTO().CreateDTOs(items).Cast<UserDTO>();
         }
+        [HttpGet, Route("GetUsersFiltered")]
+        public async Task<IEnumerable<UserDTO>> GetUsersFiltered([FromQuery] SearchFilter filter)
+        {
+            var items = filter.FilterBase(GetAvailableUsers(), (item) => $"{item.Surname} {item.Name} {item.Patronymic}");
+            return new UserDTO().CreateDTOs(items).Cast<UserDTO>();
+        }
+
 
 
 

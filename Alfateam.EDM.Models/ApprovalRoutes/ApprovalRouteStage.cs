@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Alfateam.Core;
+using Alfateam.EDM.Models.General;
 
 namespace Alfateam.EDM.Models.ApprovalRoutes
 {
@@ -29,10 +30,42 @@ namespace Alfateam.EDM.Models.ApprovalRoutes
         public List<ApprovalRouteStageAction> Actions { get; set; } = new List<ApprovalRouteStageAction>();
 
 
+
         /// <summary>
         /// Автоматическое поле, указывает на маршрут согласование
         /// </summary>
         public int ApprovalRouteId { get; set; }
+
+
+        public List<ApprovalRouteDocActionType> GetAvailableActionsForUser(User user)
+        {
+            var actions = Actions.Select(o => o.ActionType).ToList();
+
+            for(int i= actions.Count-1;i<=0; i--)
+            {
+                switch (actions[i])
+                {
+                    case ApprovalRouteDocActionType.Approve:
+                    case ApprovalRouteDocActionType.RejectApproval:
+                        if (!user.Permissions.CanApproveDocuments)
+                        {
+                            actions.RemoveAt(i);
+                        }
+                        break;
+                    case ApprovalRouteDocActionType.SignAndCompleteDocFlow:
+                    case ApprovalRouteDocActionType.SignWithoutDocFlow:
+                        if (!user.Permissions.CanSignDocuments)
+                        {
+                            actions.RemoveAt(i);
+                        }
+                        break;
+                    case ApprovalRouteDocActionType.CancelSigning:
+                        break;
+                }
+            }
+
+            return actions;
+        }
 
 
 

@@ -36,6 +36,13 @@ namespace Alfateam.Website.API.Controllers.Admin
             var items = GetCountriesList().Skip(offset).Take(count);
             return new CountryDTO().CreateDTOs(items).Cast<CountryDTO>();
         }
+        [HttpGet, Route("GetCountriesFiltered")]
+        public async Task<IEnumerable<CountryDTO>> GetCountriesFiltered([FromQuery] SearchFilter filter)
+        {
+            var items = filter.FilterBase(GetCountriesList(), (item) => item.Title);
+            return new CountryDTO().CreateDTOs(items).Cast<CountryDTO>();
+        }
+
 
         [HttpGet, Route("GetCountry")]
         public async Task<CountryDTO> GetCountry(int id)
@@ -133,7 +140,13 @@ namespace Alfateam.Website.API.Controllers.Admin
             var items = GetLanguagesList().Skip(offset).Take(count);
             return new LanguageDTO().CreateDTOs(items).Cast<LanguageDTO>();
         }
-     
+        [HttpGet, Route("GetLanguagesFiltered")]
+        public async Task<IEnumerable<LanguageDTO>> GetLanguagesFiltered([FromQuery] SearchFilter filter)
+        {
+            var items = filter.FilterBase(GetLanguagesList(), (item) => item.Title);
+            return new LanguageDTO().CreateDTOs(items).Cast<LanguageDTO>();
+        }
+
         [HttpGet, Route("GetLanguage")]
         public async Task<LanguageDTO> GetLanguage(int id)
         {
@@ -234,7 +247,13 @@ namespace Alfateam.Website.API.Controllers.Admin
             var items = GetCurrenciesList().Skip(offset).Take(count);
             return new CurrencyDTO().CreateDTOs(items).Cast<CurrencyDTO>();
         }
-  
+        [HttpGet, Route("GetCurrenciesFiltered")]
+        public async Task<IEnumerable<CurrencyDTO>> GetCurrenciesFiltered([FromQuery] SearchFilter filter)
+        {
+            var items = filter.FilterBase(GetCurrenciesList(), (item) => item.Title);
+            return new CurrencyDTO().CreateDTOs(items).Cast<CurrencyDTO>();
+        }
+
         [HttpGet, Route("GetCurrency")]
         public async Task<CurrencyDTO> GetCurrency(int id)
         {

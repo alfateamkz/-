@@ -25,6 +25,7 @@ using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Collections.Generic;
 using System.Net;
+using Alfateam.Website.API.Filters.AdminSearch;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -46,6 +47,13 @@ namespace Alfateam.Website.API.Controllers.Admin
             return new EventDTO().CreateDTOs(items).Cast<EventDTO>();
         }
 
+        [HttpGet, Route("GetEventsFiltered")]
+        [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
+        public async Task<IEnumerable<EventDTO>> GetEventsFiltered([FromQuery] EventsSearchFilter filter)
+        {
+            var items = filter.Filter(GetAvailableEvents(), (item) => item.Title);
+            return new EventDTO().CreateDTOs(items).Cast<EventDTO>();
+        }
 
 
         [HttpGet, Route("GetEvent")]
@@ -171,6 +179,15 @@ namespace Alfateam.Website.API.Controllers.Admin
             return new EventCategoryDTO().CreateDTOs(items).Cast<EventCategoryDTO>();
         }
 
+        [HttpGet, Route("GetEventCategoriesFiltered")]
+        [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
+        public async Task<IEnumerable<EventCategoryDTO>> GetEventCategoriesFiltered([FromQuery] SearchFilter filter)
+        {
+            var items = filter.FilterBase(GetAvailableEventCategories(), (item) => item.Title);
+            return new EventCategoryDTO().CreateDTOs(items).Cast<EventCategoryDTO>();
+        }
+
+
         [HttpGet, Route("GetEventCategory")]
         [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
         public async Task<EventCategoryDTO> GetEventCategory(int id)
@@ -279,6 +296,14 @@ namespace Alfateam.Website.API.Controllers.Admin
             var items = GetAvailableEventFormats().Skip(offset).Take(count);
             return new EventFormatDTO().CreateDTOs(items).Cast<EventFormatDTO>();
         }
+        [HttpGet, Route("GetEventFormatsFiltered")]
+        [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
+        public async Task<IEnumerable<EventFormatDTO>> GetEventFormatsFiltered([FromQuery] SearchFilter filter)
+        {
+            var items = filter.FilterBase(GetAvailableEventFormats(), (item) => item.Title);
+            return new EventFormatDTO().CreateDTOs(items).Cast<EventFormatDTO>();
+        }
+
 
         [HttpGet, Route("GetEventFormat")]
         [CheckContentAreaRights(ContentAccessModelType.Events, 1)]

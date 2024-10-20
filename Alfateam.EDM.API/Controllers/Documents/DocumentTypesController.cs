@@ -48,10 +48,6 @@ namespace Alfateam.EDM.API.Controllers.Documents
         {
             return (DocumentTypeDTO)DBService.TryCreateEntity(DB.DocumentTypes, model, (entity) =>
             {
-                if(model.Sides.Count == 0)
-                {
-                    throw new Exception404("Нужно задать как минимум одну сторону документа");
-                }
 
                 entity.EDMSubjectId = (int)this.EDMSubjectId;
                 entity.IsDefaultType = false;
@@ -66,10 +62,7 @@ namespace Alfateam.EDM.API.Controllers.Documents
 
             return (DocumentTypeDTO)DBService.TryUpdateEntity(DB.DocumentTypes, model, type, (entity) =>
             {
-                if (model.Sides.Count == 0)
-                {
-                    throw new Exception404("Нужно задать как минимум одну сторону документа");
-                }
+
             });
         }
 

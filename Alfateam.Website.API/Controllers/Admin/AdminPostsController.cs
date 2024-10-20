@@ -25,6 +25,7 @@ using Alfateam.Website.API.Models.DTOLocalization.Portfolios;
 using Alfateam.Core.Exceptions;
 using Alfateam2._0.Models.ContentItems;
 using Swashbuckle.AspNetCore.Annotations;
+using Alfateam.Website.API.Filters.AdminSearch;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -44,6 +45,15 @@ namespace Alfateam.Website.API.Controllers.Admin
             var items = GetAvailablePosts().Skip(offset).Take(count);
             return new PostDTO().CreateDTOs(items).Cast<PostDTO>();
         }
+
+        [HttpGet, Route("GetPostsFiltered")]
+        [CheckContentAreaRights(ContentAccessModelType.Posts, 1)]
+        public async Task<IEnumerable<PostDTO>> GetPostsFiltered([FromQuery] PostsSearchFilter filter)
+        {
+            var items = filter.Filter(GetAvailablePosts(), (item) => item.Title);
+            return new PostDTO().CreateDTOs(items).Cast<PostDTO>();
+        }
+
 
         [HttpGet, Route("GetPost")]
         [CheckContentAreaRights(ContentAccessModelType.Posts, 1)]
@@ -163,6 +173,14 @@ namespace Alfateam.Website.API.Controllers.Admin
             return new PostCategoryDTO().CreateDTOs(items).Cast<PostCategoryDTO>();
         }
 
+        [HttpGet, Route("GetPostCategoriesFiltered")]
+        [CheckContentAreaRights(ContentAccessModelType.Posts, 1)]
+        public async Task<IEnumerable<PostCategoryDTO>> GetPostCategoriesFiltered([FromQuery] SearchFilter filter)
+        {
+            var items = filter.FilterBase(GetAvailablePostCategories(), (item) => item.Title);
+            return new PostCategoryDTO().CreateDTOs(items).Cast<PostCategoryDTO>();
+        }
+
         [HttpGet, Route("GetPostCategory")]
         [CheckContentAreaRights(ContentAccessModelType.Posts, 1)]
         public async Task<PostCategoryDTO> GetPostCategory(int id)
@@ -262,6 +280,14 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<PostIndustryDTO>> GetPostIndustries(int offset, int count = 20)
         {
             var items = GetAvailablePostIndustries().Skip(offset).Take(count);
+            return new PostIndustryDTO().CreateDTOs(items).Cast<PostIndustryDTO>();
+        }
+
+        [HttpGet, Route("GetPostIndustriesFiltered")]
+        [CheckContentAreaRights(ContentAccessModelType.Posts, 1)]
+        public async Task<IEnumerable<PostIndustryDTO>> GetPostIndustriesFiltered([FromQuery] SearchFilter filter)
+        {
+            var items = filter.FilterBase(GetAvailablePostIndustries(), (item) => item.Title);
             return new PostIndustryDTO().CreateDTOs(items).Cast<PostIndustryDTO>();
         }
 

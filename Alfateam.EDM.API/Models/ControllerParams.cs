@@ -1,5 +1,6 @@
 ﻿using Alfateam.Core.Services;
 using Alfateam.DB;
+using Alfateam.EDM.API.Services;
 using Alfateam.Gateways.Abstractions;
 
 namespace Alfateam.EDM.API.Models
@@ -32,5 +33,11 @@ namespace Alfateam.EDM.API.Models
         public IWebHostEnvironment AppEnvironment { get; set; }
         public IMailGateway MailGateway { get; set; }
         public ISMSGateway SMSGateway { get; set; }
+
+
+
+
+        public DocumentsService DocService { get; set; }
+        public DocumentApprovalService DocApprovalService { get; set; }
     }
 }

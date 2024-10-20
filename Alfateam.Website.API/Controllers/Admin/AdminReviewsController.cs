@@ -31,6 +31,14 @@ namespace Alfateam.Website.API.Controllers.Admin
             return new ReviewDTO().CreateDTOs(reviews).Cast<ReviewDTO>();
         }
 
+        [HttpGet, Route("GetReviewsFiltered")]
+        [ReviewsSectionAccess(1)]
+        public async Task<IEnumerable<ReviewDTO>> GetReviewsFiltered([FromQuery] SearchFilter filter)
+        {
+            var reviews = filter.FilterBase(GetAvailableReviews(), (item) => item.Title);
+            return new ReviewDTO().CreateDTOs(reviews).Cast<ReviewDTO>();
+        }
+
 
         [HttpGet, Route("GetReview")]
         [ReviewsSectionAccess(1)]

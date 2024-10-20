@@ -45,6 +45,13 @@ namespace Alfateam.Website.API.Controllers.Admin
             var items = GetAvailablePartners().Skip(offset).Take(count);
             return new PartnerDTO().CreateDTOs(items).Cast<PartnerDTO>();
         }
+        [HttpGet, Route("GetPartnersFiltered")]
+        [CheckContentAreaRights(ContentAccessModelType.Partners, 1)]
+        public async Task<IEnumerable<PartnerDTO>> GetPartnersFiltered([FromQuery] SearchFilter filter)
+        {
+            var items = filter.FilterBase(GetAvailablePartners(), (item) => item.Title);
+            return new PartnerDTO().CreateDTOs(items).Cast<PartnerDTO>();
+        }
 
         [HttpGet, Route("GetPartner")]
         [CheckContentAreaRights(ContentAccessModelType.Partners, 1)]

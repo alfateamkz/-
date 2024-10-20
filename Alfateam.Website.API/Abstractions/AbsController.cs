@@ -5,7 +5,6 @@ using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Enums;
 using Alfateam.Website.API.Filters;
 using Alfateam.Website.API.Models;
-using Alfateam.Website.API.Services;
 using Alfateam2._0.Models.Abstractions;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
@@ -14,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using System.IO;
 using Alfateam.Core;
 using Microsoft.AspNetCore.Cors;
+using Alfateam.Website.API.Services.General;
 
 namespace Alfateam.Website.API.Abstractions
 {

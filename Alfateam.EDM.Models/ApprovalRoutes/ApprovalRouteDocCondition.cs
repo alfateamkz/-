@@ -35,5 +35,10 @@ namespace Alfateam.EDM.Models.ApprovalRoutes
         /// </summary>
         public int ApprovalRouteId  { get; set; }
         public ApprovalRoute ApprovalRoute { get; set; }
+
+
+
+
+       
     }
 }

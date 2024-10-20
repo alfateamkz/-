@@ -13,5 +13,6 @@ namespace Alfateam.EDM.Models.Enums.ApprovalRoutes
         SignWithoutDocFlow = 3,
         SignAndCompleteDocFlow = 4,
         CancelSigning = 5,
+        
     }
 }

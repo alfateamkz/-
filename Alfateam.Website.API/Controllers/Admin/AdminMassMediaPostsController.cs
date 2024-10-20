@@ -40,6 +40,13 @@ namespace Alfateam.Website.API.Controllers.Admin
             var items = GetAvailablePosts().Skip(offset).Take(count);
             return new MassMediaPostDTO().CreateDTOs(items).Cast<MassMediaPostDTO>();
         }
+        [HttpGet, Route("GetPostsFiltered")]
+        [CheckContentAreaRights(ContentAccessModelType.MassMediaPosts, 1)]
+        public async Task<IEnumerable<MassMediaPostDTO>> GetPostsFiltered([FromQuery] SearchFilter filter)
+        {
+            var items = filter.FilterBase(GetAvailablePosts(), (item) => item.Title);
+            return new MassMediaPostDTO().CreateDTOs(items).Cast<MassMediaPostDTO>();
+        }
 
         [HttpGet, Route("GetPost")]
         [CheckContentAreaRights(ContentAccessModelType.MassMediaPosts, 1)]

@@ -24,6 +24,7 @@ using Alfateam2._0.Models.ContentItems;
 using Alfateam.Website.API.Models.DTO.HR;
 using Alfateam.Website.API.Models.DTOLocalization.HR;
 using Swashbuckle.AspNetCore.Annotations;
+using Alfateam.Website.API.Filters.AdminSearch;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -40,6 +41,15 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<PortfolioDTO>> GetPortfolios(int offset, int count = 20)
         {
             var items = GetAvailablePortfolio().Skip(offset).Take(count);
+            return new PortfolioDTO().CreateDTOs(items).Cast<PortfolioDTO>();
+        }
+
+
+        [HttpGet, Route("GetPortfoliosFiltered")]
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 1)]
+        public async Task<IEnumerable<PortfolioDTO>> GetPortfoliosFiltered([FromQuery] PortfoliosSearchFilter filter)
+        {
+            var items = filter.Filter(GetAvailablePortfolio(), (item) => item.Title);
             return new PortfolioDTO().CreateDTOs(items).Cast<PortfolioDTO>();
         }
 
@@ -161,6 +171,14 @@ namespace Alfateam.Website.API.Controllers.Admin
             var items = GetAvailablePortfolioCategories().Skip(offset).Take(count);
             return new PortfolioCategoryDTO().CreateDTOs(items).Cast<PortfolioCategoryDTO>();
         }
+        [HttpGet, Route("GetPortfolioCategoriesFiltered")]
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 1)]
+        public async Task<IEnumerable<PortfolioCategoryDTO>> GetPortfolioCategoriesFiltered([FromQuery] SearchFilter filter)
+        {
+            var items = filter.FilterBase(GetAvailablePortfolioCategories(), (item) => item.Title);
+            return new PortfolioCategoryDTO().CreateDTOs(items).Cast<PortfolioCategoryDTO>();
+        }
+
 
         [HttpGet, Route("GetPortfolioCategory")]
         [CheckContentAreaRights(ContentAccessModelType.Portfolio, 1)]
@@ -263,6 +281,14 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<IEnumerable<PortfolioIndustryDTO>> GetPortfolioIndustries(int offset, int count = 20)
         {
             var items = GetAvailablePortfolioIndustries().Skip(offset).Take(count);
+            return new PortfolioIndustryDTO().CreateDTOs(items).Cast<PortfolioIndustryDTO>();
+        }
+
+        [HttpGet, Route("GetPortfolioIndustriesFiltered")]
+        [CheckContentAreaRights(ContentAccessModelType.Portfolio, 1)]
+        public async Task<IEnumerable<PortfolioIndustryDTO>> GetPortfolioIndustriesFiltered([FromQuery] SearchFilter filter)
+        {
+            var items = filter.FilterBase(GetAvailablePortfolioIndustries(), (item) => item.Title);
             return new PortfolioIndustryDTO().CreateDTOs(items).Cast<PortfolioIndustryDTO>();
         }
 

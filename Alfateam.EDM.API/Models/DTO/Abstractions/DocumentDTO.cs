@@ -1,8 +1,10 @@
 ﻿using Alfateam.Core.Attributes.DTO;
+using Alfateam.EDM.API.Models.DTO.Documents;
 using Alfateam.EDM.API.Models.DTO.Documents.DocumentSigning;
 using Alfateam.EDM.API.Models.DTO.Documents.Types;
 using Alfateam.EDM.API.Models.DTO.General;
 using Alfateam.EDM.Models.Abstractions;
+using Alfateam.EDM.Models.Documents;
 using Alfateam.EDM.Models.Documents.DocumentSigning;
 using Alfateam.EDM.Models.Documents.Types;
 using Alfateam.EDM.Models.Enums.DocumentStatuses;
@@ -21,6 +23,11 @@ namespace Alfateam.EDM.API.Models.DTO.Abstractions
     {
         [JsonProperty("discriminator")]
         public string Discriminator { get; set; }
+
+        /// <summary>
+        /// Если DraftInfo != null, то документ - черновик
+        /// </summary>
+        public DocumentDraftInfoDTO? DraftInfo { get; set; }
 
 
         [ForClientOnly]

@@ -42,7 +42,7 @@ namespace Alfateam.Website.API.Controllers.Website
         }
 
         [HttpGet, Route("GetProductsByFilter")]
-        public async Task<IEnumerable<ShopProductDTO>> GetProductsByFilter(ShopProductsFilter filter)
+        public async Task<IEnumerable<ShopProductDTO>> GetProductsByFilter(ClientShopProductsFilter filter)
         {
             var products = GetShopProducts();
 

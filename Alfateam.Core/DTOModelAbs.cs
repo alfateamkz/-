@@ -143,6 +143,11 @@ namespace Alfateam.Website.API.Abstractions
 
         public DTOModelAbs<T> CreateDTO(T item)
         {
+            if(item == null)
+            {
+                return null; 
+            }
+
             var clone = this.Clone();
 
             var types = FindAllDerivedTypes(clone.GetType());

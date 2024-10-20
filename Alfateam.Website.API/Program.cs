@@ -7,10 +7,11 @@ using Alfateam.Gateways.Abstractions;
 using Alfateam.Website.API.Filters;
 using Alfateam.Website.API.Jobs;
 using Alfateam.Website.API.Models;
-using Alfateam.Website.API.Services;
+using Alfateam.Website.API.Services.General;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using System.Threading.RateLimiting;
@@ -130,7 +131,11 @@ namespace Alfateam.Website.API
                          options.AllowAnyOrigin()
                          .AllowAnyHeader()
                          .AllowAnyMethod());
-
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(app.Environment.ContentRootPath, "uploads")),
+                RequestPath = "/uploads"
+            });
             //app.UseRouting();
 
             app.UseSwagger();

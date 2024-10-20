@@ -1,4 +1,5 @@
 ﻿using Alfateam.Core;
+using Alfateam.EDM.Models.Abstractions;
 using Alfateam.EDM.Models.ApprovalRoutes;
 using Alfateam.EDM.Models.Enums.DocumentStatuses;
 using Alfateam.EDM.Models.General;
@@ -12,17 +13,8 @@ namespace Alfateam.EDM.Models.Documents.DocumentSigning
 {
     public class DocumentApprovalMetadata : AbsModel
     {
-        /// <summary>
-        /// Используется, если документ пущен по маршруту согласования
-        /// </summary>
-        public ApprovalRoute? ApprovalRoute { get; set; }
-        /// <summary>
-        /// На каком этапе маршрута согласования сейчас находится документ
-        /// </summary>
-        public ApprovalRouteStage? ApprovalRouteStage { get; set; }
-
-
-
+        public DocumentApproveStrategy? Strategy { get; set; }
+        public int? StrategyId { get; set; }
 
         public DocumentApprovalStatus Status { get; set; } = DocumentApprovalStatus.OnApprovalOrSigningStage;
         public DateTime LastUpdateDate { get; set; } = DateTime.UtcNow;

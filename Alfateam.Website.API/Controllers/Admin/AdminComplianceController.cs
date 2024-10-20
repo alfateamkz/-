@@ -47,6 +47,17 @@ namespace Alfateam.Website.API.Controllers.Admin
             return new ComplianceDocumentDTO().CreateDTOs(items).Cast<ComplianceDocumentDTO>();
         }
 
+        [HttpGet, Route("GetComplianceDocumentsFiltered")]
+        [CheckContentAreaRights(ContentAccessModelType.Compliance, 1)]
+        public async Task<IEnumerable<ComplianceDocumentDTO>> GetComplianceDocumentsFiltered([FromQuery]SearchFilter filter)
+        {
+            var items = filter.FilterBase(GetAvailableComplianceDocuments(), (item) => item.Title);
+            return new ComplianceDocumentDTO().CreateDTOs(items).Cast<ComplianceDocumentDTO>();
+        }
+
+
+
+
         [HttpGet, Route("GetComplianceDocument")]
         [CheckContentAreaRights(ContentAccessModelType.Compliance, 1)]
         public async Task<ComplianceDocumentDTO> GetComplianceDocument(int id)

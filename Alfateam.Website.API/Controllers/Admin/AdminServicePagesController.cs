@@ -38,6 +38,15 @@ namespace Alfateam.Website.API.Controllers.Admin
             return new ServicePageDTO().CreateDTOs(items).Cast<ServicePageDTO>();
         }
 
+        [HttpGet, Route("GetServicePagesFiltered")]
+        [CheckContentAreaRights(ContentAccessModelType.Services, 1)]
+        public async Task<IEnumerable<ServicePageDTO>> GetServicePagesFiltered([FromQuery] SearchFilter filter)
+        {
+            var items = filter.FilterBase(GetAvailableServicePages(), (item) => item.MainBlockHeader);
+            return new ServicePageDTO().CreateDTOs(items).Cast<ServicePageDTO>();
+        }
+
+
         [HttpGet, Route("GetServicePage")]
         [CheckContentAreaRights(ContentAccessModelType.Services, 1)]
         public async Task<ServicePageDTO> GetServicePage(int id)

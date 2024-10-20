@@ -2,6 +2,7 @@
 using Alfateam.EDM.Models.Abstractions;
 using Alfateam.EDM.Models.ApprovalRoutes;
 using Alfateam.EDM.Models.ApprovalRoutes.RouteStageExecutors;
+using Alfateam.EDM.Models.Documents.DocumentSigning.ApproveStrategies;
 using Alfateam.EDM.Models.Enums.DocumentStatuses;
 using Alfateam.EDM.Models.General;
 using Alfateam.Gateways;
@@ -21,18 +22,20 @@ namespace Alfateam.EDM.API.Jobs
                 using (EDMDbContext db = new EDMDbContext())
                 {
                     var documents = db.Documents.Include(o => o.Approval).ThenInclude(o => o.ApprovalResults).ThenInclude(o => o.ApprovalRouteStage)
-                                                .Include(o => o.Approval).ThenInclude(o => o.ApprovalRouteStage)
+                                                .Include(o => o.Approval).ThenInclude(o => o.Strategy)
                                                 .Include(o => o.Signing)
                                                 .Where(o => !o.IsDeleted && o.Approval.Status == DocumentApprovalStatus.OnApprovalOrSigningStage);
 
                     foreach (var document in documents)
                     {
-                        if (document.Approval.ApprovalRouteStage != null)
+                        if(document.Approval.Strategy is DocumentApprovalRouteStrategy routeStrategy)
                         {
-                            var deadline = document.Approval.ApprovalRouteStage.GetDeadlineDate(document.Approval.LastUpdateDate);
-                            if (document.Approval.ApprovalRouteStage.HeedToNotifyAboutDeadline(deadline))
+                            var approvalRouteStage = db.ApprovalRouteStages.FirstOrDefault(o => o.Id ==  routeStrategy.ApprovalRouteStageId);
+
+                            var deadline = approvalRouteStage.GetDeadlineDate(document.Approval.LastUpdateDate);
+                            if (approvalRouteStage.HeedToNotifyAboutDeadline(deadline))
                             {
-                                NotifyUsersToEmail(db, document);
+                                NotifyUsersToEmail(db, document, approvalRouteStage.Id);
                             }
                         }
                     }
@@ -44,9 +47,9 @@ namespace Alfateam.EDM.API.Jobs
 
         }
 
-        private static void NotifyUsersToEmail(EDMDbContext db, Document document)
+        private static void NotifyUsersToEmail(EDMDbContext db, Document document, int approvalRouteStageId)
         {
-            var executor = db.RouteStageExecutors.FirstOrDefault(o => o.Id == document.Approval.ApprovalRouteStage.Id);
+            var executor = db.RouteStageExecutors.FirstOrDefault(o => o.Id == approvalRouteStageId);
             IEnumerable<User> users = new List<User>();
 
 

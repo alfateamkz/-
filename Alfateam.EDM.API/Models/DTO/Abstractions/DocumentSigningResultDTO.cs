@@ -17,6 +17,7 @@ namespace Alfateam.EDM.API.Models.DTO.Abstractions
         [JsonProperty("discriminator")]
         public string Discriminator { get; set; }
 
+
         [ForClientOnly]
         public DocumentSigningSideDTO Side { get; set; }
         public int SideId { get; set; }

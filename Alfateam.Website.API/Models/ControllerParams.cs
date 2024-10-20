@@ -1,7 +1,7 @@
 ﻿using Alfateam.DB;
 using Alfateam.Gateways;
 using Alfateam.Gateways.Abstractions;
-using Alfateam.Website.API.Services;
+using Alfateam.Website.API.Services.General;
 
 namespace Alfateam.Website.API.Models
 {

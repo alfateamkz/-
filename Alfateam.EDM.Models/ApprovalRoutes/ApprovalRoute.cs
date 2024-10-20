@@ -30,5 +30,8 @@ namespace Alfateam.EDM.Models.ApprovalRoutes
 
 
         public int CompanyId { get; set; }
+
+
+        
     }
 }

@@ -8,6 +8,7 @@ using Alfateam.EDM.API.Models;
 using Alfateam.Core.Filters.Swagger;
 using Microsoft.OpenApi.Models;
 using Alfateam.EDM.API.Filters;
+using Alfateam.EDM.API.Services;
 
 namespace Alfateam.EDM.API
 {
@@ -25,6 +26,10 @@ namespace Alfateam.EDM.API
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
 
+
+
+            builder.Services.AddTransient<DocumentsService>();
+            builder.Services.AddTransient<DocumentApprovalService>();
 
 
             builder.Services.AddTransient<IMailGateway, MailGateway>();
@@ -53,6 +58,7 @@ namespace Alfateam.EDM.API
             builder.Services.AddTransient<ControllerParams>();
 
 
+  
 
             builder.Services.AddSwaggerGen(config =>
             {

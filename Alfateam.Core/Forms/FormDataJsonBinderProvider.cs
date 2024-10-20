@@ -15,8 +15,17 @@ namespace Alfateam.Core.Forms
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
+            if(context.BindingInfo.BindingSource?.DisplayName != "Form")
+            {
+                return null;
+            }
+
             // Do not use this provider for binding simple values
             if (!context.Metadata.IsComplexType) return null;
+
+
+
+
 
             //// Do not use this provider if the binding target is not a property
             //var propName = context.Metadata.PropertyName;

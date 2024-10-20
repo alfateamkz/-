@@ -24,5 +24,11 @@ namespace Alfateam.EDM.Models.Abstractions
 
         public DocumentSigningSide Side { get; set; }
         public int SideId { get; set; }
+
+
+        /// <summary>
+        /// Автоматическое поле. Указывает на конкретную сущность DocumentSuccessfullySignedResult
+        /// </summary>
+        public int? DocumentSuccessfullySignedResultId { get; set; }
     }
 }

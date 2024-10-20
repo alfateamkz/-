@@ -17,6 +17,7 @@ using Alfateam.EDM.Models.Documents.Types.Items;
 using Alfateam.EDM.Models.Documents.TypesMetadata;
 using Alfateam.EDM.Models.Enums;
 using Alfateam.EDM.Models.General;
+using Alfateam.EDM.Models.General.PowersOfAttorney;
 using Alfateam.EDM.Models.General.Security;
 using Alfateam.EDM.Models.General.Subjects;
 using Alfateam.ID.Models.Abstractions;
@@ -61,6 +62,8 @@ namespace Alfateam.DB
         public DbSet<DocumentSigningResult> DocumentSigningResults { get; set; }
         public DbSet<DocumentSigningSide> DocumentSigningSides { get; set; }
         public DbSet<EDMSubject> EDMSubjects { get; set; }
+        public DbSet<EDMSubject> EDMSubjects { get; set; }
+        public DbSet<PowerOfAttorney> PowersOfAttorney { get; set; }
         public DbSet<Signature> Signatures { get; set; }
 
         #endregion
@@ -97,7 +100,6 @@ namespace Alfateam.DB
         #endregion
         public DbSet<DocumentsParcel> DocumentsParcels { get; set; }
         public DbSet<DocumentType> DocumentTypes { get; set; }
-        public DbSet<DocumentTypeSide> DocumentTypeSides { get; set; }
         #endregion
 
         #region General
@@ -122,6 +124,7 @@ namespace Alfateam.DB
 
         public DbSet<BannedCounterparty> BannedCounterparties { get; set; }
         public DbSet<CounterpartyGroup> CounterpartyGroups { get; set; }
+        public DbSet<CounterpartyInvitation> CounterpartyInvitations { get; set; }
         public DbSet<EDMProvider> EDMProviders { get; set; }
 
 
@@ -185,63 +188,24 @@ namespace Alfateam.DB
         {
             if(!DocumentTypes.Any(o => o.IsDefaultType))
             {
-                DocumentTypes.Add(new DocumentType
-                {
-                    Title = "Договор оказания услуг",
-                    Description = "",
-                    IsDefaultType = true,
-                    Sides = new List<DocumentTypeSide>
-                    {
-                        new DocumentTypeSide
-                        {
-                            Title = "Заказчик",
-                            IsSignatureRequired = true,
-                        },
-                         new DocumentTypeSide
-                        {
-                            Title = "Исполнитель",
-                            IsSignatureRequired = true,
-                        },
-                    }
-                });
-                DocumentTypes.Add(new DocumentType
-                {
-                    Title = "Акт выполненных работ",
-                    Description = "",
-                    IsDefaultType = true,
-                    Sides = new List<DocumentTypeSide>
-                    {
-                        new DocumentTypeSide
-                        {
-                            Title = "Заказчик",
-                            IsSignatureRequired = true,
-                        },
-                         new DocumentTypeSide
-                        {
-                            Title = "Исполнитель",
-                            IsSignatureRequired = true,
-                        },
-                    }
-                });
-                DocumentTypes.Add(new DocumentType
-                {
-                    Title = "Счет на оплату",
-                    Description = "",
-                    IsDefaultType = true,
-                    Sides = new List<DocumentTypeSide>
-                    {
-                        new DocumentTypeSide
-                        {
-                            Title = "Заказчик",
-                            IsSignatureRequired = false,
-                        },
-                         new DocumentTypeSide
-                        {
-                            Title = "Исполнитель",
-                            IsSignatureRequired = true,
-                        },
-                    }
-                });
+                DocumentTypes.Add(new DocumentType("Акт расхождений", 2, DocumentTypeEnum.ActDisagreement));
+                DocumentTypes.Add(new DocumentType("Акт", 2, DocumentTypeEnum.Act));
+                DocumentTypes.Add(new DocumentType("Акт сверки", 2, DocumentTypeEnum.ActReconciliation));
+                DocumentTypes.Add(new DocumentType("Договор", 2, DocumentTypeEnum.Agreement));
+                DocumentTypes.Add(new DocumentType("Доверенность", 1, DocumentTypeEnum.Attorney));
+                DocumentTypes.Add(new DocumentType("Реестр сертификатов", 1, DocumentTypeEnum.CertificateRegistry));
+                DocumentTypes.Add(new DocumentType("Претензия", 2, DocumentTypeEnum.Claim));
+                DocumentTypes.Add(new DocumentType("Накладная", 2, DocumentTypeEnum.Consignment));
+                DocumentTypes.Add(new DocumentType("Детализация", 2, DocumentTypeEnum.Detalization));
+                DocumentTypes.Add(new DocumentType("Счет на оплату", 2, DocumentTypeEnum.Invoice));
+                DocumentTypes.Add(new DocumentType("Письмо", 2, DocumentTypeEnum.Letter));
+                DocumentTypes.Add(new DocumentType("Неформализованный документ", 1, DocumentTypeEnum.NonFormalized));
+                DocumentTypes.Add(new DocumentType("Протокол согласования цены", 1, DocumentTypeEnum.PriceListAgreement));
+                DocumentTypes.Add(new DocumentType("Ценовой лист", 2, DocumentTypeEnum.PriceList));
+                DocumentTypes.Add(new DocumentType("Доп.соглашение к договору", 2, DocumentTypeEnum.SupplementaryAgreement));
+                DocumentTypes.Add(new DocumentType("Транспортная накладная", 3, DocumentTypeEnum.Waybill));
+
+                DocumentTypes.Add(new DocumentType("Накладная", 1, DocumentTypeEnum.InternalConsignment, true));
             }
         }
 
@@ -330,6 +294,11 @@ namespace Alfateam.DB
             modelBuilder.Entity<PriceListDocTypeMetadata>();
             modelBuilder.Entity<SupplementaryAgreementDocTypeMetadata>();
             modelBuilder.Entity<WaybillDocTypeMetadata>();
+
+            //Abstract Signature
+            modelBuilder.Entity<PowerOfAttorney>().HasDiscriminator(b => b.Discriminator);
+            modelBuilder.Entity<DigitalPowerOfAttorney>();
+            modelBuilder.Entity<NotarizedPowerOfAttorney>();
         }
     }
 }

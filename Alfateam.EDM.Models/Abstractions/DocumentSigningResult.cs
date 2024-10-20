@@ -22,5 +22,12 @@ namespace Alfateam.EDM.Models.Abstractions
 
         public DocumentSigningSide Side { get; set; }
         public int SideId { get; set; }
+
+
+
+        public int? DocumentSigningMetadataId { get; set; }
+        public int? DocumentCancellationMetadataId  { get; set; }
+
+
     }
 }

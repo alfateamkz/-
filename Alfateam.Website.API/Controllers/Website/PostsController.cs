@@ -28,7 +28,7 @@ namespace Alfateam.Website.API.Controllers.Website
         }
 
         [HttpGet, Route("GetPostsByFilter")]
-        public async Task<IEnumerable<PostDTO>> GetPostsByFilter(PostsSearchFilter filter)
+        public async Task<IEnumerable<PostDTO>> GetPostsByFilter(ClientPostsSearchFilter filter)
         {
             var posts = GetPosts();
 

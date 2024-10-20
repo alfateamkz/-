@@ -1,6 +1,7 @@
 ﻿using Alfateam.Core;
 using Alfateam.EDM.Models.Documents.Types;
 using Alfateam.EDM.Models.Documents.TypesMetadata;
+using Alfateam.EDM.Models.Documents.TypesMetadata.Internal;
 using JsonKnownTypes;
 using Microsoft.AspNetCore.Components.Web.Virtualization;
 using Newtonsoft.Json;
@@ -32,19 +33,13 @@ namespace Alfateam.EDM.Models.Abstractions
     [JsonKnownType(typeof(PriceListDocTypeMetadata), "PriceListDocTypeMetadata")]
     [JsonKnownType(typeof(SupplementaryAgreementDocTypeMetadata), "SupplementaryAgreementDocTypeMetadata")]
     [JsonKnownType(typeof(WaybillDocTypeMetadata), "WaybillDocTypeMetadata")]
+
+    [JsonKnownType(typeof(InternalConsignmentDocTypeMetadata), "InternalConsignmentDocTypeMetadata")]
     public class DocTypeMetadata : AbsModel
     {
         [JsonProperty("discriminator")]
         public string Discriminator { get; set; }
 
-
-
-
-        [NotMapped]
-        public virtual string Title => "Абстрактный тип";
-
-        [NotMapped]
-        public virtual int? RequiredDocumentSides => 2;
 
 
         public string DocumentNumber { get; set; }

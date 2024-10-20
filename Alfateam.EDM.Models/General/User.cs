@@ -32,7 +32,8 @@ namespace Alfateam.EDM.Models.General
 
 
 
-
+        public PowerOfAttorney? PowerOfAttorney { get; set; }
+        public int? PowerOfAttorneyId { get; set; }
 
 
 
@@ -47,5 +48,10 @@ namespace Alfateam.EDM.Models.General
 
         public int? RouteStageExecutorUsersId { get; set; }
         public int? RouteStageExecutorDepartmentId { get; set; }
+
+
+        public int? DocumentApprovalDepartmentStrategyId { get; set; }
+
+
     }
 }

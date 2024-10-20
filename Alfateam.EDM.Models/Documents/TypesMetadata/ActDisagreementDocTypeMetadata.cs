@@ -10,8 +10,6 @@ namespace Alfateam.EDM.Models.Documents.TypesMetadata
     public class ActDisagreementDocTypeMetadata : DocTypeMetadata
     {
 
-        public override string Title => "Акт разногласий";
-
         public double Sum { get; set; }
     }
 }

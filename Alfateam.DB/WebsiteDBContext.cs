@@ -476,6 +476,10 @@ namespace Alfateam.DB
                 MakeDefaultUsers();
 
                 SaveChanges();
+
+
+                MakeDefaultReviews();
+                SaveChanges();
             }
             catch (Exception ex)
             {
@@ -643,6 +647,24 @@ namespace Alfateam.DB
             magzum.RoleModel.IsAllCountriesAccess = true;
 
             Users.AddRange(owner, magzum);
+        }
+
+        private void MakeDefaultReviews()
+        {
+            if (Reviews.Any()) return;
+
+            for(int i = 5; i>0; i--)
+            {
+                Reviews.Add(new Review
+                {
+                    CountryId = 1,
+                    Rate = i,
+                    UserId = 1,
+                    Text = "TEST",
+                    Title = "Title",
+                    URLToProject = "https://alfateam.co"
+                });
+            }
         }
 
         #endregion

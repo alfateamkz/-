@@ -12,7 +12,7 @@ namespace Alfateam.EDM.Models.ApprovalRoutes
     public class ApprovalRouteStageAction : AbsModel
     {
         public ApprovalRouteDocActionType ActionType { get; set; } = ApprovalRouteDocActionType.Approve;
-        public ApprovalRouteDocActionResultType ResultType { get; set; } = ApprovalRouteDocActionResultType.GoToNextStage;
+        //public ApprovalRouteDocActionResultType ResultType { get; set; } = ApprovalRouteDocActionResultType.GoToNextStage;
 
 
 

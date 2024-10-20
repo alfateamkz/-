@@ -3,7 +3,9 @@ using Alfateam.EDM.API.Abstractions;
 using Alfateam.EDM.API.Filters;
 using Alfateam.EDM.API.Models;
 using Alfateam.EDM.API.Models.DTO.Abstractions;
+using Alfateam.EDM.API.Models.DTO.Counterparties;
 using Alfateam.EDM.API.Models.DTO.General;
+using Alfateam.EDM.Models.Counterparties;
 using Alfateam.EDM.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +41,11 @@ namespace Alfateam.EDM.API.Controllers.Counterparties
         [HttpPost, Route("CreateCounterparty")]
         public async Task<CounterpartyDTO> CreateCounterparty(CounterpartyDTO model)
         {
+            if (model is EDMCounterpartyDTO)
+            {
+                throw new Exception403("Контрагента с привязкой к ЭДО нельзя создать. Для этого есть механизм приглашений");
+            }
+
             return (CounterpartyDTO)DBService.TryCreateEntity(DB.Counterparties, model, (entity) =>
             {
                 entity.EDMSubjectId = (int)this.EDMSubjectId;
@@ -48,6 +55,11 @@ namespace Alfateam.EDM.API.Controllers.Counterparties
         [HttpPut, Route("UpdateCounterparty")]
         public async Task<CounterpartyDTO> UpdateCounterparty(CounterpartyDTO model)
         {
+            if(model is EDMCounterpartyDTO)
+            {
+                throw new Exception403("Контрагента с привязкой к ЭДО нельзя редактировать");
+            }
+
             var counterparties = DB.Counterparties.Where(o => !o.IsDeleted && o.EDMSubjectId == this.EDMSubjectId);
             var counterparty = DBService.TryGetOne(counterparties, model.Id);
 
@@ -59,6 +71,19 @@ namespace Alfateam.EDM.API.Controllers.Counterparties
         {
             var counterparties = DB.Counterparties.Where(o => !o.IsDeleted && o.EDMSubjectId == this.EDMSubjectId);
             var counterparty = DBService.TryGetOne(counterparties, id);
+
+            if(counterparty is EDMCounterparty edmCounterparty)
+            {
+                //Удаляем себя из списка контрагентов у другого контрагента
+                var counterpartiesOfMyCounterparty = DB.Counterparties.Where(o => !o.IsDeleted && o.EDMSubjectId == edmCounterparty.SubjectId 
+                                                                                && o is EDMCounterparty)
+                                                                      .Cast<EDMCounterparty>();
+                var meInMyCounterparty = counterpartiesOfMyCounterparty.FirstOrDefault(o => o.SubjectId == this.EDMSubjectId);
+                if(meInMyCounterparty != null)
+                {
+                    DBService.TryDeleteEntity(DB.Counterparties, meInMyCounterparty);
+                }
+            }
 
             DBService.TryDeleteEntity(DB.Counterparties, counterparty);
         }

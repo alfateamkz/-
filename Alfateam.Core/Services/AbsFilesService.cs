@@ -82,7 +82,7 @@ namespace Alfateam.Core.Services
         public bool IsDocumentFileExtension(string filename)
         {
             var ext = Path.GetExtension(filename);
-            return ext == ".pdf" || ext == ".docx" || ext == ".xls" || ext == ".xlsx" || ext == ".ort" || ext == ".rtf";
+            return ext == ".pdf" || ext == ".docx" || ext == ".doc" || ext == ".xls" || ext == ".xlsx" || ext == ".ort" || ext == ".rtf";
         }
         public bool IsAudioFileExtension(string filename)
         {

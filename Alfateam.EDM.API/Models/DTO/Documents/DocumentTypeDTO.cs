@@ -1,5 +1,6 @@
 ﻿using Alfateam.Core.Attributes.DTO;
 using Alfateam.EDM.Models.Documents;
+using Alfateam.EDM.Models.Enums;
 using Alfateam.Website.API.Abstractions;
 
 namespace Alfateam.EDM.API.Models.DTO.Documents
@@ -8,7 +9,10 @@ namespace Alfateam.EDM.API.Models.DTO.Documents
     {
         public string Title { get; set; }
         public string? Description { get; set; }
-
+        public int? MinRequiredDocumentSides { get; set; }
+        public int? MaxRequiredDocumentSides { get; set; }
+        [ForClientOnly]
+        public DocumentTypeEnum Type { get; set; }
 
 
 
@@ -24,6 +28,5 @@ namespace Alfateam.EDM.API.Models.DTO.Documents
         /// </summary>
         [ForClientOnly]
         public bool IsDefaultType { get; set; }
-        public List<DocumentTypeSideDTO> Sides { get; set; } = new List<DocumentTypeSideDTO>();
     }
 }

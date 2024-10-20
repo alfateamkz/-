@@ -1,6 +1,7 @@
 ﻿using Alfateam.Core;
 using Alfateam.EDM.Models.Abstractions.ApprovalRoutes;
 using Alfateam.EDM.Models.ApprovalRoutes.AfterDocSigning;
+using Alfateam.EDM.Models.Attributes;
 using Alfateam.EDM.Models.Documents;
 using Alfateam.EDM.Models.Documents.DocumentSigning;
 using Alfateam.EDM.Models.Documents.DocumentSigning.Sides;
@@ -9,10 +10,13 @@ using Alfateam.EDM.Models.Enums.DocumentStatuses;
 using Alfateam.EDM.Models.General;
 using JsonKnownTypes;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,6 +35,12 @@ namespace Alfateam.EDM.Models.Abstractions
         [JsonProperty("discriminator")]
         public string Discriminator { get; set; }
 
+        /// <summary>
+        /// Если DraftInfo != null, то документ - черновик
+        /// </summary>
+        public DocumentDraftInfo? DraftInfo { get; set; }
+        public int? DraftInfoId { get; set; }
+
 
 
         public DocumentType Type { get; set; }
@@ -48,6 +58,12 @@ namespace Alfateam.EDM.Models.Abstractions
         public string? DocumentNumber { get; set; }
         public DateTime DocumentDate { get; set; }
 
+
+
+
+        public DateTime? DeliveredToSigningSidesAt { get; set; }
+        public DateTime? TariffedAt { get; set; }
+        public DateTime? StatusChangedAt { get; set; }
 
 
 
@@ -101,7 +117,11 @@ namespace Alfateam.EDM.Models.Abstractions
 
 
 
-
+        public bool IsValidDocumentTypeMetadata()
+        {
+            var relatedToAttr = Type.GetType().GetField(Type.ToString()).GetCustomAttributes(typeof(DocTypeRelatedTo), false)[0] as DocTypeRelatedTo;
+            return DocTypeData.GetType() == relatedToAttr.TypeOfDocTypeMetadata;
+        }
 
         public bool IsOurDocument(int edmSubjectId)
         {        
@@ -112,15 +132,21 @@ namespace Alfateam.EDM.Models.Abstractions
             return ReadEntries.Where(o => o is AlfateamEDMDocumentSigningSide).Cast<AlfateamEDMDocumentSigningSide>().Any(o => o.SubjectId == edmSubjectId);
         }
 
-
+        [NotMapped]
+        public bool IsAvailableForApproval => !IsSigned && !IsCancelled && Approval.Status == DocumentApprovalStatus.OnApprovalOrSigningStage;
         [NotMapped]
         public bool IsAvailableForSigning => !IsSigned && !IsCancelled && Approval.Status == DocumentApprovalStatus.Approved;
+        [NotMapped]
+        public bool IsAvailableForCancellation => IsSigned && !IsCancelled 
+                                                    && CancellationApproval.Status == DocumentCancellationApprovalStatus.CancellationApproved
+                                                    && Cancellation.Status == DocumentCancellationResult.CancellationRequested;
+
 
         [NotMapped]
         public bool IsSigned => Signing?.Status == DocumentSigningResultType.Signed
                              || Signing?.Status == DocumentSigningResultType.SignedWithConflict
                              || Signing?.Status == DocumentSigningResultType.DocumentFlowCompleted;
         [NotMapped]
-        public bool IsCancelled => Cancellation?.Status == DocumentCancellationResult.Cancelled;
+        public bool IsCancelled => Cancellation.Status == DocumentCancellationResult.Cancelled;
     }
 }

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Alfateam.Core;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Alfateam.EDM.Models.General
 {
@@ -20,7 +21,8 @@ namespace Alfateam.EDM.Models.General
 
 
         public List<Document> Documents { get; set; } = new List<Document>();
-        public List<Document> DraftDocuments { get; set; } = new List<Document>();
+        [NotMapped]
+        public List<Document> DraftDocuments => Documents.Where(o => o.DraftInfoId != null).ToList();
 
 
 

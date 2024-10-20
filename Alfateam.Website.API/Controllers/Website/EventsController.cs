@@ -27,7 +27,7 @@ namespace Alfateam.Website.API.Controllers.Website
         }
   
         [HttpGet, Route("GetEventsByFilter")]
-        public async Task<IEnumerable<EventDTO>> GetEventsByFilter(EventsSearchFilter filter)
+        public async Task<IEnumerable<EventDTO>> GetEventsByFilter(ClientEventsSearchFilter filter)
         {
             var events = GetEventsWithIncludes();
 

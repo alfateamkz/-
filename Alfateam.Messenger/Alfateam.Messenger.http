@@ -1,0 +1,6 @@
+@Alfateam.Messenger_HostAddress = http://localhost:5226
+
+GET {{Alfateam.Messenger_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

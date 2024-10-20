@@ -21,7 +21,7 @@ namespace Alfateam.EDM.Models.Documents.DocumentSigning
         /// Используется, если документ пущен по маршруту согласования
         /// </summary>
         public ApprovalRouteStage? ApprovalRouteStage { get; set; }
-
+        public int? ApprovalRouteStageId { get; set; }
 
 
         public DocumentApprovalResultType ResultType { get; set; } 
