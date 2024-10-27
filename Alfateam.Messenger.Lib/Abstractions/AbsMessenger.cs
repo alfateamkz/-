@@ -12,7 +12,7 @@ namespace Alfateam.Messenger.Lib.Abstractions
 {
     public abstract class AbsMessenger
     {
-        protected virtual Account Account { get; set; }
+        public virtual Account Account { get; set; }
         public AbsMessenger(Account account)
         {
             if(account == null)

@@ -27,6 +27,6 @@ namespace Alfateam.Website.API.Models.DTO.HR
 
         public JobVacancyExpierence Expierence { get; set; }
 
-        public int MainLanguageId { get; set; }
+       
     }
 }

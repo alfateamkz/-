@@ -1,5 +1,4 @@
 ﻿using Alfateam.Messenger.Lib.Abstractions.Modules;
-using Alfateam.Messenger.Models.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +19,7 @@ namespace Alfateam.Messenger.Lib.Modules.VK
         }
 
 
-        public override async Task<Models.Abstractions.Chat> CreateChat(Models.Abstractions.Chat chat)
+        public override async Task<Models.Abstractions.Chats.Chat> CreateChat(Models.Abstractions.Chats.Chat chat)
         {
             throw new NotImplementedException();
         }
@@ -30,12 +29,12 @@ namespace Alfateam.Messenger.Lib.Modules.VK
             throw new NotImplementedException();
         }
 
-        public override async Task<Models.Abstractions.Chat> GetChat(string id)
+        public override async Task<Models.Abstractions.Chats.Chat> GetChat(string id)
         {
             throw new NotImplementedException();
         }
 
-        public override async Task<IEnumerable<Models.Abstractions.Chat>> GetChats(int offset, int count)
+        public override async Task<IEnumerable<Models.Abstractions.Chats.Chat>> GetChats(int offset, int count)
         {
             var response = Messenger.VkApi.Messages.GetConversations(new GetConversationsParams
             {

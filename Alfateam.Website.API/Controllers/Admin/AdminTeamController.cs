@@ -30,6 +30,7 @@ using Alfateam.Core.Exceptions;
 using Alfateam.Website.API.Models.DTOLocalization.Posts;
 using Alfateam2._0.Models.ContentItems;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Linq;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -64,7 +65,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         [CheckContentAreaRights(ContentAccessModelType.Team, 4)]
         public async Task<TeamStructureDTO> CreateTeamStructure(TeamStructureDTO structure)
         {
-            return (TeamStructureDTO)DbService.TryCreateAvailabilityEntity(DB.TeamStructures, structure, this.Session);
+            return (TeamStructureDTO)DbService.TryCreateAvailabilityEntity(DB.TeamStructures, structure, this.Session, (entity) => {
+                entity.MainLanguageId = 1;
+            });
         }
 
 
@@ -83,13 +86,23 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Отдельные команды
 
+        [HttpGet, Route("GetTeamGroups")]
+        [CheckContentAreaRights(ContentAccessModelType.Team, 1)]
+        public async Task<IEnumerable<TeamGroupDTO>> GetTeamGroups(int structureId)
+        {
+            var groups = GetTeamGroupsList().Where(o => o.TeamStructureId == structureId && !o.IsDeleted);
+
+            CheckFromTeamStructure(structureId);
+            return new TeamGroupDTO().CreateDTOs(groups).Cast<TeamGroupDTO>();
+        }
+
         [HttpGet, Route("GetTeamGroup")]
         [CheckContentAreaRights(ContentAccessModelType.Team, 1)]
-        public async Task<TeamGroupDTO> GetTeamGroup(int id)
+        public async Task<TeamGroupDTO> GetTeamGroup(int structureId,int groupId)
         {
-            var group = GetTeamGroupsList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var group = GetTeamGroupsList().FirstOrDefault(o => o.Id == groupId && o.TeamStructureId == structureId && !o.IsDeleted);
 
-            CheckFromTeamGroup(id);
+            CheckFromTeamGroup(groupId);
             return (TeamGroupDTO)new TeamGroupDTO().CreateDTO(group);
         }
 
@@ -189,13 +202,23 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Члены команды
 
+
+        [HttpGet, Route("GetTeamMembers")]
+        [CheckContentAreaRights(ContentAccessModelType.Team, 1)]
+        public async Task<IEnumerable<TeamMemberDTO>> GetTeamMembers(int groupId)
+        {
+            var members = GetTeamMembersList().Where(o => o.TeamGroupId == groupId && !o.IsDeleted);
+
+            CheckFromTeamGroup(groupId);
+            return new TeamMemberDTO().CreateDTOs(members).Cast<TeamMemberDTO>();
+        }
         [HttpGet, Route("GetTeamMember")]
         [CheckContentAreaRights(ContentAccessModelType.Team, 1)]
-        public async Task<TeamMemberDTO> GetTeamMember(int id)
+        public async Task<TeamMemberDTO> GetTeamMember(int groupId, int memberId)
         {
-            var member = GetTeamMembersList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var member = GetTeamMembersList().FirstOrDefault(o => o.Id == memberId && o.TeamGroupId == groupId && !o.IsDeleted);
 
-            CheckFromMember(id);
+            CheckFromMember(memberId);
             return (TeamMemberDTO)new TeamMemberDTO().CreateDTO(member);
         }
 
@@ -226,7 +249,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("AddTeamMember")]
         [CheckContentAreaRights(ContentAccessModelType.Team, 4)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg и резюме (опционально) с именем cvFile")]
-        public async Task<TeamMemberDTO> AddTeamMember(int groupId, [FromForm(Name = "model")] TeamMemberDTO model)
+        public async Task<TeamMemberDTO> AddTeamMember(/*int groupId, */[FromForm(Name = "model")] TeamMemberDTO model)
         {
             CheckFromTeamGroup(model.TeamGroupId);
             return (TeamMemberDTO)DbService.TryCreateEntity(DB.TeamMembers, model, (entity) =>

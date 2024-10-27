@@ -10,7 +10,6 @@ namespace Alfateam.Website.API.Models.DTO.Events
         public string Title { get; set; }
         public string Slug => SlugHelper.GetLatynSlug(Title);
 
-        [HiddenFromClient]
-        public int MainLanguageId { get; set; }
+
     }
 }

@@ -29,6 +29,6 @@ namespace Alfateam.Website.API.Models.DTO.Posts
         public int IndustryId { get; set; }
 
 
-        public int MainLanguageId { get; set; }
+
     }
 }

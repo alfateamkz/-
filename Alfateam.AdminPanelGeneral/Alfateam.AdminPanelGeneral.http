@@ -1,0 +1,6 @@
+@Alfateam.AdminPanelGeneral_HostAddress = http://localhost:5212
+
+GET {{Alfateam.AdminPanelGeneral_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

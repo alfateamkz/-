@@ -62,7 +62,7 @@ namespace Alfateam.DB
         public WebsiteDBContext()
         {
 
-            Database.EnsureCreated();
+            Database.Migrate();
             MakeDefaultEntities();
 
             //if (Database.EnsureCreated())
@@ -73,7 +73,7 @@ namespace Alfateam.DB
         public WebsiteDBContext(DbContextOptions<WebsiteDBContext> options)
         {
 
-            Database.EnsureCreated();
+            Database.Migrate();
             MakeDefaultEntities();
 
             //if (Database.EnsureCreated())
@@ -705,6 +705,16 @@ namespace Alfateam.DB
                 OutstaffMatrices.Add(found);
                 SaveChanges();
             }
+            else
+            {
+                //Убираем, чтобы на было рекурсии при сериализации
+                foreach (var price in found.Items.SelectMany(o => o.Grades).SelectMany(o => o.Prices))
+                {
+                    price.Column = null;
+                    price.OutstaffItemGrade = null;
+                }
+            }
+
 
             return found;
         }

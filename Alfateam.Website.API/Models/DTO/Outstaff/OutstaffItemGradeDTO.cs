@@ -8,6 +8,8 @@ namespace Alfateam.Website.API.Models.DTO.Outstaff
     public class OutstaffItemGradeDTO : DTOModel<OutstaffItemGrade>
     {
         public string Title { get; set; }
+
+        [ForClientOnly]
         public List<OutstaffItemGradeColumnDTO> Prices { get; set; } = new List<OutstaffItemGradeColumnDTO>();
 
 

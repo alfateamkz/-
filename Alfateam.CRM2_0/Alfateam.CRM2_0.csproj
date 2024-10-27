@@ -19,7 +19,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alfateam.DB\Alfateam.DB.csproj" />
-    <ProjectReference Include="..\Alfateam.Website.API\Alfateam.Website.API.csproj" />
   </ItemGroup>
 
 </Project>

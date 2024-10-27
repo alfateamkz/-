@@ -20,7 +20,7 @@ namespace Alfateam.ID.API.Controllers
         [HttpGet, Route("GetPayments")]
         public async Task<IEnumerable<PaymentDTO>> GetPayments()
         {
-            var payments = DB.Payments.Where(o => o.Id == this.Session.UserId && !o.IsDeleted);
+            var payments = DB.Payments.Where(o => o.UserId == this.Session.UserId && !o.IsDeleted);
             return new PaymentDTO().CreateDTOs(payments).Cast<PaymentDTO>();
         }
 

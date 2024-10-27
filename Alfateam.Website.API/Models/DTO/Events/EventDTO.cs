@@ -41,8 +41,7 @@ namespace Alfateam.Website.API.Models.DTO.Events
         [HiddenFromClient]
         public int FormatId { get; set; }
 
-        [HiddenFromClient]
-        public int MainLanguageId { get; set; }
+
 
     }
 }

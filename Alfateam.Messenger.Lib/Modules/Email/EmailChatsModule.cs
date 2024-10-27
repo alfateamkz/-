@@ -1,5 +1,5 @@
 ﻿using Alfateam.Messenger.Lib.Abstractions.Modules;
-using Alfateam.Messenger.Models.Abstractions;
+using Alfateam.Messenger.Models.Abstractions.Chats;
 using MailKit;
 using System;
 using System.Collections.Generic;

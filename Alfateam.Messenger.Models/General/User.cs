@@ -27,5 +27,9 @@ namespace Alfateam.Messenger.Models.General
         public UserRole Role { get; set; } = UserRole.Employee;
         public UserPermissions Permissions { get; set; }
         public AllowedAccountsAccess AllowedAccountsAccess { get; set; }
+
+
+
+        public DateTime LastOnlineDate { get; set; }
     }
 }

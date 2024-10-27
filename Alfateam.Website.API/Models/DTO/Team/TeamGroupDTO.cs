@@ -8,6 +8,8 @@ namespace Alfateam.Website.API.Models.DTO.Team
     public class TeamGroupDTO : DTOModel<TeamGroup>
     {
         public string Title { get; set; }
+
+        [ForClientOnly]
         public List<TeamMemberDTO> Members { get; set; } = new List<TeamMemberDTO>();
 
 

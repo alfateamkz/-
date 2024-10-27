@@ -1,5 +1,6 @@
 ﻿using Alfateam.Messenger.Lib.Abstractions.Modules;
 using Alfateam.Messenger.Models.Abstractions;
+using Alfateam.Messenger.Models.Abstractions.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,7 +48,7 @@ namespace Alfateam.Messenger.Lib.Modules.WhatsApp
             throw new NotImplementedException();
         }
 
-        public override async Task SendTextMessage(string chatId, string message, List<AbsMessageAttachment> attachments = null)
+        public override async Task SendTextMessage(string chatId, string message, List<MessageAttachment> attachments = null)
         {
             throw new NotImplementedException();
         }

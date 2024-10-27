@@ -11,7 +11,7 @@ namespace Alfateam.Website.API.Filters.AdminSearch
 
         public IEnumerable<Post> Filter(IEnumerable<Post> items, Func<Post, string> queryPredicate)
         {
-            IEnumerable<Post> filtered = new List<Post>();
+            IEnumerable<Post> filtered = new List<Post>(items);
             if (CategoryId != null)
             {
                 filtered = filtered.Where(o => o.CategoryId == CategoryId);

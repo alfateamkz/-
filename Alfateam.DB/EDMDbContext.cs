@@ -62,7 +62,7 @@ namespace Alfateam.DB
         public DbSet<DocumentSigningResult> DocumentSigningResults { get; set; }
         public DbSet<DocumentSigningSide> DocumentSigningSides { get; set; }
         public DbSet<EDMSubject> EDMSubjects { get; set; }
-        public DbSet<EDMSubject> EDMSubjects { get; set; }
+        //public DbSet<EDMSubject> EDMSubjects { get; set; }
         public DbSet<PowerOfAttorney> PowersOfAttorney { get; set; }
         public DbSet<Signature> Signatures { get; set; }
 

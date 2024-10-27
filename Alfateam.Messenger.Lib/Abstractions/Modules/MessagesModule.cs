@@ -1,4 +1,5 @@
 ﻿using Alfateam.Messenger.Models.Abstractions;
+using Alfateam.Messenger.Models.Abstractions.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace Alfateam.Messenger.Lib.Abstractions.Modules
         public abstract Task DeleteMessage(string chatId, string messageId, bool forAll);
 
 
-        public abstract Task SendTextMessage(string chatId, string message, List<AbsMessageAttachment> attachments = null);
+        public abstract Task SendTextMessage(string chatId, string message, List<MessageAttachment> attachments = null);
         public abstract Task SendVoiceMessage(string chatId, byte[] message);
         public abstract Task SendStickerMessage(string chatId, string stickerId);
 

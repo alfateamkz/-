@@ -12,7 +12,7 @@ namespace Alfateam.Website.API.Abstractions
 
         public virtual IEnumerable<T> FilterBase<T>(IEnumerable<T> items, Func<T, string> queryPredicate) where T: AbsModel
         {
-            IEnumerable<T> filtered = new List<T>();
+            IEnumerable<T> filtered = new List<T>(items);
             if (!string.IsNullOrEmpty(Query))
             {
                 filtered = filtered.Where(o => queryPredicate(o).Contains(Query, StringComparison.OrdinalIgnoreCase));  

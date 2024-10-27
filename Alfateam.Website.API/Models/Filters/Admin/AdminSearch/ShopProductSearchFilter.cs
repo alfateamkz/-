@@ -9,7 +9,7 @@ namespace Alfateam.Website.API.Filters.AdminSearch
 
         public IEnumerable<ShopProduct> Filter(IEnumerable<ShopProduct> items, Func<ShopProduct, string> queryPredicate)
         {
-            IEnumerable<ShopProduct> filtered = new List<ShopProduct>();
+            IEnumerable<ShopProduct> filtered = new List<ShopProduct>(items);
             if (CategoryId != null)
             {
                 filtered = filtered.Where(o => o.CategoryId == CategoryId);

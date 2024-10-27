@@ -9,8 +9,11 @@ namespace Alfateam.Messenger.Models
 {
     public class Sticker : AbsModel
     {
-        public string StickerId { get; set; }
         public string CorrespondingEmoji { get; set; }
         public string Filepath { get; set; }
+
+
+
+        public int StickersSetId { get; set; }
     }
 }

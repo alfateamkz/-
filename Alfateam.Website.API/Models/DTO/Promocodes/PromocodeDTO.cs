@@ -51,7 +51,6 @@ namespace Alfateam.Website.API.Models.DTO.Promocodes
         #endregion
 
 
-        public int MainLanguageId { get; set; }
 
         public static PromocodeDTO Create(Promocode item, int? countryId, int currencyId)
         {

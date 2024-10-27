@@ -1,0 +1,6 @@
+@Alfateam.CertificationCenter_HostAddress = http://localhost:5082
+
+GET {{Alfateam.CertificationCenter_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

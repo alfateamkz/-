@@ -12,6 +12,7 @@ namespace Alfateam2._0.Models.Team
     /// </summary>
     public class TeamStructure : AvailabilityModel
     {
+        public string Title { get; set; }
         public List<TeamGroup> Groups { get; set; } = new List<TeamGroup>();
     }
 }

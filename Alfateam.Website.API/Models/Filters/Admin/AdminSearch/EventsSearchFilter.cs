@@ -10,7 +10,7 @@ namespace Alfateam.Website.API.Filters.AdminSearch
 
         public IEnumerable<Event> Filter(IEnumerable<Event> items, Func<Event, string> queryPredicate)
         {
-            IEnumerable<Event> filtered = new List<Event>();
+            IEnumerable<Event> filtered = new List<Event>(items);
             if(CategoryId != null)
             {
                 filtered = filtered.Where(o => o.CategoryId == CategoryId);

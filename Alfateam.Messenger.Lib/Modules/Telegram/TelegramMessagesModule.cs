@@ -13,6 +13,7 @@ using static TdLib.TdApi.MessageContent;
 using Alfateam.Messenger.Models.Messages;
 using static TdLib.TdApi.MessageReadDate;
 using static TdLib.TdApi.ChatAction;
+using Alfateam.Messenger.Models.Abstractions.Messages;
 
 namespace Alfateam.Messenger.Lib.Modules.Telegram
 {
@@ -53,7 +54,7 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
             throw new NotImplementedException();
         }
 
-        public override async Task SendTextMessage(string chatId, string message, List<AbsMessageAttachment> attachments = null)
+        public override async Task SendTextMessage(string chatId, string message, List<MessageAttachment> attachments = null)
         {
             var msg = new InputMessageText
             {

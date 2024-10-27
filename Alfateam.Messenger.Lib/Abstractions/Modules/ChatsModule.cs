@@ -1,4 +1,4 @@
-﻿using Alfateam.Messenger.Models.Abstractions;
+﻿using Alfateam.Messenger.Models.Abstractions.Chats;
 using System;
 using System.Collections.Generic;
 using System.Linq;

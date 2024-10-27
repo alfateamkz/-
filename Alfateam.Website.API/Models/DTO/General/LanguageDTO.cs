@@ -10,6 +10,9 @@ namespace Alfateam.Website.API.Models.DTO.General
         public string Code { get; set; }
         public bool IsRightToLeft { get; set; }
 
+        [ForClientOnly]
+        public string? IconPath { get; set; }
+
 
         public bool IsHidden { get; set; }
         public int MainLanguageId { get; set; }

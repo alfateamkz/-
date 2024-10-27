@@ -17,6 +17,23 @@ namespace Alfateam.Website.API.Models.DTO.Shop.Orders
 
         [ForClientOnly]
         public double PriceForOne { get; set; }
+        [ForClientOnly]
+        public double PriceForOneWithModifiers
+        {
+            get
+            {
+                double val = 0;
+                val += Amount * PriceForOne;
+
+                foreach (var selectedOption in SelectedModifiers.SelectMany(o => o.SelectedOptions))
+                {
+                    val += selectedOption.Sum * Amount;
+                }
+
+                return val;
+            }
+
+        }
 
         public double Sum
         {

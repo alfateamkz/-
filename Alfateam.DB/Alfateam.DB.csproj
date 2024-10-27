@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -7,14 +7,27 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
+    <Compile Remove="_MigrationsWebsiteDBContext\20241024131224_Init.cs" />
+    <Compile Remove="_MigrationsWebsiteDBContext\20241024131224_Init.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
+    <PackageReference Include="Telegram.Bot" Version="19.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Alfateam.Administration.Models\Alfateam.Administration.Models.csproj" />
+    <ProjectReference Include="..\Alfateam.CerticationCenter.Models\Alfateam.CertificationCenter.Models.csproj" />
     <ProjectReference Include="..\Alfateam.CRM2_0.Models\Alfateam.CRM2_0.Models.csproj" />
     <ProjectReference Include="..\Alfateam.EDM.Models\Alfateam.EDM.Models.csproj" />
     <ProjectReference Include="..\Alfateam.ID.Models\Alfateam.ID.Models.csproj" />
+    <ProjectReference Include="..\Alfateam.Messenger.Models\Alfateam.Messenger.Models.csproj" />
     <ProjectReference Include="..\Alfateam2.0.Models\Alfateam2.0.Models.csproj" />
   </ItemGroup>
 

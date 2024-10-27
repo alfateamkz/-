@@ -10,7 +10,7 @@ namespace Alfateam.Website.API.Filters.AdminSearch
 
         public IEnumerable<Portfolio> Filter(IEnumerable<Portfolio> items, Func<Portfolio, string> queryPredicate)
         {
-            IEnumerable<Portfolio> filtered = new List<Portfolio>();
+            IEnumerable<Portfolio> filtered = new List<Portfolio>(items);
             if (CategoryId != null)
             {
                 filtered = filtered.Where(o => o.CategoryId == CategoryId);

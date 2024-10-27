@@ -18,6 +18,10 @@ using Alfateam.Website.API.Models;
 using Alfateam.Website.API.Models.DTOLocalization.Events;
 using Alfateam.Website.API.Filters;
 using Alfateam.Website.API.Filters.Access;
+using Alfateam.Core.Enums;
+using Alfateam.Core.Exceptions;
+using Alfateam2._0.Models.ContentItems;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -179,9 +183,13 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         [HttpPost, Route("CreateLanguage")]
         [CheckContentAreaRights(ContentAccessModelType.General, 4)]
-        public async Task<LanguageDTO> CreateLanguage(LanguageDTO model)
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
+        public async Task<LanguageDTO> CreateLanguage([FromForm(Name = "model")] LanguageDTO model)
         {
-            return (LanguageDTO)DbService.TryCreateEntity(DB.Languages, model);
+            return (LanguageDTO)DbService.TryCreateEntity(DB.Languages, model, async (entity) =>
+            {
+                await HandleLanguage(entity, DBModelFillMode.Create);
+            });
         }
     
         [HttpPost, Route("CreateLanguageLocalization")]
@@ -198,10 +206,14 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         [HttpPut, Route("UpdateLanguageMain")]
         [CheckContentAreaRights(ContentAccessModelType.General, 3)]
-        public async Task<LanguageDTO> UpdateLanguageMain(LanguageDTO model)
+        [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg, если изменяем картинку")]
+        public async Task<LanguageDTO> UpdateLanguageMain([FromForm(Name = "model")] LanguageDTO model)
         {
             var item = GetLanguagesList().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (LanguageDTO)DbService.TryUpdateEntity(DB.Languages, model, item);
+            return (LanguageDTO)DbService.TryUpdateEntity(DB.Languages, model, item, async (entity) =>
+            {
+                await HandleLanguage(entity, DBModelFillMode.Update);
+            });
         }
    
         [HttpPut, Route("UpdateLanguageLocalization")]
@@ -344,7 +356,20 @@ namespace Alfateam.Website.API.Controllers.Admin
         #endregion
 
 
+        #region Private handle methods
 
+        private async Task HandleLanguage(Language entity, DBModelFillMode mode)
+        {
+            const string formFilename = "mainImg";
+
+            if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
+                || mode == DBModelFillMode.Create)
+            {
+                entity.IconPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
+            }
+        }
+
+        #endregion
 
         #region Private get included methods
         private IEnumerable<Country> GetCountriesList()

@@ -30,6 +30,6 @@ namespace Alfateam.Website.API.Models.DTO.Portfolios
 
 
 
-        public int MainLanguageId { get; set; }
+  
     }
 }

@@ -52,8 +52,6 @@ namespace Alfateam.Website.API.Models.DTO.Shop
 
 
 
-        public int MainLanguageId { get; set; }
-
         public ShopProductDTO CreateDTOWithLocalization(ShopProduct item, int langId, int countryId, int currencyId)
         {
             var dto = (ShopProductDTO)this.CreateDTOWithLocalization(item, langId);

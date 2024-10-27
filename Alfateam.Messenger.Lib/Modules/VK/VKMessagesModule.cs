@@ -23,12 +23,12 @@ namespace Alfateam.Messenger.Lib.Modules.VK
             var result = Messenger.VkApi.Messages.Delete(new List<ulong> { Convert.ToUInt64(messageId) }, deleteForAll: forAll);
         }
 
-        public override async Task<Models.Abstractions.Message> GetMessage(string chatId, string messageId)
+        public override async Task<Models.Abstractions.Messages.Message> GetMessage(string chatId, string messageId)
         {
             throw new NotImplementedException();
         }
 
-        public override async Task<IEnumerable<Models.Abstractions.Message>> GetMessages(string chatId, int offset, int count)
+        public override async Task<IEnumerable<Models.Abstractions.Messages.Message>> GetMessages(string chatId, int offset, int count)
         {
 
             throw new NotImplementedException();
@@ -42,7 +42,7 @@ namespace Alfateam.Messenger.Lib.Modules.VK
                 StickerId = Convert.ToUInt32(stickerId),
             });
         }
-        public override async Task SendTextMessage(string chatId, string message, List<AbsMessageAttachment> attachments = null)
+        public override async Task SendTextMessage(string chatId, string message, List<MessageAttachment> attachments = null)
         {
             var mediaAttachments = new List<MediaAttachment>();
             foreach(var attachment in attachments)

@@ -10,8 +10,4 @@
     <ProjectReference Include="..\Alfateam.Core\Alfateam.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Chats\Alfateam\" />
-  </ItemGroup>
-
 </Project>

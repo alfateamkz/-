@@ -12,5 +12,8 @@ namespace Alfateam.Website.API.Abstractions
     {
         [DTOFieldFor(DTOFieldForType.CreationOnly)]
         public AvailabilityDTO? Availability { get; set; }
+
+        [HiddenFromClient]
+        public int MainLanguageId { get; set; }
     }
 }

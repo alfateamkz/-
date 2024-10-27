@@ -14,6 +14,6 @@ namespace Alfateam.Website.API.Models.DTO
 
 
 
-        public int MainLanguageId { get; set; }
+
     }
 }

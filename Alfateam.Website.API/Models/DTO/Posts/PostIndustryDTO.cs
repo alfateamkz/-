@@ -10,6 +10,5 @@ namespace Alfateam.Website.API.Models.DTO.Posts
         public string Slug => SlugHelper.GetLatynSlug(Title);
 
 
-        public int MainLanguageId { get; set; }
     }
 }

@@ -24,6 +24,5 @@ namespace Alfateam.Website.API.Models.DTO
         public string DocumentPath { get; set; }
 
 
-        public int MainLanguageId { get; set; }
     }
 }

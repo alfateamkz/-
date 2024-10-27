@@ -591,6 +591,13 @@ namespace Alfateam.Website.API.Controllers.Admin
             return new ShopOrderDTO().CreateDTOs(GetAvailableOrders(offset, count)).Cast<ShopOrderDTO>();
         }
 
+        [HttpGet, Route("GetLastOrder")]
+        [ShopSectionAccess(2)]
+        public async Task<ShopOrderDTO> GetLastOrder()
+        {
+            return (ShopOrderDTO)new ShopOrderDTO().CreateDTO(GetAvailableOrders().FirstOrDefault());
+        }
+
         [HttpGet, Route("GetOrder")]
         [ShopSectionAccess(2)]
         public async Task<ShopOrderDTO> GetOrder(int id)

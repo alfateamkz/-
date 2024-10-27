@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 
 namespace Alfateam.Messenger.Models.Attachments
 {
-    public class FileMessageAttachment : AbsMessageAttachment
+    public class FileMessageAttachment : MessageAttachment
     {
         public string DisplayedFilename { get; set; }
         public FileAttachmentType Type { get; set; }
-        public byte[] Data { get; set; }
+        public string Filepath { get; set; }
     }
 }

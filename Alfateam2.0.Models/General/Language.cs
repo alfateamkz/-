@@ -21,6 +21,8 @@ namespace Alfateam2._0.Models.General
         public string Code { get; set; }
         public bool IsRightToLeft { get; set; }
 
+        public string? IconPath { get; set; }
+
 
         /// <summary>
         /// Скрыта ли данная модель от пользователей сайта

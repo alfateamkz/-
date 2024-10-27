@@ -140,10 +140,8 @@ namespace Alfateam.CRM2_0.Abstractions.Services
 
         #region Update generic methods
 
-        public RequestResult TryUpdateModel<T>(DbSet<T> dbSet, T item, EditModel<T> model, Func<T, RequestResult> prepareCallback = null) where T : AbsModel
+        public RequestResult TryUpdateModel<T>(DbSet<T> dbSet, T item, EditModel<T> model, Func<T, RequestResult> prepareCallback = null) where T : AbsModel, new()
         {
-            var user = GetAuthorizedUser();
-
             return TryFinishAllRequestes(new[]
             {
                 () => RequestResult.FromBoolean(item != null,404,"Сущность с данным id не найдена"),
@@ -152,7 +150,7 @@ namespace Alfateam.CRM2_0.Abstractions.Services
                 () => UpdateModel(dbSet,item,model)
             });
         }
-        public RequestResult TryUpdateModel<T>(DbSet<T> dbSet, EditModel<T> model, Func<T, RequestResult> prepareCallback = null) where T : AbsModel
+        public RequestResult TryUpdateModel<T>(DbSet<T> dbSet, EditModel<T> model, Func<T, RequestResult> prepareCallback = null) where T : AbsModel, new()
         {
             var user = GetAuthorizedUser();
             var item = dbSet.FirstOrDefault(o => o.Id == model.Id);

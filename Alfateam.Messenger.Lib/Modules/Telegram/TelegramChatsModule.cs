@@ -1,5 +1,5 @@
 ﻿using Alfateam.Messenger.Lib.Abstractions.Modules;
-using Alfateam.Messenger.Models.Abstractions;
+using Alfateam.Messenger.Models.Abstractions.Chats;
 using Alfateam.Messenger.Models.Chats;
 using System;
 using System.Collections.Generic;
@@ -22,12 +22,12 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
 
         public override async Task<Chat> CreateChat(Chat chat)
         {
-            if(chat is PrivateChat privateChat)
+            if(chat is ExternalPrivateChat privateChat)
             {
                 var createdChat = await Messenger.Client.CreatePrivateChatAsync(userId: Convert.ToInt64(privateChat.PeerId));
                 chat.ChatId = createdChat.Id.ToString();
             }
-            else if (chat is GroupChat groupChat)
+            else if (chat is ExternalGroupChat groupChat)
             {
                 var createdChat = await Messenger.Client.CreateNewBasicGroupChatAsync(title: groupChat.Title);
                 chat.ChatId = createdChat.ChatId.ToString();
@@ -79,7 +79,7 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
         {
             if(tgChat.Type is ChatTypePrivate tgPrivateChat)
             {
-                return new PrivateChat
+                return new ExternalPrivateChat
                 {
                     PeerId = tgPrivateChat.UserId.ToString(),
                     OurUserId = await Messenger.Auth.GetOurUserId(),
@@ -87,7 +87,7 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
             }
             if (tgChat.Type is ChatTypeSecret tgSecretChat)
             {
-                return new PrivateChat
+                return new ExternalPrivateChat
                 {
                     PeerId = tgSecretChat.UserId.ToString(),
                     ChatId = tgSecretChat.SecretChatId.ToString(),
@@ -104,7 +104,7 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
                     chatPhotoPath = tgGroupFullInfo.Photo.Sizes[0].Photo.Remote.UniqueId;
                 }
 
-                return new GroupChat
+                return new ExternalGroupChat
                 {
                     Title = tgGroupFullInfo.Description,
                     ChatPhotoPath= chatPhotoPath
@@ -120,7 +120,7 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
                     chatPhotoPath = tgGroupFullInfo.Photo.Sizes[0].Photo.Remote.UniqueId;
                 }
 
-                return new GroupChat
+                return new ExternalGroupChat
                 {
                     Title = tgGroupFullInfo.Description,
                     ChatPhotoPath = chatPhotoPath

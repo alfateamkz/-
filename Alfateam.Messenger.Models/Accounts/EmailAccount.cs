@@ -9,7 +9,7 @@ namespace Alfateam.Messenger.Models.Accounts
 {
     public class EmailAccount : Account
     {
-        public string IMAP3Host{ get; set; }
+        public string IMAP3Host { get; set; }
         public int IMAP3Port { get; set; }
     }
 }

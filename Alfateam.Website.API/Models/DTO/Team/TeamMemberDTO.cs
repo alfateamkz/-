@@ -20,10 +20,12 @@ namespace Alfateam.Website.API.Models.DTO.Team
         public string Quote { get; set; }
 
 
+        [ForClientOnly]
         public string Slug => SlugHelper.GetLatynSlug($"{Surname} {Name} - {Position}");
 
 
         public Content DetailContent { get; set; }
+        [ForClientOnly]
         public string? CVFilepath { get; set; }
 
 
