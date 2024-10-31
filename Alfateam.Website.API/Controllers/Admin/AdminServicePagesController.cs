@@ -85,9 +85,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         [SwaggerOperation(description: "Нужно загрузить главную картинку через форму с именем mainBlockImg")]
         public async Task<ServicePageDTO> CreateServicePage([FromForm(Name = "model")] ServicePageDTO model)
         {
-            return (ServicePageDTO)DbService.TryCreateAvailabilityEntity(DB.ServicePages, model, this.Session, async (entity) =>
+            return (ServicePageDTO)DbService.TryCreateAvailabilityEntity(DB.ServicePages, model, this.Session, (entity) =>
             {
-                await HandleServicePage(entity, DBModelFillMode.Create);
+                HandleServicePage(entity, DBModelFillMode.Create);
             });
         }
         [HttpPost, Route("CreateServicePageLocalization")]
@@ -108,9 +108,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<ServicePageDTO> UpdateServicePageMain([FromForm(Name = "model")] ServicePageDTO model)
         {
             var item = GetAvailableServicePages().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (ServicePageDTO)DbService.TryUpdateEntity(DB.ServicePages, model, item, async (entity) =>
+            return (ServicePageDTO)DbService.TryUpdateEntity(DB.ServicePages, model, item, (entity) =>
             {
-                await HandleServicePage(entity, DBModelFillMode.Update);
+                HandleServicePage(entity, DBModelFillMode.Update);
             });
         }
 
@@ -179,7 +179,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                         break;
                 }
 
-                await HandleServicePageReview(entity, DBModelFillMode.Create);
+                HandleServicePageReview(entity, DBModelFillMode.Create);
             });
         }
 
@@ -193,9 +193,9 @@ namespace Alfateam.Website.API.Controllers.Admin
             var item = DB.ServicePageFakeReviews.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
 
             CheckFrom(mainEntityIdFor, mainEntityId);
-            return (ServicePageFakeReviewDTO)DbService.TryUpdateEntity(DB.ServicePageFakeReviews, model, item, async (entity) =>
+            return (ServicePageFakeReviewDTO)DbService.TryUpdateEntity(DB.ServicePageFakeReviews, model, item, (entity) =>
             {
-                await HandleServicePageReview(entity, DBModelFillMode.Update);
+                HandleServicePageReview(entity, DBModelFillMode.Update);
             });
         }
 
@@ -288,7 +288,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                 throw new Exception404("Сущность по данному id не найдена");
             }
 
-            await HandleServicePageAddStackIcon(page);
+            HandleServicePageAddStackIcon(page);
             DbService.UpdateEntity(DB.ServicePages, page);
         }
 
@@ -356,33 +356,33 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
 
-        private async Task HandleServicePage(ServicePage entity, DBModelFillMode mode)
+        private void HandleServicePage(ServicePage entity, DBModelFillMode mode)
         {
             const string formFilename = "mainBlockImg";
 
             if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
               || mode == DBModelFillMode.Create)
             {
-                entity.MainBlockImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
+                entity.MainBlockImgPath = FilesService.TryUploadFile(formFilename, FileType.Image);
             }
         }
-        private async Task HandleServicePageAddStackIcon(ServicePage entity)
+        private void HandleServicePageAddStackIcon(ServicePage entity)
         {
             const string formFilename = "mainImg";
 
             entity.StackIcons.Add(new ServicePageStackIcon
             {
-                ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image),
+                ImgPath = FilesService.TryUploadFile(formFilename, FileType.Image),
             });
         }
-        private async Task HandleServicePageReview(ServicePageFakeReview entity, DBModelFillMode mode)
+        private void HandleServicePageReview(ServicePageFakeReview entity, DBModelFillMode mode)
         {
             const string formFilename = "avatarImg";
 
             if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
                || mode == DBModelFillMode.Create)
             {
-                entity.CustomerAvatarPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
+                entity.CustomerAvatarPath = FilesService.TryUploadFile(formFilename, FileType.Image);
             }
         }
 

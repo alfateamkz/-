@@ -20,7 +20,7 @@ namespace Alfateam.Website.API.Abstractions
     [ApiController]
     [Route("[controller]")]
     [ErrorsFilter]
-    [APIExceptionFilter]
+    [APIExceptionFilter/*, APIAsyncExceptionFilter*/]
     [EnableCors]
     public abstract class AbsController : ControllerBase
     {

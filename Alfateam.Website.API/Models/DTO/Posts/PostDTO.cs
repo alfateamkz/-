@@ -10,11 +10,13 @@ namespace Alfateam.Website.API.Models.DTO.Posts
     public class PostDTO : AvailabilityDTOModel<Post>
     {
         public string Title { get; set; }
+
+        [ForClientOnly]
         public string ImgPath { get; set; }
         public string ShortDescription { get; set; }
         public Content Content { get; set; }
 
-
+        [ForClientOnly]
         public string Slug => SlugHelper.GetLatynSlug(Title);
 
 

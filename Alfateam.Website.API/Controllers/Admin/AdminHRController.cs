@@ -85,10 +85,10 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreateJobVacancy")]
         [HRSectionAccess(6)]
         public async Task<JobVacancyDTO> CreateJobVacancy(JobVacancyDTO model)
-        {
-            return (JobVacancyDTO)DbService.TryCreateAvailabilityEntity(DB.JobVacancies, model, this.Session, async (entity) =>
+        {         
+            return (JobVacancyDTO)DbService.TryCreateAvailabilityEntity(DB.JobVacancies, model, this.Session, (entity) =>
             {
-                await HandleJobVacancy(entity, DBModelFillMode.Create, null);
+                HandleJobVacancy(entity, DBModelFillMode.Create, null);
             });
         }
       
@@ -97,9 +97,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<JobVacancyLocalizationDTO> CreateJobVacancyLocalization(int itemId, JobVacancyLocalizationDTO localization)
         {
             var mainEntity = GetAvailableJobVacancies().FirstOrDefault(o => o.Id == itemId);
-            return (JobVacancyLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.JobVacancies, mainEntity, localization, async (entity) =>
+            return (JobVacancyLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.JobVacancies, mainEntity, localization, (entity) =>
             {
-                await HandleJobVacancyLocalization(entity, DBModelFillMode.Create, null);
+                HandleJobVacancyLocalization(entity, DBModelFillMode.Create, null);
             });   
         }
 
@@ -112,9 +112,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<JobVacancyDTO> UpdateJobVacancyMain(JobVacancyDTO model)
         {
             var item = GetAvailableJobVacancies().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (JobVacancyDTO)DbService.TryUpdateEntity(DB.JobVacancies, model, item, async (entity) =>
+            return (JobVacancyDTO)DbService.TryUpdateEntity(DB.JobVacancies, model, item, (entity) =>
             {
-                await HandleJobVacancy(entity, DBModelFillMode.Update, model.InnerContent);
+                HandleJobVacancy(entity, DBModelFillMode.Update, model.InnerContent);
             });
         }
    
@@ -125,9 +125,9 @@ namespace Alfateam.Website.API.Controllers.Admin
             var localization = DB.JobVacancyLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var mainEntity = GetAvailableJobVacancies().FirstOrDefault(o => o.Id == localization.JobVacancyId && !o.IsDeleted);
 
-            return (JobVacancyLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.JobVacancyLocalizations, localization, model, mainEntity, async (entity) =>
+            return (JobVacancyLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.JobVacancyLocalizations, localization, model, mainEntity, (entity) =>
             {
-                await HandleJobVacancyLocalization(entity, DBModelFillMode.Update, model.InnerContent);
+                HandleJobVacancyLocalization(entity, DBModelFillMode.Update, model.InnerContent);
             });
         }
 
@@ -250,13 +250,13 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Private prepare methods
 
-        private async Task HandleJobVacancy(JobVacancy entity, DBModelFillMode mode, Content newContentForUpdate)
+        private void HandleJobVacancy(JobVacancy entity, DBModelFillMode mode, Content newContentForUpdate)
         {
-            if(!DB.Currencies.Any(o => o.Id == entity.CurrencyId && !o.IsDeleted))
+            if (!DB.Currencies.Any(o => o.Id == entity.CurrencyId && !o.IsDeleted))
             {
                 throw new Exception400("Валюта с таким id не найдена");
             }
-            else if(!DB.Languages.Any(o => o.Id == entity.MainLanguageId && !o.IsDeleted))
+            else if (!DB.Languages.Any(o => o.Id == entity.MainLanguageId && !o.IsDeleted))
             {
                 throw new Exception400("Язык с таким id не найден");
             }
@@ -265,25 +265,24 @@ namespace Alfateam.Website.API.Controllers.Admin
                 throw new Exception400("Поле требуемый опыт должно быть заполнено");
             }
 
-            if(mode == DBModelFillMode.Create)
-            {
-                await FilesService.UploadContentMedia(entity.InnerContent);
-            }
-            else if(mode == DBModelFillMode.Update && !entity.InnerContent.AreSame(newContentForUpdate))
-            {
-                await FilesService.UpdateContentMedia(entity.InnerContent, newContentForUpdate);
-            }
-            
-        }       
-        private async Task HandleJobVacancyLocalization(JobVacancyLocalization entity, DBModelFillMode mode, Content newContentForUpdate)
-        {
             if (mode == DBModelFillMode.Create)
             {
-                await FilesService.UploadContentMedia(entity.InnerContent);
+                FilesService.UploadContentMedia(entity.InnerContent);
             }
             else if (mode == DBModelFillMode.Update && !entity.InnerContent.AreSame(newContentForUpdate))
             {
-                await FilesService.UpdateContentMedia(entity.InnerContent, newContentForUpdate);
+                FilesService.UpdateContentMedia(entity.InnerContent, newContentForUpdate);
+            }
+        }       
+        private void HandleJobVacancyLocalization(JobVacancyLocalization entity, DBModelFillMode mode, Content newContentForUpdate)
+        {
+            if (mode == DBModelFillMode.Create)
+            {
+                FilesService.UploadContentMedia(entity.InnerContent);
+            }
+            else if (mode == DBModelFillMode.Update && !entity.InnerContent.AreSame(newContentForUpdate))
+            {
+                FilesService.UpdateContentMedia(entity.InnerContent, newContentForUpdate);
             }
         }
 

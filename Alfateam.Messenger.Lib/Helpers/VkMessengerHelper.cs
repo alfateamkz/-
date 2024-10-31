@@ -1,4 +1,5 @@
 ﻿using Alfateam.Messenger.Models.Abstractions.Messages;
+using Alfateam.Messenger.Models.Abstractions.Messages.External;
 using Alfateam.Messenger.Models.Chats;
 using System;
 using System.Collections.Generic;
@@ -32,7 +33,7 @@ namespace Alfateam.Messenger.Lib.Helpers
                 ChatId = "",
                 PeerId = chat.Peer.Id.ToString(),
                 OurUserId = api.UserId.ToString(),
-                Messages = new List<Message>
+                Messages = new List<ExternalMessengerMessage>
                 {
 
                 },

@@ -133,6 +133,8 @@ namespace Alfateam.Core.Services
         {
            
             ValidateToUpdateEntity(item, model);
+
+
             callback?.Invoke(item);
 
             UpdateEntity(dbSet, model, item);

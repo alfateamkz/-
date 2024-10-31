@@ -1,4 +1,5 @@
 ﻿using Alfateam.Messenger.Models.Abstractions;
+using Alfateam.Messenger.Models.DTO.Abstractions;
 using Alfateam.Messenger.Models.General.Chats;
 using Alfateam.Website.API.Abstractions;
 using System;

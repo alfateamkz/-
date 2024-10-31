@@ -17,8 +17,17 @@ namespace Alfateam.Website.API.Services.General
 
         #region Upload content media
 
-        public async Task UpdateContentMedia(Content oldContent, Content newContent)
+        public void UpdateContentMedia(Content oldContent, Content newContent)
         {
+            if (oldContent == null)
+            {
+                throw new Exception400("oldContent не должен быть равен null");
+            }
+            else if (newContent == null)
+            {
+                throw new Exception400("newContent не должен быть равен null");
+            }
+
             var oldContentItems = GetAllContentItems(oldContent);
             var newContentItems = GetAllContentItems(oldContent);
 
@@ -70,47 +79,52 @@ namespace Alfateam.Website.API.Services.General
             {
                 if (item is AudioContentItem audio)
                 {
-                    audio.AudioPath = await TryUploadFile(item.Guid, FileType.Audio);
+                    audio.AudioPath = TryUploadFile(item.Guid, FileType.Audio);
                 }
                 else if (item is ImageContentItem image)
                 {
-                    image.ImgPath = await TryUploadFile(item.Guid, FileType.Image);
+                    image.ImgPath = TryUploadFile(item.Guid, FileType.Image);
                 }
                 else if (item is ImageSliderContentItem slider)
                 {
                     foreach (var img in slider.Images)
                     {
-                        img.ImgPath = await TryUploadFile(item.Guid, FileType.Image);
+                        img.ImgPath = TryUploadFile(item.Guid, FileType.Image);
                     }
                 }
                 else if (item is VideoContentItem video)
                 {
-                    video.VideoPath = await TryUploadFile(item.Guid, FileType.Video);
+                    video.VideoPath = TryUploadFile(item.Guid, FileType.Video);
                 }
             }
         }
-        public async Task UploadContentMedia(Content content)
+        public void UploadContentMedia(Content content)
         {
+            if(content == null)
+            {
+                throw new Exception400("content не должен быть равен null");
+            }
+
             foreach (var item in content.Items)
             {
                 if (item is AudioContentItem audio)
                 {
-                    audio.AudioPath = await TryUploadFile(item.Guid, FileType.Audio);
+                    audio.AudioPath = TryUploadFile(item.Guid, FileType.Audio);
                 }
                 else if (item is ImageContentItem image)
                 {
-                    image.ImgPath = await TryUploadFile(item.Guid, FileType.Image);
+                    image.ImgPath = TryUploadFile(item.Guid, FileType.Image);
                 }
                 else if (item is ImageSliderContentItem slider)
                 {
                     foreach (var img in slider.Images)
                     {
-                        img.ImgPath = await TryUploadFile(item.Guid, FileType.Image);
+                        img.ImgPath = TryUploadFile(item.Guid, FileType.Image);
                     }
                 }
                 else if (item is VideoContentItem video)
                 {
-                    video.VideoPath = await TryUploadFile(item.Guid, FileType.Video);
+                    video.VideoPath =  TryUploadFile(item.Guid, FileType.Video);
                 }
             }
         }

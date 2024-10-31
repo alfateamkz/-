@@ -1,4 +1,5 @@
 ﻿using Alfateam.Core;
+using Alfateam.Messenger.Models.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,13 +10,18 @@ namespace Alfateam.Messenger.Models.General.Chats
 {
     public class ChatPersonalSettings : AbsModel
     {
-        public User User { get; set; }
+        public Account User { get; set; }
         public int UserId { get; set; }
 
 
 
         public ChatFolder? Folder { get; set; }
         public int? FolderId { get; set; }
+
+
+
+        public ChatBackground Background { get; set; }
+        public int BackgroundId { get; set; }
 
 
         /// <summary>

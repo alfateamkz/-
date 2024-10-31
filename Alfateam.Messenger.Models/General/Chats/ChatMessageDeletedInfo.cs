@@ -1,4 +1,5 @@
 ﻿using Alfateam.Core;
+using Alfateam.Messenger.Models.Accounts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Alfateam.Messenger.Models.General.Chats
 {
     public class ChatMessageDeletedInfo : AbsModel
     {
-        public User DeletedBy { get; set; }
+        public AlfateamMessengerAccount DeletedBy { get; set; }
         public int DeletedById { get; set; }
 
 

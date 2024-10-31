@@ -2,6 +2,9 @@
 using Alfateam.Core.Exceptions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.VisualBasic.FileIO;
+using System.IO;
+using System.Net.Mail;
 
 namespace Alfateam.Core.Services
 {
@@ -110,127 +113,79 @@ namespace Alfateam.Core.Services
 
         #region UploadFile
 
-        public async Task<string> TryUploadFile(string formFileName, FileType fileType)
+
+
+
+
+        public async Task<string> TryUploadFileAsync(string formFileName, FileType fileType)
         {
             var file = Request.Form.Files.FirstOrDefault(o => o.Name == formFileName);
+            CheckFileBeforeUpload(file, fileType);
 
-            switch (fileType)
-            {
-                case FileType.Image:
-                    this.CheckImageFile(file);
-                    break;
-                case FileType.Document:
-                    this.CheckDocumentFile(file);
-                    break;
-                case FileType.Video:
-                    this.CheckVideoFile(file);
-                    break;
-                case FileType.Audio:
-                    this.CheckAudioFile(file);
-                    break;
-            }
-
-
-            string filepath = await this.UploadFile(file);
-            return filepath;
+            return await this.UploadFileAsync(file);
         }
-        public async Task<string> TryUploadFile(IFormFile file, FileType fileType)
+        public async Task<string> TryUploadFileAsync(IFormFile file, FileType fileType)
         {
-            switch (fileType)
-            {
-                case FileType.Image:
-                    this.CheckImageFile(file);
-                    break;
-                case FileType.Document:
-                    this.CheckDocumentFile(file);
-                    break;
-                case FileType.Video:
-                    this.CheckVideoFile(file);
-                    break;
-                case FileType.Audio:
-                    this.CheckAudioFile(file);
-                    break;
-            }
-
-            string filepath = await this.UploadFile(file);
-            return filepath;
+            CheckFileBeforeUpload(file, fileType);
+            return await this.UploadFileAsync(file);
         }
-        public async Task<string> TryUploadFile(int index, FileType fileType)
+        public async Task<string> TryUploadFileAsync(int index, FileType fileType)
         {
             var file = Request.Form.Files[index];
+            CheckFileBeforeUpload(file, fileType);
 
-            switch (fileType)
-            {
-                case FileType.Image:
-                    this.CheckImageFile(file);
-                    break;
-                case FileType.Document:
-                    this.CheckDocumentFile(file);
-                    break;
-                case FileType.Video:
-                    this.CheckVideoFile(file);
-                    break;
-                case FileType.Audio:
-                    this.CheckAudioFile(file);
-                    break;
-            }
-
-            string filepath = await this.UploadFile(file);
-            return filepath;
+            return await this.UploadFileAsync(file);
         }
 
-        public async Task<string> UploadFile(int index = 0)
+        public string TryUploadFile(string formFileName, FileType fileType)
+        {
+            var file = Request.Form.Files.FirstOrDefault(o => o.Name == formFileName);
+            CheckFileBeforeUpload(file, fileType);
+
+            return this.UploadFile(file);
+        }
+        public string TryUploadFile(IFormFile file, FileType fileType)
+        {
+            CheckFileBeforeUpload(file, fileType);
+            return this.UploadFile(file);
+        }
+        public string TryUploadFile(int index, FileType fileType)
+        {
+            var file = Request.Form.Files[index];
+            CheckFileBeforeUpload(file, fileType);
+
+            return this.UploadFile(file);
+        }
+
+
+        public async Task<string> UploadFileAsync(int index = 0)
         {
             var attachment = Request.Form.Files.Skip(index).FirstOrDefault();
-            var filePath = "/uploads/" + Guid.NewGuid().ToString();
-
-            if (attachment != null && attachment.Length > 0)
-            {
-                string path = filePath + attachment.FileName;
-                using (var fileStream = new FileStream(AppEnvironment.WebRootPath + path, FileMode.Create))
-                {
-                    await attachment.CopyToAsync(fileStream);
-                }
-                return path;
-            }
-            return "";
+            return await PrivateUploadFileAsync(attachment);
         }
-        public async Task<string> UploadFile(IFormFile file)
+        public async Task<string> UploadFileAsync(IFormFile file)
         {
-            var folderPath = AppEnvironment.ContentRootPath + "/uploads/";
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
-
-            var filePath = "/uploads/" + Guid.NewGuid().ToString();
-       
-            if (file != null && file.Length > 0)
-            {
-                string path = filePath + file.FileName;
-                using (var fileStream = new FileStream(AppEnvironment.ContentRootPath + path, FileMode.Create))
-                {
-                    await file.CopyToAsync(fileStream);
-                }
-                return path;
-            }
-            return "";
+            return await PrivateUploadFileAsync(file);
         }
-        public async Task<string> UploadFile(string formFileName)
+        public async Task<string> UploadFileAsync(string formFileName)
         {
             var attachment = Request.Form.Files.FirstOrDefault(o => o.Name == formFileName);
-            var filePath = "/uploads/" + Guid.NewGuid().ToString();
+            return await PrivateUploadFileAsync(attachment);
+        }
 
-            if (attachment != null && attachment.Length > 0)
-            {
-                string path = filePath + attachment.FileName;
-                using (var fileStream = new FileStream(AppEnvironment.WebRootPath + path, FileMode.Create))
-                {
-                    await attachment.CopyToAsync(fileStream);
-                }
-                return path;
-            }
-            return "";
+        public string UploadFile(int index = 0)
+        {
+            var attachment = Request.Form.Files.Skip(index).FirstOrDefault();
+            return PrivateUploadFile(attachment);
+        }
+        public string UploadFile(IFormFile file)
+        {
+            return PrivateUploadFile(file);
+        }
+        public string UploadFile(string formFileName)
+        {
+            var attachment = Request.Form.Files.FirstOrDefault(o => o.Name == formFileName);
+            return PrivateUploadFile(attachment);
         }
 
         #endregion
@@ -255,6 +210,86 @@ namespace Alfateam.Core.Services
         #endregion
 
 
+
+        #region Private methods
+
+    
+        private void CheckFileBeforeUpload(IFormFile file, FileType fileType)
+        {
+            switch (fileType)
+            {
+                case FileType.Image:
+                    this.CheckImageFile(file);
+                    break;
+                case FileType.Document:
+                    this.CheckDocumentFile(file);
+                    break;
+                case FileType.Video:
+                    this.CheckVideoFile(file);
+                    break;
+                case FileType.Audio:
+                    this.CheckAudioFile(file);
+                    break;
+            }
+        }
+
+
+
+        private string PrivateUploadFile(IFormFile file)
+        {
+            var folderPath = AppEnvironment.ContentRootPath + "/uploads/";
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            var filePath = "/uploads/" + Guid.NewGuid().ToString();
+
+            if (file != null && file.Length > 0)
+            {
+                string path = filePath + file.FileName;
+                using (var fileStream = new FileStream(AppEnvironment.ContentRootPath + path, FileMode.Create))
+                {
+                    CopyTo(file, fileStream);
+                }
+                return path;
+            }
+            return "";
+        }
+        private async Task<string> PrivateUploadFileAsync(IFormFile file)
+        {
+            var folderPath = AppEnvironment.ContentRootPath + "/uploads/";
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            var filePath = "/uploads/" + Guid.NewGuid().ToString();
+
+            if (file != null && file.Length > 0)
+            {
+                string path = filePath + file.FileName;
+                using (var fileStream = new FileStream(AppEnvironment.ContentRootPath + path, FileMode.Create))
+                {
+                    await CopyToAsync(file, fileStream);
+                }
+                return path;
+            }
+            return "";
+        }
+
+
+        private void CopyTo(IFormFile file, FileStream fs)
+        {
+            file.CopyTo(fs);
+        }
+        private async Task CopyToAsync(IFormFile file, FileStream fs)
+        {
+            await file.CopyToAsync(fs);
+        }
+
+
+        #endregion
 
     }
 }

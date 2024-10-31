@@ -1,6 +1,8 @@
 ﻿using Alfateam.Messenger.Lib.Abstractions.Modules;
-using Alfateam.Messenger.Models.Abstractions;
-using Alfateam.Messenger.Models.Attachments;
+using Alfateam.Messenger.Models.Abstractions.Attachments;
+using Alfateam.Messenger.Models.Attachments.Alfateam;
+using MessageDbModel = Alfateam.Messenger.Models.Abstractions.Messages.Message;
+using DbFileAttachmentType = Alfateam.Messenger.Models.Enums.FileAttachmentType;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,31 +20,35 @@ namespace Alfateam.Messenger.Lib.Modules.VK
             Messenger = messenger;
         }
 
-        public override async Task DeleteMessage(string chatId, string messageId, bool forAll)
+        public override async Task<bool> DeleteMessage(string chatId, string messageId, bool forAll)
         {
             var result = Messenger.VkApi.Messages.Delete(new List<ulong> { Convert.ToUInt64(messageId) }, deleteForAll: forAll);
-        }
-
-        public override async Task<Models.Abstractions.Messages.Message> GetMessage(string chatId, string messageId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override async Task<IEnumerable<Models.Abstractions.Messages.Message>> GetMessages(string chatId, int offset, int count)
-        {
 
             throw new NotImplementedException();
         }
 
-        public override async Task SendStickerMessage(string chatId, string stickerId)
+        public override async Task<MessageDbModel> GetMessage(string chatId, string messageId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override async Task<IEnumerable<MessageDbModel>> GetMessages(string chatId, int offset, int count)
+        {
+
+            throw new NotImplementedException();
+        }
+
+        public override async Task<MessageDbModel> SendStickerMessage(string chatId, string stickerId)
         {
             var result = Messenger.VkApi.Messages.SendSticker(new MessagesSendStickerParams
             {
                 ChatId = Convert.ToInt64(chatId),
                 StickerId = Convert.ToUInt32(stickerId),
             });
+
+            throw new NotImplementedException();
         }
-        public override async Task SendTextMessage(string chatId, string message, List<MessageAttachment> attachments = null)
+        public override async Task<MessageDbModel> SendTextMessage(string chatId, string message, List<MessageAttachment> attachments = null)
         {
             var mediaAttachments = new List<MediaAttachment>();
             foreach(var attachment in attachments)
@@ -51,28 +57,28 @@ namespace Alfateam.Messenger.Lib.Modules.VK
                 {
                     switch (fileMessageAttachment.Type)
                     {
-                        case Models.Enums.FileAttachmentType.Image:
+                        case DbFileAttachmentType.Image:
                             mediaAttachments.Add(new Photo()
                             {
                                 CanComment = false,
 
                             });
                             break;
-                        case Models.Enums.FileAttachmentType.Video:
+                        case DbFileAttachmentType.Video:
                             mediaAttachments.Add(new Video()
                             {
                                 CanComment = false,
 
                             });
                             break;
-                        case Models.Enums.FileAttachmentType.Audio:
+                        case DbFileAttachmentType.Audio:
                             mediaAttachments.Add(new Audio()
                             {
                                
 
                             });
                             break;
-                        case Models.Enums.FileAttachmentType.Document:
+                        case DbFileAttachmentType.Document:
                             mediaAttachments.Add(new Document()
                             {
                                 
@@ -91,10 +97,10 @@ namespace Alfateam.Messenger.Lib.Modules.VK
                 DisableMentions = true,
             });
 
-           
+            throw new NotImplementedException();
         }
 
-        public override async Task SendVoiceMessage(string chatId, byte[] message)
+        public override async Task<MessageDbModel> SendVoiceMessage(string chatId, byte[] message)
         {
             throw new NotImplementedException();
         }
@@ -113,7 +119,7 @@ namespace Alfateam.Messenger.Lib.Modules.VK
 
 
 
-        public override async Task EditMessage(string chatId, string messageId, string text)
+        public override async Task<MessageDbModel> EditMessage(string chatId, string messageId, string text)
         {
             var editResult = Messenger.VkApi.Messages.Edit(new MessageEditParams
             {
@@ -123,6 +129,8 @@ namespace Alfateam.Messenger.Lib.Modules.VK
                 MessageId = Convert.ToInt64(messageId),
                 Message = text
             });
+
+            throw new NotImplementedException();
         }
     }
 }

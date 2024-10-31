@@ -69,7 +69,7 @@ namespace Alfateam.EDM.API.Controllers.Director
             var subjects = DB.EDMSubjects.Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
             var subject = DBService.TryGetOne(subjects, companyId);
 
-            subject.LogoPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
+            subject.LogoPath = FilesService.TryUploadFile(formFilename, FileType.Image);
             DBService.UpdateEntity(DB.EDMSubjects, subject);
 
             return subject.LogoPath;

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using VkNet.Model;
 using VkNet;
+using Alfateam.Messenger.Lib.Models;
 
 namespace Alfateam.Messenger.Lib.Modules.VK
 {
@@ -30,11 +31,11 @@ namespace Alfateam.Messenger.Lib.Modules.VK
 
             if (Messenger.VkApi.IsAuthorized)
             {
-                return AuthResult.Authorized;
+                return AuthResult.Create(AuthResultType.Authorized);
             }
             else
             {
-                return AuthResult.InvalidCredentials;
+                return AuthResult.Create(AuthResultType.InvalidCredentials);
             }
         }
 

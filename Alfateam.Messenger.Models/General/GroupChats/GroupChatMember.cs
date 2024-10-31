@@ -1,4 +1,5 @@
 ﻿using Alfateam.Core;
+using Alfateam.Messenger.Models.Accounts;
 using Alfateam.Messenger.Models.Enums;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace Alfateam.Messenger.Models.General.GroupChats
 {
     public class GroupChatMember : AbsModel
     {
-        public User User { get; set; }
+        public AlfateamMessengerAccount User { get; set; }
         public int UserId { get; set; }
 
 

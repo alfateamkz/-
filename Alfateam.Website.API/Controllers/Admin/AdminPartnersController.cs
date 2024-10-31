@@ -93,9 +93,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         [SwaggerOperation(description: "Нужно загрузить логотип через форму с именем logoImg")]
         public async Task<PartnerDTO> CreatePartner([FromForm(Name = "model")] PartnerDTO model)
         {
-            return (PartnerDTO)DbService.TryCreateAvailabilityEntity(DB.Partners, model, this.Session, async (entity) =>
+            return (PartnerDTO)DbService.TryCreateAvailabilityEntity(DB.Partners, model, this.Session, (entity) =>
             {
-                await HandlePartner(entity, DBModelFillMode.Create, null);
+                HandlePartner(entity, DBModelFillMode.Create, null);
             });
         }
 
@@ -104,9 +104,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<PartnerLocalizationDTO> CreatePartnerLocalization(int itemId, PartnerLocalizationDTO localization)
         {
             var mainEntity = GetAvailablePartners().FirstOrDefault(o => o.Id == itemId);
-            return (PartnerLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.Partners, mainEntity, localization, async (entity) =>
+            return (PartnerLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.Partners, mainEntity, localization, (entity) =>
             {
-                await HandlePartnerLocalization(entity, DBModelFillMode.Create, null);
+                HandlePartnerLocalization(entity, DBModelFillMode.Create, null);
             });
         }
 
@@ -121,9 +121,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<PartnerDTO> UpdatePostCategoryMain([FromForm(Name = "model")] PartnerDTO model)
         {
             var item = GetAvailablePartners().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (PartnerDTO)DbService.TryUpdateEntity(DB.Partners, model, item, async (entity) =>
+            return (PartnerDTO)DbService.TryUpdateEntity(DB.Partners, model, item, (entity) =>
             {
-                await HandlePartner(entity, DBModelFillMode.Update, model.Content);
+                HandlePartner(entity, DBModelFillMode.Update, model.Content);
             });
         }
 
@@ -134,9 +134,9 @@ namespace Alfateam.Website.API.Controllers.Admin
             var localization = DB.PartnerLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var mainEntity = GetAvailablePartners().FirstOrDefault(o => o.Id == localization.PartnerId && !o.IsDeleted);
 
-            return (PartnerLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.PartnerLocalizations, localization, model, mainEntity, async (entity) =>
+            return (PartnerLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.PartnerLocalizations, localization, model, mainEntity, (entity) =>
             {
-                await HandlePartnerLocalization(entity, DBModelFillMode.Update, model.Content);
+                HandlePartnerLocalization(entity, DBModelFillMode.Update, model.Content);
             });
         }
 
@@ -188,34 +188,34 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Private prepare methods
 
-        private async Task HandlePartner(Partner entity, DBModelFillMode mode, Content newContentForUpdate)
+        private void HandlePartner(Partner entity, DBModelFillMode mode, Content newContentForUpdate)
         {
             const string formFilename = "logoImg";
 
             if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
                || mode == DBModelFillMode.Create)
             {
-                entity.LogoPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
+                entity.LogoPath = FilesService.TryUploadFile(formFilename, FileType.Image);
             }
 
             if (mode == DBModelFillMode.Create)
             {
-                await FilesService.UploadContentMedia(entity.Content);
+                FilesService.UploadContentMedia(entity.Content);
             }
             else if (mode == DBModelFillMode.Update && !entity.Content.AreSame(newContentForUpdate))
             {
-                await FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
+                FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
             }
         }
-        private async Task HandlePartnerLocalization(PartnerLocalization entity, DBModelFillMode mode, Content newContentForUpdate)
+        private void HandlePartnerLocalization(PartnerLocalization entity, DBModelFillMode mode, Content newContentForUpdate)
         {
             if (mode == DBModelFillMode.Create)
             {
-                await FilesService.UploadContentMedia(entity.Content);
+                FilesService.UploadContentMedia(entity.Content);
             }
             else if (mode == DBModelFillMode.Update && !entity.Content.AreSame(newContentForUpdate))
             {
-                await FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
+                FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
             }
         }
 

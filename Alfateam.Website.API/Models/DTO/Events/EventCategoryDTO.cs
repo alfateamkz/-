@@ -11,7 +11,7 @@ namespace Alfateam.Website.API.Models.DTO.Events
         public string? Description { get; set; }
 
 
-
+        [ForClientOnly]
         public string Slug => SlugHelper.GetLatynSlug(Title);
     }
 }

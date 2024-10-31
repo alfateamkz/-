@@ -9,56 +9,23 @@ namespace Alfateam.DB.Helpers
     internal static class ConnectionStrings
     {
 
-
-
+        internal static string BuildConnectionString(string dbName)
+        {
 #if DEBUG
-
-        public static string EDM { get; set; } = "server=localhost;" +
-                                                     "user=root;" +
-                                                     "password=H2c7V7p6;" +
-                                                     "port=3306;" +
-                                                     "database=alfateam_edm;";
-        public static string AlfateamID { get; set; } = "server=localhost;" +
-                                                        "user=root;" +
-                                                        "password=H2c7V7p6;" +
-                                                        "port=3306;" +
-                                                        "database=alfateam_id;";
-        public static string Website { get; set; } = "server=localhost;" +
-                                                    "user=root;" +
-                                                    "password=H2c7V7p6;" +
-                                                    "port=3306;" +
-                                                    "database=alfateam_co;";
-        public static string CRM { get; set; } = "server=localhost;" +
-                                                 "user=root;" +
-                                                 "password=H2c7V7p6;" +
-                                                 "port=3306;" +
-                                                 "database=alfateam_co_crm;";
+            return $"server=localhost;user=root;password=H2c7V7p6;port=3306;database={dbName};";
 #else
-
-      public static string EDM { get; set; } = "server=localhost;" +
-                                                        "user=usp;" +
-                                                        "password=ErPvm!3;" +
-                                                        "port=3306;" +
-                                                        "database=alfateam_edm;";
-
-        public static string AlfateamID { get; set; } = "server=localhost;" +
-                                                        "user=usp;" +
-                                                        "password=ErPvm!3;" +
-                                                        "port=3306;" +
-                                                        "database=alfateam_id;";
-
-        public static string Website { get; set; } = "server=localhost;" +
-                                                    "user=usp;" +
-                                                    "password=ErPvm!3;" +
-                                                    "port=3306;" +
-                                                    "database=alfateam_co;";
-
-
-         public static string CRM { get; set; } = "server=localhost;" +
-                                                 "user=usp;" +
-                                                 "password=ErPvm!3;" +
-                                                 "port=3306;" +
-                                                 "database=alfateam_co_crm;";
+            return $"server=localhost;user=usp;password=ErPvm!3;port=3306;database={dbName};";
 #endif
+        }
+
+
+        public static string Administration => BuildConnectionString("alfateam_administration");
+        public static string EDM => BuildConnectionString("alfateam_edm");
+        public static string AlfateamID => BuildConnectionString("alfateam_id");
+        public static string CRM => BuildConnectionString("alfateam_co_crm");
+        public static string Website => BuildConnectionString("alfateam_co");
+        public static string Messenger => BuildConnectionString("alfateam_messenger");
+        public static string CertCenter => BuildConnectionString("alfateam_certCenter");
+
     }
 }

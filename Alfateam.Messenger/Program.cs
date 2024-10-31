@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Alfateam.Messenger.API.Models;
 using Alfateam.Messenger.API.Filters;
+using Alfateam.Messenger.API.Controllers.Messenger;
+using Alfateam.Messenger.API.Services;
 
 namespace Alfateam.Messenger
 {
@@ -24,7 +26,7 @@ namespace Alfateam.Messenger
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-
+            builder.Services.AddSignalR();
 
 
 
@@ -52,6 +54,9 @@ namespace Alfateam.Messenger
             });
             builder.Services.AddTransient<AbsDBService>(x => new AbsDBService(x.GetRequiredService<MessengerDbContext>()));
             builder.Services.AddTransient<AbsFilesService>();
+
+            builder.Services.AddTransient<ChatMiscService>();
+
             builder.Services.AddTransient<ControllerParams>();
 
 
@@ -82,6 +87,7 @@ namespace Alfateam.Messenger
 
 
             app.MapControllers();
+            app.MapHub<MessengerWebSocketHub>("/MessengerWebSocketHub");
 
             app.Run();
         }

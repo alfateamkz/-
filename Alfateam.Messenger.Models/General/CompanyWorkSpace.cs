@@ -1,4 +1,5 @@
 ﻿using Alfateam.Core;
+using Alfateam.Messenger.Models.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,9 +22,20 @@ namespace Alfateam.Messenger.Models.General
 
 
 
+        public List<Account> Accounts { get; set; } = new List<Account>();
+
 
 
         public List<User> Users { get; set; } = new List<User>();
+        public Department Department { get; set; }
+
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int BusinessId { get; set; }
 
     }
 }

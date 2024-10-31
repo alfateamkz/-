@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Alfateam.ID.Models\Alfateam.ID.Models.csproj" />
     <ProjectReference Include="..\Alfateam.Messenger.Models\Alfateam.Messenger.Models.csproj" />
   </ItemGroup>
 

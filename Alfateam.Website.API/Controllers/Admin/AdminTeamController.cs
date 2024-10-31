@@ -362,7 +362,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         
 
         #region Private prepare methods
-        private async Task HandleTeamMember(TeamMember entity, DBModelFillMode mode, Content newContentForUpdate)
+        private void HandleTeamMember(TeamMember entity, DBModelFillMode mode, Content newContentForUpdate)
         {
             const string formFilename = "mainImg";
             const string cvFilename = "cvFile";
@@ -370,40 +370,40 @@ namespace Alfateam.Website.API.Controllers.Admin
             if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
               || mode == DBModelFillMode.Create)
             {
-                entity.ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
+                entity.ImgPath = FilesService.TryUploadFile(formFilename, FileType.Image);
             }
 
             if (FilesService.IsFileUploaded(cvFilename))
             {
-                entity.CVFilepath = await FilesService.TryUploadFile(cvFilename, FileType.Document);
+                entity.CVFilepath = FilesService.TryUploadFile(cvFilename, FileType.Document);
             }
 
             if (mode == DBModelFillMode.Create)
             {
-                await FilesService.UploadContentMedia(entity.DetailContent);
+                FilesService.UploadContentMedia(entity.DetailContent);
             }
             else if (mode == DBModelFillMode.Update && !entity.DetailContent.AreSame(newContentForUpdate))
             {
-                await FilesService.UpdateContentMedia(entity.DetailContent, newContentForUpdate);
+                FilesService.UpdateContentMedia(entity.DetailContent, newContentForUpdate);
             }
         }
-        private async Task HandleTeamMemberLocalization(TeamMemberLocalization entity, DBModelFillMode mode, Content newContentForUpdate)
+        private void HandleTeamMemberLocalization(TeamMemberLocalization entity, DBModelFillMode mode, Content newContentForUpdate)
         {
             const string cvFilename = "cvFile";
 
             if (FilesService.IsFileUploaded(cvFilename))
             {
-                entity.CVFilepath = await FilesService.TryUploadFile(cvFilename, FileType.Document);
+                entity.CVFilepath = FilesService.TryUploadFile(cvFilename, FileType.Document);
             }
 
 
             if (mode == DBModelFillMode.Create)
             {
-                await FilesService.UploadContentMedia(entity.DetailContent);
+                FilesService.UploadContentMedia(entity.DetailContent);
             }
             else if (mode == DBModelFillMode.Update && !entity.DetailContent.AreSame(newContentForUpdate))
             {
-                await FilesService.UpdateContentMedia(entity.DetailContent, newContentForUpdate);
+                FilesService.UpdateContentMedia(entity.DetailContent, newContentForUpdate);
             }
         }
 

@@ -105,9 +105,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
         public async Task<ShopProductDTO> CreateProduct([FromForm(Name ="model")]ShopProductDTO model)
         {
-            return (ShopProductDTO)DbService.TryCreateAvailabilityEntity(DB.ShopProducts, model, this.Session, async (entity) =>
+            return (ShopProductDTO)DbService.TryCreateAvailabilityEntity(DB.ShopProducts, model, this.Session, (entity) =>
             {
-                await HandleProduct(entity, DBModelFillMode.Create);
+                HandleProduct(entity, DBModelFillMode.Create);
             });
         }
 
@@ -117,9 +117,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<ShopProductLocalizationDTO> CreateProductCategoryLocalization(int itemId, [FromForm(Name = "localization")] ShopProductLocalizationDTO localization)
         {
             var mainEntity = GetAvailableShopProducts().FirstOrDefault(o => o.Id == itemId);
-            return (ShopProductLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.ShopProducts, mainEntity, localization, async (entity) =>
+            return (ShopProductLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.ShopProducts, mainEntity, localization, (entity) =>
             {
-                await HandleProductLocalization(entity, DBModelFillMode.Create);
+                HandleProductLocalization(entity, DBModelFillMode.Create);
             });
         }
 
@@ -132,9 +132,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<ShopProductDTO> UpdateProductMain([FromForm(Name = "model")] ShopProductDTO model)
         {
             var item = GetAvailableShopProducts().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (ShopProductDTO)DbService.TryUpdateEntity(DB.ShopProducts, model, item, async (entity) =>
+            return (ShopProductDTO)DbService.TryUpdateEntity(DB.ShopProducts, model, item, (entity) =>
             {
-                await HandleProduct(entity, DBModelFillMode.Update);
+                HandleProduct(entity, DBModelFillMode.Update);
             });
         }
 
@@ -146,9 +146,9 @@ namespace Alfateam.Website.API.Controllers.Admin
             var localization = DB.ShopProductLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var mainEntity = GetAvailableShopProducts().FirstOrDefault(o => o.Id == localization.ShopProductId && !o.IsDeleted);
 
-            return (ShopProductLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.ShopProductLocalizations, localization, model, mainEntity, async (entity) =>
+            return (ShopProductLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.ShopProductLocalizations, localization, model, mainEntity, (entity) =>
             {
-                await HandleProductLocalization(entity, DBModelFillMode.Update);
+                HandleProductLocalization(entity, DBModelFillMode.Update);
             });
         }
 
@@ -168,7 +168,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                 throw new Exception404("Сущность по данному id не найдена");
             }
 
-            await HandleProductAddPhoto(product);
+            HandleProductAddPhoto(product);
             DbService.UpdateEntity(DB.ShopProducts, product);
         }
 
@@ -184,7 +184,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                 throw new Exception404("Сущность по данному id не найдена");
             }
 
-            await HandleProductLocalizationAddPhoto(localization);
+            HandleProductLocalizationAddPhoto(localization);
             DbService.UpdateEntity(DB.ShopProductLocalizations, localization);
         }
 
@@ -875,7 +875,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Private prepare model methods
 
 
-        private async Task HandleProduct(ShopProduct entity, DBModelFillMode mode)
+        private void HandleProduct(ShopProduct entity, DBModelFillMode mode)
         {
             const string formFilename = "mainImg";
 
@@ -887,10 +887,10 @@ namespace Alfateam.Website.API.Controllers.Admin
                     entity.MainImage = new ShopProductImage();
                 }
 
-                entity.MainImage.ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
+                entity.MainImage.ImgPath = FilesService.TryUploadFile(formFilename, FileType.Image);
             }
         }
-        private async Task HandleProductLocalization(ShopProductLocalization entity, DBModelFillMode mode)
+        private void HandleProductLocalization(ShopProductLocalization entity, DBModelFillMode mode)
         {
             const string formFilename = "mainImg";
 
@@ -902,28 +902,28 @@ namespace Alfateam.Website.API.Controllers.Admin
                     entity.MainImage = new ShopProductImage();
                 }
 
-                entity.MainImage.ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
+                entity.MainImage.ImgPath = FilesService.TryUploadFile(formFilename, FileType.Image);
             }
         }
 
 
 
-        private async Task HandleProductAddPhoto(ShopProduct entity)
+        private void HandleProductAddPhoto(ShopProduct entity)
         {
             const string formFilename = "mainImg";
 
             entity.Images.Add(new ShopProductImage
             {
-                ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image),
+                ImgPath = FilesService.TryUploadFile(formFilename, FileType.Image),
             });
         }
-        private async Task HandleProductLocalizationAddPhoto(ShopProductLocalization entity)
+        private void HandleProductLocalizationAddPhoto(ShopProductLocalization entity)
         {
             const string formFilename = "mainImg";
 
             entity.Images.Add(new ShopProductImage
             {
-                ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image),
+                ImgPath = FilesService.TryUploadFile(formFilename, FileType.Image),
             });
         }
 

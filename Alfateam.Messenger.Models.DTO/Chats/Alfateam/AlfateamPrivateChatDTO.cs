@@ -1,4 +1,5 @@
 ﻿using Alfateam.Messenger.Models.DTO.Abstractions.Chats;
+using Alfateam.Messenger.Models.DTO.Accounts;
 using Alfateam.Messenger.Models.DTO.General;
 using Alfateam.Messenger.Models.General;
 using System;
@@ -11,6 +12,6 @@ namespace Alfateam.Messenger.Models.DTO.Chats.Alfateam
 {
     public class AlfateamPrivateChatDTO : AlfateamMessengerChatDTO
     {
-        public UserDTO Peer { get; set; }
+        public AlfateamMessengerAccountDTO Peer { get; set; }
     }
 }

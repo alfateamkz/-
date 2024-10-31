@@ -11,5 +11,12 @@ namespace Alfateam.Messenger.Models.General.Chats
     {
         public string Title { get; set; }
         public string LabelHexColor { get; set; }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int AccountId { get; set; }
     }
 }

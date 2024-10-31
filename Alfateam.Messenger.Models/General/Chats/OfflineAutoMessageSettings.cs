@@ -15,5 +15,12 @@ namespace Alfateam.Messenger.Models.General.Chats
 
 
         public OfflineAutoMessageSendTime SendTimeInfo { get; set; }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int AccountId { get; set; }
     }
 }

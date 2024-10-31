@@ -12,6 +12,8 @@ using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Reviews;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Alfateam.Website.API.Filters.AdminSearch;
+using Alfateam.Website.API.Models.Filters.Admin.AdminSearch;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -33,9 +35,9 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         [HttpGet, Route("GetReviewsFiltered")]
         [ReviewsSectionAccess(1)]
-        public async Task<IEnumerable<ReviewDTO>> GetReviewsFiltered([FromQuery] SearchFilter filter)
+        public async Task<IEnumerable<ReviewDTO>> GetReviewsFiltered([FromQuery] ReviewsSearchFilter filter)
         {
-            var reviews = filter.FilterBase(GetAvailableReviews(), (item) => item.Title);
+            var reviews = filter.Filter(GetAvailableReviews(), (item) => item.Title);
             return new ReviewDTO().CreateDTOs(reviews).Cast<ReviewDTO>();
         }
 

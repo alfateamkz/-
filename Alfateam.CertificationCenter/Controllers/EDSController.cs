@@ -79,16 +79,16 @@ namespace Alfateam.CertificationCenter.Controllers
                 {
                     issueRequest.PersonalDocumentImages.Add(new Models.Files.AttachedImage
                     {
-                        FilePath = await FilesService.TryUploadFile(file, FileType.Image)
+                        FilePath = FilesService.TryUploadFile(file, FileType.Image)
                     });
                 }
                 issueRequest.PersonalDocumentVideo = new Models.Files.AttachedVideo
                 {
-                    FilePath = await FilesService.TryUploadFile("PersonalDocumentVideo", FileType.Video)
+                    FilePath = FilesService.TryUploadFile("PersonalDocumentVideo", FileType.Video)
                 };
                 issueRequest.PersonalBiometryVideo = new Models.Files.AttachedVideo
                 {
-                    FilePath = await FilesService.TryUploadFile("PersonalBiometryVideo", FileType.Video)
+                    FilePath = FilesService.TryUploadFile("PersonalBiometryVideo", FileType.Video)
                 };
 
 
@@ -99,13 +99,13 @@ namespace Alfateam.CertificationCenter.Controllers
                     {
                         issueRequest.CompanyDocumentImages.Add(new Models.Files.AttachedImage
                         {
-                            FilePath = await FilesService.TryUploadFile(file, FileType.Image)
+                            FilePath = FilesService.TryUploadFile(file, FileType.Image)
                         });
                     }
 
                     issueRequest.CompanyDocumentVideo = new Models.Files.AttachedVideo
                     {
-                        FilePath = await FilesService.TryUploadFile("CompanyDocumentVideo", FileType.Video)
+                        FilePath = FilesService.TryUploadFile("CompanyDocumentVideo", FileType.Video)
                     };
                 }
 

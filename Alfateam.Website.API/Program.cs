@@ -136,6 +136,8 @@ namespace Alfateam.Website.API
                 FileProvider = new PhysicalFileProvider(Path.Combine(app.Environment.ContentRootPath, "uploads")),
                 RequestPath = "/uploads"
             });
+            app.UseExceptionHandler("/error");
+
             //app.UseRouting();
 
             app.UseSwagger();

@@ -1,6 +1,9 @@
 ﻿using Alfateam.Messenger.Lib.Abstractions.Modules;
+using Alfateam.Messenger.Lib.Enums;
 using Alfateam.Messenger.Models.Abstractions.Chats;
 using Alfateam.Messenger.Models.Chats;
+using Alfateam.Messenger.Models.DTO.Abstractions.Chats;
+using Alfateam.Messenger.Models.DTO.Chats;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,19 +28,26 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
             if(chat is ExternalPrivateChat privateChat)
             {
                 var createdChat = await Messenger.Client.CreatePrivateChatAsync(userId: Convert.ToInt64(privateChat.PeerId));
-                chat.ChatId = createdChat.Id.ToString();
+                privateChat.ChatId = createdChat.Id.ToString();
             }
             else if (chat is ExternalGroupChat groupChat)
             {
                 var createdChat = await Messenger.Client.CreateNewBasicGroupChatAsync(title: groupChat.Title);
-                chat.ChatId = createdChat.ChatId.ToString();
+                groupChat.ChatId = createdChat.ChatId.ToString();
             }
 
             return chat;
         }
-        public override async Task DeleteChat(string chatId)
+        public override async Task<Chat> EditChat(Chat chat)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override async Task<ChatDeletionResult> DeleteChat(string chatId)
         {
             var response = await Messenger.Client.DeleteChatAsync(chatId: Convert.ToInt64(chatId));
+
+            throw new NotImplementedException();
         }
         public override async Task<Chat> GetChat(string chatId)
         {

@@ -109,7 +109,7 @@ namespace Alfateam.Website.API.Controllers.General
             const string formFilename = "avatar";
 
             var user = this.Session.User;
-            user.AvatarPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
+            user.AvatarPath = FilesService.TryUploadFile(formFilename, FileType.Image);
             DbService.UpdateEntity(DB.Users, user);
 
             return this.Session.User.AvatarPath;

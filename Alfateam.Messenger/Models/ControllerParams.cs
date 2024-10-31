@@ -1,6 +1,7 @@
 ﻿using Alfateam.Core.Services;
 using Alfateam.DB;
 using Alfateam.Gateways.Abstractions;
+using Alfateam.Messenger.API.Services;
 
 namespace Alfateam.Messenger.API.Models
 {
@@ -12,7 +13,9 @@ namespace Alfateam.Messenger.API.Models
                                 AbsFilesService filesService,
                                 IWebHostEnvironment appEnv,
                                 IMailGateway mailGateway,
-                                ISMSGateway smsGateway)
+                                ISMSGateway smsGateway,
+
+                                ChatMiscService chatMisc)
         {
             DB = db;
             IDDB = iddb;
@@ -21,6 +24,8 @@ namespace Alfateam.Messenger.API.Models
             AppEnvironment = appEnv;
             MailGateway = mailGateway;
             SMSGateway = smsGateway;
+
+            ChatMiscService = chatMisc;
         }
 
 
@@ -31,5 +36,9 @@ namespace Alfateam.Messenger.API.Models
         public IWebHostEnvironment AppEnvironment { get; set; }
         public IMailGateway MailGateway { get; set; }
         public ISMSGateway SMSGateway { get; set; }
+
+
+
+        public ChatMiscService ChatMiscService  { get; set; }
     }
 }

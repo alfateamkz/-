@@ -10,6 +10,7 @@ namespace Alfateam.Website.API.Models.DTO.Portfolios
     public class PortfolioDTO : AvailabilityDTOModel<Portfolio>
     {
         public string Title { get; set; }
+        [ForClientOnly]
         public string ImgPath { get; set; }
         public string ShortDescription { get; set; }
         public Content Content { get; set; }

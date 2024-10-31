@@ -98,6 +98,7 @@ namespace Alfateam.Website.API.Services.General
 
 
             var dbModel = model.CreateDBModelFromDTO();
+
             callback?.Invoke(dbModel);
 
             dbSet.Add(dbModel);

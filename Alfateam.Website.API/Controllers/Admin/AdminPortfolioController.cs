@@ -88,9 +88,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
         public async Task<PortfolioDTO> CreatePortfolio([FromForm(Name = "model")] PortfolioDTO model)
         {
-            return (PortfolioDTO)DbService.TryCreateAvailabilityEntity(DB.Portfolios, model, this.Session, async (entity) =>
+            return (PortfolioDTO)DbService.TryCreateAvailabilityEntity(DB.Portfolios, model, this.Session, (entity) =>
             {
-                await HandlePortfolio(entity, DBModelFillMode.Create, null);
+                HandlePortfolio(entity, DBModelFillMode.Create, null);
             });
         }
 
@@ -100,9 +100,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<PortfolioLocalizationDTO> CreatePortfolioLocalization(int itemId, [FromForm(Name = "localization")] PortfolioLocalizationDTO localization)
         {
             var mainEntity = GetAvailablePortfolio().FirstOrDefault(o => o.Id == itemId);
-            return (PortfolioLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.Portfolios, mainEntity, localization, async (entity) =>
+            return (PortfolioLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.Portfolios, mainEntity, localization, (entity) =>
             {
-                await HandlePortfolioLocalization(entity, DBModelFillMode.Create, null);
+                HandlePortfolioLocalization(entity, DBModelFillMode.Create, null);
             });
         }
 
@@ -115,9 +115,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<PortfolioDTO> UpdatePortfolioMain([FromForm(Name = "model")] PortfolioDTO model)
         {
             var item = GetAvailablePortfolio().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (PortfolioDTO)DbService.TryUpdateEntity(DB.Portfolios, model, item, async (entity) =>
+            return (PortfolioDTO)DbService.TryUpdateEntity(DB.Portfolios, model, item, (entity) =>
             {
-                await HandlePortfolio(entity, DBModelFillMode.Update, model.Content);
+                HandlePortfolio(entity, DBModelFillMode.Update, model.Content);
             });
         }
 
@@ -129,9 +129,9 @@ namespace Alfateam.Website.API.Controllers.Admin
             var localization = DB.PortfolioLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var mainEntity = GetAvailablePortfolio().FirstOrDefault(o => o.Id == localization.PortfolioId && !o.IsDeleted);
 
-            return (PortfolioLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.PortfolioLocalizations, localization, model, mainEntity, async (entity) =>
+            return (PortfolioLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.PortfolioLocalizations, localization, model, mainEntity, (entity) =>
             {
-                await HandlePortfolioLocalization(entity, DBModelFillMode.Update, model.Content);
+                HandlePortfolioLocalization(entity, DBModelFillMode.Update, model.Content);
             });
         }
 
@@ -435,42 +435,42 @@ namespace Alfateam.Website.API.Controllers.Admin
         #endregion
 
         #region Private methods
-        private async Task HandlePortfolio(Portfolio entity, DBModelFillMode mode, Content newContentForUpdate)
+        private void HandlePortfolio(Portfolio entity, DBModelFillMode mode, Content newContentForUpdate)
         {
             const string formFilename = "mainImg";
 
             if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
                 || mode == DBModelFillMode.Create)
             {
-                entity.ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
+                entity.ImgPath = FilesService.TryUploadFile(formFilename, FileType.Image);
             }
 
             if (mode == DBModelFillMode.Create)
             {
-                await FilesService.UploadContentMedia(entity.Content);
+                FilesService.UploadContentMedia(entity.Content);
             }
             else if (mode == DBModelFillMode.Update && !entity.Content.AreSame(newContentForUpdate))
             {
-                await FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
+                FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
             }
         }
-        private async Task HandlePortfolioLocalization(PortfolioLocalization entity, DBModelFillMode mode, Content newContentForUpdate)
+        private void HandlePortfolioLocalization(PortfolioLocalization entity, DBModelFillMode mode, Content newContentForUpdate)
         {
             const string formFilename = "mainImg";
 
             if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
                 || mode == DBModelFillMode.Create)
             {
-                entity.ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
+                entity.ImgPath = FilesService.TryUploadFile(formFilename, FileType.Image);
             }
 
             if (mode == DBModelFillMode.Create)
             {
-                await FilesService.UploadContentMedia(entity.Content);
+                FilesService.UploadContentMedia(entity.Content);
             }
             else if (mode == DBModelFillMode.Update && !entity.Content.AreSame(newContentForUpdate))
             {
-                await FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
+                FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
             }
         }
 

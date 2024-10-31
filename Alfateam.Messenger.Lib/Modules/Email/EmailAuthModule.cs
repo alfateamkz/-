@@ -1,5 +1,6 @@
 ﻿using Alfateam.Messenger.Lib.Abstractions.Modules;
 using Alfateam.Messenger.Lib.Enums;
+using Alfateam.Messenger.Lib.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace Alfateam.Messenger.Lib.Modules.Email
                 await Messenger.Imap.ConnectAsync(Messenger.EmailAccount.IMAP3Host, Messenger.EmailAccount.IMAP3Port, true);
                 if (!Messenger.Imap.IsConnected)
                 {
-                    return AuthResult.InvalidCredentials;
+                    return AuthResult.Create(AuthResultType.InvalidCredentials);
                 }
             }
 
@@ -32,11 +33,11 @@ namespace Alfateam.Messenger.Lib.Modules.Email
                 await Messenger.Imap.AuthenticateAsync(Messenger.EmailAccount.Login, Messenger.EmailAccount.Password);
                 if (!Messenger.Imap.IsAuthenticated)
                 {
-                    return AuthResult.InvalidCredentials;
+                    return AuthResult.Create(AuthResultType.InvalidCredentials);
                 }
             }
 
-            return AuthResult.Authorized;
+            return AuthResult.Create(AuthResultType.Authorized);
         }
 
         public override async Task<AuthResult> ConfirmAuth(string code)

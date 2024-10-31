@@ -98,9 +98,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем previewImg и документ с именем docFile")]
         public async Task<ComplianceDocumentDTO> CreateComplianceDocument([FromForm(Name = "model")] ComplianceDocumentDTO model)
         {
-            return (ComplianceDocumentDTO)DbService.TryCreateAvailabilityEntity(DB.ComplianceDocuments, model, this.Session, async (entity) =>
+            return (ComplianceDocumentDTO)DbService.TryCreateAvailabilityEntity(DB.ComplianceDocuments, model, this.Session, (entity) =>
             {
-                await HandleComplianceDocument(entity, DBModelFillMode.Create);
+                HandleComplianceDocument(entity, DBModelFillMode.Create);
             });
         }
      
@@ -110,9 +110,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<ComplianceDocumentLocalizationDTO> CreateComplianceDocumentLocalization(int itemId, [FromForm(Name = "localization")] ComplianceDocumentLocalizationDTO localization)
         {
             var mainEntity = GetAvailableComplianceDocuments().FirstOrDefault(o => o.Id == itemId);
-            return (ComplianceDocumentLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.ComplianceDocuments, mainEntity, localization, async (entity) =>
+            return (ComplianceDocumentLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.ComplianceDocuments, mainEntity, localization, (entity) =>
             {
-                await HandleComplianceDocumentLocalization(entity, DBModelFillMode.Create);
+                HandleComplianceDocumentLocalization(entity, DBModelFillMode.Create);
             });
         }
 
@@ -125,9 +125,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<ComplianceDocumentDTO> UpdateComplianceDocumentMain([FromForm(Name = "model")] ComplianceDocumentDTO model)
         {
             var item = GetAvailableComplianceDocuments().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (ComplianceDocumentDTO)DbService.TryUpdateEntity(DB.ComplianceDocuments, model, item, async (entity) =>
+            return (ComplianceDocumentDTO)DbService.TryUpdateEntity(DB.ComplianceDocuments, model, item, (entity) =>
             {
-                await HandleComplianceDocument(entity, DBModelFillMode.Update);
+                HandleComplianceDocument(entity, DBModelFillMode.Update);
             });
         }
 
@@ -138,9 +138,9 @@ namespace Alfateam.Website.API.Controllers.Admin
             var localization = DB.ComplianceDocumentLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var mainEntity = GetAvailableComplianceDocuments().FirstOrDefault(o => o.Id == localization.ComplianceDocumentId && !o.IsDeleted);
 
-            return (ComplianceDocumentLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.ComplianceDocumentLocalizations, localization, model, mainEntity, async (entity) =>
+            return (ComplianceDocumentLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.ComplianceDocumentLocalizations, localization, model, mainEntity, (entity) =>
             {
-                await HandleComplianceDocumentLocalization(entity, DBModelFillMode.Update);
+                HandleComplianceDocumentLocalization(entity, DBModelFillMode.Update);
             });
         }
 
@@ -202,7 +202,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Private prepare methods
 
-        private async Task HandleComplianceDocument(ComplianceDocument entity, DBModelFillMode mode)
+        private void HandleComplianceDocument(ComplianceDocument entity, DBModelFillMode mode)
         {
             const string previewImgName = "previewImg";
             const string docFileName = "docFile";
@@ -210,17 +210,17 @@ namespace Alfateam.Website.API.Controllers.Admin
             if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(previewImgName))
               || mode == DBModelFillMode.Create)
             {
-                entity.ImgPreviewPath = await FilesService.TryUploadFile(previewImgName, FileType.Image);
+                entity.ImgPreviewPath = FilesService.TryUploadFile(previewImgName, FileType.Image);
             }
 
             if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(docFileName))
               || mode == DBModelFillMode.Create)
             {
-                entity.DocumentPath = await FilesService.TryUploadFile(docFileName, FileType.Document);
+                entity.DocumentPath = FilesService.TryUploadFile(docFileName, FileType.Document);
                 entity.KBSize = FilesService.GetFileSizeInBytes(entity.DocumentPath) * 1024;
             }
         }
-        private async Task HandleComplianceDocumentLocalization(ComplianceDocumentLocalization entity, DBModelFillMode mode)
+        private void HandleComplianceDocumentLocalization(ComplianceDocumentLocalization entity, DBModelFillMode mode)
         {
             const string previewImgName = "previewImg";
             const string docFileName = "docFile";
@@ -228,13 +228,13 @@ namespace Alfateam.Website.API.Controllers.Admin
             if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(previewImgName))
               || mode == DBModelFillMode.Create)
             {
-                entity.ImgPreviewPath = await FilesService.TryUploadFile(previewImgName, FileType.Image);
+                entity.ImgPreviewPath = FilesService.TryUploadFile(previewImgName, FileType.Image);
             }
 
             if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(docFileName))
               || mode == DBModelFillMode.Create)
             {
-                entity.DocumentPath = await FilesService.TryUploadFile(docFileName, FileType.Document);
+                entity.DocumentPath = FilesService.TryUploadFile(docFileName, FileType.Document);
                 entity.KBSize = FilesService.GetFileSizeInBytes(entity.DocumentPath) * 1024;
             }
         }

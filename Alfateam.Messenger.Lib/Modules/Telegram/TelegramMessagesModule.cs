@@ -1,5 +1,4 @@
 ﻿using Alfateam.Messenger.Lib.Abstractions.Modules;
-using Alfateam.Messenger.Models.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +13,9 @@ using Alfateam.Messenger.Models.Messages;
 using static TdLib.TdApi.MessageReadDate;
 using static TdLib.TdApi.ChatAction;
 using Alfateam.Messenger.Models.Abstractions.Messages;
+using Alfateam.Messenger.Models.Abstractions.Attachments;
+using Alfateam.Messenger.Models.Messages.External.UserMessages;
+using Alfateam.Messenger.Models.Abstractions.Messages.External;
 
 namespace Alfateam.Messenger.Lib.Modules.Telegram
 {
@@ -27,9 +29,11 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
         }
 
 
-        public override async Task DeleteMessage(string chatId, string messageId, bool forAll)
+        public override async Task<bool> DeleteMessage(string chatId, string messageId, bool forAll)
         {
             var response = await Messenger.Client.DeleteMessagesAsync(Convert.ToInt64(chatId), new long[] { Convert.ToInt64(messageId) }, forAll);
+
+            throw new NotImplementedException();
         }
 
         public override async Task<Message> GetMessage(string chatId, string messageId)
@@ -49,12 +53,12 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
 
 
 
-        public override async Task SendStickerMessage(string chatId, string stickerId)
+        public override async Task<Message> SendStickerMessage(string chatId, string stickerId)
         {
             throw new NotImplementedException();
         }
 
-        public override async Task SendTextMessage(string chatId, string message, List<MessageAttachment> attachments = null)
+        public override async Task<Message> SendTextMessage(string chatId, string message, List<MessageAttachment> attachments = null)
         {
             var msg = new InputMessageText
             {
@@ -73,7 +77,7 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
 
             throw new NotImplementedException();
         }
-        public override async Task SendVoiceMessage(string chatId, byte[] message)
+        public override async Task<Message> SendVoiceMessage(string chatId, byte[] message)
         {
             var voiceMessageFilepath = SaveTempFile(message);
             using (var audioFileReader = new AudioFileReader(voiceMessageFilepath))
@@ -90,6 +94,8 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
                 await Messenger.Client.SendMessageAsync(chatId: Convert.ToInt64(chatId), inputMessageContent: voiceMsg);
             }
             DeleteTempFile(voiceMessageFilepath);
+
+            throw new NotImplementedException();
         }
 
 
@@ -109,7 +115,7 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
 
 
 
-        public override async Task EditMessage(string chatId, string messageId, string text)
+        public override async Task<Message> EditMessage(string chatId, string messageId, string text)
         {
             var result = await Messenger.Client.EditMessageTextAsync(Convert.ToInt64(chatId), Convert.ToInt64(messageId), inputMessageContent: new InputMessageText()
             {
@@ -118,6 +124,8 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
                     Text = text
                 }
             });
+
+            throw new NotImplementedException();
         }
 
 
@@ -147,7 +155,7 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
 
             if (tgMessage.Content is MessageText textMsg)
             {
-                message = new TextMessage
+                message = new ExtTextMessage
                 {
                     Text = textMsg.Text.Text,
                 };
@@ -155,7 +163,7 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
             else if(tgMessage.Content is MessageVoiceNote voiceMsg)
             {
                
-                 message = new VoiceMessage
+                 message = new ExtVoiceMessage
                  {
                      IsListened = voiceMsg.IsListened,
                      //Message = voiceMsg.VoiceNote.Voice.Remote.UniqueId.T,
@@ -164,14 +172,14 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
             }
             else if (tgMessage.Content is MessageSticker stickerMsg)
             {
-                message = new StickerMessage
+                message = new ExtStickerMessage
                 {
 
                 };
             }
             else
             {
-                message = new TextMessage
+                message = new ExtTextMessage
                 {
                     Text = $"Неподдерживаемый тип сообщения ({tgMessage.Content.GetType().Name})",
                 };
@@ -184,8 +192,8 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
                 var readAtResponse = await Messenger.Client.GetMessageReadDateAsync(tgMessage.ChatId, tgMessage.Id);
                 if(readAtResponse is MessageReadDateRead readDateRead)
                 {
-                    message.ReadAt = DateTime.FromFileTimeUtc(readDateRead.ReadDate);
-                    message.IsRead = true;
+                    (message as ExternalMessengerMessage).ReadAt = DateTime.FromFileTimeUtc(readDateRead.ReadDate);
+                    (message as ExternalMessengerMessage).IsRead = true;
                 }
             }
 

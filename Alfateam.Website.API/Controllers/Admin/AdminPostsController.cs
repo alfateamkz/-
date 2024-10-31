@@ -92,9 +92,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
         public async Task<PostDTO> CreatePost([FromForm(Name = "model")] PostDTO model)
         {
-            return (PostDTO)DbService.TryCreateAvailabilityEntity(DB.Posts, model, this.Session, async (entity) =>
+            return (PostDTO)DbService.TryCreateAvailabilityEntity(DB.Posts, model, this.Session, (entity) =>
             {
-                await HandlePost(entity, DBModelFillMode.Create, null);
+                HandlePost(entity, DBModelFillMode.Create, null);
             });
         }
 
@@ -104,9 +104,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<PostLocalizationDTO> CreatePostLocalization(int itemId, [FromForm(Name = "localization")] PostLocalizationDTO localization)
         {
             var mainEntity = GetAvailablePosts().FirstOrDefault(o => o.Id == itemId);
-            return (PostLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.Posts, mainEntity, localization, async (entity) =>
+            return (PostLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.Posts, mainEntity, localization, (entity) =>
             {
-                await HandlePostLocalization(entity, DBModelFillMode.Create, null);
+                HandlePostLocalization(entity, DBModelFillMode.Create, null);
             });
         }
 
@@ -119,9 +119,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<PostDTO> UpdatePostMain([FromForm(Name = "model")] PostDTO model)
         {
             var item = GetAvailablePosts().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (PostDTO)DbService.TryUpdateEntity(DB.Posts, model, item, async (entity) =>
+            return (PostDTO)DbService.TryUpdateEntity(DB.Posts, model, item, (entity) =>
             {
-                await HandlePost(entity, DBModelFillMode.Update, model.Content);
+                HandlePost(entity, DBModelFillMode.Update, model.Content);
             });
         }
 
@@ -133,9 +133,9 @@ namespace Alfateam.Website.API.Controllers.Admin
             var localization = DB.PostLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var mainEntity = GetAvailablePosts().FirstOrDefault(o => o.Id == localization.PostId && !o.IsDeleted);
 
-            return (PostLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.PostLocalizations, localization, model, mainEntity, async (entity) =>
+            return (PostLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.PostLocalizations, localization, model, mainEntity, (entity) =>
             {
-                await HandlePostLocalization(entity, DBModelFillMode.Update, model.Content);
+                HandlePostLocalization(entity, DBModelFillMode.Update, model.Content);
             });
         }
 
@@ -412,7 +412,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Private prepare methods
 
-        private async Task HandlePost(Post entity, DBModelFillMode mode, Content newContentForUpdate)
+        private void HandlePost(Post entity, DBModelFillMode mode, Content newContentForUpdate)
         {
             const string formFilename = "mainImg";
 
@@ -429,35 +429,35 @@ namespace Alfateam.Website.API.Controllers.Admin
             if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
                 || mode == DBModelFillMode.Create)
             {
-                entity.ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
+                entity.ImgPath = FilesService.TryUploadFile(formFilename, FileType.Image);
             }
 
             if (mode == DBModelFillMode.Create)
             {
-                await FilesService.UploadContentMedia(entity.Content);
+                FilesService.UploadContentMedia(entity.Content);
             }
             else if (mode == DBModelFillMode.Update && !entity.Content.AreSame(newContentForUpdate))
             {
-                await FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
+                FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
             }
         }
-        private async Task HandlePostLocalization(PostLocalization entity, DBModelFillMode mode, Content newContentForUpdate)
+        private void HandlePostLocalization(PostLocalization entity, DBModelFillMode mode, Content newContentForUpdate)
         {
             const string formFilename = "mainImg";
 
             if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
                 || mode == DBModelFillMode.Create)
             {
-                entity.ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
+                entity.ImgPath = FilesService.TryUploadFile(formFilename, FileType.Image);
             }
 
             if (mode == DBModelFillMode.Create)
             {
-                await FilesService.UploadContentMedia(entity.Content);
+                FilesService.UploadContentMedia(entity.Content);
             }
             else if (mode == DBModelFillMode.Update && !entity.Content.AreSame(newContentForUpdate))
             {
-                await FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
+                FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
             }
         }
 

@@ -17,6 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Alfateam.DB\Alfateam.DB.csproj" />
+    <ProjectReference Include="..\Alfateam.Messenger.Models.DTO\Alfateam.Messenger.Models.DTO.csproj" />
     <ProjectReference Include="..\Alfateam.Messenger.Models\Alfateam.Messenger.Models.csproj" />
   </ItemGroup>
 

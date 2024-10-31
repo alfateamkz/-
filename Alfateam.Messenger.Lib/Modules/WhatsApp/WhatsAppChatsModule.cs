@@ -1,5 +1,7 @@
 ﻿using Alfateam.Messenger.Lib.Abstractions.Modules;
+using Alfateam.Messenger.Lib.Enums;
 using Alfateam.Messenger.Models.Abstractions.Chats;
+using Alfateam.Messenger.Models.DTO.Abstractions.Chats;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,8 +23,12 @@ namespace Alfateam.Messenger.Lib.Modules.WhatsApp
         {
             throw new NotImplementedException();
         }
+        public override async Task<Chat> EditChat(Chat chat)
+        {
+            throw new NotImplementedException();
+        }
 
-        public override async Task DeleteChat(string id)
+        public override async Task<ChatDeletionResult> DeleteChat(string id)
         {
             throw new NotImplementedException();
         }

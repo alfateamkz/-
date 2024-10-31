@@ -14,8 +14,7 @@ namespace Alfateam.Messenger.Models.DTO.General.Chats
     public class ChatNotificationSettingsDTO : DTOModelAbs<ChatNotificationSettings>
     {
         [ForClientOnly]
-        [Description("Звук уведомления. Если пусто, то звук проигрывается по умолчанию")]
-        public string? SoundFilepath { get; set; }
+        public ChatNotificationSoundDTO Sound { get; set; }
 
 
 

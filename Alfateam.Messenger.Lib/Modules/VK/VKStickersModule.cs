@@ -1,5 +1,6 @@
 ﻿using Alfateam.Messenger.Lib.Abstractions.Modules;
-using Alfateam.Messenger.Models;
+using Alfateam.Messenger.Models.Abstractions;
+using Alfateam.Messenger.Models.Stickers.Alfateam;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,12 +17,29 @@ namespace Alfateam.Messenger.Lib.Modules.VK
             Messenger = messenger;
         }
 
-        public override async Task<Sticker> GetSticker(string stickerId)
+
+        public override async Task<IEnumerable<AbsStickerSet>> GetStickersSets(int offset, int count)
+        {
+            throw new NotImplementedException();
+        }
+        public override async Task<AbsStickerSet> GetStickersSet(string setId)
         {
             throw new NotImplementedException();
         }
 
-        public override async Task<IEnumerable<Sticker>> GetStickers(string query, int offset, int count)
+
+
+
+        public override async Task<IEnumerable<AbsSticker>> GetStickersBySet(string setId, int offset, int count)
+        {
+            throw new NotImplementedException();
+        }
+        public override async Task<AbsSticker> GetSticker(string stickerId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override async Task<IEnumerable<AbsSticker>> GetStickers(string query, int offset, int count)
         {
             throw new NotImplementedException();
         }

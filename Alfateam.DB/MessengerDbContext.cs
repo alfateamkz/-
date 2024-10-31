@@ -1,11 +1,14 @@
 ﻿using Alfateam.Messenger.Models;
 using Alfateam.Messenger.Models.Abstractions;
+using Alfateam.Messenger.Models.Abstractions.Attachments;
 using Alfateam.Messenger.Models.Abstractions.Chats;
 using Alfateam.Messenger.Models.Abstractions.Messages;
 using Alfateam.Messenger.Models.General;
 using Alfateam.Messenger.Models.General.Chats;
 using Alfateam.Messenger.Models.General.GroupChats;
 using Alfateam.Messenger.Models.General.Security;
+using Alfateam.Messenger.Models.Stickers.Alfateam;
+using Alfateam.Messenger.Models.StickerSets;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -20,18 +23,24 @@ namespace Alfateam.DB
         public MessengerDbContext()
         {
             Database.EnsureCreated();
+            CreateDefaultEntities();
         }
         public MessengerDbContext(DbContextOptions<MessengerDbContext> options)
         {
             Database.EnsureCreated();
+            CreateDefaultEntities();
         }
 
         #region Abstractions
 
-        public DbSet<MessageAttachment> MessageAttachments { get; set; }
-        public DbSet<Account> Accounts { get; set; }
+        public DbSet<MessageAttachment> Attachments { get; set; }
         public DbSet<Chat> Chats { get; set; }
         public DbSet<Message> Messages { get; set; }
+
+
+        public DbSet<AbsSticker> Stickers { get; set; }
+        public DbSet<AbsStickerSet> StickersSets { get; set; }
+        public DbSet<Account> Accounts { get; set; }
         public DbSet<OfflineAutoMessageSendTime> OfflineAutoMessageSendTimes { get; set; }
 
         #endregion
@@ -60,6 +69,7 @@ namespace Alfateam.DB
         #region Security
 
         public DbSet<AllowedAccountsAccess> AllowedAccountsAccesses { get; set; }
+        public DbSet<TrustedUserIPAddress> TrustedUserIPAddresses { get; set; }
         public DbSet<UserPermissions> UserPermissions { get; set; }
         #endregion
 
@@ -71,9 +81,75 @@ namespace Alfateam.DB
 
         #endregion
 
+        public DbSet<ChatBackground> ChatBackgrounds { get; set; }
+        public DbSet<ChatNotificationSound> ChatNotificationSounds { get; set; }
 
 
-        public DbSet<Sticker> Stickers { get; set; }
-        public DbSet<StickersSet> StickersSets { get; set; }
+
+
+
+
+        private void CreateDefaultEntities()
+        {
+            CreateDefaultChatBackgrounds();
+            CreateDefaultChatNotificationSounds();
+        }
+
+        private void CreateDefaultChatBackgrounds()
+        {
+            if(!ChatBackgrounds.Any(o => o.AccountId == null))
+            {
+                ChatBackgrounds.Add(new ChatBackground
+                {
+                    Filepath = ""
+                });
+                ChatBackgrounds.Add(new ChatBackground
+                {
+                    Filepath = ""
+                });
+                ChatBackgrounds.Add(new ChatBackground
+                {
+                    Filepath = ""
+                });
+                ChatBackgrounds.Add(new ChatBackground
+                {
+                    Filepath = ""
+                });
+                ChatBackgrounds.Add(new ChatBackground
+                {
+                    Filepath = ""
+                });
+
+                SaveChanges();
+            }      
+        }
+        private void CreateDefaultChatNotificationSounds()
+        {
+            if (!ChatNotificationSounds.Any(o => o.AccountId == null))
+            {
+                ChatNotificationSounds.Add(new ChatNotificationSound
+                {
+                    Filepath = ""
+                });
+                ChatNotificationSounds.Add(new ChatNotificationSound
+                {
+                    Filepath = ""
+                });
+                ChatNotificationSounds.Add(new ChatNotificationSound
+                {
+                    Filepath = ""
+                });
+                ChatNotificationSounds.Add(new ChatNotificationSound
+                {
+                    Filepath = ""
+                });
+                ChatNotificationSounds.Add(new ChatNotificationSound
+                {
+                    Filepath = ""
+                });
+
+                SaveChanges();
+            }
+        }
     }
 }

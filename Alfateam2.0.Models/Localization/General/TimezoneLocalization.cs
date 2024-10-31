@@ -10,5 +10,8 @@ namespace Alfateam2._0.Models.Localization.General
     public class TimezoneLocalization : LocalizableModel
     {
         public string Title { get; set; }
+
+
+        public int TimeZoneId { get; set; }
     }
 }

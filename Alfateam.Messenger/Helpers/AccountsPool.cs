@@ -18,8 +18,25 @@ namespace Alfateam.Messenger.API.Helpers
         }
         public static AbsMessenger? GetMessenger(Account account)
         {
-            return Messengers.FirstOrDefault(o => o.Account.Id == account.Id);
+            return Messengers.FirstOrDefault(o => o.Account.Id == account?.Id);
         }
+        public static AbsMessenger? GetOrCreateMessenger(Account account)
+        {
+            if(account == null)
+            {
+                return null;
+            }
+
+            var messenger = GetMessenger(account);
+            if(messenger == null)
+            {
+                TryAddAccount(account);
+                messenger = GetMessenger(account);
+            }
+            return messenger;
+        }
+
+
 
 
 

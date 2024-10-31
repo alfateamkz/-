@@ -12,6 +12,7 @@ namespace Alfateam.Website.API.Models.DTO.Events
     
         public string Title { get; set; }
         public string Description { get; set; }
+        [ForClientOnly]
         public string ImgPath { get; set; }
 
 
@@ -20,12 +21,15 @@ namespace Alfateam.Website.API.Models.DTO.Events
 
 
 
-
+        [ForClientOnly]
         public string Slug => SlugHelper.GetLatynSlug(Title);
 
 
+        [ForClientOnly]
         public EventCategoryDTO Category { get; set; }
+        [ForClientOnly]
         public EventFormatDTO Format { get; set; }
+        [ForClientOnly]
         public TimezoneDTO Timezone { get; set; }
 
 

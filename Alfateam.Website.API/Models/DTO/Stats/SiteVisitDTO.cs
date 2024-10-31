@@ -14,10 +14,12 @@ namespace Alfateam.Website.API.Models.DTO.Stats
 
         public string URL { get; set; }
         public string UserAgent { get; set; }
+
+        [ForClientOnly]
         public string? IP { get; set; }
 
 
-
+        [ForClientOnly]
         public CountryDTO? Country { get; set; }
         public int? CountryId { get; set; }
 
@@ -27,6 +29,7 @@ namespace Alfateam.Website.API.Models.DTO.Stats
 
         public string Fingerprint { get; set; }
 
+        [ForClientOnly]
         public UserDTO? VisitedBy { get; set; }
         public int? VisitedById { get; set; }
     }

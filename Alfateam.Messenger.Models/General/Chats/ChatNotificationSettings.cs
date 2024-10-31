@@ -10,16 +10,14 @@ namespace Alfateam.Messenger.Models.General.Chats
 {
     public class ChatNotificationSettings : AbsModel
     {
-        /// <summary>
-        /// Звук уведомления. Если пусто, то звук проигрывается по умолчанию
-        /// </summary>
-        public string? SoundFilepath { get; set; }
 
+        public ChatNotificationSound Sound { get; set; }
+        public int SoundId { get; set; }
 
 
 
         [NotMapped]
-        public bool IsMuted => MutedBefore == null;
+        public bool IsMuted => MutedBefore == null || MutedBefore < DateTime.UtcNow;
         public DateTime? MutedBefore { get; set; }
     }
 }

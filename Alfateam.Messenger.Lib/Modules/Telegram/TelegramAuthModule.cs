@@ -1,5 +1,6 @@
 ﻿using Alfateam.Messenger.Lib.Abstractions.Modules;
 using Alfateam.Messenger.Lib.Enums;
+using Alfateam.Messenger.Lib.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,17 +31,17 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
             }
             else if (authState is AuthorizationStateWaitCode waitCode)
             {
-                return AuthResult.TwoFARequired;
+                return AuthResult.Create(AuthResultType.TwoFARequired);
             }
 
 
             if (authState is AuthorizationStateReady ready)
             {
-                return AuthResult.Authorized;
+                return AuthResult.Create(AuthResultType.Authorized);
             }
             else
             {
-                return AuthResult.InvalidCredentials;
+                return AuthResult.Create(AuthResultType.InvalidCredentials);
             }
         }
         public override async Task<AuthResult> ConfirmAuth(string code)
@@ -50,11 +51,11 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
 
             if (authState is AuthorizationStateReady ready)
             {
-                return AuthResult.Authorized;
+                return AuthResult.Create(AuthResultType.Authorized);
             }
             else
             {
-                return AuthResult.InvalidCredentials;
+                return AuthResult.Create(AuthResultType.InvalidCredentials);
             }
         }
 

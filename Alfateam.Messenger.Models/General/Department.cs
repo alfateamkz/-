@@ -18,9 +18,25 @@ namespace Alfateam.Messenger.Models.General
 
 
 
+
+
+
         /// <summary>
         /// Головное ли подразделение. Если да, то оно не может быть удалено
         /// </summary>
         public bool IsRoot { get; set; }
+
+
+
+        /// <summary>
+        /// Указывает на рабочее пространство (компанию). Ставим всегда, даже в дочерних подразделениях
+        /// </summary>
+        public int CompanyWorkSpaceId { get; set; }
+
+
+        /// <summary>
+        /// Указывает на родительское подразделение, если оно имеется
+        /// </summary>
+        public int? DepartmentId { get; set; }
     }
 }

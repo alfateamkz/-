@@ -95,9 +95,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         [CheckContentAreaRights(ContentAccessModelType.Events, 4)]
         public async Task<EventDTO> CreateEvent([FromForm(Name = "model")] EventDTO model)
         {
-            return (EventDTO)DbService.TryCreateAvailabilityEntity(DB.Events, model, this.Session, async (entity) =>
+            return (EventDTO)DbService.TryCreateAvailabilityEntity(DB.Events, model, this.Session, (entity) =>
             {
-                await HandleEventModel(entity, DBModelFillMode.Create);
+                HandleEventModel(entity, DBModelFillMode.Create);
             });
         }
 
@@ -107,9 +107,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<EventLocalizationDTO> CreateEventLocalization(int itemId, [FromForm(Name = "localization")] EventLocalizationDTO localization)
         {
             var mainEntity = GetAvailableEvents().FirstOrDefault(o => o.Id == itemId);
-            return (EventLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.Events, mainEntity, localization, async (entity) =>
+            return (EventLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.Events, mainEntity, localization, (entity) =>
             {
-                await HandleEventLocalizationModel(entity, DBModelFillMode.Create);
+                HandleEventLocalizationModel(entity, DBModelFillMode.Create);
             });
         }
 
@@ -122,9 +122,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<EventDTO> UpdateEventMain([FromForm(Name = "model")] EventDTO model)
         {
             var item = GetAvailableEvents().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (EventDTO)DbService.TryUpdateEntity(DB.Events, model, item, async (entity) =>
+            return (EventDTO)DbService.TryUpdateEntity(DB.Events, model, item, (entity) =>
             {
-                await HandleEventModel(entity, DBModelFillMode.Update);
+                HandleEventModel(entity, DBModelFillMode.Update);
             });
         }
 
@@ -136,9 +136,9 @@ namespace Alfateam.Website.API.Controllers.Admin
             var localization = DB.EventLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var mainEntity = GetAvailableEvents().FirstOrDefault(o => o.Id == localization.EventId && !o.IsDeleted);
 
-            return (EventLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.EventLocalizations, localization, model, mainEntity, async (entity) =>
+            return (EventLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.EventLocalizations, localization, model, mainEntity, (entity) =>
             {
-                await HandleEventLocalizationModel(entity, DBModelFillMode.Update);
+                HandleEventLocalizationModel(entity, DBModelFillMode.Update);
             });
         }
 
@@ -449,7 +449,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Private prepare methods
 
-        private async Task HandleEventModel(Event entity, DBModelFillMode mode)
+        private void HandleEventModel(Event entity, DBModelFillMode mode)
         {
             const string formFilename = "mainImg";
 
@@ -469,12 +469,12 @@ namespace Alfateam.Website.API.Controllers.Admin
             if((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
                 || mode == DBModelFillMode.Create)
             {
-                entity.ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
+                entity.ImgPath = FilesService.TryUploadFile(formFilename, FileType.Image);
             }
 
 
         }
-        private async Task HandleEventLocalizationModel(EventLocalization entity, DBModelFillMode mode)
+        private void HandleEventLocalizationModel(EventLocalization entity, DBModelFillMode mode)
         {
             string formFilename = $"localization_{entity.LanguageEntityId}_mainImg";
          
@@ -487,7 +487,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
                || mode == DBModelFillMode.Create)
             {
-                entity.ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
+                entity.ImgPath = FilesService.TryUploadFile(formFilename, FileType.Image);
             }
         }
 

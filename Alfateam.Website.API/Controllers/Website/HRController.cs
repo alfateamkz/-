@@ -115,10 +115,10 @@ namespace Alfateam.Website.API.Controllers.Website
                 throw new Exception404("Вакансия по данному id не найдена");
             }
 
-            return (JobSummaryDTO)DbService.TryCreateEntity(DB.JobSummaries, model, async (entity) =>
+            return (JobSummaryDTO)DbService.TryCreateEntity(DB.JobSummaries, model, (entity) =>
             {
                 entity.JobVacancyId = vacancyId;
-                await HandleSummary(entity);
+                HandleSummary(entity);
             });
         }
 
@@ -128,9 +128,9 @@ namespace Alfateam.Website.API.Controllers.Website
             var vacancy = DB.JobVacancies.FirstOrDefault(o => o.Id == vacancyId && !o.IsDeleted);
             var summary = GetSummaryFromVacancy(vacancy, model.CreatedByFingerprint);
 
-            return (JobSummaryDTO)DbService.TryUpdateEntity(DB.JobSummaries, model, summary, async (entity) =>
+            return (JobSummaryDTO)DbService.TryUpdateEntity(DB.JobSummaries, model, summary, (entity) =>
             {
-                await HandleSummary(entity);
+                HandleSummary(entity);
             });
         }
 
@@ -205,13 +205,13 @@ namespace Alfateam.Website.API.Controllers.Website
 
 
 
-        private async Task HandleSummary(JobSummary summary)
+        private void HandleSummary(JobSummary summary)
         {
             const string formFilename = "cvFile";
 
             if (FilesService.IsFileUploaded(formFilename))
             {
-                summary.CVPath = await FilesService.TryUploadFile(formFilename, FileType.Document);
+                summary.CVPath = FilesService.TryUploadFile(formFilename, FileType.Document);
             }
         }
 

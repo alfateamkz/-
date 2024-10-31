@@ -84,9 +84,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
         public async Task<MassMediaPostDTO> CreatePost([FromForm(Name = "model")] MassMediaPostDTO model)
         {
-            return (MassMediaPostDTO)DbService.TryCreateAvailabilityEntity(DB.MassMediaPosts, model, this.Session, async (entity) =>
+            return (MassMediaPostDTO)DbService.TryCreateAvailabilityEntity(DB.MassMediaPosts, model, this.Session, (entity) =>
             {
-                await HandleMassMediaPost(entity, DBModelFillMode.Create);
+                HandleMassMediaPost(entity, DBModelFillMode.Create);
             });
         }
 
@@ -108,9 +108,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         public async Task<MassMediaPostDTO> UpdatePostMain([FromForm(Name = "model")] MassMediaPostDTO model)
         {
             var item = GetAvailablePosts().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (MassMediaPostDTO)DbService.TryUpdateEntity(DB.MassMediaPosts, model, item, async (entity) =>
+            return (MassMediaPostDTO)DbService.TryUpdateEntity(DB.MassMediaPosts, model, item, (entity) =>
             {
-                await HandleMassMediaPost(entity, DBModelFillMode.Update);
+                HandleMassMediaPost(entity, DBModelFillMode.Update);
             });
         }
 
@@ -183,14 +183,14 @@ namespace Alfateam.Website.API.Controllers.Admin
         #endregion
 
         #region Private prepare methods
-        private async Task HandleMassMediaPost(MassMediaPost entity, DBModelFillMode mode)
+        private void HandleMassMediaPost(MassMediaPost entity, DBModelFillMode mode)
         {
             const string formFilename = "mainImg";
 
             if ((mode == DBModelFillMode.Update && FilesService.IsFileUploaded(formFilename))
                || mode == DBModelFillMode.Create)
             {
-                entity.ImgPath = await FilesService.TryUploadFile(formFilename, FileType.Image);
+                entity.ImgPath = FilesService.TryUploadFile(formFilename, FileType.Image);
             }
         }
 

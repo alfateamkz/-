@@ -27,9 +27,16 @@ namespace Alfateam.Messenger.Models.General
         public UserRole Role { get; set; } = UserRole.Employee;
         public UserPermissions Permissions { get; set; }
         public AllowedAccountsAccess AllowedAccountsAccess { get; set; }
-
+        public List<TrustedUserIPAddress> TrustedUserIPs { get; set; } = new List<TrustedUserIPAddress>();
 
 
         public DateTime LastOnlineDate { get; set; }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int CompanyWorkSpaceId { get; set; }
     }
 }
