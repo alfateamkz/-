@@ -4,16 +4,19 @@ using Alfateam.DB;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Alfateam.DB._MigrationsWebsiteDBContext
+namespace Alfateam.DB._Migrations.WebsiteDB
 {
     [DbContext(typeof(WebsiteDBContext))]
-    partial class WebsiteDBContextModelSnapshot : ModelSnapshot
+    [Migration("20241024131224_Init")]
+    partial class Init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -691,9 +694,6 @@ namespace Alfateam.DB._MigrationsWebsiteDBContext
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<string>("IconPath")
-                        .HasColumnType("longtext");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
@@ -7938,10 +7938,6 @@ namespace Alfateam.DB._MigrationsWebsiteDBContext
 
                     b.Property<int>("MainLanguageId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");

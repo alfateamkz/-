@@ -39,6 +39,13 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
 
+        [HttpGet, Route("GetUsersCount")]
+        public async Task<int> GetUsersCount()
+        {
+            return GetAvailableUsers().Count();
+        }
+
+
         [HttpGet,Route("GetUsers")]
         public async Task<IEnumerable<UserDTO>> GetUsers(int offset, int count = 20)
         {

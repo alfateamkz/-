@@ -19,6 +19,12 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
         }
 
+        [HttpGet, Route("GetVisitsCount")]
+        public async Task<int> GetVisitsCount(SiteVisitFilter filter)
+        {
+            return (await GetVisits(filter)).Count();
+        }
+
         [HttpGet, Route("GetVisits")]
         public async Task<IEnumerable<SiteVisitDTO>> GetVisits(SiteVisitFilter filter)
         {
@@ -43,8 +49,18 @@ namespace Alfateam.Website.API.Controllers.Admin
             return new SiteVisitDTO().CreateDTOs(items).Cast<SiteVisitDTO>();
         }
 
+
+
+
+
+        [HttpGet, Route("GetVisitsByDayCount")]
+        public async Task<int> GetVisitsByDayCount(DateTime from, DateTime to)
+        {
+            return (await GetVisitsByDay(from, to)).Count();
+        }
+
         [HttpGet, Route("GetVisitsByDay")]
-        public async Task<List<VisitsByDay>> GetVisits(DateTime from,DateTime to)
+        public async Task<List<VisitsByDay>> GetVisitsByDay(DateTime from,DateTime to)
         {
             var allVisits = DB.SiteVisits.Where(o => o.VisitedAt >= from && o.VisitedAt <= to);
             var grouped = allVisits.GroupBy(o => o.VisitedAt.Date);

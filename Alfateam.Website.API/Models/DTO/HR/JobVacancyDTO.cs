@@ -25,6 +25,10 @@ namespace Alfateam.Website.API.Models.DTO.HR
         public double? SalaryTo { get; set; }
 
 
+        public JobVacancyCategoryDTO? Category { get; set; }
+        public int? CategoryId { get; set; }
+
+
         public JobVacancyExpierence Expierence { get; set; }
 
        

@@ -40,6 +40,7 @@ using Swashbuckle.AspNetCore.Annotations;
 using Alfateam.Website.API.Models.DTO.Shop.ProductModifierItems;
 using Microsoft.AspNetCore.Http.Features;
 using Alfateam.Website.API.Filters.AdminSearch;
+using Alfateam.Website.API.Models.Filters.Admin.AdminSearch;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -50,6 +51,14 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
         #region Товары
+
+
+        [HttpGet, Route("GetProductsCount")]
+        public async Task<int> GetProductsCount()
+        {
+            return GetAvailableShopProducts().Count();
+        }
+
 
         [HttpGet, Route("GetProducts")]
         [ShopSectionAccess(1)]
@@ -473,6 +482,13 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Категории товаров
 
+        [HttpGet, Route("GetProductCategoriesCount")]
+        public async Task<int> GetProductCategoriesCount()
+        {
+            return GetAvailableShopProductCategories().Count();
+        }
+
+
         [HttpGet, Route("GetProductCategories")]
         [ShopSectionAccess(1)]
         public async Task<IEnumerable<ShopProductCategoryDTO>> GetProductCategories(int offset, int count = 20)
@@ -584,12 +600,30 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Заказы
 
+
+        [HttpGet, Route("GetOrdersCount")]
+        public async Task<int> GetOrdersCount()
+        {
+            return GetAvailableOrders().Count();
+        }
+
+
         [HttpGet, Route("GetOrders")]
         [ShopSectionAccess(2)]
         public async Task<IEnumerable<ShopOrderDTO>> GetOrders(int offset, int count = 20)
         {
             return new ShopOrderDTO().CreateDTOs(GetAvailableOrders(offset, count)).Cast<ShopOrderDTO>();
         }
+
+
+        [HttpGet, Route("GetOrdersFiltered")]
+        [ShopSectionAccess(2)]
+        public async Task<IEnumerable<ShopOrderDTO>> GetOrdersFiltered([FromQuery]ShopOrdersSearchFilter filter)
+        {
+            var items = filter.Filter(GetAvailableOrders());
+            return new ShopOrderDTO().CreateDTOs(items).Cast<ShopOrderDTO>();
+        }
+
 
         [HttpGet, Route("GetLastOrder")]
         [ShopSectionAccess(2)]
@@ -653,6 +687,13 @@ namespace Alfateam.Website.API.Controllers.Admin
         #endregion
 
         #region Промокоды
+
+        [HttpGet, Route("GetPromocodesCount")]
+        public async Task<int> GetPromocodesCount()
+        {
+            return GetAvailablePromocodes().Count();
+        }
+
 
         [HttpGet, Route("GetPromocodes")]
         [ShopSectionAccess(1)]

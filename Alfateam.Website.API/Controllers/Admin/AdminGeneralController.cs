@@ -34,6 +34,14 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Страны
 
+        [HttpGet, Route("GetCountriesCount")]
+        public async Task<int> GetCountriesCount()
+        {
+            return GetCountriesList().Count();
+        }
+
+
+
         [HttpGet, Route("GetCountries")]
         public async Task<IEnumerable<CountryDTO>> GetCountries(int offset, int count = 20)
         {
@@ -137,6 +145,15 @@ namespace Alfateam.Website.API.Controllers.Admin
         #endregion
 
         #region Языки
+
+        [HttpGet, Route("GetLanguagesCount")]
+        [CheckContentAreaRights(ContentAccessModelType.Compliance, 1)]
+        public async Task<int> GetLanguagesCount()
+        {
+            return GetLanguagesList().Count();
+        }
+
+
 
         [HttpGet, Route("GetLanguages")]
         public async Task<IEnumerable<LanguageDTO>> GetLanguages(int offset, int count = 20)
@@ -253,6 +270,15 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Валюты
 
+        [HttpGet, Route("GetCurrenciesCount")]
+        [CheckContentAreaRights(ContentAccessModelType.Compliance, 1)]
+        public async Task<int> GetCurrenciesCount()
+        {
+            return GetCurrenciesList().Count();
+        }
+
+
+
         [HttpGet, Route("GetCurrencies")]
         public async Task<IEnumerable<CurrencyDTO>> GetCurrencies(int offset, int count = 20)
         {
@@ -356,6 +382,15 @@ namespace Alfateam.Website.API.Controllers.Admin
         #endregion
 
         #region Часовые пояса
+
+        [HttpGet, Route("GetTimezonesCount")]
+        [CheckContentAreaRights(ContentAccessModelType.Compliance, 1)]
+        public async Task<int> GetTimezonesCount()
+        {
+            return GetTimezonesList().Count();
+        }
+
+
 
         [HttpGet, Route("GetTimezones")]
         public async Task<IEnumerable<TimezoneDTO>> GetTimezones(int offset, int count = 20)

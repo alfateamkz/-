@@ -38,6 +38,14 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Партнеры
 
+        [HttpGet, Route("GetPartnersCount")]
+        public async Task<int> GetPartnersCount()
+        {
+            return GetAvailablePartners().Count();
+        }
+
+
+
         [HttpGet, Route("GetPartners")]
         [CheckContentAreaRights(ContentAccessModelType.Partners, 1)]
         public async Task<IEnumerable<PartnerDTO>> GetPartners(int offset, int count = 20)

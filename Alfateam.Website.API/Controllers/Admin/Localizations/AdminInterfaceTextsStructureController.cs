@@ -5,6 +5,18 @@ using Alfateam.Website.API.Enums.LocalizationTexts.ClientCabinet;
 using Alfateam.Website.API.Enums.LocalizationTexts.StaticPages;
 using Alfateam.Website.API.Models;
 using Alfateam2._0.Models.Abstractions;
+using Alfateam2._0.Models.Localization.Texts;
+using Alfateam2._0.Models.Localization.Texts.ClientCabinet;
+using Alfateam2._0.Models.Localization.Texts.ClientCabinet.Auth;
+using Alfateam2._0.Models.Localization.Texts.ClientCabinet.Referral;
+using Alfateam2._0.Models.Localization.Texts.Common;
+using Alfateam2._0.Models.Localization.Texts.HR;
+using Alfateam2._0.Models.Localization.Texts.Invest;
+using Alfateam2._0.Models.Localization.Texts.Portfolio;
+using Alfateam2._0.Models.Localization.Texts.Shop;
+using Alfateam2._0.Models.Localization.Texts.StaticPages;
+using Alfateam2._0.Models.Localization.Texts.StaticPages.InnerLandings;
+using Alfateam2._0.Models.Localization.Texts.Team;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Alfateam.Website.API.Controllers.Admin.Localizations
@@ -47,19 +59,19 @@ namespace Alfateam.Website.API.Controllers.Admin.Localizations
             {
                 SubPages = new List<AdminLocalizationPageStructureItem>
                 {
-                    new AdminLocalizationPageStructureItem("Код отправлен на почту")
+                    new AdminLocalizationPageStructureItem("Код отправлен на почту", typeof(CCAuthCodeSentPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("CCAuthTexts", languageId, CCAuthTextsType.CCAuthCodeSentPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Восстановление пароля")
+                    new AdminLocalizationPageStructureItem("Восстановление пароля", typeof(CCAuthRestorePageTexts))
                     {
                         CommonMethodName = QueryStringBuider("CCAuthTexts", languageId, CCAuthTextsType.CCAuthRestorePageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Вход в аккаунт")
+                    new AdminLocalizationPageStructureItem("Вход в аккаунт", typeof(CCAuthSignInPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("CCAuthTexts", languageId, CCAuthTextsType.CCAuthSignInPageTexts)
                     },
-                     new AdminLocalizationPageStructureItem("Регистрация")
+                     new AdminLocalizationPageStructureItem("Регистрация", typeof(CCAuthSignUpPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("CCAuthTexts", languageId, CCAuthTextsType.CCAuthSignUpPageTexts)
                     },
@@ -72,19 +84,19 @@ namespace Alfateam.Website.API.Controllers.Admin.Localizations
             {
                 SubPages = new List<AdminLocalizationPageStructureItem>
                 {
-                    new AdminLocalizationPageStructureItem("Страница счета")
+                    new AdminLocalizationPageStructureItem("Страница счета", typeof(CCRefAccountPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("CCAuthTexts", languageId, CCRefTextsType.CCRefAccountPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Главная страница")
+                    new AdminLocalizationPageStructureItem("Главная страница", typeof(CCRefMainPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("CCAuthTexts", languageId, CCRefTextsType.CCRefMainPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Мои счета")
+                    new AdminLocalizationPageStructureItem("Мои счета", typeof(CCRefMyAccountsPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("CCAuthTexts", languageId, CCRefTextsType.CCRefMyAccountsPageTexts)
                     },
-                     new AdminLocalizationPageStructureItem("Вывод средств")
+                     new AdminLocalizationPageStructureItem("Вывод средств", typeof(CCRefWithdrawalPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("CCAuthTexts", languageId, CCRefTextsType.CCRefWithdrawalPageTexts)
                     },
@@ -97,27 +109,27 @@ namespace Alfateam.Website.API.Controllers.Admin.Localizations
             {
                 SubPages = new List<AdminLocalizationPageStructureItem>
                 {
-                    new AdminLocalizationPageStructureItem("Информация")
+                    new AdminLocalizationPageStructureItem("Информация", typeof(CCInfoPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("ClientCabinetTexts", languageId, ClientCabinetTextsType.CCInfoPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Мои заказы")
+                    new AdminLocalizationPageStructureItem("Мои заказы", typeof(CCMyOrdersPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("ClientCabinetTexts", languageId, ClientCabinetTextsType.CCMyOrdersPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Мои проекты")
+                    new AdminLocalizationPageStructureItem("Мои проекты", typeof(CCMyProjectsPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("ClientCabinetTexts", languageId, ClientCabinetTextsType.CCMyProjectsPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Уведомления")
+                    new AdminLocalizationPageStructureItem("Уведомления", typeof(CCNotificationsPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("ClientCabinetTexts", languageId, ClientCabinetTextsType.CCNotificationsPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Страница заказа")
+                    new AdminLocalizationPageStructureItem("Страница заказа", typeof(CCOrderPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("ClientCabinetTexts", languageId, ClientCabinetTextsType.CCOrderPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Страница проекта")
+                    new AdminLocalizationPageStructureItem("Страница проекта", typeof(CCProjectPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("ClientCabinetTexts", languageId, ClientCabinetTextsType.CCProjectPageTexts)
                     },
@@ -146,15 +158,15 @@ namespace Alfateam.Website.API.Controllers.Admin.Localizations
             {
                 SubPages = new List<AdminLocalizationPageStructureItem>
                 {
-                    new AdminLocalizationPageStructureItem("Качество и процесс работы")
+                    new AdminLocalizationPageStructureItem("Качество и процесс работы", typeof(ILQualityAndPipelinePageTexts))
                     {
                         CommonMethodName = QueryStringBuider("InnerLandingsTexts", languageId, InnerLandingsTextsType.ILQualityAndPipelinePageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Реферальная программа")
+                    new AdminLocalizationPageStructureItem("Реферальная программа", typeof(ILRefProgramPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("InnerLandingsTexts", languageId, InnerLandingsTextsType.ILRefProgramPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Работай с нами")
+                    new AdminLocalizationPageStructureItem("Работай с нами", typeof(ILWorkWithUsPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("InnerLandingsTexts", languageId, InnerLandingsTextsType.ILWorkWithUsPageTexts)
                     },
@@ -167,31 +179,31 @@ namespace Alfateam.Website.API.Controllers.Admin.Localizations
             {
                 SubPages = new List<AdminLocalizationPageStructureItem>
                 {
-                    new AdminLocalizationPageStructureItem("О нас")
+                    new AdminLocalizationPageStructureItem("О нас", typeof(AboutUsPageTexts))
                     {
-                        CommonMethodName = QueryStringBuider("StaticPagesTexts", languageId, StaticPagesTextsType.AboutUsPageTexts)
+                        CommonMethodName = QueryStringBuider("StaticPagesTexts", languageId, StaticPagesTextsType.AboutUsPageTexts),
                     },
-                    new AdminLocalizationPageStructureItem("Корпоративная этика")
+                    new AdminLocalizationPageStructureItem("Корпоративная этика", typeof(CorporateCulturePageTexts))
                     {
                         CommonMethodName = QueryStringBuider("StaticPagesTexts", languageId, StaticPagesTextsType.CorporateCulturePageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Найти мой договор")
+                    new AdminLocalizationPageStructureItem("Найти мой договор", typeof(FindMyAgreementPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("StaticPagesTexts", languageId, StaticPagesTextsType.FindMyAgreementPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Противодействие мошенничеству")
+                    new AdminLocalizationPageStructureItem("Противодействие мошенничеству", typeof(FraudCounteractionPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("StaticPagesTexts", languageId, StaticPagesTextsType.FraudCounteractionPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Лендинг")
+                    new AdminLocalizationPageStructureItem("Лендинг", typeof(LandingTexts))
                     {
                         CommonMethodName = QueryStringBuider("StaticPagesTexts", languageId, StaticPagesTextsType.LandingTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Политика конфедициальности")
+                    new AdminLocalizationPageStructureItem("Политика конфедициальности", typeof(PrivacyPolicyPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("StaticPagesTexts", languageId, StaticPagesTextsType.PrivacyPolicyPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Услуги")
+                    new AdminLocalizationPageStructureItem("Услуги", typeof(ServicesListPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("StaticPagesTexts", languageId, StaticPagesTextsType.ServicesListPageTexts)
                     },
@@ -218,19 +230,19 @@ namespace Alfateam.Website.API.Controllers.Admin.Localizations
             {
                 SubPages = new List<AdminLocalizationPageStructureItem>
                 {
-                    new AdminLocalizationPageStructureItem("Личный кабинет")
+                    new AdminLocalizationPageStructureItem("Личный кабинет", typeof(ClientCabinetCommonTexts))
                     {
                         CommonMethodName = QueryStringBuider("CommonTexts", languageId, CommonTextsType.ClientCabinetCommonTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Футер")
+                    new AdminLocalizationPageStructureItem("Футер", typeof(FooterTexts))
                     {
                         CommonMethodName = QueryStringBuider("CommonTexts", languageId, CommonTextsType.FooterTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Хедер")
+                    new AdminLocalizationPageStructureItem("Хедер", typeof(HeaderTexts))
                     {
                         CommonMethodName = QueryStringBuider("CommonTexts", languageId, CommonTextsType.HeaderTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Ссылки")
+                    new AdminLocalizationPageStructureItem("Ссылки", typeof(LinksLocalization))
                     {
                         CommonMethodName = QueryStringBuider("CommonTexts", languageId, CommonTextsType.LinksLocalization)
                     },
@@ -239,39 +251,39 @@ namespace Alfateam.Website.API.Controllers.Admin.Localizations
         }
         private void SetGeneralPageItems(List<AdminLocalizationPageStructureItem> items, int languageId)
         {
-            items.Add(new AdminLocalizationPageStructureItem("Комплаенс")
+            items.Add(new AdminLocalizationPageStructureItem("Комплаенс", typeof(ComplianceTexts))
             {
                 CommonMethodName = QueryStringBuider("GeneralTexts", languageId, GeneralTextsType.ComplianceTexts)
             });
-            items.Add(new AdminLocalizationPageStructureItem("Мероприятия")
+            items.Add(new AdminLocalizationPageStructureItem("Мероприятия", typeof(EventTexts))
             {
                 CommonMethodName = QueryStringBuider("GeneralTexts", languageId, GeneralTextsType.EventTexts)
             });
-            items.Add(new AdminLocalizationPageStructureItem("СМИ о нас")
+            items.Add(new AdminLocalizationPageStructureItem("СМИ о нас", typeof(MassMediaAboutUsTexts))
             {
                 CommonMethodName = QueryStringBuider("GeneralTexts", languageId, GeneralTextsType.MassMediaAboutUsTexts)
             });
-            items.Add(new AdminLocalizationPageStructureItem("Аутстафф")
+            items.Add(new AdminLocalizationPageStructureItem("Аутстафф", typeof(OutstaffPageTexts))
             {
                 CommonMethodName = QueryStringBuider("GeneralTexts", languageId, GeneralTextsType.OutstaffPageTexts)
             });
-            items.Add(new AdminLocalizationPageStructureItem("Партнеры")
+            items.Add(new AdminLocalizationPageStructureItem("Партнеры", typeof(PartnersPageTexts))
             {
                 CommonMethodName = QueryStringBuider("GeneralTexts", languageId, GeneralTextsType.PartnersPageTexts)
             });
-            items.Add(new AdminLocalizationPageStructureItem("Новости")
+            items.Add(new AdminLocalizationPageStructureItem("Новости", typeof(PostsPageTexts))
             {
                 CommonMethodName = QueryStringBuider("GeneralTexts", languageId, GeneralTextsType.PostsPageTexts)
             });
-            items.Add(new AdminLocalizationPageStructureItem("Отзывы")
+            items.Add(new AdminLocalizationPageStructureItem("Отзывы", typeof(ReviewsPageTexts))
             {
                 CommonMethodName = QueryStringBuider("GeneralTexts", languageId, GeneralTextsType.ReviewsPageTexts)
             });
-            items.Add(new AdminLocalizationPageStructureItem("Услуги")
+            items.Add(new AdminLocalizationPageStructureItem("Услуги", typeof(ServicePageTexts))
             {
                 CommonMethodName = QueryStringBuider("GeneralTexts", languageId, GeneralTextsType.ServicePageTexts)
             });
-            items.Add(new AdminLocalizationPageStructureItem("Карта сайта")
+            items.Add(new AdminLocalizationPageStructureItem("Карта сайта", typeof(SitemapPageTexts))
             {
                 CommonMethodName = QueryStringBuider("GeneralTexts", languageId, GeneralTextsType.SitemapPageTexts)
             });
@@ -282,11 +294,11 @@ namespace Alfateam.Website.API.Controllers.Admin.Localizations
             {
                 SubPages = new List<AdminLocalizationPageStructureItem>
                 {
-                    new AdminLocalizationPageStructureItem("Список вакансий")
+                    new AdminLocalizationPageStructureItem("Список вакансий", typeof(HRJobVacanciesListPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("HRTexts", languageId, HRTextsType.HRJobVacanciesListPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Страница вакансии")
+                    new AdminLocalizationPageStructureItem("Страница вакансии", typeof(HRJobVacancyPageText))
                     {
                         CommonMethodName = QueryStringBuider("HRTexts", languageId, HRTextsType.HRJobVacancyPageText)
                     },
@@ -299,11 +311,11 @@ namespace Alfateam.Website.API.Controllers.Admin.Localizations
             {
                 SubPages = new List<AdminLocalizationPageStructureItem>
                 {
-                    new AdminLocalizationPageStructureItem("Страница инвест проекта")
+                    new AdminLocalizationPageStructureItem("Страница инвест проекта", typeof(InvestProjectPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("InvestTexts", languageId, InvestTextsType.InvestProjectPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Список инвест проектов")
+                    new AdminLocalizationPageStructureItem("Список инвест проектов", typeof(InvestProjectsListPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("InvestTexts", languageId, InvestTextsType.InvestProjectsListPageTexts)
                     },
@@ -316,15 +328,15 @@ namespace Alfateam.Website.API.Controllers.Admin.Localizations
             {
                 SubPages = new List<AdminLocalizationPageStructureItem>
                 {
-                    new AdminLocalizationPageStructureItem("Страница проекта")
+                    new AdminLocalizationPageStructureItem("Страница проекта", typeof(PortfolioItemPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("PortfolioTexts", languageId, PortfolioTextsType.PortfolioItemPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Список проектов")
+                    new AdminLocalizationPageStructureItem("Список проектов", typeof(PortfolioListPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("PortfolioTexts", languageId, PortfolioTextsType.PortfolioListPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Статистика просмотров проектов")
+                    new AdminLocalizationPageStructureItem("Статистика просмотров проектов", typeof(PortfolioStatsPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("PortfolioTexts", languageId, PortfolioTextsType.PortfolioStatsPageTexts)
                     },
@@ -337,27 +349,27 @@ namespace Alfateam.Website.API.Controllers.Admin.Localizations
             {
                 SubPages = new List<AdminLocalizationPageStructureItem>
                 {
-                    new AdminLocalizationPageStructureItem("Корзина")
+                    new AdminLocalizationPageStructureItem("Корзина", typeof(ShopBasketPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("ShopTexts", languageId, ShopTextsType.ShopBasketPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Адрес доставки")
+                    new AdminLocalizationPageStructureItem("Адрес доставки", typeof(ShopDeliveryAddressPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("ShopTexts", languageId, ShopTextsType.ShopDeliveryAddressPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Страница продукта")
+                    new AdminLocalizationPageStructureItem("Страница продукта", typeof(ShopItemPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("ShopTexts", languageId, ShopTextsType.ShopItemPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Список продуктов")
+                    new AdminLocalizationPageStructureItem("Список продуктов", typeof(ShopItemsPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("ShopTexts", languageId, ShopTextsType.ShopItemsPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Страница заказ не оплачен")
+                    new AdminLocalizationPageStructureItem("Страница заказ не оплачен", typeof(ShopOrderNotPaidPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("ShopTexts", languageId, ShopTextsType.ShopOrderNotPaidPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Страница заказ оплачен")
+                    new AdminLocalizationPageStructureItem("Страница заказ оплачен", typeof(ShopOrderPaidSuccessfullyPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("ShopTexts", languageId, ShopTextsType.ShopOrderPaidSuccessfullyPageTexts)
                     },
@@ -370,11 +382,11 @@ namespace Alfateam.Website.API.Controllers.Admin.Localizations
             {
                 SubPages = new List<AdminLocalizationPageStructureItem>
                 {
-                    new AdminLocalizationPageStructureItem("Страница члена команды")
+                    new AdminLocalizationPageStructureItem("Страница члена команды", typeof(TeamMemberPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("TeamTexts", languageId, TeamTextsType.TeamMemberPageTexts)
                     },
-                    new AdminLocalizationPageStructureItem("Члены команды")
+                    new AdminLocalizationPageStructureItem("Члены команды", typeof(TeamPageTexts))
                     {
                         CommonMethodName = QueryStringBuider("TeamTexts", languageId, TeamTextsType.TeamPageTexts)
                     },

@@ -28,6 +28,12 @@ namespace Alfateam2._0.Models.HR
         public double? SalaryTo { get; set; }
 
 
+
+        public JobVacancyCategory? Category { get; set; }
+        public int? CategoryId { get; set; }
+
+
+
         [NotMapped]
         public string Slug => SlugHelper.GetLatynSlug(Title);
 

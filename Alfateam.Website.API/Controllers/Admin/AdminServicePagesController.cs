@@ -27,8 +27,16 @@ namespace Alfateam.Website.API.Controllers.Admin
         public AdminServicePagesController(ControllerParams @params) : base(@params)
         {
         }
-         
+
         #region Страницы услуг и их локализации
+
+        [HttpGet, Route("GetServicePagesCount")]
+        public async Task<int> GetServicePagesCount()
+        {
+            return GetAvailableServicePages().Count();
+        }
+
+
 
         [HttpGet, Route("GetServicePages")]
         [CheckContentAreaRights(ContentAccessModelType.Services, 1)]

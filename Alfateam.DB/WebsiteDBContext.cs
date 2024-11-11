@@ -119,6 +119,7 @@ namespace Alfateam.DB
         #region HR
         public DbSet<JobSummary> JobSummaries { get; set; }
         public DbSet<JobVacancy> JobVacancies { get; set; }
+        public DbSet<JobVacancyCategory> JobVacancyCategories { get; set; }
         public DbSet<JobVacancyExpierence> JobVacancyExpierences { get; set; }
         #endregion
 
@@ -141,6 +142,7 @@ namespace Alfateam.DB
         #endregion
 
         #region HR
+        public DbSet<JobVacancyCategoryLocalization> JobVacancyCategoryLocalizations { get; set; }
         public DbSet<JobVacancyLocalization> JobVacancyLocalizations { get; set; }
         #endregion
 

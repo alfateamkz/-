@@ -36,6 +36,14 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Портфолио
 
+        [HttpGet, Route("GetPortfoliosCount")]
+        public async Task<int> GetPortfoliosCount()
+        {
+            return GetAvailablePortfolio().Count();
+        }
+
+
+
         [HttpGet, Route("GetPortfolios")]
         [CheckContentAreaRights(ContentAccessModelType.Portfolio, 1)]
         public async Task<IEnumerable<PortfolioDTO>> GetPortfolios(int offset, int count = 20)
@@ -164,6 +172,14 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Категории портфолио
 
+        [HttpGet, Route("GetPortfolioCategoriesCount")]
+        public async Task<int> GetPortfolioCategoriesCount()
+        {
+            return GetAvailablePortfolioCategories().Count();
+        }
+
+
+
         [HttpGet, Route("GetPortfolioCategories")]
         [CheckContentAreaRights(ContentAccessModelType.Portfolio, 1)]
         public async Task<IEnumerable<PortfolioCategoryDTO>> GetPortfolioCategories(int offset, int count = 20)
@@ -275,6 +291,13 @@ namespace Alfateam.Website.API.Controllers.Admin
         #endregion
 
         #region Индустрии портфолио
+
+        [HttpGet, Route("GetPortfolioIndustriesCount")]
+        public async Task<int> GetPortfolioIndustriesCount()
+        {
+            return GetAvailablePortfolioIndustries().Count();
+        }
+
 
         [HttpGet, Route("GetPortfolioIndustries")]
         [CheckContentAreaRights(ContentAccessModelType.Portfolio, 1)]

@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Alfateam.DB._MigrationsWebsiteDBContext
+namespace Alfateam.DB._Migrations.WebsiteDB
 {
     [DbContext(typeof(WebsiteDBContext))]
-    [Migration("20241024131224_Init")]
-    partial class Init
+    [Migration("20241109052626_JobVacancyCategories")]
+    partial class JobVacancyCategories
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -695,6 +695,9 @@ namespace Alfateam.DB._MigrationsWebsiteDBContext
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("IconPath")
+                        .HasColumnType("longtext");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
@@ -1079,6 +1082,9 @@ namespace Alfateam.DB._MigrationsWebsiteDBContext
                     b.Property<int>("AvailabilityId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -1117,6 +1123,8 @@ namespace Alfateam.DB._MigrationsWebsiteDBContext
 
                     b.HasIndex("AvailabilityId");
 
+                    b.HasIndex("CategoryId");
+
                     b.HasIndex("CurrencyId");
 
                     b.HasIndex("ExpierenceId");
@@ -1126,6 +1134,32 @@ namespace Alfateam.DB._MigrationsWebsiteDBContext
                     b.HasIndex("MainLanguageId");
 
                     b.ToTable("JobVacancies");
+                });
+
+            modelBuilder.Entity("Alfateam2._0.Models.HR.JobVacancyCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("JobVacancyCategories");
                 });
 
             modelBuilder.Entity("Alfateam2._0.Models.HR.JobVacancyExpierence", b =>
@@ -1281,7 +1315,7 @@ namespace Alfateam.DB._MigrationsWebsiteDBContext
                     b.Property<int>("LanguageEntityId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TimeZoneId")
+                    b.Property<int>("TimeZoneId")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
@@ -1470,6 +1504,42 @@ namespace Alfateam.DB._MigrationsWebsiteDBContext
                     b.HasIndex("LanguageEntityId");
 
                     b.ToTable("EventLocalizations");
+                });
+
+            modelBuilder.Entity("Alfateam2._0.Models.Localization.Items.HR.JobVacancyCategoryLocalization", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("JobVacancyCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LanguageEntityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobVacancyCategoryId");
+
+                    b.HasIndex("LanguageEntityId");
+
+                    b.ToTable("JobVacancyCategoryLocalizations");
                 });
 
             modelBuilder.Entity("Alfateam2._0.Models.Localization.Items.HR.JobVacancyLocalization", b =>
@@ -7939,6 +8009,10 @@ namespace Alfateam.DB._MigrationsWebsiteDBContext
                     b.Property<int>("MainLanguageId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -8530,6 +8604,10 @@ namespace Alfateam.DB._MigrationsWebsiteDBContext
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Alfateam2._0.Models.HR.JobVacancyCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId");
+
                     b.HasOne("Alfateam2._0.Models.General.Currency", "Currency")
                         .WithMany()
                         .HasForeignKey("CurrencyId")
@@ -8555,6 +8633,8 @@ namespace Alfateam.DB._MigrationsWebsiteDBContext
                         .IsRequired();
 
                     b.Navigation("Availability");
+
+                    b.Navigation("Category");
 
                     b.Navigation("Currency");
 
@@ -8628,7 +8708,9 @@ namespace Alfateam.DB._MigrationsWebsiteDBContext
 
                     b.HasOne("Alfateam2._0.Models.General.TimeZone", null)
                         .WithMany("Localizations")
-                        .HasForeignKey("TimeZoneId");
+                        .HasForeignKey("TimeZoneId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("LanguageEntity");
                 });
@@ -8689,6 +8771,23 @@ namespace Alfateam.DB._MigrationsWebsiteDBContext
                     b.HasOne("Alfateam2._0.Models.Events.Event", null)
                         .WithMany("Localizations")
                         .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Alfateam2._0.Models.General.Language", "LanguageEntity")
+                        .WithMany()
+                        .HasForeignKey("LanguageEntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LanguageEntity");
+                });
+
+            modelBuilder.Entity("Alfateam2._0.Models.Localization.Items.HR.JobVacancyCategoryLocalization", b =>
+                {
+                    b.HasOne("Alfateam2._0.Models.HR.JobVacancyCategory", null)
+                        .WithMany("Localizations")
+                        .HasForeignKey("JobVacancyCategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -11147,6 +11246,11 @@ namespace Alfateam.DB._MigrationsWebsiteDBContext
                     b.Navigation("Summaries");
 
                     b.Navigation("WatchesList");
+                });
+
+            modelBuilder.Entity("Alfateam2._0.Models.HR.JobVacancyCategory", b =>
+                {
+                    b.Navigation("Localizations");
                 });
 
             modelBuilder.Entity("Alfateam2._0.Models.Localization.Items.ServicePageLocalization", b =>

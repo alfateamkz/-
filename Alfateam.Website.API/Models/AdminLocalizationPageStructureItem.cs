@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel;
 
 namespace Alfateam.Website.API.Models
 {
@@ -13,12 +14,28 @@ namespace Alfateam.Website.API.Models
             Title = title;
         }
 
+
+        public AdminLocalizationPageStructureItem(string title, string commonMethodName, Type typeOfObject)
+        {
+            Title = title;
+
+            SetMethodNames(commonMethodName);
+            SetObjectStructureFields(typeOfObject);
+        }
+
+
         public AdminLocalizationPageStructureItem(string title, string commonMethodName)
         {
             Title = title;
+
             SetMethodNames(commonMethodName);
         }
+        public AdminLocalizationPageStructureItem(string title, Type typeOfObject)
+        {
+            Title = title;
 
+            SetObjectStructureFields(typeOfObject);
+        }
 
 
         public string Title { get; set; }
@@ -29,6 +46,9 @@ namespace Alfateam.Website.API.Models
 
         public string GetMethod { get; set; }
         public string CrtUpdMethod { get; set; }
+
+        public List<AdminLocalizationPageField> ObjectStructure { get; set; } = new List<AdminLocalizationPageField>();
+
 
 
         public string CommonMethodName 
@@ -49,6 +69,27 @@ namespace Alfateam.Website.API.Models
         {
             GetMethod = $"Get{commonMethodName}";
             CrtUpdMethod = $"CrtUpd{commonMethodName}";
+        }
+        private void SetObjectStructureFields(Type typeOfObject)
+        {
+            var props = typeOfObject.GetProperties().Where(o => o.CanWrite);
+            foreach (var prop in props)
+            {
+                string clientFieldName = prop.Name;
+
+                var descriptionAttr = prop.GetCustomAttributes(true).FirstOrDefault(o => o is DescriptionAttribute) as DescriptionAttribute;
+                if(descriptionAttr != null)
+                {
+                    clientFieldName = descriptionAttr.Description;
+                }
+
+                ObjectStructure.Add(new AdminLocalizationPageField()
+                {
+                    ClientFieldName = clientFieldName,
+                    JSONName = prop.Name,
+                    Type = prop.PropertyType.Name,
+                });
+            }
         }
     }
 }

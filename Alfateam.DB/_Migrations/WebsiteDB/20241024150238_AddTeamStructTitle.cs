@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Alfateam.DB._MigrationsWebsiteDBContext
+namespace Alfateam.DB._Migrations.WebsiteDB
 {
     /// <inheritdoc />
     public partial class AddTeamStructTitle : Migration

@@ -23,6 +23,55 @@ namespace Alfateam.Core.Services
 
         #region Get
 
+
+
+        public IEnumerable<DTO> GetMany<T, DTO>(IEnumerable<T> from,
+                                                Func<T, bool> predicate = null) where T : AbsModel, new()
+                                                                                where DTO : DTOModelAbs<T>, new()
+        {
+            return GetManyWithTotalCount<T, DTO>(from, 0, int.MaxValue, predicate).Items;
+        }
+        public IEnumerable<DTO> GetMany<T,DTO>(IEnumerable<T> from,
+                                                      int offset,
+                                                      int count,
+                                                      Func<T, bool> predicate = null) where T : AbsModel, new()
+                                                                                      where DTO : DTOModelAbs<T>, new()
+        {
+            return GetManyWithTotalCount<T,DTO>(from, offset, count, predicate).Items;
+        }
+        public ItemsWithTotalCount<DTO> GetManyWithTotalCount<T, DTO>(IEnumerable<T> from, 
+                                                                            int offset, 
+                                                                            int count, 
+                                                                            Func<T,bool> predicate = null) where T : AbsModel, new()
+                                                                                                           where DTO : DTOModelAbs<T>, new()
+        {
+            var dtoModel = new DTO();
+
+
+            var filtered = from.Where(o => !o.IsDeleted);
+            if(predicate != null)
+            {
+                filtered = filtered.Where(predicate);
+            }
+
+            var toReturn = new ItemsWithTotalCount<DTO>
+            {
+                TotalCount = from.Count(),
+            };
+
+            var toTake = filtered.Skip(offset).Take(count);
+            foreach(var item in toTake)
+            {
+                toReturn.Items.Add((DTO)dtoModel.CreateDTO(item));
+            }
+
+            return toReturn;
+        }
+
+
+
+
+
         public DTOModelAbs<T> TryGetOne<T>(IEnumerable<T> fromModels, int id, DTOModelAbs<T> dTOModel) where T : AbsModel, new()
         {
             var dbModel = TryGetOne(fromModels, id);

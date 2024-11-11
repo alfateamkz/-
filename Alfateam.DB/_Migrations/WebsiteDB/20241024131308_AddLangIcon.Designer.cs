@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Alfateam.DB._MigrationsWebsiteDBContext
+namespace Alfateam.DB._Migrations.WebsiteDB
 {
     [DbContext(typeof(WebsiteDBContext))]
-    [Migration("20241024150238_AddTeamStructTitle")]
-    partial class AddTeamStructTitle
+    [Migration("20241024131308_AddLangIcon")]
+    partial class AddLangIcon
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -7941,10 +7941,6 @@ namespace Alfateam.DB._MigrationsWebsiteDBContext
 
                     b.Property<int>("MainLanguageId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");

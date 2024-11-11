@@ -349,11 +349,11 @@ namespace Alfateam.EDM.API.Services
             else if (signature is ScanSignature scanSignature)
             {
                 scanSignature.SignedById = authorizedUser.Id;
-                scanSignature.ScanPath = await FilesService.TryUploadFile("signedDoc", FileType.Document);
+                scanSignature.ScanPath = FilesService.TryUploadFile("signedDoc", FileType.Document);
             }
             else if (signature is ScanSignatureWithoutDocFlow scanSignatureWithoutDocFlow)
             {
-                scanSignatureWithoutDocFlow.ScanPath = await FilesService.TryUploadFile("signedDoc", FileType.Document);
+                scanSignatureWithoutDocFlow.ScanPath = FilesService.TryUploadFile("signedDoc", FileType.Document);
             }
         }
 

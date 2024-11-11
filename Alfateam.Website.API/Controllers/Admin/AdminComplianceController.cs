@@ -39,6 +39,14 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Комплаенс-документы
 
+        [HttpGet, Route("GetComplianceDocumentsCount")]
+        public async Task<int> GetComplianceDocumentsCount()
+        {
+            return GetAvailableComplianceDocuments().Count();
+        }
+
+
+
         [HttpGet, Route("GetComplianceDocuments")]
         [CheckContentAreaRights(ContentAccessModelType.Compliance, 1)]
         public async Task<IEnumerable<ComplianceDocumentDTO>> GetComplianceDocuments(int offset, int count = 20)

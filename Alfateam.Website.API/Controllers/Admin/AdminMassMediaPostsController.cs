@@ -33,6 +33,15 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Посты
 
+
+        [HttpGet, Route("GetPostsCount")]
+        public async Task<int> GetPostsCount()
+        {
+            return GetAvailablePosts().Count();
+        }
+
+
+
         [HttpGet, Route("GetPosts")]
         [CheckContentAreaRights(ContentAccessModelType.MassMediaPosts, 1)]
         public async Task<IEnumerable<MassMediaPostDTO>> GetPosts(int offset, int count = 20)

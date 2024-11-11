@@ -19,6 +19,12 @@ namespace Alfateam.Website.API.Abstractions
             }
             return filtered.Skip(Offset).Take(Count);
         }
+
+        public virtual IEnumerable<T> FilterBase<T>(IEnumerable<T> items) where T : AbsModel
+        {
+            IEnumerable<T> filtered = new List<T>(items);
+            return filtered.Skip(Offset).Take(Count);
+        }
     }
 
 

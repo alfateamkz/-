@@ -25,6 +25,14 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Отзывы
 
+
+        [HttpGet, Route("GetReviewsCount")]
+        public async Task<int> GetReviewsCount()
+        {
+            return GetAvailableReviews().Count();
+        }
+
+
         [HttpGet, Route("GetReviews")]
         [ReviewsSectionAccess(1)]
         public async Task<IEnumerable<ReviewDTO>> GetReviews(int offset, int count = 20)

@@ -34,10 +34,19 @@ namespace Alfateam.Website.API.Controllers.Admin
         public AdminEventsController(ControllerParams @params) : base(@params)
         {
         }
-    
+
 
 
         #region События
+
+
+        [HttpGet, Route("GetEventsCount")]
+        public async Task<int> GetEventsCount()
+        {
+            return GetAvailableEvents().Count();
+        }
+
+
 
         [HttpGet, Route("GetEvents")]
         [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
@@ -167,9 +176,18 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
 
-        #endregion 
+        #endregion
 
         #region Категории событий
+
+
+        [HttpGet, Route("GetEventCategoriesCount")]
+        public async Task<int> GetEventCategoriesCount()
+        {
+            return GetAvailableEventCategories().Count();
+        }
+
+
 
         [HttpGet, Route("GetEventCategories")]
         [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
@@ -288,6 +306,15 @@ namespace Alfateam.Website.API.Controllers.Admin
         #endregion
 
         #region Форматы событий
+
+
+        [HttpGet, Route("GetEventFormatsCount")]
+        public async Task<int> GetEventFormatsCount()
+        {
+            return GetAvailableEventFormats().Count();
+        }
+
+
 
         [HttpGet, Route("GetEventFormats")]
         [CheckContentAreaRights(ContentAccessModelType.Events, 1)]

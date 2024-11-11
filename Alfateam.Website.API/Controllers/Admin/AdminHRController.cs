@@ -22,6 +22,7 @@ using Alfateam.Website.API.Filters.Access;
 using Alfateam.Website.API.Models.DTOLocalization.Events;
 using Alfateam.Core.Exceptions;
 using Alfateam2._0.Models.ContentItems;
+using Alfateam.Website.API.Models.Filters.Admin.AdminSearch;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -34,6 +35,14 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Вакансии
 
+
+        [HttpGet, Route("GetJobVacanciesCount")]
+        public async Task<int> GetJobVacanciesCount()
+        {
+            return GetAvailableJobVacancies().Count();
+        }
+
+
         [HttpGet, Route("GetJobVacancies")]
         [HRSectionAccess(1)]
         public async Task<IEnumerable<JobVacancyDTO>> GetJobVacancies(int offset, int count = 20)
@@ -43,9 +52,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
         [HttpGet, Route("GetJobVacanciesFiltered")]
         [HRSectionAccess(1)]
-        public async Task<IEnumerable<JobVacancyDTO>> GetJobVacanciesFiltered([FromQuery] SearchFilter filter)
+        public async Task<IEnumerable<JobVacancyDTO>> GetJobVacanciesFiltered([FromQuery] JobVacanciesSearchFilter filter)
         {
-            var items = filter.FilterBase(GetAvailableJobVacancies(), (item) => item.Title);
+            var items = filter.Filter(GetAvailableJobVacancies(), (item) => item.Title);
             return new JobVacancyDTO().CreateDTOs(items).Cast<JobVacancyDTO>();
         }
 
@@ -158,7 +167,139 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #endregion
 
+        #region Категории вакансий
+
+
+        [HttpGet, Route("GetJobVacancyCategoriesCount")]
+        public async Task<int> GetJobVacancyCategoriesCount()
+        {
+            return GetAvailableJobVacancyCategories().Count();
+        }
+
+
+        [HttpGet, Route("GetJobVacancyCategories")]
+        [HRSectionAccess(1)]
+        public async Task<IEnumerable<JobVacancyCategoryDTO>> GetJobVacancyCategories(int offset, int count = 20)
+        {
+            var items = GetAvailableJobVacancyCategories().Skip(offset).Take(count);
+            return new JobVacancyCategoryDTO().CreateDTOs(items).Cast<JobVacancyCategoryDTO>();
+        }
+        [HttpGet, Route("GetJobVacancyCategoriesFiltered")]
+        [HRSectionAccess(1)]
+        public async Task<IEnumerable<JobVacancyCategoryDTO>> GetJobVacancyCategoriesFiltered([FromQuery] SearchFilter filter)
+        {
+            var items = filter.FilterBase(GetAvailableJobVacancyCategories(), (item) => item.Title);
+            return new JobVacancyCategoryDTO().CreateDTOs(items).Cast<JobVacancyCategoryDTO>();
+        }
+
+        [HttpGet, Route("GetJobVacancyCategory")]
+        [HRSectionAccess(1)]
+        public async Task<JobVacancyCategoryDTO> GetJobVacancyCategory(int id)
+        {
+            return (JobVacancyCategoryDTO)DbService.TryGetOne(GetAvailableJobVacancyCategories(), id, new JobVacancyCategoryDTO());
+        }
+
+
+        [HttpGet, Route("GetJobVacancyCategoryLocalizations")]
+        [HRSectionAccess(1)]
+        public async Task<IEnumerable<JobVacancyCategoryLocalizationDTO>> GetJobVacancyCategoryLocalizations(int id)
+        {
+            var localizations = DB.JobVacancyCategoryLocalizations.Include(o => o.LanguageEntity).Where(o => o.JobVacancyCategoryId == id && !o.IsDeleted);
+            var mainEntity = GetAvailableJobVacancyCategories().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new JobVacancyCategoryLocalizationDTO()).Cast<JobVacancyCategoryLocalizationDTO>();
+        }
+
+        [HttpGet, Route("GetJobVacancyCategoryLocalization")]
+        [HRSectionAccess(1)]
+        public async Task<JobVacancyCategoryLocalizationDTO> GetJobVacancyCategoryLocalization(int id)
+        {
+            var localization = DB.JobVacancyCategoryLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var mainEntity = GetAvailableJobVacancyCategories().FirstOrDefault(o => o.Id == localization?.JobVacancyCategoryId && !o.IsDeleted);
+
+            return (JobVacancyCategoryLocalizationDTO)DbService.GetLocalizationModel(localization, mainEntity, new JobVacancyCategoryLocalizationDTO());
+        }
+
+
+
+
+
+
+        [HttpPost, Route("CreateJobVacancyCategory")]
+        [HRSectionAccess(6)]
+        public async Task<JobVacancyCategoryDTO> CreateJobVacancyCategory(JobVacancyCategoryDTO model)
+        {
+            return (JobVacancyCategoryDTO)DbService.TryCreateEntity(DB.JobVacancyCategories, model);
+        }
+
+        [HttpPost, Route("CreateJobVacancyCategoryLocalization")]
+        [HRSectionAccess(6)]
+        public async Task<JobVacancyCategoryLocalizationDTO> CreateJobVacancyLocalization(int itemId, JobVacancyCategoryLocalizationDTO localization)
+        {
+            var mainEntity = GetAvailableJobVacancyCategories().FirstOrDefault(o => o.Id == itemId);
+            return (JobVacancyCategoryLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.JobVacancyCategories, mainEntity, localization);
+        }
+
+
+
+
+
+        [HttpPut, Route("UpdateJobVacancyCategory")]
+        [HRSectionAccess(4)]
+        public async Task<JobVacancyCategoryDTO> UpdateJobVacancyCategory(JobVacancyCategoryDTO model)
+        {
+            var item = GetAvailableJobVacancyCategories().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            return (JobVacancyCategoryDTO)DbService.TryUpdateEntity(DB.JobVacancyCategories, model, item);
+        }
+
+        [HttpPut, Route("UpdateJobVacancyCategoryLocalization")]
+        [HRSectionAccess(5)]
+        public async Task<JobVacancyCategoryLocalizationDTO> UpdateJobVacancyCategoryLocalization(JobVacancyCategoryLocalizationDTO model)
+        {
+            var localization = DB.JobVacancyCategoryLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
+            var mainEntity = GetAvailableJobVacancyCategories().FirstOrDefault(o => o.Id == localization.JobVacancyCategoryId && !o.IsDeleted);
+
+            return (JobVacancyCategoryLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.JobVacancyCategoryLocalizations, localization, model, mainEntity);
+        }
+
+
+
+
+
+
+        [HttpDelete, Route("DeleteJobVacancyCategory")]
+        [HRSectionAccess(7)]
+        public async Task DeleteJobVacancyCategory(int id)
+        {
+            var item = GetAvailableJobVacancyCategories().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            DbService.TryDeleteEntity(DB.JobVacancyCategories, item);
+        }
+
+        [HttpDelete, Route("DeleteJobVacancyCategoryLocalization")]
+        [HRSectionAccess(7)]
+        public async Task DeleteJobVacancyCategoryLocalization(int id)
+        {
+            var item = DB.JobVacancyCategoryLocalizations.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var mainModel = DB.JobVacancyCategories.FirstOrDefault(o => o.Id == item.JobVacancyCategoryId && !o.IsDeleted);
+
+            DbService.TryDeleteLocalizationEntity(DB.JobVacancyCategoryLocalizations, item, mainModel);
+        }
+
+
+
+        #endregion
+
+
+
+
         #region Резюме
+
+        [HttpGet, Route("GetJobSummariesCount")]
+        public async Task<int> GetJobSummariesCount(int vacancyId)
+        {
+            return (await GetJobSummaries(vacancyId,0, int.MaxValue)).Count();
+        }
+
 
         [HttpGet, Route("GetJobSummaries")]
         [HRSectionAccess(2)]
@@ -172,6 +313,21 @@ namespace Alfateam.Website.API.Controllers.Admin
 
             var summaries = GetSummariesList().Where(o => o.JobVacancyId == vacancyId && !o.IsDeleted).Skip(offset).Take(count);
             return new JobSummaryDTO().CreateDTOs(summaries).Cast<JobSummaryDTO>();
+        }
+
+        [HttpGet, Route("GetJobSummariesFiltered")]
+        [HRSectionAccess(2)]
+        public async Task<IEnumerable<JobSummaryDTO>> GetJobSummariesFiltered(int vacancyId, [FromQuery] JobSummariesSearchFilter filter)
+        {
+            var vacancy = GetAvailableJobVacancies().FirstOrDefault(o => o.Id == vacancyId && !o.IsDeleted);
+            if (vacancy is null)
+            {
+                throw new Exception404("Сущность по данному id не найдена");
+            }
+
+            var summaries = GetSummariesList().Where(o => o.JobVacancyId == vacancyId && !o.IsDeleted);
+            var summariesFiltered = filter.Filter(summaries, (item) => item.AboutInfo);
+            return new JobSummaryDTO().CreateDTOs(summariesFiltered).Cast<JobSummaryDTO>();
         }
 
         [HttpGet, Route("GetJobSummary")]
@@ -246,6 +402,11 @@ namespace Alfateam.Website.API.Controllers.Admin
             return DbService.GetAvailableModels(this.Session.User, GetVacanciesFullIncludedList()).Cast<JobVacancy>();
         }
 
+        private IEnumerable<JobVacancyCategory> GetAvailableJobVacancyCategories()
+        {
+            return DB.JobVacancyCategories.Where(c => !c.IsDeleted);
+        }
+
         #endregion
 
         #region Private prepare methods
@@ -298,6 +459,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                                   .Include(o => o.Currency)
                                   .Include(o => o.WatchesList)
                                   .Include(o => o.Localizations)
+                                  .Include(o => o.Category)
                                   .Where(o => !o.IsDeleted);
         }
         private IQueryable<JobVacancy> GetVacanciesFullIncludedList()
@@ -308,6 +470,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                                   .Include(o => o.WatchesList)
                                   .Include(o => o.InnerContent).ThenInclude(o => o.Items)
                                   .Include(o => o.MainLanguage)
+                                  .Include(o => o.Category)
                                   .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                   .Where(o => !o.IsDeleted);
         }

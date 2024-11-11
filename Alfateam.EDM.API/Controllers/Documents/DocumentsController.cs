@@ -428,7 +428,7 @@ namespace Alfateam.EDM.API.Controllers.Documents
         }
         private async Task HandleNonFormalizedDocument(DocumentWithFile document, int counter)
         {
-            document.DocumentPath = await FilesService.TryUploadFile(counter, FileType.Document);
+            document.DocumentPath = FilesService.TryUploadFile(counter, FileType.Document);
         }
 
 

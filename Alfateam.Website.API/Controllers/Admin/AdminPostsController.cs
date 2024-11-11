@@ -38,6 +38,14 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Новости
 
+
+        [HttpGet, Route("GetPostsCount")]
+        public async Task<int> GetPostsCount()
+        {
+            return GetAvailablePosts().Count();
+        }
+
+
         [HttpGet, Route("GetPosts")]
         [CheckContentAreaRights(ContentAccessModelType.Posts, 1)]
         public async Task<IEnumerable<PostDTO>> GetPosts(int offset, int count = 20)
@@ -165,6 +173,13 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Категории новостей
 
+        [HttpGet, Route("GetPostCategoriesCount")]
+        public async Task<int> GetPostCategoriesCount()
+        {
+            return GetAvailablePostCategories().Count();
+        }
+
+
         [HttpGet, Route("GetPostCategories")]
         [CheckContentAreaRights(ContentAccessModelType.Posts, 1)]
         public async Task<IEnumerable<PostCategoryDTO>> GetPostCategories(int offset, int count = 20)
@@ -274,6 +289,13 @@ namespace Alfateam.Website.API.Controllers.Admin
         #endregion
 
         #region Индустрии новостей
+
+        [HttpGet, Route("GetPostIndustriesCount")]
+        public async Task<int> GetPostIndustriesCount()
+        {
+            return GetAvailablePostIndustries().Count();
+        }
+
 
         [HttpGet, Route("GetPostIndustries")]
         [CheckContentAreaRights(ContentAccessModelType.Posts, 1)]

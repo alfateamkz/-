@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="_Migrations\WebsiteDBContext\20241024131224_Init.cs" />
-    <Compile Remove="_Migrations\WebsiteDBContext\20241024131224_Init.Designer.cs" />
+    <Compile Remove="_Migrations\WebsiteDB\20241024131224_Init.cs" />
+    <Compile Remove="_Migrations\WebsiteDB\20241024131224_Init.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,6 +28,7 @@
     <ProjectReference Include="..\Alfateam.EDM.Models\Alfateam.EDM.Models.csproj" />
     <ProjectReference Include="..\Alfateam.ID.Models\Alfateam.ID.Models.csproj" />
     <ProjectReference Include="..\Alfateam.Messenger.Models\Alfateam.Messenger.Models.csproj" />
+    <ProjectReference Include="..\Alfateam.Sales.Models\Alfateam.Sales.Models.csproj" />
     <ProjectReference Include="..\Alfateam2.0.Models\Alfateam2.0.Models.csproj" />
   </ItemGroup>
 

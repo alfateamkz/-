@@ -43,6 +43,14 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Структуры команд
 
+
+        [HttpGet, Route("GetTeamStructuresCount")]
+        public async Task<int> GetTeamStructuresCount()
+        {
+            return GetAvailableTeamStructures().Count();
+        }
+
+
         [HttpGet, Route("GetTeamStructures")]
         [CheckContentAreaRights(ContentAccessModelType.Team, 1)]
         public async Task<IEnumerable<TeamStructureDTO>> GetTeamStructures(int offset, int count = 20)
