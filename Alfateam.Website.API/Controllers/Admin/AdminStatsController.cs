@@ -1,7 +1,9 @@
-﻿using Alfateam.DB;
+﻿using Alfateam.Core;
+using Alfateam.DB;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Website.API.Core;
 using Alfateam.Website.API.Models;
+using Alfateam.Website.API.Models.DTO;
 using Alfateam.Website.API.Models.DTO.Portfolios;
 using Alfateam.Website.API.Models.DTO.Reviews;
 using Alfateam.Website.API.Models.DTO.Stats;
@@ -19,14 +21,9 @@ namespace Alfateam.Website.API.Controllers.Admin
         {
         }
 
-        [HttpGet, Route("GetVisitsCount")]
-        public async Task<int> GetVisitsCount(SiteVisitFilter filter)
-        {
-            return (await GetVisits(filter)).Count();
-        }
 
         [HttpGet, Route("GetVisits")]
-        public async Task<IEnumerable<SiteVisitDTO>> GetVisits(SiteVisitFilter filter)
+        public async Task<ItemsWithTotalCount<SiteVisitDTO>> GetVisits(SiteVisitFilter filter)
         {
             var allVisits = DB.SiteVisits.Where(o => o.VisitedAt >= filter.From && o.VisitedAt <= filter.To);
 
@@ -45,8 +42,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                 allVisits = allVisits.Where(o => o.Fingerprint == filter.Fingerprint);
             }
 
-            var items = allVisits.Skip(filter.Offset).Take(filter.Count).ToList();
-            return new SiteVisitDTO().CreateDTOs(items).Cast<SiteVisitDTO>();
+            return DbService.GetManyWithTotalCount<SiteVisit, SiteVisitDTO>(allVisits, filter.Offset, filter.Count);
         }
 
 
@@ -74,6 +70,7 @@ namespace Alfateam.Website.API.Controllers.Admin
                     Count = group.Count()
                 });
             }
+
 
             return visits;
         }

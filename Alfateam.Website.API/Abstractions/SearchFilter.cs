@@ -10,21 +10,21 @@ namespace Alfateam.Website.API.Abstractions
         public int Count { get; set; } = 20;
         public string Query { get; set; } = "";
 
-        public virtual IEnumerable<T> FilterBase<T>(IEnumerable<T> items, Func<T, string> queryPredicate) where T: AbsModel
-        {
-            IEnumerable<T> filtered = new List<T>(items);
-            if (!string.IsNullOrEmpty(Query))
-            {
-                filtered = filtered.Where(o => queryPredicate(o).Contains(Query, StringComparison.OrdinalIgnoreCase));  
-            }
-            return filtered.Skip(Offset).Take(Count);
-        }
+        //public virtual IEnumerable<T> FilterBase<T>(IEnumerable<T> items, Func<T, string> queryPredicate) where T: AbsModel
+        //{
+        //    IEnumerable<T> filtered = new List<T>(items);
+        //    if (!string.IsNullOrEmpty(Query))
+        //    {
+        //        filtered = filtered.Where(o => queryPredicate(o).Contains(Query, StringComparison.OrdinalIgnoreCase));  
+        //    }
+        //    return filtered.Skip(Offset).Take(Count);
+        //}
 
-        public virtual IEnumerable<T> FilterBase<T>(IEnumerable<T> items) where T : AbsModel
-        {
-            IEnumerable<T> filtered = new List<T>(items);
-            return filtered.Skip(Offset).Take(Count);
-        }
+        //public virtual IEnumerable<T> FilterBase<T>(IEnumerable<T> items) where T : AbsModel
+        //{
+        //    IEnumerable<T> filtered = new List<T>(items);
+        //    return filtered.Skip(Offset).Take(Count);
+        //}
     }
 
 

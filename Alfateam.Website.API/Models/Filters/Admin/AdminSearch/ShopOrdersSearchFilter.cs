@@ -19,7 +19,8 @@ namespace Alfateam.Website.API.Models.Filters.Admin.AdminSearch
                 filtered = filtered.Where(o => o.Items.Any(o => o.Item.Title.Contains(Query, StringComparison.OrdinalIgnoreCase)));
             }
 
-            return this.FilterBase(filtered);
+            return filtered;
+            //return this.FilterBase(filtered, queryPredicate);
         }
     }
 }

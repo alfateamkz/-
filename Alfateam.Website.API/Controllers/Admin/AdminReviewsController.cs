@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Alfateam.Website.API.Filters.AdminSearch;
 using Alfateam.Website.API.Models.Filters.Admin.AdminSearch;
+using Alfateam.Website.API.Models.DTO;
+using Alfateam.Core;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -26,27 +28,22 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Отзывы
 
 
-        [HttpGet, Route("GetReviewsCount")]
-        public async Task<int> GetReviewsCount()
-        {
-            return GetAvailableReviews().Count();
-        }
-
 
         [HttpGet, Route("GetReviews")]
         [ReviewsSectionAccess(1)]
-        public async Task<IEnumerable<ReviewDTO>> GetReviews(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<ReviewDTO>> GetReviews(int offset, int count = 20)
         {
-            var reviews = GetAvailableReviews(offset, count);
-            return new ReviewDTO().CreateDTOs(reviews).Cast<ReviewDTO>();
+            return DbService.GetManyWithTotalCount<Review, ReviewDTO>(GetAvailableReviews(), offset, count);
         }
 
         [HttpGet, Route("GetReviewsFiltered")]
         [ReviewsSectionAccess(1)]
-        public async Task<IEnumerable<ReviewDTO>> GetReviewsFiltered([FromQuery] ReviewsSearchFilter filter)
+        public async Task<ItemsWithTotalCount<ReviewDTO>> GetReviewsFiltered([FromQuery] ReviewsSearchFilter filter)
         {
-            var reviews = filter.Filter(GetAvailableReviews(), (item) => item.Title);
-            return new ReviewDTO().CreateDTOs(reviews).Cast<ReviewDTO>();
+            return DbService.GetManyWithTotalCount<Review, ReviewDTO>(filter.Filter(GetAvailableReviews()), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
 

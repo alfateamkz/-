@@ -26,6 +26,8 @@ using Alfateam.Core.Exceptions;
 using Alfateam2._0.Models.ContentItems;
 using Swashbuckle.AspNetCore.Annotations;
 using Alfateam.Website.API.Filters.AdminSearch;
+using Alfateam.Website.API.Models.DTO;
+using Alfateam.Core;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -39,27 +41,21 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Новости
 
 
-        [HttpGet, Route("GetPostsCount")]
-        public async Task<int> GetPostsCount()
-        {
-            return GetAvailablePosts().Count();
-        }
-
-
         [HttpGet, Route("GetPosts")]
         [CheckContentAreaRights(ContentAccessModelType.Posts, 1)]
-        public async Task<IEnumerable<PostDTO>> GetPosts(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<PostDTO>> GetPosts(int offset, int count = 20)
         {
-            var items = GetAvailablePosts().Skip(offset).Take(count);
-            return new PostDTO().CreateDTOs(items).Cast<PostDTO>();
+            return DbService.GetManyWithTotalCount<Post, PostDTO>(GetAvailablePosts(), offset, count);
         }
 
         [HttpGet, Route("GetPostsFiltered")]
         [CheckContentAreaRights(ContentAccessModelType.Posts, 1)]
-        public async Task<IEnumerable<PostDTO>> GetPostsFiltered([FromQuery] PostsSearchFilter filter)
+        public async Task<ItemsWithTotalCount<PostDTO>> GetPostsFiltered([FromQuery] PostsSearchFilter filter)
         {
-            var items = filter.Filter(GetAvailablePosts(), (item) => item.Title);
-            return new PostDTO().CreateDTOs(items).Cast<PostDTO>();
+            return DbService.GetManyWithTotalCount<Post, PostDTO>(filter.Filter(GetAvailablePosts()), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
 
@@ -173,27 +169,22 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Категории новостей
 
-        [HttpGet, Route("GetPostCategoriesCount")]
-        public async Task<int> GetPostCategoriesCount()
-        {
-            return GetAvailablePostCategories().Count();
-        }
-
 
         [HttpGet, Route("GetPostCategories")]
         [CheckContentAreaRights(ContentAccessModelType.Posts, 1)]
-        public async Task<IEnumerable<PostCategoryDTO>> GetPostCategories(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<PostCategoryDTO>> GetPostCategories(int offset, int count = 20)
         {
-            var items = GetAvailablePostCategories().Skip(offset).Take(count);
-            return new PostCategoryDTO().CreateDTOs(items).Cast<PostCategoryDTO>();
+            return DbService.GetManyWithTotalCount<PostCategory, PostCategoryDTO>(GetAvailablePostCategories(), offset, count);
         }
 
         [HttpGet, Route("GetPostCategoriesFiltered")]
         [CheckContentAreaRights(ContentAccessModelType.Posts, 1)]
-        public async Task<IEnumerable<PostCategoryDTO>> GetPostCategoriesFiltered([FromQuery] SearchFilter filter)
+        public async Task<ItemsWithTotalCount<PostCategoryDTO>> GetPostCategoriesFiltered([FromQuery] SearchFilter filter)
         {
-            var items = filter.FilterBase(GetAvailablePostCategories(), (item) => item.Title);
-            return new PostCategoryDTO().CreateDTOs(items).Cast<PostCategoryDTO>();
+            return DbService.GetManyWithTotalCount<PostCategory, PostCategoryDTO>(GetAvailablePostCategories(), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
         [HttpGet, Route("GetPostCategory")]
@@ -290,27 +281,22 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Индустрии новостей
 
-        [HttpGet, Route("GetPostIndustriesCount")]
-        public async Task<int> GetPostIndustriesCount()
-        {
-            return GetAvailablePostIndustries().Count();
-        }
-
 
         [HttpGet, Route("GetPostIndustries")]
         [CheckContentAreaRights(ContentAccessModelType.Posts, 1)]
-        public async Task<IEnumerable<PostIndustryDTO>> GetPostIndustries(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<PostIndustryDTO>> GetPostIndustries(int offset, int count = 20)
         {
-            var items = GetAvailablePostIndustries().Skip(offset).Take(count);
-            return new PostIndustryDTO().CreateDTOs(items).Cast<PostIndustryDTO>();
+            return DbService.GetManyWithTotalCount<PostIndustry, PostIndustryDTO>(GetAvailablePostIndustries(), offset, count);
         }
 
         [HttpGet, Route("GetPostIndustriesFiltered")]
         [CheckContentAreaRights(ContentAccessModelType.Posts, 1)]
-        public async Task<IEnumerable<PostIndustryDTO>> GetPostIndustriesFiltered([FromQuery] SearchFilter filter)
+        public async Task<ItemsWithTotalCount<PostIndustryDTO>> GetPostIndustriesFiltered([FromQuery] SearchFilter filter)
         {
-            var items = filter.FilterBase(GetAvailablePostIndustries(), (item) => item.Title);
-            return new PostIndustryDTO().CreateDTOs(items).Cast<PostIndustryDTO>();
+            return DbService.GetManyWithTotalCount<PostIndustry, PostIndustryDTO>(GetAvailablePostIndustries(), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
         [HttpGet, Route("GetPostIndustry")]

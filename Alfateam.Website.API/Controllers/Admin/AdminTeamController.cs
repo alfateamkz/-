@@ -31,6 +31,7 @@ using Alfateam.Website.API.Models.DTOLocalization.Posts;
 using Alfateam2._0.Models.ContentItems;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Linq;
+using Alfateam.Core;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -44,19 +45,11 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Структуры команд
 
 
-        [HttpGet, Route("GetTeamStructuresCount")]
-        public async Task<int> GetTeamStructuresCount()
-        {
-            return GetAvailableTeamStructures().Count();
-        }
-
-
         [HttpGet, Route("GetTeamStructures")]
         [CheckContentAreaRights(ContentAccessModelType.Team, 1)]
-        public async Task<IEnumerable<TeamStructureDTO>> GetTeamStructures(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<TeamStructureDTO>> GetTeamStructures(int offset, int count = 20)
         {
-            var items = GetAvailableTeamStructures().Skip(offset).Take(count);
-            return new TeamStructureDTO().CreateDTOs(items).Cast<TeamStructureDTO>();
+            return DbService.GetManyWithTotalCount<TeamStructure, TeamStructureDTO>(GetAvailableTeamStructures(), offset, count);
         }
 
         [HttpGet, Route("GetTeamStructure")]

@@ -25,6 +25,7 @@ using Alfateam.Core.Enums;
 using Alfateam.Core.Exceptions;
 using Swashbuckle.AspNetCore.Annotations;
 using Alfateam.Website.API.Filters.Access;
+using Alfateam.Core;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -39,28 +40,22 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Комплаенс-документы
 
-        [HttpGet, Route("GetComplianceDocumentsCount")]
-        public async Task<int> GetComplianceDocumentsCount()
-        {
-            return GetAvailableComplianceDocuments().Count();
-        }
-
-
 
         [HttpGet, Route("GetComplianceDocuments")]
         [CheckContentAreaRights(ContentAccessModelType.Compliance, 1)]
-        public async Task<IEnumerable<ComplianceDocumentDTO>> GetComplianceDocuments(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<ComplianceDocumentDTO>> GetComplianceDocuments(int offset, int count = 20)
         {
-            var items = GetAvailableComplianceDocuments().Skip(offset).Take(count);
-            return new ComplianceDocumentDTO().CreateDTOs(items).Cast<ComplianceDocumentDTO>();
+            return DbService.GetManyWithTotalCount<ComplianceDocument, ComplianceDocumentDTO>(GetAvailableComplianceDocuments(), offset, count);
         }
 
         [HttpGet, Route("GetComplianceDocumentsFiltered")]
         [CheckContentAreaRights(ContentAccessModelType.Compliance, 1)]
-        public async Task<IEnumerable<ComplianceDocumentDTO>> GetComplianceDocumentsFiltered([FromQuery]SearchFilter filter)
+        public async Task<ItemsWithTotalCount<ComplianceDocumentDTO>> GetComplianceDocumentsFiltered([FromQuery]SearchFilter filter)
         {
-            var items = filter.FilterBase(GetAvailableComplianceDocuments(), (item) => item.Title);
-            return new ComplianceDocumentDTO().CreateDTOs(items).Cast<ComplianceDocumentDTO>();
+            return DbService.GetManyWithTotalCount<ComplianceDocument, ComplianceDocumentDTO>(GetAvailableComplianceDocuments(), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
 

@@ -22,6 +22,9 @@ using Alfateam.Core.Enums;
 using Alfateam.Website.API.Models.DTO.Events;
 using Alfateam.Website.API.Models.DTOLocalization.Events;
 using Swashbuckle.AspNetCore.Annotations;
+using Alfateam.Website.API.Models.DTO.HR;
+using Alfateam2._0.Models.HR;
+using Alfateam.Core;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -34,27 +37,22 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Посты
 
 
-        [HttpGet, Route("GetPostsCount")]
-        public async Task<int> GetPostsCount()
-        {
-            return GetAvailablePosts().Count();
-        }
-
 
 
         [HttpGet, Route("GetPosts")]
         [CheckContentAreaRights(ContentAccessModelType.MassMediaPosts, 1)]
-        public async Task<IEnumerable<MassMediaPostDTO>> GetPosts(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<MassMediaPostDTO>> GetPosts(int offset, int count = 20)
         {
-            var items = GetAvailablePosts().Skip(offset).Take(count);
-            return new MassMediaPostDTO().CreateDTOs(items).Cast<MassMediaPostDTO>();
+            return DbService.GetManyWithTotalCount<MassMediaPost, MassMediaPostDTO>(GetAvailablePosts(), offset, count);
         }
         [HttpGet, Route("GetPostsFiltered")]
         [CheckContentAreaRights(ContentAccessModelType.MassMediaPosts, 1)]
-        public async Task<IEnumerable<MassMediaPostDTO>> GetPostsFiltered([FromQuery] SearchFilter filter)
+        public async Task<ItemsWithTotalCount<MassMediaPostDTO>> GetPostsFiltered([FromQuery] SearchFilter filter)
         {
-            var items = filter.FilterBase(GetAvailablePosts(), (item) => item.Title);
-            return new MassMediaPostDTO().CreateDTOs(items).Cast<MassMediaPostDTO>();
+            return DbService.GetManyWithTotalCount<MassMediaPost, MassMediaPostDTO>(GetAvailablePosts(), filter.Offset, filter.Count,(entity) =>
+            {
+                return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
         [HttpGet, Route("GetPost")]

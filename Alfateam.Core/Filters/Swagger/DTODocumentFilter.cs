@@ -44,6 +44,10 @@ namespace Alfateam.Core.Filters.Swagger
                         {
                             apiOperation.Description += $"<p>Структура JSON</p><pre> {DTOJsonSerialization.SerializeSampleModel(modelMetadata.ModelType, GetHttpMethodEnum(apiDesc.HttpMethod))} </pre>";
                         }
+                        else if (modelMetadata.ModelType != null && modelMetadata.ModelType.Name.Contains("ItemsWithTotalCount"))
+                        {
+                            apiOperation.Description += $"<p>Структура JSON</p><pre> {DTOJsonSerialization.SerializeSampleModel(modelMetadata.ModelType, GetHttpMethodEnum(apiDesc.HttpMethod))} </pre>";
+                        }
                     }              
                 }
                 else if (apiDesc.HttpMethod != "DELETE")

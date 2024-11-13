@@ -27,6 +27,7 @@ using Alfateam.Website.API.Models.DTOLocalization.HR;
 using Alfateam.Core.Exceptions;
 using Alfateam.Core.Enums;
 using Swashbuckle.AspNetCore.Annotations;
+using Alfateam.Core;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -38,27 +39,22 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Партнеры
 
-        [HttpGet, Route("GetPartnersCount")]
-        public async Task<int> GetPartnersCount()
-        {
-            return GetAvailablePartners().Count();
-        }
-
-
 
         [HttpGet, Route("GetPartners")]
         [CheckContentAreaRights(ContentAccessModelType.Partners, 1)]
-        public async Task<IEnumerable<PartnerDTO>> GetPartners(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<PartnerDTO>> GetPartners(int offset, int count = 20)
         {
-            var items = GetAvailablePartners().Skip(offset).Take(count);
-            return new PartnerDTO().CreateDTOs(items).Cast<PartnerDTO>();
+            return DbService.GetManyWithTotalCount<Partner, PartnerDTO>(GetAvailablePartners(), offset, count);
         }
+
         [HttpGet, Route("GetPartnersFiltered")]
         [CheckContentAreaRights(ContentAccessModelType.Partners, 1)]
-        public async Task<IEnumerable<PartnerDTO>> GetPartnersFiltered([FromQuery] SearchFilter filter)
+        public async Task<ItemsWithTotalCount<PartnerDTO>> GetPartnersFiltered([FromQuery] SearchFilter filter)
         {
-            var items = filter.FilterBase(GetAvailablePartners(), (item) => item.Title);
-            return new PartnerDTO().CreateDTOs(items).Cast<PartnerDTO>();
+            return DbService.GetManyWithTotalCount<Partner, PartnerDTO>(GetAvailablePartners(), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
         [HttpGet, Route("GetPartner")]

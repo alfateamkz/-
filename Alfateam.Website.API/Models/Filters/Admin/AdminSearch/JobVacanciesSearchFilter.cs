@@ -7,7 +7,7 @@ namespace Alfateam.Website.API.Models.Filters.Admin.AdminSearch
     public class JobVacanciesSearchFilter : SearchFilter
     {
         public int? CategoryId { get; set; }
-        public IEnumerable<JobVacancy> Filter(IEnumerable<JobVacancy> items, Func<JobVacancy, string> queryPredicate)
+        public IEnumerable<JobVacancy> Filter(IEnumerable<JobVacancy> items)
         {
             IEnumerable<JobVacancy> filtered = new List<JobVacancy>(items);
             if (CategoryId != null)
@@ -15,7 +15,8 @@ namespace Alfateam.Website.API.Models.Filters.Admin.AdminSearch
                 filtered = filtered.Where(o => o.CategoryId == CategoryId);
             }
 
-            return this.FilterBase(filtered, queryPredicate);
+            return filtered;
+            //return this.FilterBase(filtered, queryPredicate);
         }
     }
 }

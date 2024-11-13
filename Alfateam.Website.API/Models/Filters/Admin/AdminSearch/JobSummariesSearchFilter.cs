@@ -7,7 +7,7 @@ namespace Alfateam.Website.API.Models.Filters.Admin.AdminSearch
     public class JobSummariesSearchFilter : SearchFilter
     {
         public JobSummaryStatus? Status { get; set; }
-        public IEnumerable<JobSummary> Filter(IEnumerable<JobSummary> items, Func<JobSummary, string> queryPredicate)
+        public IEnumerable<JobSummary> Filter(IEnumerable<JobSummary> items)
         {
             IEnumerable<JobSummary> filtered = new List<JobSummary>(items);
             if (Status != null)
@@ -15,7 +15,8 @@ namespace Alfateam.Website.API.Models.Filters.Admin.AdminSearch
                 filtered = filtered.Where(o => o.Status == Status);
             }
 
-            return this.FilterBase(filtered, queryPredicate);
+            return filtered;
+            //return this.FilterBase(filtered, queryPredicate);
         }
     }
 }

@@ -7,14 +7,16 @@ namespace Alfateam.Website.API.Filters.AdminSearch
     {
         public int? CategoryId { get; set; }
 
-        public IEnumerable<ShopProduct> Filter(IEnumerable<ShopProduct> items, Func<ShopProduct, string> queryPredicate)
+        public IEnumerable<ShopProduct> Filter(IEnumerable<ShopProduct> items)
         {
             IEnumerable<ShopProduct> filtered = new List<ShopProduct>(items);
             if (CategoryId != null)
             {
                 filtered = filtered.Where(o => o.CategoryId == CategoryId);
             }
-            return this.FilterBase(filtered, queryPredicate);
+
+            return filtered;
+            //return this.FilterBase(filtered, queryPredicate);
         }
     }
 }

@@ -718,6 +718,18 @@ namespace Alfateam.DB
                     price.Column = null;
                     price.OutstaffItemGrade = null;
                 }
+
+                found.Columns = found.Columns.Where(o => !o.IsDeleted).ToList();
+                found.Items = found.Items.Where(o => !o.IsDeleted).ToList();
+
+                foreach(var item in found.Items)
+                {
+                    item.Grades = item.Grades.Where(o => !o.IsDeleted).ToList();
+                    foreach(var grade in item.Grades)
+                    {
+                        grade.Prices = grade.Prices.Where(o => !o.IsDeleted).ToList();
+                    }
+                }
             }
 
 

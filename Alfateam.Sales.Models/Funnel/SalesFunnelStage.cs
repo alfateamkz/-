@@ -23,6 +23,14 @@ namespace Alfateam.Sales.Models.Funnel
         public int TypeId { get; set; }
 
 
+
+        /// <summary>
+        /// Информация о туннеле продаж, если задана
+        /// </summary>
+        public SalesFunnelTunnel? Tunnel { get; set; }
+
+
+
         /// <summary>
         /// Автоматическое поле
         /// </summary>

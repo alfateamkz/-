@@ -23,6 +23,9 @@ using Alfateam.Website.API.Models.DTOLocalization.Events;
 using Alfateam.Core.Exceptions;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam.Website.API.Models.Filters.Admin.AdminSearch;
+using Alfateam.Core;
+using Alfateam.Website.API.Models.DTO;
+using Alfateam2._0.Models;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -36,26 +39,21 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Вакансии
 
 
-        [HttpGet, Route("GetJobVacanciesCount")]
-        public async Task<int> GetJobVacanciesCount()
-        {
-            return GetAvailableJobVacancies().Count();
-        }
-
 
         [HttpGet, Route("GetJobVacancies")]
         [HRSectionAccess(1)]
-        public async Task<IEnumerable<JobVacancyDTO>> GetJobVacancies(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<JobVacancyDTO>> GetJobVacancies(int offset, int count = 20)
         {
-            var items = GetAvailableJobVacancies().Skip(offset).Take(count);
-            return new JobVacancyDTO().CreateDTOs(items).Cast<JobVacancyDTO>();
+            return DbService.GetManyWithTotalCount<JobVacancy, JobVacancyDTO>(GetAvailableJobVacancies(), offset, count);
         }
         [HttpGet, Route("GetJobVacanciesFiltered")]
         [HRSectionAccess(1)]
-        public async Task<IEnumerable<JobVacancyDTO>> GetJobVacanciesFiltered([FromQuery] JobVacanciesSearchFilter filter)
+        public async Task<ItemsWithTotalCount<JobVacancyDTO>> GetJobVacanciesFiltered([FromQuery] JobVacanciesSearchFilter filter)
         {
-            var items = filter.Filter(GetAvailableJobVacancies(), (item) => item.Title);
-            return new JobVacancyDTO().CreateDTOs(items).Cast<JobVacancyDTO>();
+            return DbService.GetManyWithTotalCount<JobVacancy, JobVacancyDTO>(filter.Filter(GetAvailableJobVacancies()), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
         [HttpGet, Route("GetJobVacancy")]
@@ -170,26 +168,20 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Категории вакансий
 
 
-        [HttpGet, Route("GetJobVacancyCategoriesCount")]
-        public async Task<int> GetJobVacancyCategoriesCount()
-        {
-            return GetAvailableJobVacancyCategories().Count();
-        }
-
-
         [HttpGet, Route("GetJobVacancyCategories")]
         [HRSectionAccess(1)]
-        public async Task<IEnumerable<JobVacancyCategoryDTO>> GetJobVacancyCategories(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<JobVacancyCategoryDTO>> GetJobVacancyCategories(int offset, int count = 20)
         {
-            var items = GetAvailableJobVacancyCategories().Skip(offset).Take(count);
-            return new JobVacancyCategoryDTO().CreateDTOs(items).Cast<JobVacancyCategoryDTO>();
+            return DbService.GetManyWithTotalCount<JobVacancyCategory, JobVacancyCategoryDTO>(GetAvailableJobVacancyCategories(), offset, count);
         }
         [HttpGet, Route("GetJobVacancyCategoriesFiltered")]
         [HRSectionAccess(1)]
-        public async Task<IEnumerable<JobVacancyCategoryDTO>> GetJobVacancyCategoriesFiltered([FromQuery] SearchFilter filter)
+        public async Task<ItemsWithTotalCount<JobVacancyCategoryDTO>> GetJobVacancyCategoriesFiltered([FromQuery] SearchFilter filter)
         {
-            var items = filter.FilterBase(GetAvailableJobVacancyCategories(), (item) => item.Title);
-            return new JobVacancyCategoryDTO().CreateDTOs(items).Cast<JobVacancyCategoryDTO>();
+            return DbService.GetManyWithTotalCount<JobVacancyCategory, JobVacancyCategoryDTO>(GetAvailableJobVacancyCategories(), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
         [HttpGet, Route("GetJobVacancyCategory")]
@@ -294,16 +286,10 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Резюме
 
-        [HttpGet, Route("GetJobSummariesCount")]
-        public async Task<int> GetJobSummariesCount(int vacancyId)
-        {
-            return (await GetJobSummaries(vacancyId,0, int.MaxValue)).Count();
-        }
-
 
         [HttpGet, Route("GetJobSummaries")]
         [HRSectionAccess(2)]
-        public async Task<IEnumerable<JobSummaryDTO>> GetJobSummaries(int vacancyId, int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<JobSummaryDTO>> GetJobSummaries(int vacancyId, int offset, int count = 20)
         {
             var vacancy = GetAvailableJobVacancies().FirstOrDefault(o => o.Id == vacancyId && !o.IsDeleted);
             if(vacancy is null)
@@ -311,13 +297,13 @@ namespace Alfateam.Website.API.Controllers.Admin
                 throw new Exception404("Сущность по данному id не найдена");
             }
 
-            var summaries = GetSummariesList().Where(o => o.JobVacancyId == vacancyId && !o.IsDeleted).Skip(offset).Take(count);
-            return new JobSummaryDTO().CreateDTOs(summaries).Cast<JobSummaryDTO>();
+            var summaries = GetSummariesList().Where(o => o.JobVacancyId == vacancyId && !o.IsDeleted);
+            return DbService.GetManyWithTotalCount<JobSummary, JobSummaryDTO>(summaries, offset, count);
         }
 
         [HttpGet, Route("GetJobSummariesFiltered")]
         [HRSectionAccess(2)]
-        public async Task<IEnumerable<JobSummaryDTO>> GetJobSummariesFiltered(int vacancyId, [FromQuery] JobSummariesSearchFilter filter)
+        public async Task<ItemsWithTotalCount<JobSummaryDTO>> GetJobSummariesFiltered(int vacancyId, [FromQuery] JobSummariesSearchFilter filter)
         {
             var vacancy = GetAvailableJobVacancies().FirstOrDefault(o => o.Id == vacancyId && !o.IsDeleted);
             if (vacancy is null)
@@ -326,8 +312,10 @@ namespace Alfateam.Website.API.Controllers.Admin
             }
 
             var summaries = GetSummariesList().Where(o => o.JobVacancyId == vacancyId && !o.IsDeleted);
-            var summariesFiltered = filter.Filter(summaries, (item) => item.AboutInfo);
-            return new JobSummaryDTO().CreateDTOs(summariesFiltered).Cast<JobSummaryDTO>();
+            return DbService.GetManyWithTotalCount<JobSummary, JobSummaryDTO>(filter.Filter(summaries), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.AboutInfo.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
         [HttpGet, Route("GetJobSummary")]

@@ -41,6 +41,8 @@ using Alfateam.Website.API.Models.DTO.Shop.ProductModifierItems;
 using Microsoft.AspNetCore.Http.Features;
 using Alfateam.Website.API.Filters.AdminSearch;
 using Alfateam.Website.API.Models.Filters.Admin.AdminSearch;
+using Alfateam.Core;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -53,27 +55,21 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Товары
 
 
-        [HttpGet, Route("GetProductsCount")]
-        public async Task<int> GetProductsCount()
-        {
-            return GetAvailableShopProducts().Count();
-        }
-
-
         [HttpGet, Route("GetProducts")]
         [ShopSectionAccess(1)]
-        public async Task<IEnumerable<ShopProductDTO>> GetProducts(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<ShopProductDTO>> GetProducts(int offset, int count = 20)
         {
-            var items = GetAvailableShopProducts().Skip(offset).Take(count);
-            return new ShopProductDTO().CreateDTOs(items).Cast<ShopProductDTO>();
+            return DbService.GetManyWithTotalCount<ShopProduct, ShopProductDTO>(GetAvailableShopProducts(), offset, count);
         }
 
         [HttpGet, Route("GetProductsFiltered")]
         [ShopSectionAccess(1)]
-        public async Task<IEnumerable<ShopProductDTO>> GetProductsFiltered([FromQuery] ShopProductSearchFilter filter)
+        public async Task<ItemsWithTotalCount<ShopProductDTO>> GetProductsFiltered([FromQuery] ShopProductSearchFilter filter)
         {
-            var items = filter.Filter(GetAvailableShopProducts(), (item) => item.Title);
-            return new ShopProductDTO().CreateDTOs(items).Cast<ShopProductDTO>();
+            return DbService.GetManyWithTotalCount<ShopProduct, ShopProductDTO>(filter.Filter(GetAvailableShopProducts()), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
 
@@ -482,27 +478,23 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Категории товаров
 
-        [HttpGet, Route("GetProductCategoriesCount")]
-        public async Task<int> GetProductCategoriesCount()
-        {
-            return GetAvailableShopProductCategories().Count();
-        }
 
 
         [HttpGet, Route("GetProductCategories")]
         [ShopSectionAccess(1)]
-        public async Task<IEnumerable<ShopProductCategoryDTO>> GetProductCategories(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<ShopProductCategoryDTO>> GetProductCategories(int offset, int count = 20)
         {
-            var items = GetAvailableShopProductCategories().Skip(offset).Take(count);
-            return new ShopProductCategoryDTO().CreateDTOs(items).Cast<ShopProductCategoryDTO>();
+            return DbService.GetManyWithTotalCount<ShopProductCategory, ShopProductCategoryDTO>(GetAvailableShopProductCategories(), offset, count);
         }
 
         [HttpGet, Route("GetProductCategoriesFiltered")]
         [ShopSectionAccess(1)]
-        public async Task<IEnumerable<ShopProductCategoryDTO>> GetProductCategoriesFiltered([FromQuery] SearchFilter filter)
+        public async Task<ItemsWithTotalCount<ShopProductCategoryDTO>> GetProductCategoriesFiltered([FromQuery] SearchFilter filter)
         {
-            var items = filter.FilterBase(GetAvailableShopProductCategories(), (item) => item.Title);
-            return new ShopProductCategoryDTO().CreateDTOs(items).Cast<ShopProductCategoryDTO>();
+            return DbService.GetManyWithTotalCount<ShopProductCategory, ShopProductCategoryDTO>(GetAvailableShopProductCategories(), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
         [HttpGet, Route("GetProductCategory")]
@@ -601,27 +593,22 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Заказы
 
 
-        [HttpGet, Route("GetOrdersCount")]
-        public async Task<int> GetOrdersCount()
-        {
-            return GetAvailableOrders().Count();
-        }
-
-
         [HttpGet, Route("GetOrders")]
         [ShopSectionAccess(2)]
-        public async Task<IEnumerable<ShopOrderDTO>> GetOrders(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<ShopOrderDTO>> GetOrders(int offset, int count = 20)
         {
-            return new ShopOrderDTO().CreateDTOs(GetAvailableOrders(offset, count)).Cast<ShopOrderDTO>();
+            return DbService.GetManyWithTotalCount<ShopOrder, ShopOrderDTO>(GetAvailableOrders(), offset, count);
         }
 
 
         [HttpGet, Route("GetOrdersFiltered")]
         [ShopSectionAccess(2)]
-        public async Task<IEnumerable<ShopOrderDTO>> GetOrdersFiltered([FromQuery]ShopOrdersSearchFilter filter)
+        public async Task<ItemsWithTotalCount<ShopOrderDTO>> GetOrdersFiltered([FromQuery]ShopOrdersSearchFilter filter)
         {
-            var items = filter.Filter(GetAvailableOrders());
-            return new ShopOrderDTO().CreateDTOs(items).Cast<ShopOrderDTO>();
+            return DbService.GetManyWithTotalCount<ShopOrder, ShopOrderDTO>(filter.Filter(GetAvailableOrders()), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.Items.Any(o => o.Item.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase));
+            });
         }
 
 
@@ -688,18 +675,12 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Промокоды
 
-        [HttpGet, Route("GetPromocodesCount")]
-        public async Task<int> GetPromocodesCount()
-        {
-            return GetAvailablePromocodes().Count();
-        }
-
 
         [HttpGet, Route("GetPromocodes")]
         [ShopSectionAccess(1)]
-        public async Task<IEnumerable<PromocodeDTO>> GetPromocodes(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<PromocodeDTO>> GetPromocodes(int offset, int count = 20)
         {
-            return new PromocodeDTO().CreateDTOs(GetAvailablePromocodes().Skip(offset).Take(20)).Cast<PromocodeDTO>();
+            return DbService.GetManyWithTotalCount<Promocode, PromocodeDTO>(GetAvailablePromocodes(), offset, count);
         }
 
         [HttpGet, Route("GetPromocode")]

@@ -8,7 +8,7 @@ namespace Alfateam.Website.API.Filters.AdminSearch
         public int? CategoryId { get; set; }
         public int? FormatId { get; set; }
 
-        public IEnumerable<Event> Filter(IEnumerable<Event> items, Func<Event, string> queryPredicate)
+        public IEnumerable<Event> Filter(IEnumerable<Event> items)
         {
             IEnumerable<Event> filtered = new List<Event>(items);
             if(CategoryId != null)
@@ -19,7 +19,9 @@ namespace Alfateam.Website.API.Filters.AdminSearch
             {
                 filtered = filtered.Where(o => o.FormatId == FormatId);
             }
-            return this.FilterBase(filtered, queryPredicate);
+
+            return filtered;
+            //return this.FilterBase(filtered, queryPredicate);
         }
     }
 }

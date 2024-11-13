@@ -9,7 +9,7 @@ namespace Alfateam.Website.API.Filters.AdminSearch
         public int? CategoryId { get; set; }
         public int? IndustryId { get; set; }
 
-        public IEnumerable<Post> Filter(IEnumerable<Post> items, Func<Post, string> queryPredicate)
+        public IEnumerable<Post> Filter(IEnumerable<Post> items)
         {
             IEnumerable<Post> filtered = new List<Post>(items);
             if (CategoryId != null)
@@ -20,7 +20,8 @@ namespace Alfateam.Website.API.Filters.AdminSearch
             {
                 filtered = filtered.Where(o => o.IndustryId == IndustryId);
             }
-            return this.FilterBase(filtered, queryPredicate);
+            return filtered;
+            //return this.FilterBase(filtered, queryPredicate);
         }
     }
 }

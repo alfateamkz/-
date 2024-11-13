@@ -67,6 +67,11 @@ namespace Alfateam.Core.Filters.Swagger
                     var arrayType = taskReturnType.GenericTypeArguments[0];
                     operation.Description += "Массив с "+ arrayType.Name;
                 }
+                else if (taskReturnType.Name.Contains("ItemsWithTotalCount"))
+                {
+                    var arrayType = taskReturnType.GenericTypeArguments[0];
+                    operation.Description += "Список с " + arrayType.Name + " и кол-вом сущностей в БД";
+                }
                 else
                 {
                     operation.Description += taskReturnType.Name;

@@ -22,6 +22,10 @@ using Alfateam.Core.Enums;
 using Alfateam.Core.Exceptions;
 using Alfateam2._0.Models.ContentItems;
 using Swashbuckle.AspNetCore.Annotations;
+using Alfateam.Website.API.Models.DTO;
+using Alfateam2._0.Models;
+using Alfateam.Core;
+using Alfateam.Website.API.Models.DTO.HR;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -34,25 +38,19 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Страны
 
-        [HttpGet, Route("GetCountriesCount")]
-        public async Task<int> GetCountriesCount()
-        {
-            return GetCountriesList().Count();
-        }
-
-
 
         [HttpGet, Route("GetCountries")]
-        public async Task<IEnumerable<CountryDTO>> GetCountries(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<CountryDTO>> GetCountries(int offset, int count = 20)
         {
-            var items = GetCountriesList().Skip(offset).Take(count);
-            return new CountryDTO().CreateDTOs(items).Cast<CountryDTO>();
+            return DbService.GetManyWithTotalCount<Country, CountryDTO>(GetCountriesList(), offset, count);
         }
         [HttpGet, Route("GetCountriesFiltered")]
-        public async Task<IEnumerable<CountryDTO>> GetCountriesFiltered([FromQuery] SearchFilter filter)
+        public async Task<ItemsWithTotalCount<CountryDTO>> GetCountriesFiltered([FromQuery] SearchFilter filter)
         {
-            var items = filter.FilterBase(GetCountriesList(), (item) => item.Title);
-            return new CountryDTO().CreateDTOs(items).Cast<CountryDTO>();
+            return DbService.GetManyWithTotalCount<Country, CountryDTO>(GetCountriesList(), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
 
@@ -146,26 +144,19 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Языки
 
-        [HttpGet, Route("GetLanguagesCount")]
-        [CheckContentAreaRights(ContentAccessModelType.Compliance, 1)]
-        public async Task<int> GetLanguagesCount()
-        {
-            return GetLanguagesList().Count();
-        }
-
-
 
         [HttpGet, Route("GetLanguages")]
-        public async Task<IEnumerable<LanguageDTO>> GetLanguages(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<LanguageDTO>> GetLanguages(int offset, int count = 20)
         {
-            var items = GetLanguagesList().Skip(offset).Take(count);
-            return new LanguageDTO().CreateDTOs(items).Cast<LanguageDTO>();
+            return DbService.GetManyWithTotalCount<Language, LanguageDTO>(GetLanguagesList(), offset, count);
         }
         [HttpGet, Route("GetLanguagesFiltered")]
-        public async Task<IEnumerable<LanguageDTO>> GetLanguagesFiltered([FromQuery] SearchFilter filter)
+        public async Task<ItemsWithTotalCount<LanguageDTO>> GetLanguagesFiltered([FromQuery] SearchFilter filter)
         {
-            var items = filter.FilterBase(GetLanguagesList(), (item) => item.Title);
-            return new LanguageDTO().CreateDTOs(items).Cast<LanguageDTO>();
+            return DbService.GetManyWithTotalCount<Language, LanguageDTO>(GetLanguagesList(), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
         [HttpGet, Route("GetLanguage")]
@@ -270,26 +261,19 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Валюты
 
-        [HttpGet, Route("GetCurrenciesCount")]
-        [CheckContentAreaRights(ContentAccessModelType.Compliance, 1)]
-        public async Task<int> GetCurrenciesCount()
-        {
-            return GetCurrenciesList().Count();
-        }
-
-
 
         [HttpGet, Route("GetCurrencies")]
-        public async Task<IEnumerable<CurrencyDTO>> GetCurrencies(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<CurrencyDTO>> GetCurrencies(int offset, int count = 20)
         {
-            var items = GetCurrenciesList().Skip(offset).Take(count);
-            return new CurrencyDTO().CreateDTOs(items).Cast<CurrencyDTO>();
+            return DbService.GetManyWithTotalCount<Currency, CurrencyDTO>(GetCurrenciesList(), offset, count);
         }
         [HttpGet, Route("GetCurrenciesFiltered")]
-        public async Task<IEnumerable<CurrencyDTO>> GetCurrenciesFiltered([FromQuery] SearchFilter filter)
+        public async Task<ItemsWithTotalCount<CurrencyDTO>> GetCurrenciesFiltered([FromQuery] SearchFilter filter)
         {
-            var items = filter.FilterBase(GetCurrenciesList(), (item) => item.Title);
-            return new CurrencyDTO().CreateDTOs(items).Cast<CurrencyDTO>();
+            return DbService.GetManyWithTotalCount<Currency, CurrencyDTO>(GetCurrenciesList(), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
         [HttpGet, Route("GetCurrency")]
@@ -383,26 +367,19 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Часовые пояса
 
-        [HttpGet, Route("GetTimezonesCount")]
-        [CheckContentAreaRights(ContentAccessModelType.Compliance, 1)]
-        public async Task<int> GetTimezonesCount()
-        {
-            return GetTimezonesList().Count();
-        }
-
-
 
         [HttpGet, Route("GetTimezones")]
-        public async Task<IEnumerable<TimezoneDTO>> GetTimezones(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<TimezoneDTO>> GetTimezones(int offset, int count = 20)
         {
-            var items = GetTimezonesList().Skip(offset).Take(count);
-            return new TimezoneDTO().CreateDTOs(items).Cast<TimezoneDTO>();
+            return DbService.GetManyWithTotalCount<Alfateam2._0.Models.General.TimeZone, TimezoneDTO>(GetTimezonesList(), offset, count);
         }
         [HttpGet, Route("GetTimezonesFiltered")]
-        public async Task<IEnumerable<TimezoneDTO>> GetTimezonesFiltered([FromQuery] SearchFilter filter)
+        public async Task<ItemsWithTotalCount<TimezoneDTO>> GetTimezonesFiltered([FromQuery] SearchFilter filter)
         {
-            var items = filter.FilterBase(GetTimezonesList(), (item) => item.Title);
-            return new TimezoneDTO().CreateDTOs(items).Cast<TimezoneDTO>();
+            return DbService.GetManyWithTotalCount<Alfateam2._0.Models.General.TimeZone, TimezoneDTO>(GetTimezonesList(), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
 

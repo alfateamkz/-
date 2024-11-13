@@ -23,7 +23,7 @@ namespace Alfateam.Core.Helpers
             var model = Activator.CreateInstance(dtoModelType);
             SetSampleModelValues(model, type);
 
-            return Serialize(model as DTOModelAbs, type);
+            return Serialize(model, type);
         }
 
         private static void SetSampleModelValues(object model, DTOJsonSerializationType type)
@@ -32,7 +32,7 @@ namespace Alfateam.Core.Helpers
         }
         private static void SetSampleModelValuesRecursively(object model, DTOJsonSerializationType type, List<Type> describedTypes)
         {
-            if(model == null)
+            if(model == null || describedTypes.Any(o => o == model.GetType()))
             {
                 return;
             }
@@ -45,18 +45,18 @@ namespace Alfateam.Core.Helpers
                     continue;
                 }
 
-                prop.SetValue(model, MakeSampleValueIfNull(prop.PropertyType, prop.GetValue(model)));
-
                 if (DTOModelAbs.IsModelTypeOf(prop.PropertyType, typeof(DTOModelAbs)))
                 {
                     describedTypes.Add(prop.PropertyType);
                 }
+
+                prop.SetValue(model, MakeSampleValueIfNull(prop.PropertyType, prop.GetValue(model)));
+
+              
             }
 
             foreach (var prop in model.GetType().GetProperties().Where(o => o.CanWrite))
             {
-
-               
                 if (DTOModelAbs.IsModelTypeOf(prop.PropertyType, typeof(DTOModelAbs)))
                 {
                     SetSampleModelValuesRecursively(prop.GetValue(model), type, describedTypes);
@@ -66,16 +66,15 @@ namespace Alfateam.Core.Helpers
                     var arrayItemType = prop.PropertyType.GetGenericArguments()[0];
                     if (DTOModelAbs.IsModelTypeOf(arrayItemType, typeof(DTOModelAbs)))
                     {
-                        if (prop.Name == "Costs")
-                        {
-                            var list = (prop.GetValue(model) as IEnumerable).Cast<DTOModelAbs>().ToList(); 
-                            foreach(var item in list)
-                            {
-                                SetSampleModelValuesRecursively(item, type, describedTypes);
-                            }
+                        describedTypes.Add(arrayItemType);
 
-                            describedTypes.Add(arrayItemType);
+                        var list = (prop.GetValue(model) as IEnumerable).Cast<DTOModelAbs>().ToList();
+                        foreach (var item in list)
+                        {
+                            SetSampleModelValuesRecursively(item, type, describedTypes);
                         }
+
+                      
                     }
 
                     
@@ -87,18 +86,18 @@ namespace Alfateam.Core.Helpers
 
 
 
-        public static string Serialize(DTOModelAbs dto, DTOJsonSerializationType type)
+        public static string Serialize(object item, DTOJsonSerializationType type)
         {
             var jsonObj = new ExpandoObject();
 
-            SetJsonFieldsRecursively(jsonObj, dto, type);
+            SetJsonFieldsRecursively(jsonObj, item, type);
             return JsonConvert.SerializeObject(jsonObj, Formatting.Indented);
         }
-        private static void SetJsonFieldsRecursively(ExpandoObject jsonObj, DTOModelAbs dto, DTOJsonSerializationType type)
+        private static void SetJsonFieldsRecursively(ExpandoObject jsonObj, object item, DTOJsonSerializationType type)
         {
-            foreach (var prop in GetProperties(dto, type))
+            foreach (var prop in GetProperties(item, type))
             {
-                var propVal = prop.GetValue(dto);
+                var propVal = prop.GetValue(item);
 
                 if (DTOModelAbs.IsModelTypeOf(prop.PropertyType, typeof(DTOModelAbs)))
                 {
@@ -137,16 +136,16 @@ namespace Alfateam.Core.Helpers
         }
 
 
-        private static IEnumerable<PropertyInfo> GetProperties(DTOModelAbs dto, DTOJsonSerializationType type)
+        private static IEnumerable<PropertyInfo> GetProperties(object item, DTOJsonSerializationType type)
         {
             var neededProps = new List<PropertyInfo>();
 
-            if(dto is null)
+            if(item is null)
             {
                 return neededProps;
             }
 
-            foreach(var prop in dto.GetType().GetProperties())
+            foreach(var prop in item.GetType().GetProperties())
             {
 
                 if(type == DTOJsonSerializationType.GET && !prop.GetCustomAttributes().Any(o => o is HiddenFromClient))
@@ -185,7 +184,7 @@ namespace Alfateam.Core.Helpers
             {
                 if(propType == typeof(string))
                 {
-                    return "хуй";
+                    return "строка";
                 }
                 return Activator.CreateInstance(propType);
             }

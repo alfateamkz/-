@@ -40,8 +40,8 @@ namespace Alfateam.Core.Services
             return GetManyWithTotalCount<T,DTO>(from, offset, count, predicate).Items;
         }
         public ItemsWithTotalCount<DTO> GetManyWithTotalCount<T, DTO>(IEnumerable<T> from, 
-                                                                            int offset, 
-                                                                            int count, 
+                                                                            int offset = 0, 
+                                                                            int count = int.MaxValue, 
                                                                             Func<T,bool> predicate = null) where T : AbsModel, new()
                                                                                                            where DTO : DTOModelAbs<T>, new()
         {
@@ -56,7 +56,7 @@ namespace Alfateam.Core.Services
 
             var toReturn = new ItemsWithTotalCount<DTO>
             {
-                TotalCount = from.Count(),
+                TotalCount = filtered.Count(),
             };
 
             var toTake = filtered.Skip(offset).Take(count);

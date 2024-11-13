@@ -19,6 +19,8 @@ using Alfateam2._0.Models.Shop;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
+using Alfateam.Website.API.Models.DTO;
+using Alfateam.Core;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -30,28 +32,21 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Страницы услуг и их локализации
 
-        [HttpGet, Route("GetServicePagesCount")]
-        public async Task<int> GetServicePagesCount()
-        {
-            return GetAvailableServicePages().Count();
-        }
-
-
-
         [HttpGet, Route("GetServicePages")]
         [CheckContentAreaRights(ContentAccessModelType.Services, 1)]
-        public async Task<IEnumerable<ServicePageDTO>> GetServicePages(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<ServicePageDTO>> GetServicePages(int offset, int count = 20)
         {
-            var items = GetAvailableServicePages().Skip(offset).Take(count);
-            return new ServicePageDTO().CreateDTOs(items).Cast<ServicePageDTO>();
+            return DbService.GetManyWithTotalCount<ServicePage, ServicePageDTO>(GetAvailableServicePages(), offset, count);
         }
 
         [HttpGet, Route("GetServicePagesFiltered")]
         [CheckContentAreaRights(ContentAccessModelType.Services, 1)]
-        public async Task<IEnumerable<ServicePageDTO>> GetServicePagesFiltered([FromQuery] SearchFilter filter)
+        public async Task<ItemsWithTotalCount<ServicePageDTO>> GetServicePagesFiltered([FromQuery] SearchFilter filter)
         {
-            var items = filter.FilterBase(GetAvailableServicePages(), (item) => item.MainBlockHeader);
-            return new ServicePageDTO().CreateDTOs(items).Cast<ServicePageDTO>();
+            return DbService.GetManyWithTotalCount<ServicePage, ServicePageDTO>(GetAvailableServicePages(), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.MainBlockHeader.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
 

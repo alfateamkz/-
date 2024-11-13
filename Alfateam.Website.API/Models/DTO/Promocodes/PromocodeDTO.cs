@@ -24,16 +24,22 @@ namespace Alfateam.Website.API.Models.DTO.Promocodes
 
 
         public string Code { get; set; }
+
+        [ForClientOnly]
         public PromocodeType Type { get; set; }
 
 
         [ForClientOnly]
         public CurrencyDTO Currency { get; set; }
+        [ForClientOnly]
         public int CurrencyId { get; set; }
 
 
+        [ForClientOnly]
         public double? Value { get; set; }
+        [ForClientOnly]
         public double? PriceFromValue { get; set; }
+        [ForClientOnly]
         public double? PriceToValue { get; set; }
 
 

@@ -35,7 +35,8 @@ namespace Alfateam.Sales.API.Abstractions
             this.SMSGateway = @params.SMSGateway;
         }
 
-
+        //TODO: 1. проверка доступа к клиентам, заказам, воронкам и этапам воронок и другим сущностям при создании и апдейте
+       
 
         public string Domain => Request.Headers["Domain"];
         public int? CompanyId => ParseIntValueFromHeader("CompanyId");

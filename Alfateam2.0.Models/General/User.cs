@@ -7,6 +7,7 @@ using Alfateam2._0.Models.Shop.Orders;
 using Alfateam2._0.Models.Shop.Wishes;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -22,6 +23,11 @@ namespace Alfateam2._0.Models.General
         public string Name { get; set; }    
         public string Surname { get; set; }
         public string? Patronymic { get; set; }
+
+        [NotMapped]
+        public string FIO => $"{this.Surname} {this.Name} {this.Patronymic}";
+
+
         public string? AvatarPath { get; set; }
 
 

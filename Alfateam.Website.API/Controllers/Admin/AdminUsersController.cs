@@ -26,6 +26,9 @@ using Alfateam.Website.API.Models.DTO.Reviews;
 using Alfateam.Website.API.Models.DTO.Posts;
 using Alfateam.Website.API.Filters.Access;
 using Alfateam.Core.Helpers;
+using Alfateam.Website.API.Models.DTO.Team;
+using Alfateam2._0.Models.Team;
+using Alfateam.Core;
 
 
 
@@ -47,16 +50,17 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpGet,Route("GetUsers")]
-        public async Task<IEnumerable<UserDTO>> GetUsers(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<UserDTO>> GetUsers(int offset, int count = 20)
         {
-            var items = GetAvailableUsers().Skip(offset).Take(count);
-            return new UserDTO().CreateDTOs(items).Cast<UserDTO>();
+            return DbService.GetManyWithTotalCount<User, UserDTO>(GetAvailableUsers(), offset, count);
         }
         [HttpGet, Route("GetUsersFiltered")]
-        public async Task<IEnumerable<UserDTO>> GetUsersFiltered([FromQuery] SearchFilter filter)
+        public async Task<ItemsWithTotalCount<UserDTO>> GetUsersFiltered([FromQuery] SearchFilter filter)
         {
-            var items = filter.FilterBase(GetAvailableUsers(), (item) => $"{item.Surname} {item.Name} {item.Patronymic}");
-            return new UserDTO().CreateDTOs(items).Cast<UserDTO>();
+            return DbService.GetManyWithTotalCount<User, UserDTO>(GetAvailableUsers(), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.FIO.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
 

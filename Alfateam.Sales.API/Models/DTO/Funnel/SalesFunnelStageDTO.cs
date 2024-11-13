@@ -2,6 +2,7 @@
 using Alfateam.Sales.Models.Enums;
 using Alfateam.Sales.Models.Funnel;
 using Alfateam.Website.API.Abstractions;
+using System.ComponentModel;
 
 namespace Alfateam.Sales.API.Models.DTO.Funnel
 {
@@ -14,7 +15,14 @@ namespace Alfateam.Sales.API.Models.DTO.Funnel
 
         [ForClientOnly]
         public SalesFunnelStageTypeDTO Type { get; set; }
+        [HiddenFromClient]
         public int TypeId { get; set; }
+
+
+
+
+        [Description("Информация о туннеле продаж, если задана")]
+        public SalesFunnelTunnelDTO? Tunnel { get; set; }
 
     }
 }

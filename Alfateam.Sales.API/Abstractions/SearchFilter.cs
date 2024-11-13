@@ -9,10 +9,10 @@ namespace Alfateam.Sales.API.Abstractions
 
         public string Query { get; set; }
 
-        public virtual IEnumerable<T> FilterBase<T>(IEnumerable<T> items) where T : AbsModel
-        {
-            return items.Skip(Offset).Take(Count);
-        }
+        //public virtual IEnumerable<T> FilterBase<T>(IEnumerable<T> items) where T : AbsModel
+        //{
+        //    return items.Skip(Offset).Take(Count);
+        //}
 
     }
 }

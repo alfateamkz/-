@@ -26,6 +26,9 @@ using Swashbuckle.AspNetCore.Annotations;
 using System.Collections.Generic;
 using System.Net;
 using Alfateam.Website.API.Filters.AdminSearch;
+using Alfateam.Core;
+using Alfateam.Website.API.Models.DTO;
+using Alfateam2._0.Models;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -40,28 +43,22 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region События
 
 
-        [HttpGet, Route("GetEventsCount")]
-        public async Task<int> GetEventsCount()
-        {
-            return GetAvailableEvents().Count();
-        }
-
-
 
         [HttpGet, Route("GetEvents")]
         [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
-        public async Task<IEnumerable<EventDTO>> GetEvents(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<EventDTO>> GetEvents(int offset, int count = 20)
         {
-            var items = GetAvailableEvents().Skip(offset).Take(count);
-            return new EventDTO().CreateDTOs(items).Cast<EventDTO>();
+            return DbService.GetManyWithTotalCount<Event, EventDTO>(GetAvailableEvents(), offset, count);
         }
 
         [HttpGet, Route("GetEventsFiltered")]
         [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
-        public async Task<IEnumerable<EventDTO>> GetEventsFiltered([FromQuery] EventsSearchFilter filter)
+        public async Task<ItemsWithTotalCount<EventDTO>> GetEventsFiltered([FromQuery] EventsSearchFilter filter)
         {
-            var items = filter.Filter(GetAvailableEvents(), (item) => item.Title);
-            return new EventDTO().CreateDTOs(items).Cast<EventDTO>();
+            return DbService.GetManyWithTotalCount<Event, EventDTO>(filter.Filter(GetAvailableEvents()), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
 
@@ -181,28 +178,22 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Категории событий
 
 
-        [HttpGet, Route("GetEventCategoriesCount")]
-        public async Task<int> GetEventCategoriesCount()
-        {
-            return GetAvailableEventCategories().Count();
-        }
-
-
 
         [HttpGet, Route("GetEventCategories")]
         [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
-        public async Task<IEnumerable<EventCategoryDTO>> GetEventCategories(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<EventCategoryDTO>> GetEventCategories(int offset, int count = 20)
         {
-            var items = GetAvailableEventCategories().Skip(offset).Take(count);
-            return new EventCategoryDTO().CreateDTOs(items).Cast<EventCategoryDTO>();
+            return DbService.GetManyWithTotalCount<EventCategory, EventCategoryDTO>(GetAvailableEventCategories(), offset, count);
         }
 
         [HttpGet, Route("GetEventCategoriesFiltered")]
         [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
-        public async Task<IEnumerable<EventCategoryDTO>> GetEventCategoriesFiltered([FromQuery] SearchFilter filter)
+        public async Task<ItemsWithTotalCount<EventCategoryDTO>> GetEventCategoriesFiltered([FromQuery] SearchFilter filter)
         {
-            var items = filter.FilterBase(GetAvailableEventCategories(), (item) => item.Title);
-            return new EventCategoryDTO().CreateDTOs(items).Cast<EventCategoryDTO>();
+            return DbService.GetManyWithTotalCount<EventCategory, EventCategoryDTO>(GetAvailableEventCategories(), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
 
@@ -318,17 +309,18 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         [HttpGet, Route("GetEventFormats")]
         [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
-        public async Task<IEnumerable<EventFormatDTO>> GetEventFormats(int offset, int count = 20)
+        public async Task<ItemsWithTotalCount<EventFormatDTO>> GetEventFormats(int offset, int count = 20)
         {
-            var items = GetAvailableEventFormats().Skip(offset).Take(count);
-            return new EventFormatDTO().CreateDTOs(items).Cast<EventFormatDTO>();
+            return DbService.GetManyWithTotalCount<EventFormat, EventFormatDTO>(GetAvailableEventFormats(), offset, count);
         }
         [HttpGet, Route("GetEventFormatsFiltered")]
         [CheckContentAreaRights(ContentAccessModelType.Events, 1)]
-        public async Task<IEnumerable<EventFormatDTO>> GetEventFormatsFiltered([FromQuery] SearchFilter filter)
+        public async Task<ItemsWithTotalCount<EventFormatDTO>> GetEventFormatsFiltered([FromQuery] SearchFilter filter)
         {
-            var items = filter.FilterBase(GetAvailableEventFormats(), (item) => item.Title);
-            return new EventFormatDTO().CreateDTOs(items).Cast<EventFormatDTO>();
+            return DbService.GetManyWithTotalCount<EventFormat, EventFormatDTO>(GetAvailableEventFormats(), filter.Offset, filter.Count, (entity) =>
+            {
+                return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+            });
         }
 
 

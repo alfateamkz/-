@@ -1,9 +1,11 @@
 ﻿using Alfateam.Sales.Models;
 using Alfateam.Sales.Models.Abstractions;
+using Alfateam.Sales.Models.BusinessProposals;
 using Alfateam.Sales.Models.Conversation;
 using Alfateam.Sales.Models.Funnel;
 using Alfateam.Sales.Models.General;
 using Alfateam.Sales.Models.General.Security;
+using Alfateam.Sales.Models.Invoices;
 using Alfateam.Sales.Models.Orders;
 using Alfateam.Sales.Models.Plan;
 using Alfateam.Sales.Models.Scripting;
@@ -29,8 +31,16 @@ namespace Alfateam.DB
 
 
         #region Abstractions
+        public DbSet<BPTemplatePlaceholder> BPTemplatePlaceholders { get; set; }
         public DbSet<CustomerConversation> CustomerConversations { get; set; }
+        public DbSet<InvoicePaidInfo> InvoicePaidInfos { get; set; }
+        public DbSet<InvoiceTemplatePlaceholder> InvoiceTemplatePlaceholders { get; set; }
 
+        #endregion
+
+        #region BusinessProposals
+        public DbSet<BusinessProposal> BusinessProposals { get; set; }
+        public DbSet<BusinessProposalTemplate> BusinessProposalTemplates { get; set; }
         #endregion
 
         #region Conversation
@@ -42,6 +52,7 @@ namespace Alfateam.DB
         public DbSet<SalesFunnel> SalesFunnels { get; set; }
         public DbSet<SalesFunnelStage> SalesFunnelStages { get; set; }
         public DbSet<SalesFunnelStageType> SalesFunnelStageTypes { get; set; }
+        public DbSet<SalesFunnelTunnel> SalesFunnelTunnels { get; set; }
 
         #endregion
 
@@ -54,10 +65,18 @@ namespace Alfateam.DB
         public DbSet<Business> Businesses { get; set; }
         public DbSet<BusinessCompany> BusinessCompanies { get; set; }
         public DbSet<CompanyInfo> CompanyInfos { get; set; }
+        public DbSet<ContactInfo> ContactInfos { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<SalesKPI> SalesKPIs { get; set; }
         public DbSet<SubscriptionInfo> SubscriptionInfos { get; set; }
         public DbSet<User> Users { get; set; }
+
+        #endregion
+
+        #region Invoices
+        public DbSet<Invoice> Invoices { get; set; }
+        public DbSet<InvoiceItem> InvoiceItems { get; set; }
+        public DbSet<InvoiceTemplate> InvoiceTemplates { get; set; }
 
         #endregion
 

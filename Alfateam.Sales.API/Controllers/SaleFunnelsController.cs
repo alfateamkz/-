@@ -74,7 +74,6 @@ namespace Alfateam.Sales.API.Controllers
         public async Task<SalesFunnelStageDTO> CreateSaleFunnelStage(int funnelId, SalesFunnelStageDTO model)
         {
             ThrowIfFunnelDontExist(funnelId);
-
             return (SalesFunnelStageDTO)DBService.TryCreateEntity(DB.SalesFunnelStages, model, (entity) =>
             {
                 entity.SalesFunnelId = funnelId;
