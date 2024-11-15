@@ -45,9 +45,13 @@ namespace Alfateam.Sales.API.Controllers.Invoices
         [HttpPost, Route("CreateTemplate")]
         public async Task<InvoiceTemplateDTO> CreateSaleFunnel(InvoiceTemplateDTO model)
         {
-            return (InvoiceTemplateDTO)DBService.TryCreateEntity(DB.InvoiceTemplates, model, (entity) =>
+            return (InvoiceTemplateDTO)DBService.TryCreateEntity(DB.InvoiceTemplates, model, callback: (entity) =>
             {
                 entity.BusinessCompanyId = (int)this.CompanyId;
+            },
+            afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Добавление шаблона счета на оплату", $"Добавлен шаблон счета на оплату {entity.Title}");
             });
         }
 
@@ -55,7 +59,10 @@ namespace Alfateam.Sales.API.Controllers.Invoices
         public async Task<InvoiceTemplateDTO> UpdateTemplate(InvoiceTemplateDTO model)
         {
             var item = GetAvailableTemplates().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (InvoiceTemplateDTO)DBService.TryUpdateEntity(DB.InvoiceTemplates, model, item);
+            return (InvoiceTemplateDTO)DBService.TryUpdateEntity(DB.InvoiceTemplates, model, item, afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Редактирование шаблона счета на оплату", $"Отредактирован шаблон счета на оплату с id={entity.Id}");
+            });
         }
 
 
@@ -64,6 +71,8 @@ namespace Alfateam.Sales.API.Controllers.Invoices
         {
             var item = GetAvailableTemplates().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             DBService.TryDeleteEntity(DB.InvoiceTemplates, item);
+
+            this.AddHistoryAction("Удаление шаблона счета на оплату", $"Удален шаблон счета на оплату {item.Title} с id={id}");
         }
 
         #endregion
@@ -77,6 +86,10 @@ namespace Alfateam.Sales.API.Controllers.Invoices
             return (InvoiceTemplatePlaceholderDTO)DBService.TryCreateEntity(DB.InvoiceTemplatePlaceholders, model, (entity) =>
             {
                 entity.InvoiceTemplateId = templateId;
+            },
+            afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Добавление плейсхолдера к шаблону счета на оплату", $"Добавлен плейсхолдер {entity.PlaceholderName} к шаблону счета на оплату");
             });
         }
 
@@ -84,7 +97,10 @@ namespace Alfateam.Sales.API.Controllers.Invoices
         public async Task<InvoiceTemplatePlaceholderDTO> UpdateTemplatePlaceholder(InvoiceTemplatePlaceholderDTO model)
         {
             var item = TryGetTemplatePlaceholder(model.Id);
-            return (InvoiceTemplatePlaceholderDTO)DBService.TryUpdateEntity(DB.InvoiceTemplatePlaceholders, model, item);
+            return (InvoiceTemplatePlaceholderDTO)DBService.TryUpdateEntity(DB.InvoiceTemplatePlaceholders, model, item, afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Редактирование плейсхолдера к шаблону счета на оплату", $"Отредактирован плейсхолдер к шаблону счета на оплату с id={entity.Id}");
+            });
         }
 
         [HttpDelete, Route("DeleteTemplatePlaceholder")]
@@ -92,6 +108,8 @@ namespace Alfateam.Sales.API.Controllers.Invoices
         {
             var item = TryGetTemplatePlaceholder(id);
             DBService.TryDeleteEntity(DB.InvoiceTemplatePlaceholders, item);
+
+            this.AddHistoryAction("Удаление плейсхолдера к шаблону счета на оплату", $"Удален плейсхолдер {item.PlaceholderName} к шаблону счета на оплату с id={id}");
         }
 
 

@@ -201,9 +201,6 @@ namespace Alfateam.Website.API.Abstractions
             return clone;
         }
 
-
-
-
         public IEnumerable<DTOModelAbs<T>> CreateDTOs(IEnumerable<T> items)
         {
             var models = new List<DTOModelAbs<T>>();
@@ -465,6 +462,11 @@ namespace Alfateam.Website.API.Abstractions
         public DTOModelAbs<T> Clone()
         {
             return this.MemberwiseClone() as DTOModelAbs<T>;
+        }
+
+        public Type GetTypeOfDBEntity()
+        {
+            return typeof(T);
         }
 
     }

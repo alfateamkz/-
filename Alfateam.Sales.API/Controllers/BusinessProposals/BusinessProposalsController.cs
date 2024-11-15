@@ -51,6 +51,11 @@ namespace Alfateam.Sales.API.Controllers.BusinessProposals
             return (BusinessProposalDTO)DBService.TryCreateEntity(DB.BusinessProposals, model, (entity) =>
             {
                 entity.CustomerId = model.CustomerId;
+            },
+            afterSuccessCallback: (entity) =>
+            {
+                var customer = DB.Customers.FirstOrDefault(o => o.Id == model.CustomerId);
+                this.AddHistoryAction("Выставление КП клиенту", $"Выставлено КП {entity.Title} клиенту {customer.FIO}");
             });
         }
 
@@ -58,7 +63,10 @@ namespace Alfateam.Sales.API.Controllers.BusinessProposals
         public async Task<BusinessProposalDTO> UpdateProposal(BusinessProposalDTO model)
         {
             var item = GetAvailableProposals().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (BusinessProposalDTO)DBService.TryUpdateEntity(DB.BusinessProposals, model, item);
+            return (BusinessProposalDTO)DBService.TryUpdateEntity(DB.BusinessProposals, model, item, afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Редактирование КП клиенту", $"Отредактировано КП с id={entity.Id}");
+            });
         }
 
         [HttpDelete, Route("DeleteProposal")]
@@ -66,6 +74,8 @@ namespace Alfateam.Sales.API.Controllers.BusinessProposals
         {
             var item = GetAvailableProposals().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             DBService.TryDeleteEntity(DB.BusinessProposals, item);
+
+            this.AddHistoryAction("Удаление КП клиенту", $"Удалено КП {item.Title} клиенту {item.Customer.FIO} с id={id}");
         }
 
         #endregion

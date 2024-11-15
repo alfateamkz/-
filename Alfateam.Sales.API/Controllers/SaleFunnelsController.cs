@@ -45,6 +45,10 @@ namespace Alfateam.Sales.API.Controllers
             return (SalesFunnelDTO)DBService.TryCreateEntity(DB.SalesFunnels, model, (entity) =>
             {
                 entity.BusinessCompanyId = (int)this.CompanyId;
+            }, 
+            afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Добавление воронки продаж", $"Добавлена воронка продаж {entity.Title}");
             });
         }
 
@@ -52,7 +56,10 @@ namespace Alfateam.Sales.API.Controllers
         public async Task<SalesFunnelDTO> UpdateSaleFunnel(SalesFunnelDTO model)
         {
             var item = GetAvailableSalesFunnels().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (SalesFunnelDTO)DBService.TryUpdateEntity(DB.SalesFunnels, model, item);
+            return (SalesFunnelDTO)DBService.TryUpdateEntity(DB.SalesFunnels, model, item, afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Редактирование воронки продаж", $"Отредактирована воронка продаж с id={entity.Id}");
+            });
         }
 
 
@@ -64,6 +71,8 @@ namespace Alfateam.Sales.API.Controllers
         {
             var item = GetAvailableSalesFunnels().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             DBService.TryDeleteEntity(DB.SalesFunnels, item);
+
+            this.AddHistoryAction("Удаление воронки продаж", $"Удалена воронка продаж {item.Title} с id={id}");
         }
 
         #endregion
@@ -77,6 +86,10 @@ namespace Alfateam.Sales.API.Controllers
             return (SalesFunnelStageDTO)DBService.TryCreateEntity(DB.SalesFunnelStages, model, (entity) =>
             {
                 entity.SalesFunnelId = funnelId;
+            },
+            afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Добавление этапа воронки продаж", $"Добавлен этап воронки продаж {entity.Title}");
             });
         }
 
@@ -84,7 +97,10 @@ namespace Alfateam.Sales.API.Controllers
         public async Task<SalesFunnelStageDTO> UpdateSaleFunnelStage(SalesFunnelStageDTO model)
         {
             var item = TryGetFunnelStage(model.Id);
-            return (SalesFunnelStageDTO)DBService.TryUpdateEntity(DB.SalesFunnelStages, model, item);
+            return (SalesFunnelStageDTO)DBService.TryUpdateEntity(DB.SalesFunnelStages, model, item, afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Редактирование этапа воронки продаж", $"Отредактирован этап воронки продаж с id={entity.Id}");
+            });
         }
 
         [HttpDelete, Route("DeleteSaleFunnelStage")]
@@ -92,6 +108,8 @@ namespace Alfateam.Sales.API.Controllers
         {
             var item = TryGetFunnelStage(id);
             DBService.TryDeleteEntity(DB.SalesFunnelStages, item);
+
+            this.AddHistoryAction("Удаление этапа воронки продаж", $"Удален этап воронки продаж {item.Title} с id={id}");
         }
 
         #endregion
@@ -127,6 +145,10 @@ namespace Alfateam.Sales.API.Controllers
             return (SalesFunnelStageTypeDTO)DBService.TryCreateEntity(DB.SalesFunnelStageTypes, model, (entity) =>
             {
                 entity.BusinessCompanyId = (int)this.CompanyId;
+            },
+            afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Добавление статуса этапа для воронок продаж", $"Добавлен статус этапа для воронок продаж {entity.Title}");
             });
         }
 
@@ -134,7 +156,10 @@ namespace Alfateam.Sales.API.Controllers
         public async Task<SalesFunnelStageTypeDTO> UpdateSaleFunnelStageType(SalesFunnelStageTypeDTO model)
         {
             var item = GetAvailableSalesFunnelTypes().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (SalesFunnelStageTypeDTO)DBService.TryUpdateEntity(DB.SalesFunnelStageTypes, model, item);
+            return (SalesFunnelStageTypeDTO)DBService.TryUpdateEntity(DB.SalesFunnelStageTypes, model, item, afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Редактирование статуса этапа для воронок продаж", $"Отредактирован статус этапа для воронок продаж с id={entity.Id}");
+            });
         }
 
 
@@ -144,6 +169,8 @@ namespace Alfateam.Sales.API.Controllers
         {
             var item = GetAvailableSalesFunnelTypes().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             DBService.TryDeleteEntity(DB.SalesFunnelStageTypes, item);
+
+            this.AddHistoryAction("Удаление статуса этапа для воронок продаж", $"Удален статус этапа для воронок продаж {item.Title} с id={id}");
         }
 
 

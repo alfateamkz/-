@@ -43,10 +43,14 @@ namespace Alfateam.Sales.API.Controllers
         [HttpPost, Route("CreateCustomer")]
         public async Task<CustomerDTO> CreateCustomer(CustomerDTO model)
         {
-            return (CustomerDTO)DBService.TryCreateEntity(DB.Customers, model, (entity) =>
+            return (CustomerDTO)DBService.TryCreateEntity(DB.Customers, model, callback: (entity) =>
             {
                 entity.BusinessCompanyId = (int)this.CompanyId;
                 entity.CreatedById = this.AuthorizedUser.Id;
+            }, 
+            afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Добавление клиента", $"Добавлен клиент {entity.FIO}");
             });
         }
 
@@ -54,7 +58,10 @@ namespace Alfateam.Sales.API.Controllers
         public async Task<CustomerDTO> UpdateCustomer(CustomerDTO model)
         {
             var item = GetAvailableCustomers().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (CustomerDTO)DBService.TryUpdateEntity(DB.Customers, model, item);
+            return (CustomerDTO)DBService.TryUpdateEntity(DB.Customers, model, item, afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Редактирование клиента", $"Отредактирован клиент с id={item.Id}");
+            });
         }
 
 
@@ -65,6 +72,8 @@ namespace Alfateam.Sales.API.Controllers
         {
             var item = GetAvailableCustomers().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             DBService.TryDeleteEntity(DB.Customers, item);
+
+            this.AddHistoryAction("Удаление клиента", $"Удален клиент {item.FIO} с id={id}");
         }
 
 
@@ -99,9 +108,13 @@ namespace Alfateam.Sales.API.Controllers
         [HttpPost, Route("CreateCustomerCategory")]
         public async Task<CustomerCategoryDTO> CreateCustomerCategory(CustomerCategoryDTO model)
         {
-            return (CustomerCategoryDTO)DBService.TryCreateEntity(DB.CustomerCategories, model, (entity) =>
+            return (CustomerCategoryDTO)DBService.TryCreateEntity(DB.CustomerCategories, model, callback: (entity) =>
             {
                 entity.BusinessCompanyId = (int)this.CompanyId;
+            },
+            afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Добавление категории клиентов", $"Добавлена категория клиентов {entity.Title}");
             });
         }
 
@@ -109,7 +122,10 @@ namespace Alfateam.Sales.API.Controllers
         public async Task<CustomerCategoryDTO> UpdateCustomerCategory(CustomerCategoryDTO model)
         {
             var item = GetAvailableCustomerCategories().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (CustomerCategoryDTO)DBService.TryUpdateEntity(DB.CustomerCategories, model, item);
+            return (CustomerCategoryDTO)DBService.TryUpdateEntity(DB.CustomerCategories, model, item, afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Редактирование категории клиентов", $"Отредактирована категории клиентов с id={item.Id}");
+            });
         }
 
 
@@ -120,6 +136,8 @@ namespace Alfateam.Sales.API.Controllers
         {
             var item = GetAvailableCustomerCategories().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             DBService.TryDeleteEntity(DB.CustomerCategories, item);
+
+            this.AddHistoryAction("Удаление категории клиентов", $"Удален категория клиентов {item.Title} с id={id}");
         }
 
 

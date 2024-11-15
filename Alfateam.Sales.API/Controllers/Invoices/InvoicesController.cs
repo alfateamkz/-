@@ -52,14 +52,21 @@ namespace Alfateam.Sales.API.Controllers.Invoices
         [HttpPost, Route("CreateInvoice")]
         public async Task<InvoiceDTO> CreateInvoice(InvoiceDTO model)
         {
-            return (InvoiceDTO)DBService.TryCreateEntity(DB.Invoices, model);
+            return (InvoiceDTO)DBService.TryCreateEntity(DB.Invoices, model, afterSuccessCallback: (entity) =>
+            {
+                var customer = DB.Customers.FirstOrDefault(o => o.Id == model.CustomerId);
+                this.AddHistoryAction("Выставление счета на оплату клиенту", $"Выставлен счет на оплату {entity.Title} клиенту {customer.FIO}");
+            });
         }
 
         [HttpPut, Route("UpdateInvoice")]
         public async Task<InvoiceDTO> UpdateInvoice(InvoiceDTO model)
         {
             var item = GetAvailableInvoices().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (InvoiceDTO)DBService.TryUpdateEntity(DB.Invoices, model, item);
+            return (InvoiceDTO)DBService.TryUpdateEntity(DB.Invoices, model, item, afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Редактирование счета на оплату клиенту", $"Отредактирован счет на оплату с id={entity.Id}");
+            });
         }
 
         [HttpDelete, Route("DeleteInvoice")]
@@ -67,6 +74,8 @@ namespace Alfateam.Sales.API.Controllers.Invoices
         {
             var item = GetAvailableInvoices().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             DBService.TryDeleteEntity(DB.Invoices, item);
+
+            this.AddHistoryAction("Удаление счета на оплату клиенту", $"Удален счет на оплату {item.Title} клиенту {item.Customer.FIO} с id={id}");
         }
 
         #endregion

@@ -1,7 +1,12 @@
 ﻿using Alfateam.Sales.Models;
 using Alfateam.Sales.Models.Abstractions;
+using Alfateam.Sales.Models.Abstractions.ExtInterations;
+using Alfateam.Sales.Models.Abstractions.Tasks;
 using Alfateam.Sales.Models.BusinessProposals;
 using Alfateam.Sales.Models.Conversation;
+using Alfateam.Sales.Models.ExternalInteractions.SentForms;
+using Alfateam.Sales.Models.ExternalInteractions.SentForms.CommunitationButtons;
+using Alfateam.Sales.Models.ExternalInteractions.SentForms.Fields.Props;
 using Alfateam.Sales.Models.Funnel;
 using Alfateam.Sales.Models.General;
 using Alfateam.Sales.Models.General.Security;
@@ -9,6 +14,7 @@ using Alfateam.Sales.Models.Invoices;
 using Alfateam.Sales.Models.Orders;
 using Alfateam.Sales.Models.Plan;
 using Alfateam.Sales.Models.Scripting;
+using Alfateam.Sales.Models.Tasks.CompletionCheck;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -31,6 +37,20 @@ namespace Alfateam.DB
 
 
         #region Abstractions
+
+        #region ExtInterations
+
+        public DbSet<ExternalInteraction> ExternalInteractions { get; set; }
+        public DbSet<SentWebsiteFormField> SentWebsiteFormFields { get; set; }
+        public DbSet<WebsiteFormInput> WebsiteFormInputs { get; set; }
+        #endregion
+
+        #region Tasks
+        public DbSet<MarkedAsCompleted> MarkedAsCompleted { get; set; }
+        public DbSet<UserTask> UserTasks { get; set; }
+
+        #endregion
+
         public DbSet<BPTemplatePlaceholder> BPTemplatePlaceholders { get; set; }
         public DbSet<CustomerConversation> CustomerConversations { get; set; }
         public DbSet<InvoicePaidInfo> InvoicePaidInfos { get; set; }
@@ -48,6 +68,29 @@ namespace Alfateam.DB
 
         #endregion
 
+        #region ExternalInteractions
+
+        #region SentForms
+
+        #region CommunitationButtons
+        public DbSet<CommunitationButtonsAction> CommunitationButtonsActions { get; set; }
+        public DbSet<CommunitationButtonsActionsSession> CommunitationButtonsActionsSessions { get; set; }
+        #endregion
+
+        #region Fields
+
+        #region Props
+        public DbSet<FilesSentFormFieldFile> FilesSentFormFieldFiles { get; set; }
+        #endregion
+
+        #endregion
+
+        public DbSet<SentWebsiteForm> SentWebsiteForms { get; set; }
+
+        #endregion
+
+        #endregion
+
         #region Funnel
         public DbSet<SalesFunnel> SalesFunnels { get; set; }
         public DbSet<SalesFunnelStage> SalesFunnelStages { get; set; }
@@ -60,6 +103,7 @@ namespace Alfateam.DB
 
         #region Security
         public DbSet<UserPermissions> UserPermissions { get; set; }
+        public DbSet<HistoryAction> HistoryActions { get; set; }
 
         #endregion
         public DbSet<Business> Businesses { get; set; }
@@ -100,6 +144,14 @@ namespace Alfateam.DB
 
         #endregion
 
+        #region Tasks
+
+        #region CompletionCheck
+        public DbSet<TaskCompletionCheckResult> TaskCompletionCheckResults { get; set; }
+
+        #endregion
+
+        #endregion
 
         public DbSet<Customer> Customers { get; set; }
         public DbSet<CustomerCategory> CustomerCategories { get; set; }

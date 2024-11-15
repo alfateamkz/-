@@ -61,6 +61,10 @@ namespace Alfateam.Sales.API.Controllers
             return (SalesPlanningDTO)DBService.TryCreateEntity(DB.SalesPlannings, model, (entity) =>
             {
                 entity.BusinessCompanyId = (int)this.CompanyId;
+            },
+            afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Добавление планирования продаж", $"Добавлено планирование продаж {entity.Title}");
             });
         }
 
@@ -70,7 +74,10 @@ namespace Alfateam.Sales.API.Controllers
             var item = GetAvailableSalesPlannings().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
 
             ThrowIfSalesPlanningNotVaild(model);
-            return (SalesPlanningDTO)DBService.TryUpdateEntity(DB.SalesPlannings, model, item);
+            return (SalesPlanningDTO)DBService.TryUpdateEntity(DB.SalesPlannings, model, item, afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Редактирование планирования продаж", $"Отредактировано планирование продаж с id={entity.Id}");
+            });
         }
 
 
@@ -79,6 +86,8 @@ namespace Alfateam.Sales.API.Controllers
         {
             var item = GetAvailableSalesPlannings().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             DBService.TryDeleteEntity(DB.SalesPlannings, item);
+
+            this.AddHistoryAction("Удаление планирования продаж", $"Удалено планирование продаж {item.Title} с id={id}");
         }
 
 
@@ -94,6 +103,10 @@ namespace Alfateam.Sales.API.Controllers
             return (SalesPlanDTO)DBService.TryCreateEntity(DB.SalesPlans, model, (entity) =>
             {
                 entity.SalesPlanningId = planningId;
+            },
+            afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Добавление плана продаж", $"Добавлен план продаж {entity.Title}");
             });
         }
 
@@ -101,7 +114,10 @@ namespace Alfateam.Sales.API.Controllers
         public async Task<SalesPlanDTO> UpdateSalesPlan(SalesPlanDTO model)
         {
             var item = TryGetSalesPlan(model.Id);
-            return (SalesPlanDTO)DBService.TryUpdateEntity(DB.SalesPlans, model, item);
+            return (SalesPlanDTO)DBService.TryUpdateEntity(DB.SalesPlans, model, item, afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Редактирование плана продаж", $"Отредактирован план продаж с id={entity.Id}");
+            });
         }
 
         [HttpDelete, Route("DeleteSalesPlan")]
@@ -109,6 +125,8 @@ namespace Alfateam.Sales.API.Controllers
         {
             var item = TryGetSalesPlan(id);
             DBService.TryDeleteEntity(DB.SalesPlans, item);
+
+            this.AddHistoryAction("Удаление плана продаж", $"Удален план продаж {item.Title} с id={id}");
         }
 
         #endregion
@@ -122,6 +140,10 @@ namespace Alfateam.Sales.API.Controllers
             return (SalesPlanItemDTO)DBService.TryCreateEntity(DB.SalesPlanItems, model, (entity) =>
             {
                 entity.SalesPlanId = planId;
+            },
+            afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Добавление пункта плана продаж", $"Добавлен пункт плана продаж {entity.Title}");
             });
         }
 
@@ -129,7 +151,10 @@ namespace Alfateam.Sales.API.Controllers
         public async Task<SalesPlanItemDTO> UpdateSalesPlanItem(SalesPlanItemDTO model)
         {
             var item = TryGetSalesPlanItem(model.Id);
-            return (SalesPlanItemDTO)DBService.TryUpdateEntity(DB.SalesPlanItems, model, item);
+            return (SalesPlanItemDTO)DBService.TryUpdateEntity(DB.SalesPlanItems, model, item, afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Редактирование пункта плана продаж", $"Отредактирован пункт плана продаж с id={entity.Id}");
+            });
         }
 
         [HttpDelete, Route("DeleteSalesPlanItem")]
@@ -137,6 +162,8 @@ namespace Alfateam.Sales.API.Controllers
         {
             var item = TryGetSalesPlanItem(id);
             DBService.TryDeleteEntity(DB.SalesPlanItems, item);
+
+            this.AddHistoryAction("Удаление пункта плана продаж", $"Удален пункт плана продаж {item.Title} с id={id}");
         }
 
 

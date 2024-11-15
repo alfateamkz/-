@@ -1,6 +1,9 @@
 ﻿using Alfateam.Core;
+using Alfateam.Sales.Models.Abstractions.ExtInterations;
+using Alfateam.Sales.Models.Abstractions.Tasks;
 using Alfateam.Sales.Models.BusinessProposals;
 using Alfateam.Sales.Models.Funnel;
+using Alfateam.Sales.Models.General.Security;
 using Alfateam.Sales.Models.Invoices;
 using Alfateam.Sales.Models.Orders;
 using Alfateam.Sales.Models.Plan;
@@ -46,5 +49,15 @@ namespace Alfateam.Sales.Models.General
 
         public List<BusinessProposalTemplate> BusinessProposalTemplates { get; set; } = new List<BusinessProposalTemplate>();
         public List<InvoiceTemplate> InvoiceTemplates { get; set; } = new List<InvoiceTemplate>();
+
+
+
+
+
+
+
+        public List<ExternalInteraction> ExternalInteractions { get; set; } = new List<ExternalInteraction>();
+        public List<UserTask> UserTasks { get; set; } = new List<UserTask>();
+        public List<HistoryAction> HistoryActions { get; set; } = new List<HistoryAction>();
     }
 }

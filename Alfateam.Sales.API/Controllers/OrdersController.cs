@@ -1,8 +1,10 @@
 ﻿using Alfateam.Core;
+using Alfateam.Core.Exceptions;
 using Alfateam.Sales.API.Abstractions;
 using Alfateam.Sales.API.Models;
 using Alfateam.Sales.API.Models.DTO.Funnel;
 using Alfateam.Sales.API.Models.DTO.Orders;
+using Alfateam.Sales.Models.Enums;
 using Alfateam.Sales.Models.Orders;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,7 +44,7 @@ namespace Alfateam.Sales.API.Controllers
         {
             var user = this.AuthorizedUser;
 
-            return (OrderDTO)DBService.TryCreateEntity(DB.Orders, model, (entity) =>
+            return (OrderDTO)DBService.TryCreateEntity(DB.Orders, model, callback: (entity) =>
             {
                 entity.BusinessCompanyId = (int)this.CompanyId;
                 entity.SaleInfo = new OrderSaleInfo()
@@ -50,6 +52,10 @@ namespace Alfateam.Sales.API.Controllers
                     FoundById = user.Id,
                     ResponsibleId = user.Id,
                 };
+            },
+            afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Добавление заказа", $"Добавлен заказ {entity.Title}");
             });
         }
 
@@ -57,7 +63,10 @@ namespace Alfateam.Sales.API.Controllers
         public async Task<OrderDTO> UpdateOrder(OrderDTO model)
         {
             var item = GetAvailableOrders().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (OrderDTO)DBService.TryUpdateEntity(DB.Orders, model, item);
+            return (OrderDTO)DBService.TryUpdateEntity(DB.Orders, model, item, afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Редактирование заказа", $"Отредактирован заказ с id={entity.Id}");
+            });
         }
 
 
@@ -67,6 +76,8 @@ namespace Alfateam.Sales.API.Controllers
         {
             var item = GetAvailableOrders().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             DBService.TryDeleteEntity(DB.Orders, item);
+
+            this.AddHistoryAction("Удаление заказа", $"Удален заказ {item.Title} с id={id}");
         }
 
         #endregion
@@ -101,6 +112,11 @@ namespace Alfateam.Sales.API.Controllers
             return (OrderStatusDTO)DBService.TryCreateEntity(DB.OrderStatuses, model, (entity) =>
             {
                 entity.BusinessCompanyId = (int)this.CompanyId;
+                entity.Type = OrderStatusType.Custom;
+            },
+            afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Добавление пользовательского статуса заказа", $"Добавлен статуса заказа {entity.Title}");
             });
         }
 
@@ -108,7 +124,10 @@ namespace Alfateam.Sales.API.Controllers
         public async Task<OrderStatusDTO> UpdateOrderStatus(OrderStatusDTO model)
         {
             var item = GetAvailableOrderStatuses().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (OrderStatusDTO)DBService.TryUpdateEntity(DB.OrderStatuses, model, item);
+            return (OrderStatusDTO)DBService.TryUpdateEntity(DB.OrderStatuses, model, item, afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Редактирование пользовательского статуса заказа", $"Отредактирован статуса заказа с id={entity.Id}");
+            });
         }
 
 
@@ -117,7 +136,13 @@ namespace Alfateam.Sales.API.Controllers
         public async Task DeleteOrderStatus(int id)
         {
             var item = GetAvailableOrderStatuses().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (item.IsDefault)
+            {
+                throw new Exception403("Нельзя удалить встроенный статус заказа. Можно только редактировать текст");
+            }
+
             DBService.TryDeleteEntity(DB.OrderStatuses, item);
+            this.AddHistoryAction("Удаление пользовательского статуса заказа", $"Удален статуса заказа {item.Title} с id={id}");
         }
 
         #endregion
@@ -125,6 +150,9 @@ namespace Alfateam.Sales.API.Controllers
 
 
         #region Управление заказами (не круд, а бизнес процессы)
+
+
+
 
 
         #endregion
@@ -142,7 +170,7 @@ namespace Alfateam.Sales.API.Controllers
         }
         private IEnumerable<OrderStatus> GetAvailableOrderStatuses()
         {
-            return DB.OrderStatuses.Where(o => !o.IsDeleted && o.BusinessCompanyId == this.CompanyId);
+            return DB.OrderStatuses.Where(o => !o.IsDeleted && (o.BusinessCompanyId == this.CompanyId || o.IsDefault));
         }
 
 

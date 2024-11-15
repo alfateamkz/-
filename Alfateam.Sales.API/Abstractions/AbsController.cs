@@ -6,6 +6,7 @@ using Alfateam.EDM.Models.General.Subjects;
 using Alfateam.Gateways.Abstractions;
 using Alfateam.ID.Models.Security;
 using Alfateam.Sales.API.Models;
+using Alfateam.Sales.Models.General.Security;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -64,6 +65,17 @@ namespace Alfateam.Sales.API.Abstractions
 
 
 
+        [NonAction]
+        public void AddHistoryAction(string title, string description = null)
+        {
+            DBService.CreateEntity(DB.HistoryActions, new HistoryAction
+            {
+                Title = title,
+                Description = description,
+                CreatedById = this.AuthorizedUser.Id,
+                BusinessCompanyId = (int)this.CompanyId,
+            });
+        }
 
 
 

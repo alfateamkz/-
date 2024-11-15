@@ -8,7 +8,7 @@ namespace Alfateam.Sales.API.Models.DTO.Invoices
     public class InvoiceDTO : DTOModelAbs<Invoice>
     {
         [ForClientOnly]
-        public string UniqueURL { get; set; } = $"{DateTime.UtcNow.ToString("dd-MM-yyyy")}-{System.Guid.NewGuid().ToString()}";
+        public string UniqueURL { get; set; }
 
 
         [ForClientOnly]

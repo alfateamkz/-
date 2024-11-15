@@ -95,7 +95,8 @@ namespace Alfateam.Core.Services
 
         public DTOModelAbs<T> TryCreateEntity<T>(DbSet<T> dbSet,
                                                  DTOModelAbs<T> model,
-                                                 Action<T> callback = null) where T : AbsModel, new()
+                                                 Action<T> callback = null,
+                                                 Action<T> afterSuccessCallback = null) where T : AbsModel, new()
         {
             model.SetDBContext(DB);
             ValidateToCreateEntity(model);
@@ -110,8 +111,10 @@ namespace Alfateam.Core.Services
 
             dbSet.Add(dbModel);
             DB.SaveChanges();
-
             model.Id = dbModel.Id;
+
+            afterSuccessCallback?.Invoke(dbModel);
+
             return model;
         }
 
@@ -178,7 +181,8 @@ namespace Alfateam.Core.Services
         public DTOModelAbs<T> TryUpdateEntity<T>(DbSet<T> dbSet, 
                                                 DTOModelAbs<T> model, 
                                                 T item, 
-                                                Action<T> callback = null) where T : AbsModel, new()
+                                                Action<T> callback = null,
+                                                Action<T> afterSuccessCallback = null) where T : AbsModel, new()
         {
            
             ValidateToUpdateEntity(item, model);
@@ -187,6 +191,9 @@ namespace Alfateam.Core.Services
             callback?.Invoke(item);
 
             UpdateEntity(dbSet, model, item);
+
+            afterSuccessCallback?.Invoke(item);
+
             return model;
         }
 
@@ -216,13 +223,15 @@ namespace Alfateam.Core.Services
         #endregion
 
         #region Delete
-        public void TryDeleteEntity<T>(DbSet<T> dbSet, T item, bool softDelete = true) where T : AbsModel
+        public void TryDeleteEntity<T>(DbSet<T> dbSet, T item, bool softDelete = true, Action afterSuccessCallback = null) where T : AbsModel
         {
             if (item == null)
             {
                 throw new Exception404("Сущность по данному id не найдена");
             }
             DeleteEntity(dbSet, item, softDelete);
+
+            afterSuccessCallback?.Invoke();
         }
         public void DeleteEntity<T>(DbSet<T> dbSet, T item, bool softDelete = true) where T : AbsModel
         {

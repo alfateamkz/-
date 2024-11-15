@@ -14,5 +14,15 @@ namespace Alfateam.Sales.Models.General
         public string Contact { get; set; }
 
         public string? Comment { get; set; }
+
+
+
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int? CommunitationButtonsExtInterationId { get; set; }
     }
 }

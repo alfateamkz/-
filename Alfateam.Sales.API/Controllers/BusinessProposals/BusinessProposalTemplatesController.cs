@@ -47,6 +47,10 @@ namespace Alfateam.Sales.API.Controllers.BusinessProposals
             return (BusinessProposalTemplateDTO)DBService.TryCreateEntity(DB.BusinessProposalTemplates, model, (entity) =>
             {
                 entity.BusinessCompanyId = (int)this.CompanyId;
+            },
+            afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Добавление шаблона КП", $"Добавлен шаблон КП {entity.Title}");
             });
         }
 
@@ -54,7 +58,10 @@ namespace Alfateam.Sales.API.Controllers.BusinessProposals
         public async Task<BusinessProposalTemplateDTO> UpdateTemplate(BusinessProposalTemplateDTO model)
         {
             var item = GetAvailableTemplates().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (BusinessProposalTemplateDTO)DBService.TryUpdateEntity(DB.BusinessProposalTemplates, model, item);
+            return (BusinessProposalTemplateDTO)DBService.TryUpdateEntity(DB.BusinessProposalTemplates, model, item, afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Редактирование шаблона КП ", $"Отредактирован шаблон КП с id={entity.Id}");
+            });
         }
 
 
@@ -63,6 +70,8 @@ namespace Alfateam.Sales.API.Controllers.BusinessProposals
         {
             var item = GetAvailableTemplates().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             DBService.TryDeleteEntity(DB.BusinessProposalTemplates, item);
+
+            this.AddHistoryAction("Удаление шаблона КП", $"Удален шаблон КП {item.Title} с id={id}");
         }
 
 
@@ -74,9 +83,13 @@ namespace Alfateam.Sales.API.Controllers.BusinessProposals
         public async Task<BPTemplatePlaceholderDTO> CreateTemplatePlaceholder(int templateId, BPTemplatePlaceholderDTO model)
         {
             ThrowIfTemplateExist(templateId);
-            return (BPTemplatePlaceholderDTO)DBService.TryCreateEntity(DB.BPTemplatePlaceholders, model, (entity) =>
+            return (BPTemplatePlaceholderDTO)DBService.TryCreateEntity(DB.BPTemplatePlaceholders, model, callback: (entity) =>
             {
                 entity.BusinessProposalTemplateId = templateId;
+            },
+            afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Добавление плейсхолдера к шаблону КП", $"Добавлен плейсхолдер {entity.PlaceholderName} к шаблону КП");
             });
         }
 
@@ -85,7 +98,10 @@ namespace Alfateam.Sales.API.Controllers.BusinessProposals
         public async Task<BPTemplatePlaceholderDTO> UpdateTemplatePlaceholder(BPTemplatePlaceholderDTO model)
         {
             var item = TryGetTemplatePlaceholder(model.Id);
-            return (BPTemplatePlaceholderDTO)DBService.TryUpdateEntity(DB.BPTemplatePlaceholders, model, item);
+            return (BPTemplatePlaceholderDTO)DBService.TryUpdateEntity(DB.BPTemplatePlaceholders, model, item, afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Редактирование плейсхолдера к шаблону КП", $"Отредактирован плейсхолдер к шаблону КП с id={entity.Id}");
+            });
         }
 
 
@@ -94,6 +110,8 @@ namespace Alfateam.Sales.API.Controllers.BusinessProposals
         {
             var item = TryGetTemplatePlaceholder(id);
             DBService.TryDeleteEntity(DB.BPTemplatePlaceholders, item);
+
+            this.AddHistoryAction("Удаление плейсхолдера к шаблону КП", $"Удален плейсхолдер {item.PlaceholderName} к шаблону КП с id={id}");
         }
 
         #endregion

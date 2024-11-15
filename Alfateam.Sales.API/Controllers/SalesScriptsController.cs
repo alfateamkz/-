@@ -49,6 +49,10 @@ namespace Alfateam.Sales.API.Controllers
             return (SalesScriptDTO)DBService.TryCreateEntity(DB.SalesScripts, model, (entity) =>
             {
                 entity.BusinessCompanyId = (int)this.CompanyId;
+            },
+            afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Добавление скрипта продаж", $"Добавлен скрипт продаж {entity.Title}");
             });
         }
 
@@ -56,7 +60,10 @@ namespace Alfateam.Sales.API.Controllers
         public async Task<SalesScriptDTO> UpdateSalesScript(SalesScriptDTO model)
         {
             var item = GetAvailableSalesScripts().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (SalesScriptDTO)DBService.TryUpdateEntity(DB.SalesScripts, model, item);
+            return (SalesScriptDTO)DBService.TryUpdateEntity(DB.SalesScripts, model, item, afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Редактирование скрипта продаж", $"Отредактирован скрипт продаж с id={entity.Id}");
+            });
         }
 
 
@@ -66,6 +73,8 @@ namespace Alfateam.Sales.API.Controllers
         {
             var item = GetAvailableSalesScripts().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             DBService.TryDeleteEntity(DB.SalesScripts, item);
+
+            this.AddHistoryAction("Удаление скрипта продаж", $"Удален скрипт продаж {item.Title} с id={id}");
         }
 
         #endregion
@@ -82,6 +91,10 @@ namespace Alfateam.Sales.API.Controllers
             {
                 entity.SalesScriptId = scriptId;
                 entity.SalesScriptBlockId = parentBlockId;
+            },
+            afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Добавление блока в скрипте продаж", $"Добавлен блок в скрипте продаж {entity.Text}");
             });
         }
 
@@ -89,7 +102,10 @@ namespace Alfateam.Sales.API.Controllers
         public async Task<SalesScriptBlockDTO> UpdateSalesScriptBlock(SalesScriptBlockDTO model)
         {
             var item = TryGetScriptBlock(model.Id);
-            return (SalesScriptBlockDTO)DBService.TryUpdateEntity(DB.SalesScriptBlocks, model, item);
+            return (SalesScriptBlockDTO)DBService.TryUpdateEntity(DB.SalesScriptBlocks, model, item, afterSuccessCallback: (entity) =>
+            {
+                this.AddHistoryAction("Редактирование блока в скрипте продаж", $"Отредактирован блок в скрипте продаж с id={entity.Id}");
+            });
         }
 
         [HttpDelete, Route("DeleteSalesScriptBlock")]
@@ -97,6 +113,8 @@ namespace Alfateam.Sales.API.Controllers
         {
             var item = TryGetScriptBlock(id);
             DBService.TryDeleteEntity(DB.SalesScriptBlocks, item);
+
+            this.AddHistoryAction("Удаление блока в скрипте продаж", $"Удален блок в скрипте продаж {item.Text} с id={id}");
         }
 
         #endregion
