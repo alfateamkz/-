@@ -18,6 +18,10 @@ namespace Alfateam.Sales.Models.Abstractions
     [JsonKnownType(typeof(InvoiceManualPaidInfo), "InvoiceManualPaidInfo")]
     public class InvoicePaidInfo : AbsModel
     {
+        [JsonProperty("discriminator")]
+        public string Discriminator { get; set; }
+
+
         public DateTime PaidAt { get; set; }
     }
 }

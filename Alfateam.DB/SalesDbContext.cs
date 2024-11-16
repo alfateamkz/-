@@ -3,6 +3,7 @@ using Alfateam.Sales.Models.Abstractions;
 using Alfateam.Sales.Models.Abstractions.ExtInterations;
 using Alfateam.Sales.Models.Abstractions.Tasks;
 using Alfateam.Sales.Models.BusinessProposals;
+using Alfateam.Sales.Models.BusinessProposals.Kanban;
 using Alfateam.Sales.Models.Conversation;
 using Alfateam.Sales.Models.ExternalInteractions.SentForms;
 using Alfateam.Sales.Models.ExternalInteractions.SentForms.CommunitationButtons;
@@ -11,6 +12,7 @@ using Alfateam.Sales.Models.Funnel;
 using Alfateam.Sales.Models.General;
 using Alfateam.Sales.Models.General.Security;
 using Alfateam.Sales.Models.Invoices;
+using Alfateam.Sales.Models.Invoices.Kanban;
 using Alfateam.Sales.Models.Orders;
 using Alfateam.Sales.Models.Plan;
 using Alfateam.Sales.Models.Scripting;
@@ -59,6 +61,14 @@ namespace Alfateam.DB
         #endregion
 
         #region BusinessProposals
+
+        #region Kanban
+        public DbSet<BusinessProposalsKanbanData> BusinessProposalsKanbanData { get; set; }
+        public DbSet<BusinessProposalsKanban> BusinessProposalsKanbans { get; set; }
+        public DbSet<BusinessProposalsKanbanStage> BusinessProposalsKanbanStages { get; set; }
+
+        #endregion
+
         public DbSet<BusinessProposal> BusinessProposals { get; set; }
         public DbSet<BusinessProposalTemplate> BusinessProposalTemplates { get; set; }
         #endregion
@@ -110,6 +120,7 @@ namespace Alfateam.DB
         public DbSet<BusinessCompany> BusinessCompanies { get; set; }
         public DbSet<CompanyInfo> CompanyInfos { get; set; }
         public DbSet<ContactInfo> ContactInfos { get; set; }
+        public DbSet<Currency> Currencies { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<SalesKPI> SalesKPIs { get; set; }
         public DbSet<SubscriptionInfo> SubscriptionInfos { get; set; }
@@ -118,6 +129,14 @@ namespace Alfateam.DB
         #endregion
 
         #region Invoices
+
+        #region Kanban
+        public DbSet<InvoiceKanbanData> InvoiceKanbanData { get; set; }
+        public DbSet<InvoicesKanban> InvoicesKanbans { get; set; }
+        public DbSet<InvoicesKanbanStage> InvoicesKanbanStages { get; set; }
+
+        #endregion
+
         public DbSet<Invoice> Invoices { get; set; }
         public DbSet<InvoiceItem> InvoiceItems { get; set; }
         public DbSet<InvoiceTemplate> InvoiceTemplates { get; set; }

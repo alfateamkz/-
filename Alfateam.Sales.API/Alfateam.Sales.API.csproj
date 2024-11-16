@@ -17,8 +17,4 @@
     <ProjectReference Include="..\Alfateam.Gateways\Alfateam.Gateways.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controllers\Analytics\" />
-  </ItemGroup>
-
 </Project>

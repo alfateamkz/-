@@ -11,7 +11,17 @@ namespace Alfateam.Sales.API.Models.DTO.General
         public string? ActualAddress { get; set; }
 
 
+
         [ForClientOnly]
         public string? LogoPath { get; set; }
+
+
+
+
+        [ForClientOnly]
+        public CurrencyDTO MainCurrency { get; set; }
+        [HiddenFromClient]
+        public int MainCurrencyId { get; set; }
+
     }
 }

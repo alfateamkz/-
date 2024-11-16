@@ -1,4 +1,5 @@
 ﻿using Alfateam.Core;
+using Alfateam.Sales.Models.BusinessProposals.Kanban;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,5 +24,13 @@ namespace Alfateam.Sales.Models.BusinessProposals
 
         public Customer Customer { get; set; }
         public int CustomerId { get; set; }
+
+
+
+        /// <summary>
+        /// Информация о канбане, в котором находится КП, если не равно null
+        /// </summary>
+        public BusinessProposalsKanbanData? KanbanData { get; set; }
+        public int? KanbanDataId { get; set; }
     }
 }

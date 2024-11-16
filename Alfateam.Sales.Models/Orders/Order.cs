@@ -1,4 +1,5 @@
 ﻿using Alfateam.Core;
+using Alfateam.Sales.Models.General;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,8 @@ namespace Alfateam.Sales.Models.Orders
 
 
 
-        public string CurrencyCode { get; set; }
+        public Currency Currency { get; set; }
+        public int CurrencyId { get; set; }
         public double Sum { get; set; }
 
 

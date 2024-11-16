@@ -54,6 +54,8 @@ namespace Alfateam.Sales.API.Controllers.Invoices
         {
             return (InvoiceDTO)DBService.TryCreateEntity(DB.Invoices, model, afterSuccessCallback: (entity) =>
             {
+                entity.CreatedById = this.AuthorizedUser.Id;
+
                 var customer = DB.Customers.FirstOrDefault(o => o.Id == model.CustomerId);
                 this.AddHistoryAction("Выставление счета на оплату клиенту", $"Выставлен счет на оплату {entity.Title} клиенту {customer.FIO}");
             });
@@ -92,6 +94,10 @@ namespace Alfateam.Sales.API.Controllers.Invoices
         private IEnumerable<Invoice> GetAvailableInvoices()
         {
             return DB.Invoices.Include(o => o.Customer)
+                              .Include(o => o.CreatedBy)
+                              .Include(o => o.RejectedInfo)
+                              .Include(o => o.PaidInfo)
+                              .Include(o => o.Items)
                               .Where(o => !o.IsDeleted && o.Customer.BusinessCompanyId == this.CompanyId);
         }
 

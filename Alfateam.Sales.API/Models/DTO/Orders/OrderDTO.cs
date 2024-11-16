@@ -1,4 +1,5 @@
 ﻿using Alfateam.Core.Attributes.DTO;
+using Alfateam.Sales.API.Models.DTO.General;
 using Alfateam.Sales.Models.Orders;
 using Alfateam.Website.API.Abstractions;
 
@@ -16,8 +17,12 @@ namespace Alfateam.Sales.API.Models.DTO.Orders
         public string Description { get; set; }
 
 
+        [ForClientOnly]
+        public CurrencyDTO Currency { get; set; }
+        [HiddenFromClient]
+        public int CurrencyId { get; set; }
 
-        public string CurrencyCode { get; set; }
+
         public double Sum { get; set; }
 
 
