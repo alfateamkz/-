@@ -2,8 +2,12 @@
 using Alfateam.Core.Exceptions;
 using Alfateam.Sales.API.Abstractions;
 using Alfateam.Sales.API.Models;
+using Alfateam.Sales.API.Models.DTO.BusinessProposals;
 using Alfateam.Sales.API.Models.DTO.BusinessProposals.Kanban;
 using Alfateam.Sales.API.Models.DTO.Funnel;
+using Alfateam.Sales.API.Models.DTO.Invoices;
+using Alfateam.Sales.API.Models.Kanban;
+using Alfateam.Sales.Models.BusinessProposals;
 using Alfateam.Sales.Models.BusinessProposals.Kanban;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -111,12 +115,53 @@ namespace Alfateam.Sales.API.Controllers.BusinessProposals
 
         #endregion
 
+        #region Карточки в канбане
+
+        [HttpGet, Route("GetKanbanItems")]
+        public async Task<KanbanClientModel<BusinessProposalDTO>> GetKanbanItems(int kanbanId)
+        {
+            var kanban = DBService.TryGetOne(GetAvailableKanbans(), kanbanId);
+            var invoices = GetAvailableProposals(kanbanId);
+
+
+            var clientModel = new KanbanClientModel<BusinessProposalDTO>();
+
+            foreach (var stage in kanban.Stages)
+            {
+                var items = invoices.Where(o => o.KanbanData.StageId == stage.Id);
+
+                clientModel.Stages.Add(new KanbanStageClientModel<BusinessProposalDTO>
+                {
+                    StageId = stage.Id,
+                    Items = new BusinessProposalDTO().CreateDTOs(items).Cast<BusinessProposalDTO>()
+                });
+            }
+
+            return clientModel;
+        }
+
+        [HttpPut, Route("SetKanbanItemStage")]
+        public async Task SetKanbanItemStage(int businessProposalId, int stageId)
+        {
+            var proposal = DBService.TryGetOne(GetAvailableProposals(), businessProposalId);
+            TryGetKanbanStage(stageId);
+
+            proposal.KanbanData.StageId = stageId;
+            DBService.UpdateEntity(DB.BusinessProposals, proposal);
+        }
+
+        #endregion
 
 
 
 
 
-        #region Private methods
+
+
+
+
+
+        #region Private kanban methods
         private IEnumerable<BusinessProposalsKanban> GetAvailableKanbans()
         {
             return DB.BusinessProposalsKanbans.Include(o => o.Stages)
@@ -139,6 +184,22 @@ namespace Alfateam.Sales.API.Controllers.BusinessProposals
             }
             return stage;
         }
+
+        #endregion
+
+        #region Private business proposals methods
+
+        private IEnumerable<BusinessProposal> GetAvailableProposals()
+        {
+            return DB.BusinessProposals.Include(o => o.Customer)
+                                       .Where(o => !o.IsDeleted && o.Customer.BusinessCompanyId == this.CompanyId);
+        }
+
+        private IEnumerable<BusinessProposal> GetAvailableProposals(int kanbanId)
+        {
+            return GetAvailableProposals().Where(o => o.KanbanData?.KanbanId == kanbanId);
+        }
+
 
         #endregion
     }

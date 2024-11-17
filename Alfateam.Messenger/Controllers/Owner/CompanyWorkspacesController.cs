@@ -69,8 +69,8 @@ namespace Alfateam.Messenger.API.Controllers.Owner
 
 
 
-        [HttpDelete, Route("DeleteSubject")]
-        public async Task DeleteSubject(int id)
+        [HttpDelete, Route("DeleteWorkspace")]
+        public async Task DeleteWorkspace(int id)
         {
             var workspace = TryGetWorkspace(id);
 

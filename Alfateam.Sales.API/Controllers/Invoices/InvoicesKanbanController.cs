@@ -6,6 +6,9 @@ using Alfateam.Sales.API.Models.DTO.Invoices.Kanban;
 using Alfateam.Sales.Models.Invoices.Kanban;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Alfateam.Sales.Models.Invoices;
+using Alfateam.Sales.API.Models.Kanban;
+using Alfateam.Sales.API.Models.DTO.Invoices;
 
 namespace Alfateam.Sales.API.Controllers.Invoices
 {
@@ -110,18 +113,57 @@ namespace Alfateam.Sales.API.Controllers.Invoices
 
         #endregion
 
+        #region Карточки в канбане
+
+        [HttpGet, Route("GetKanbanItems")]
+        public async Task<KanbanClientModel<InvoiceDTO>> GetKanbanItems(int kanbanId)
+        {
+            var kanban = DBService.TryGetOne(GetAvailableKanbans(), kanbanId);
+            var invoices = GetAvailableInvoices(kanbanId);
+
+
+            var clientModel = new KanbanClientModel<InvoiceDTO>();
+
+            foreach (var stage in kanban.Stages)
+            {
+                var items = invoices.Where(o => o.KanbanData.StageId == stage.Id);
+
+                clientModel.Stages.Add(new KanbanStageClientModel<InvoiceDTO>
+                {
+                    StageId = stage.Id,
+                    Items = new InvoiceDTO().CreateDTOs(items).Cast<InvoiceDTO>()
+                });
+            }
+
+            return clientModel;
+        }
+
+        [HttpPut, Route("SetKanbanItemStage")]
+        public async Task SetKanbanItemStage(int invoiceId, int stageId)
+        {
+            var invoice = DBService.TryGetOne(GetAvailableInvoices(), invoiceId);
+            TryGetKanbanStage(stageId);
+
+            invoice.KanbanData.StageId = stageId;
+            DBService.UpdateEntity(DB.Invoices, invoice);
+        }
+
+        #endregion
 
 
 
 
 
-        #region Private methods
+
+
+
+
+        #region Private kanban methods
         private IEnumerable<InvoicesKanban> GetAvailableKanbans()
         {
             return DB.InvoicesKanbans.Include(o => o.Stages)
-                                              .Where(o => !o.IsDeleted && o.BusinessCompanyId == this.CompanyId);
+                                     .Where(o => !o.IsDeleted && o.BusinessCompanyId == this.CompanyId);
         }
-
 
 
 
@@ -138,6 +180,27 @@ namespace Alfateam.Sales.API.Controllers.Invoices
             }
             return stage;
         }
+
+        #endregion
+
+        #region Private invoice methods
+
+
+        private IEnumerable<Invoice> GetAvailableInvoices()
+        {
+            return DB.Invoices.Include(o => o.Customer)
+                              .Include(o => o.CreatedBy)
+                              .Include(o => o.RejectedInfo)
+                              .Include(o => o.PaidInfo)
+                              .Include(o => o.Items)
+                              .Include(o => o.KanbanData)
+                              .Where(o => !o.IsDeleted && o.Customer.BusinessCompanyId == this.CompanyId);
+        }
+        private IEnumerable<Invoice> GetAvailableInvoices(int kanbanId)
+        {
+            return GetAvailableInvoices().Where(o => o.KanbanData?.KanbanId == kanbanId);
+        }
+
 
         #endregion
     }

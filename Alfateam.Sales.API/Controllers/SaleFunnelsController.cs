@@ -2,8 +2,12 @@
 using Alfateam.Core.Exceptions;
 using Alfateam.Sales.API.Abstractions;
 using Alfateam.Sales.API.Models;
+using Alfateam.Sales.API.Models.DTO.BusinessProposals;
 using Alfateam.Sales.API.Models.DTO.Funnel;
+using Alfateam.Sales.API.Models.DTO.Orders;
+using Alfateam.Sales.API.Models.Kanban;
 using Alfateam.Sales.Models.Funnel;
+using Alfateam.Sales.Models.Orders;
 using Alfateam2._0.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -176,6 +180,42 @@ namespace Alfateam.Sales.API.Controllers
 
         #endregion
 
+        #region Карточки в канбане
+
+        [HttpGet, Route("GetFunnelItems")]
+        public async Task<KanbanClientModel<OrderDTO>> GetFunnelItems(int funnelId)
+        {
+            var funnel = DBService.TryGetOne(GetAvailableSalesFunnels(), funnelId);
+            var orders = GetAvailableOrders(funnelId);
+
+
+            var clientModel = new KanbanClientModel<OrderDTO>();
+
+            foreach (var stage in funnel.Stages)
+            {
+                var items = orders.Where(o => GetOrderSaleFunnelInfo(o, funnelId)?.FunnelStageId == stage.Id);
+
+                clientModel.Stages.Add(new KanbanStageClientModel<OrderDTO>
+                {
+                    StageId = stage.Id,
+                    Items = new OrderDTO().CreateDTOs(items).Cast<OrderDTO>()
+                });
+            }
+
+            return clientModel;
+        }
+
+        [HttpPut, Route("SetFunnelItemStage")]
+        public async Task SetFunnelItemStage(int orderId, int funnelId, int stageId)
+        {
+            var order = DBService.TryGetOne(GetAvailableOrders(), orderId);
+            TryGetFunnelStage(stageId);
+
+            GetOrderSaleFunnelInfo(order, funnelId).FunnelStageId = stageId;
+            DBService.UpdateEntity(DB.Orders, order);
+        }
+
+        #endregion
 
 
 
@@ -185,7 +225,8 @@ namespace Alfateam.Sales.API.Controllers
 
 
 
-        #region Private methods
+
+        #region Private sale funnels methods
 
         private IEnumerable<SalesFunnel> GetAvailableSalesFunnels()
         {
@@ -212,6 +253,23 @@ namespace Alfateam.Sales.API.Controllers
             return stage;
         }
 
+        #endregion
+
+        #region Private order methods
+        private IEnumerable<Order> GetAvailableOrders()
+        {
+            return DB.Orders.Include(o => o.SaleInfo).ThenInclude(o => o.FunnelInfos)
+                            .Where(o => !o.IsDeleted && o.BusinessCompanyId == this.CompanyId);
+        }
+        private IEnumerable<Order> GetAvailableOrders(int funnelId)
+        {
+            return GetAvailableOrders().Where(o => o.SaleInfo.FunnelInfos.Any(o => o.FunnelId == funnelId));
+        }
+        
+        private OrderSaleFunnelInfo? GetOrderSaleFunnelInfo(Order order, int funnelId)
+        {
+            return order.SaleInfo.FunnelInfos.FirstOrDefault(o => o.FunnelId == funnelId && !o.IsDeleted);
+        }
         #endregion
     }
 }

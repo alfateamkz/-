@@ -36,7 +36,7 @@ namespace Alfateam.Sales.Models.General
 
 
         public List<User> Users { get; set; } = new List<User>();
-        public List<Department> Departments { get; set; } = new List<Department>();
+        public Department Department { get; set; }
 
 
 
@@ -70,5 +70,13 @@ namespace Alfateam.Sales.Models.General
         public List<ExternalInteraction> ExternalInteractions { get; set; } = new List<ExternalInteraction>();
         public List<UserTask> UserTasks { get; set; } = new List<UserTask>();
         public List<HistoryAction> HistoryActions { get; set; } = new List<HistoryAction>();
+
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int BusinessId { get; set; }
     }
 }

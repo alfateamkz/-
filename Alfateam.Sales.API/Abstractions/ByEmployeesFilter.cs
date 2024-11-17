@@ -12,6 +12,8 @@ namespace Alfateam.Sales.API.Abstractions
     [JsonKnownType(typeof(UsersByEmployeesFilter), "UsersByEmployeesFilter")]
     public abstract class ByEmployeesFilter
     {
+        [JsonProperty("discriminator")]
+        public string Discriminator { get; set; }
         public abstract IEnumerable<User> GetEmployees(IEnumerable<User> allCompanyUsers);
     }
 }

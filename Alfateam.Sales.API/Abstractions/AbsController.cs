@@ -5,6 +5,7 @@ using Alfateam.EDM.Models.Abstractions;
 using Alfateam.EDM.Models.General.Subjects;
 using Alfateam.Gateways.Abstractions;
 using Alfateam.ID.Models.Security;
+using Alfateam.Sales.API.Filters;
 using Alfateam.Sales.API.Models;
 using Alfateam.Sales.Models.General.Security;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,7 @@ namespace Alfateam.Sales.API.Abstractions
     [Route("[controller]")]
     [ErrorsFilter]
     [APIExceptionFilter]
+    [AlfateamAPIKeyFilter]
     public abstract class AbsController : ControllerBase
     {
         public readonly SalesDbContext DB;
@@ -37,9 +39,19 @@ namespace Alfateam.Sales.API.Abstractions
         }
 
         //TODO: 1. проверка доступа к клиентам, заказам, воронкам и этапам воронок и другим сущностям при создании и апдейте
-       
 
+
+
+        public string API_KEY => Request.Headers["API_KEY"];
         public string Domain => Request.Headers["Domain"];
+        public int? BusinessId
+        {
+            get
+            {
+                var business = DB.Businesses.FirstOrDefault(o => o.Domain == this.Domain && !o.IsDeleted);
+                return business?.Id;
+            }
+        }
         public int? CompanyId => ParseIntValueFromHeader("CompanyId");
 
 

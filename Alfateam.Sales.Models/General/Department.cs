@@ -26,6 +26,11 @@ namespace Alfateam.Sales.Models.General
 
 
 
+        /// <summary>
+        /// Родительское подразделение, если оно есть
+        /// </summary>
+        public int? DepartmentId { get; set; }
+
 
         /// <summary>
         /// Автоматическое поле

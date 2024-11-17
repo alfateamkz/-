@@ -11,6 +11,7 @@ using Alfateam.Sales.Models.ExternalInteractions.SentForms.Fields.Props;
 using Alfateam.Sales.Models.Funnel;
 using Alfateam.Sales.Models.General;
 using Alfateam.Sales.Models.General.Security;
+using Alfateam.Sales.Models.Integrations.API;
 using Alfateam.Sales.Models.Invoices;
 using Alfateam.Sales.Models.Invoices.Kanban;
 using Alfateam.Sales.Models.Orders;
@@ -125,6 +126,16 @@ namespace Alfateam.DB
         public DbSet<SalesKPI> SalesKPIs { get; set; }
         public DbSet<SubscriptionInfo> SubscriptionInfos { get; set; }
         public DbSet<User> Users { get; set; }
+
+        #endregion
+
+        #region Integrations
+
+        #region API
+        public DbSet<AlfateamAPIKey> AlfateamAPIKeys { get; set; }
+        public DbSet<AlfateamAPIRequestEntry> AlfateamAPIRequestEntries { get; set; }
+
+        #endregion
 
         #endregion
 
