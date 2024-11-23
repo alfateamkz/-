@@ -5,6 +5,7 @@ namespace Alfateam.Sales.API.Models.DTO.ExternalInteractions.Inputs
     public class FileWebsiteFormInputDTO : WebsiteFormInputDTO
     {
         public int MaxFilesCount { get; set; }
-        public string AllowedExtensions { get; set; }
+        public int MaxFileSizeInKBs { get; set; }
+        public string? AllowedExtensions { get; set; }
     }
 }

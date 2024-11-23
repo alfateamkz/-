@@ -9,7 +9,7 @@ namespace Alfateam.DB.Helpers
     internal static class ConnectionStrings
     {
 
-        internal static string BuildConnectionString(string dbName)
+        public static string BuildConnectionString(string dbName)
         {
 #if DEBUG
             return $"server=localhost;user=root;password=H2c7V7p6;port=3306;database={dbName};";
@@ -17,6 +17,13 @@ namespace Alfateam.DB.Helpers
             return $"server=localhost;user=usp;password=ErPvm!3;port=3306;database={dbName};";
 #endif
         }
+
+
+        #region Services
+
+        public static string CurrencyRates => BuildConnectionString("currency_rates");
+
+        #endregion
 
 
         public static string Administration => BuildConnectionString("alfateam_administration");

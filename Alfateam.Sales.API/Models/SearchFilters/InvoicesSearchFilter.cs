@@ -4,6 +4,7 @@ namespace Alfateam.Sales.API.Models.SearchFilters
 {
     public class InvoicesSearchFilter : SearchFilter
     {
-        public int? CustomerId { get; set; }
+        public int? PersonContactId { get; set; }
+        public int? CompanyId { get; set; }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using Alfateam.Core;
 using Alfateam.Sales.Models.BusinessProposals.Kanban;
+using Alfateam.Sales.Models.Customers;
+using Alfateam.Sales.Models.General;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +15,22 @@ namespace Alfateam.Sales.Models.BusinessProposals
         public string UniqueURL { get; set; } = $"{DateTime.UtcNow.ToString("dd-MM-yyyy")}-{System.Guid.NewGuid().ToString()}";
 
 
+        public PersonContact? PersonContact { get; set; }
+        public int? PersonContactId { get; set; }
+
+
+
+        public Company? Company { get; set; }
+        public int? CompanyId { get; set; }
+
+
+
+
+
         public string Title { get; set; }
-        public string HTMLContent { get; set; }
+        public string? HTMLContent { get; set; }
+        public CurrencyAndValue Sum { get; set; }
+
 
 
         public DateTime? ExpiresAt { get; set; }
@@ -22,15 +38,21 @@ namespace Alfateam.Sales.Models.BusinessProposals
 
 
 
-        public Customer Customer { get; set; }
-        public int CustomerId { get; set; }
+
+        /// <summary>
+        /// Информация о канбане, в котором находится КП
+        /// </summary>
+        public BusinessProposalsKanbanData KanbanData { get; set; }
+        public int KanbanDataId { get; set; }
+
+
+
 
 
 
         /// <summary>
-        /// Информация о канбане, в котором находится КП, если не равно null
+        /// Автоматическое поле
         /// </summary>
-        public BusinessProposalsKanbanData? KanbanData { get; set; }
-        public int? KanbanDataId { get; set; }
+        public int BusinessCompanyId { get; set; }
     }
 }

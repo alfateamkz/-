@@ -12,6 +12,7 @@ namespace Alfateam.Sales.Models.Enums
         Active = 2, //Встреча идет прямо сейчас
         Completed = 3, //Завершена
         Failed = 4, //Несостоялась
-        Postponed = 5 //Перенесена
+        Cancelled = 5, //Отменен
+        Postponed = 6 //Перенесена
     }
 }

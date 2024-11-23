@@ -8,6 +8,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Alfateam.Sales.API.Controllers.Owner
 {
+    [Route("Owner/[controller]")]
     public class BusinessCompaniesController : AbsController
     {
         public BusinessCompaniesController(ControllerParams @params) : base(@params)

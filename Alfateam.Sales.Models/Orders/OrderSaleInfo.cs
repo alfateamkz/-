@@ -14,18 +14,19 @@ namespace Alfateam.Sales.Models.Orders
     /// </summary>
     public class OrderSaleInfo : AbsModel
     {
-  
+        public SalesFunnel Funnel { get; set; }
+        public int FunnelId { get; set; }
+
+
+        public SalesFunnelStage FunnelStage { get; set; }
+        public int FunnelStageId { get; set; }
+
+
+
         /// <summary>
-        /// Воронки, в которых находится заказ
+        /// Продажник, который внес заказ в систему
         /// </summary>
-        public List<OrderSaleFunnelInfo> FunnelInfos { get; set; } = new List<OrderSaleFunnelInfo>();
-
-
-
-		/// <summary>
-		/// Продажник, который внес заказ в систему
-		/// </summary>
-		public User FoundBy { get; set; }
+        public User FoundBy { get; set; }
 		public int FoundById { get; set; }
 
 

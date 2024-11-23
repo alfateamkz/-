@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Alfateam.Sales.API.Controllers.Invoices
 {
+    [Route("Invoices/[controller]")]
     public class InvoicesController : AbsController
     {
         public InvoicesController(ControllerParams @params) : base(@params)
@@ -32,9 +33,13 @@ namespace Alfateam.Sales.API.Controllers.Invoices
                 {
                     condition &= entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
                 }
-                if (filter.CustomerId != null)
+                if (filter.PersonContactId != null)
                 {
-                    condition &= entity.CustomerId == filter.CustomerId;
+                    condition &= entity.PersonContactId == filter.PersonContactId;
+                }
+                if (filter.CompanyId != null)
+                {
+                    condition &= entity.CompanyId == filter.CompanyId;
                 }
                 return condition;
             });
@@ -55,9 +60,8 @@ namespace Alfateam.Sales.API.Controllers.Invoices
             return (InvoiceDTO)DBService.TryCreateEntity(DB.Invoices, model, afterSuccessCallback: (entity) =>
             {
                 entity.CreatedById = this.AuthorizedUser.Id;
-
-                var customer = DB.Customers.FirstOrDefault(o => o.Id == model.CustomerId);
-                this.AddHistoryAction("Выставление счета на оплату клиенту", $"Выставлен счет на оплату {entity.Title} клиенту {customer.FIO}");
+                entity.BusinessCompanyId = (int)this.CompanyId;
+                this.AddHistoryAction("Выставление счета на оплату клиенту", $"Выставлен счет на оплату {entity.Title}");
             });
         }
 
@@ -77,7 +81,7 @@ namespace Alfateam.Sales.API.Controllers.Invoices
             var item = GetAvailableInvoices().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             DBService.TryDeleteEntity(DB.Invoices, item);
 
-            this.AddHistoryAction("Удаление счета на оплату клиенту", $"Удален счет на оплату {item.Title} клиенту {item.Customer.FIO} с id={id}");
+            this.AddHistoryAction("Удаление счета на оплату клиенту", $"Удален счет на оплату {item.Title} с id={id}");
         }
 
         #endregion
@@ -93,12 +97,16 @@ namespace Alfateam.Sales.API.Controllers.Invoices
 
         private IEnumerable<Invoice> GetAvailableInvoices()
         {
-            return DB.Invoices.Include(o => o.Customer)
+            return DB.Invoices.Include(o => o.Company)
+                              .Include(o => o.PersonContact)
                               .Include(o => o.CreatedBy)
                               .Include(o => o.RejectedInfo)
                               .Include(o => o.PaidInfo)
+                              .Include(o => o.Currency)
                               .Include(o => o.Items)
-                              .Where(o => !o.IsDeleted && o.Customer.BusinessCompanyId == this.CompanyId);
+                              .Include(o => o.KanbanData).ThenInclude(o => o.Kanban)
+                              .Include(o => o.KanbanData).ThenInclude(o => o.Stage)
+                              .Where(o => !o.IsDeleted && o.BusinessCompanyId == this.CompanyId);
         }
 
 

@@ -18,6 +18,9 @@ namespace Alfateam.Sales.Models.Scripting
         /// Текст фразы
         /// </summary>
         public string Text { get; set; }
+        public string BGHexColor { get; set; }
+        public string TextHexColor { get; set; }
+
 
         /// <summary>
         /// Тип блока

@@ -82,70 +82,7 @@ namespace Alfateam.Sales.API.Controllers
 
         #endregion
 
-        #region Статусы заказов
 
-        [HttpGet, Route("GetOrderStatuses")]
-        public async Task<ItemsWithTotalCount<OrderStatusDTO>> GetOrderStatuses(SearchFilter filter)
-        {
-            return DBService.GetManyWithTotalCount<OrderStatus, OrderStatusDTO>(GetAvailableOrderStatuses(), filter.Offset, filter.Count, (entity) =>
-            {
-                if (!string.IsNullOrEmpty(filter.Query))
-                {
-                    return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
-                }
-                return true;
-            });
-        }
-
-        [HttpGet, Route("GetOrderStatus")]
-        public async Task<OrderStatusDTO> GetSaleFunnelStageType(int id)
-        {
-            return (OrderStatusDTO)DBService.TryGetOne(GetAvailableOrderStatuses(), id, new OrderStatusDTO());
-        }
-
-
-
-
-        [HttpPost, Route("CreateOrderStatus")]
-        public async Task<OrderStatusDTO> CreateOrderStatus(OrderStatusDTO model)
-        {
-            return (OrderStatusDTO)DBService.TryCreateEntity(DB.OrderStatuses, model, (entity) =>
-            {
-                entity.BusinessCompanyId = (int)this.CompanyId;
-                entity.Type = OrderStatusType.Custom;
-            },
-            afterSuccessCallback: (entity) =>
-            {
-                this.AddHistoryAction("Добавление пользовательского статуса заказа", $"Добавлен статуса заказа {entity.Title}");
-            });
-        }
-
-        [HttpPut, Route("UpdateOrderStatus")]
-        public async Task<OrderStatusDTO> UpdateOrderStatus(OrderStatusDTO model)
-        {
-            var item = GetAvailableOrderStatuses().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (OrderStatusDTO)DBService.TryUpdateEntity(DB.OrderStatuses, model, item, afterSuccessCallback: (entity) =>
-            {
-                this.AddHistoryAction("Редактирование пользовательского статуса заказа", $"Отредактирован статуса заказа с id={entity.Id}");
-            });
-        }
-
-
-
-        [HttpDelete, Route("DeleteOrderStatus")]
-        public async Task DeleteOrderStatus(int id)
-        {
-            var item = GetAvailableOrderStatuses().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            if (item.IsDefault)
-            {
-                throw new Exception403("Нельзя удалить встроенный статус заказа. Можно только редактировать текст");
-            }
-
-            DBService.TryDeleteEntity(DB.OrderStatuses, item);
-            this.AddHistoryAction("Удаление пользовательского статуса заказа", $"Удален статуса заказа {item.Title} с id={id}");
-        }
-
-        #endregion
 
 
 
@@ -167,10 +104,6 @@ namespace Alfateam.Sales.API.Controllers
         private IEnumerable<Order> GetAvailableOrders()
         {
             return DB.Orders.Where(o => !o.IsDeleted && o.BusinessCompanyId == this.CompanyId);
-        }
-        private IEnumerable<OrderStatus> GetAvailableOrderStatuses()
-        {
-            return DB.OrderStatuses.Where(o => !o.IsDeleted && (o.BusinessCompanyId == this.CompanyId || o.IsDefault));
         }
 
 

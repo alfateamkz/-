@@ -325,8 +325,7 @@ namespace Alfateam.Website.API.Abstractions
 
                 var itemSameProp = FindSameProp(prop, itemProps);
                 if (itemSameProp != null && itemSameProp.CanWrite)
-                {
-                 
+                {    
                     if (prop.PropertyType == typeof(List<int>))
                     {
                         FillDBProp_FromListOfIds(item, itemSameProp, prop);
@@ -425,8 +424,8 @@ namespace Alfateam.Website.API.Abstractions
                     if (string.IsNullOrEmpty(dbItemPropSearchName))
                     {
                         dbItemPropSearchName = dtoProp.Name.Replace("Ids", "");
-                        itemProp = itemProps.FirstOrDefault(o => o.Name == dbItemPropSearchName);
                     }
+                    itemProp = itemProps.FirstOrDefault(o => o.Name == dbItemPropSearchName);
                 }
             }
 

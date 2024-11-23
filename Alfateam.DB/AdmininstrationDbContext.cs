@@ -18,11 +18,11 @@ namespace Alfateam.DB
     {
         public AdmininstrationDbContext()
         {
-
+            Database.EnsureCreated();
         }
         public AdmininstrationDbContext(DbContextOptions<AdmininstrationDbContext> options) : this()
         {
-
+            Database.EnsureCreated();
         }
 
         #region Abstractions

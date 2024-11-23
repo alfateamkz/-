@@ -1,6 +1,7 @@
 ﻿
 using Alfateam.Core;
 using Alfateam.Sales.Models.Enums;
+using Alfateam.Sales.Models.Enums.Statuses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,10 +18,17 @@ namespace Alfateam.Sales.Models.Funnel
 
         public string Title { get; set; }
         public string? Description { get; set; }
+        public string BGHexColor { get; set; }
+        public string TextHexColor { get; set; }
 
 
-        public SalesFunnelStageType Type { get; set; }
-        public int TypeId { get; set; }
+        public SalesFunnelStageStatus Status { get; set; }
+        public bool IsSystemStage { get; set; }
+        public int Order { get; set; }
+
+
+
+
 
 
 

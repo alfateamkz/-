@@ -49,6 +49,13 @@ namespace Alfateam.Sales.API.Controllers
             return (SalesScriptDTO)DBService.TryCreateEntity(DB.SalesScripts, model, (entity) =>
             {
                 entity.BusinessCompanyId = (int)this.CompanyId;
+                entity.StartBlock = new SalesScriptBlock
+                {
+                    Text = "Начало разговора",
+                    Type = Sales.Models.Enums.SalesScriptBlockType.Intro,
+                    BGHexColor = "#2FC6F6",
+                    TextHexColor = "#000000",
+                };
             },
             afterSuccessCallback: (entity) =>
             {

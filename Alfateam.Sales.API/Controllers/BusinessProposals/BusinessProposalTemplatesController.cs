@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Alfateam.Sales.API.Controllers.BusinessProposals
 {
+    [Route("BP/[controller]")]
     public class BusinessProposalTemplatesController : AbsController
     {
         public BusinessProposalTemplatesController(ControllerParams @params) : base(@params)

@@ -10,9 +10,13 @@ namespace Alfateam.Sales.API.Models.DTO.Orders
     public class OrderSaleInfoDTO : DTOModelAbs<OrderSaleInfo>
     {
 
-        [Description("Воронки, в которых находится заказ")]
         [ForClientOnly]
-        public List<OrderSaleFunnelInfoDTO> FunnelInfos { get; set; } = new List<OrderSaleFunnelInfoDTO>();
+        public SalesFunnelDTO Funnel { get; set; }
+
+        [ForClientOnly]
+        public SalesFunnelStageDTO FunnelStage { get; set; }
+
+
 
 
 

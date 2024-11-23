@@ -3,10 +3,14 @@ using Alfateam.Sales.Models.Abstractions.ExtInterations;
 using Alfateam.Sales.Models.Abstractions.Tasks;
 using Alfateam.Sales.Models.BusinessProposals;
 using Alfateam.Sales.Models.BusinessProposals.Kanban;
+using Alfateam.Sales.Models.Customers;
+using Alfateam.Sales.Models.Customers.Categories;
+using Alfateam.Sales.Models.Customers.Other;
 using Alfateam.Sales.Models.Funnel;
 using Alfateam.Sales.Models.General.Security;
 using Alfateam.Sales.Models.Invoices;
 using Alfateam.Sales.Models.Invoices.Kanban;
+using Alfateam.Sales.Models.Leads;
 using Alfateam.Sales.Models.Orders;
 using Alfateam.Sales.Models.Plan;
 using Alfateam.Sales.Models.Scripting;
@@ -40,25 +44,33 @@ namespace Alfateam.Sales.Models.General
 
 
 
-
+        public List<Lead> Leads { get; set; } = new List<Lead>();
         public List<Order> Orders { get; set; } = new List<Order>();
-        public List<OrderStatus> OrderStatuses { get; set; } = new List<OrderStatus>();
+
 
 
         public List<SalesPlanning> SalesPlannings { get; set; } = new List<SalesPlanning>();
         public List<SalesFunnel> SalesFunnels { get; set; } = new List<SalesFunnel>();
-        public List<SalesFunnelStageType> SalesFunnelStageTypes { get; set; } = new List<SalesFunnelStageType>();
         public List<SalesScript> SalesScripts { get; set; } = new List<SalesScript>();
 
 
-        public List<Customer> Customers { get; set; } = new List<Customer>();
-        public List<CustomerCategory> CustomerCategories { get; set; } = new List<CustomerCategory>();
 
 
+        public List<PersonContact> PersonContacts { get; set; } = new List<PersonContact>();
+        public List<Company> Companies { get; set; } = new List<Company>();
+        public List<PersonContactCategory> PersonContactCategories { get; set; } = new List<PersonContactCategory>();
+        public List<CompanyCategory> CompanyCategories { get; set; } = new List<CompanyCategory>();
+        public List<CompanyFieldOfActivity> CompanyFieldsOfActivity { get; set; } = new List<CompanyFieldOfActivity>();
+
+
+
+
+        public List<BusinessProposal> BusinessProposals { get; set; } = new List<BusinessProposal>();
         public List<BusinessProposalTemplate> BusinessProposalTemplates { get; set; } = new List<BusinessProposalTemplate>();
         public List<BusinessProposalsKanban> BusinessProposalKanbans { get; set; } = new List<BusinessProposalsKanban>();
 
 
+        public List<Invoice> Invoices { get; set; } = new List<Invoice>();
         public List<InvoiceTemplate> InvoiceTemplates { get; set; } = new List<InvoiceTemplate>();
         public List<InvoicesKanban> InvoicesKanbans { get; set; } = new List<InvoicesKanban>();
 

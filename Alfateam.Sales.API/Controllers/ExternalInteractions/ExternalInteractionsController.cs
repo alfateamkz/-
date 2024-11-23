@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Alfateam.Sales.API.Controllers.ExternalInteractions
 {
+    [Route("ExtIntegrations/[controller]")]
     public class ExternalInteractionsController : AbsController
     {
         public ExternalInteractionsController(ControllerParams @params) : base(@params)

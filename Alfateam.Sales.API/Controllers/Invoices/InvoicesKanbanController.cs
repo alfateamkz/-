@@ -9,9 +9,13 @@ using Microsoft.EntityFrameworkCore;
 using Alfateam.Sales.Models.Invoices;
 using Alfateam.Sales.API.Models.Kanban;
 using Alfateam.Sales.API.Models.DTO.Invoices;
+using Alfateam.Sales.Models.BusinessProposals.Kanban;
+using Alfateam.Sales.Models.Enums.Statuses;
+using Alfateam.Sales.API.Models.DTO.BusinessProposals.Kanban;
 
 namespace Alfateam.Sales.API.Controllers.Invoices
 {
+    [Route("Invoices/[controller]")]
     public class InvoicesKanbanController : AbsController
     {
         public InvoicesKanbanController(ControllerParams @params) : base(@params)
@@ -45,6 +49,7 @@ namespace Alfateam.Sales.API.Controllers.Invoices
             return (InvoicesKanbanDTO)DBService.TryCreateEntity(DB.InvoicesKanbans, model, (entity) =>
             {
                 entity.BusinessCompanyId = (int)this.CompanyId;
+                AddDefaultKanbanStages(entity);
             },
             afterSuccessCallback: (entity) =>
             {
@@ -79,17 +84,24 @@ namespace Alfateam.Sales.API.Controllers.Invoices
         #region Этапы (колонки) канбанов
 
         [HttpPost, Route("CreateKanbanStage")]
-        public async Task<InvoicesKanbanStageDTO> CreateKanbanStage(int kanbanId, InvoicesKanbanStageDTO model)
+        public async Task<InvoicesKanbanStageDTO> CreateKanbanStage(int kanbanId, int stageAfterId, InvoicesKanbanStageDTO model)
         {
-            ThrowIfKanbanDontExist(kanbanId);
-            return (InvoicesKanbanStageDTO)DBService.TryCreateEntity(DB.InvoicesKanbanStages, model, (entity) =>
+            var kanban = TryGetKanban(kanbanId);
+            if (TryGetKanbanStage(stageAfterId).InvoicesKanbanId != kanbanId)
             {
-                entity.InvoicesKanbanId = kanbanId;
-            },
-            afterSuccessCallback: (entity) =>
+                throw new Exception403("Этап не принадлежит текущему канбану");
+            }
+            else if(!model.IsValid())
             {
-                this.AddHistoryAction("Добавление этапа (колонки) для канбана", $"Добавлен этап (колонка) для канбана {entity.Title}");
-            });
+                throw new Exception400("Проверьте корректность заполнения полей");
+            }
+
+            var stageEntity = model.CreateDBModelFromDTO();
+            kanban.InsertStage(stageAfterId, stageEntity);
+            DBService.UpdateEntity(DB.InvoicesKanbans, kanban);
+
+            this.AddHistoryAction("Добавление этапа (колонки) для канбана", $"Добавлен этап (колонка) для канбана {stageEntity.Title}");
+            return (InvoicesKanbanStageDTO)new InvoicesKanbanStageDTO().CreateDTO(stageEntity);
         }
 
         [HttpPut, Route("UpdateKanbanStage")]
@@ -106,8 +118,17 @@ namespace Alfateam.Sales.API.Controllers.Invoices
         public async Task DeleteKanbanStage(int id)
         {
             var item = TryGetKanbanStage(id);
-            DBService.TryDeleteEntity(DB.InvoicesKanbanStages, item);
 
+            if (item.IsSystemStage)
+            {
+                throw new Exception403("Невозможно удалить системную стадию");
+            }
+            else if (GetAvailableInvoices(item.InvoicesKanbanId).Where(o => o.KanbanData.StageId == id).Any())
+            {
+                throw new Exception400("Этап (колонка) для счетов на оплату не пустой");
+            }
+
+            DBService.TryDeleteEntity(DB.InvoicesKanbanStages, item);
             this.AddHistoryAction("Удаление этапа (колонки) для канбана", $"Удален этап (колонка) для канбана {item.Title} с id={id}");
         }
 
@@ -165,8 +186,52 @@ namespace Alfateam.Sales.API.Controllers.Invoices
                                      .Where(o => !o.IsDeleted && o.BusinessCompanyId == this.CompanyId);
         }
 
+        private void AddDefaultKanbanStages(InvoicesKanban entity)
+        {
+            entity.Stages.Add(new InvoicesKanbanStage
+            {
+                Status = InvoiceKanbanStageStatus.NewInvoice,
+                Title = "Новый",
+                TextHexColor = "#07141C",
+                BGHexColor = "#39A8EF",
+                IsSystemStage = true,
+            });
+            entity.Stages.Add(new InvoicesKanbanStage
+            {
+                Status = InvoiceKanbanStageStatus.InWork,
+                Title = "Отправлен клиенту",
+                TextHexColor = "#07141C",
+                BGHexColor = "#2FC6F6",
+                IsSystemStage = false,
+            });
 
 
+
+
+
+            entity.Stages.Add(new InvoicesKanbanStage
+            {
+                Status = InvoiceKanbanStageStatus.Rejected,
+                Title = "Не оплачен",
+                TextHexColor = "#FFFFFF",
+                BGHexColor = "#FF5752",
+                IsSystemStage = true,
+            });
+            entity.Stages.Add(new InvoicesKanbanStage
+            {
+                Status = InvoiceKanbanStageStatus.Paid,
+                Title = "Оплачен",
+                TextHexColor = "#07141C",
+                BGHexColor = "#7BD500",
+                IsSystemStage = true,
+            });
+        }
+
+
+        private InvoicesKanban TryGetKanban(int kanbanId)
+        {
+            return DBService.TryGetOne(GetAvailableKanbans(), kanbanId);
+        }
         private void ThrowIfKanbanDontExist(int kanbanId)
         {
             DBService.TryGetOne(GetAvailableKanbans(), kanbanId);
@@ -188,17 +253,18 @@ namespace Alfateam.Sales.API.Controllers.Invoices
 
         private IEnumerable<Invoice> GetAvailableInvoices()
         {
-            return DB.Invoices.Include(o => o.Customer)
+            return DB.Invoices.Include(o => o.PersonContact)
+                              .Include(o => o.Company)
                               .Include(o => o.CreatedBy)
                               .Include(o => o.RejectedInfo)
                               .Include(o => o.PaidInfo)
                               .Include(o => o.Items)
                               .Include(o => o.KanbanData)
-                              .Where(o => !o.IsDeleted && o.Customer.BusinessCompanyId == this.CompanyId);
+                              .Where(o => !o.IsDeleted && o.BusinessCompanyId == this.CompanyId);
         }
         private IEnumerable<Invoice> GetAvailableInvoices(int kanbanId)
         {
-            return GetAvailableInvoices().Where(o => o.KanbanData?.KanbanId == kanbanId);
+            return GetAvailableInvoices().Where(o => o.KanbanData.KanbanId == kanbanId);
         }
 
 

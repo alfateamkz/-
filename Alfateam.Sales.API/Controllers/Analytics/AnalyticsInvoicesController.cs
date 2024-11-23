@@ -2,7 +2,9 @@
 using Alfateam.Sales.API.Abstractions;
 using Alfateam.Sales.API.Enums.Analytics;
 using Alfateam.Sales.API.Models;
-using Alfateam.Sales.API.Models.Analytics.Invoices;
+using Alfateam.Sales.API.Models.Analytics.Invoices.ByManagersStats;
+using Alfateam.Sales.API.Models.Analytics.Invoices.SumStats;
+using Alfateam.Sales.API.Models.Analytics.Invoices.TopByEmployees;
 using Alfateam.Sales.API.Models.DTO;
 using Alfateam.Sales.API.Models.SearchFilters.Analytics;
 using Alfateam.Sales.Models.Invoices;
@@ -11,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Alfateam.Sales.API.Controllers.Analytics
 {
+    [Route("Analytics/[controller]")]
     public class AnalyticsInvoicesController : AbsController
     {
         public AnalyticsInvoicesController(ControllerParams @params) : base(@params)
@@ -62,7 +65,7 @@ namespace Alfateam.Sales.API.Controllers.Analytics
 
         private IEnumerable<Invoice> GetAvailableInvoices()
         {
-            return DB.Invoices.Where(o => !o.IsDeleted && o.Customer.BusinessCompanyId == this.CompanyId);
+            return DB.Invoices.Where(o => !o.IsDeleted && o.BusinessCompanyId == this.CompanyId);
         }
         private IEnumerable<Invoice> GetAvailableInvoicesByFilter(AnalyticsInvoicesFilter filter)
         {

@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Alfateam.Sales.API.Controllers.ExternalInteractions
 {
+    [Route("ExtIntegrations/[controller]")]
     public class ClientExternalInteractionsController : AbsController
     {
         public ClientExternalInteractionsController(ControllerParams @params) : base(@params)

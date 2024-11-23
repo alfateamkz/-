@@ -16,8 +16,10 @@ namespace Alfateam.Website.API.Models.DTO.General
 
 
 
-        [DTOFieldBindWith(typeof(Language))]
+        [DTOFieldBindWith(nameof(Languages), typeof(Language))]
         public List<int> LanguagesIds { get; set; } = new List<int>();
+
+        [ForClientOnly]
         public List<LanguageDTO> Languages { get; set; } = new List<LanguageDTO>();
 
 
@@ -29,8 +31,10 @@ namespace Alfateam.Website.API.Models.DTO.General
 
 
 
-        [DTOFieldBindWith(typeof(Currency))]
+        [DTOFieldBindWith(nameof(Currencies), typeof(Currency))]
         public List<int> CurrenciesIds { get; set; } = new List<int>();
+
+        [ForClientOnly]
         public List<CurrencyDTO> Currencies { get; set; } = new List<CurrencyDTO>();
 
 

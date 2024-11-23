@@ -11,11 +11,11 @@ namespace Alfateam.DB.StaticTextsDBs
     {
         public StaticMessengerDbContext()
         {
-
+            Database.EnsureCreated();
         }
         public StaticMessengerDbContext(DbContextOptions<StaticMessengerDbContext> options) : this()
         {
-
+            Database.EnsureCreated();
         }
     }
 }

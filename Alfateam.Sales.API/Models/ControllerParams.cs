@@ -1,5 +1,6 @@
 ﻿using Alfateam.Core.Services;
 using Alfateam.DB;
+using Alfateam.DB.ServicesDBs;
 using Alfateam.Gateways.Abstractions;
 
 namespace Alfateam.Sales.API.Models
@@ -8,6 +9,7 @@ namespace Alfateam.Sales.API.Models
     {
         public ControllerParams(SalesDbContext db,
                                 IDDbContext idDb,
+                                CurrencyRatesDbContext сurrencyRatesDb,
                                 AbsDBService dBService,
                                 AbsFilesService filesService,
                                 IWebHostEnvironment appEnv,
@@ -16,6 +18,7 @@ namespace Alfateam.Sales.API.Models
         {
             DB = db;
             IDDB = idDb;
+            CurrencyRatesDB = сurrencyRatesDb;
             DBService = dBService;
             FilesService = filesService;
             AppEnvironment = appEnv;
@@ -26,6 +29,9 @@ namespace Alfateam.Sales.API.Models
 
         public SalesDbContext DB { get; set; }
         public IDDbContext IDDB { get; set; }
+        public CurrencyRatesDbContext CurrencyRatesDB { get; set; }
+
+
         public AbsDBService DBService { get; set; }
         public AbsFilesService FilesService { get; set; }
         public IWebHostEnvironment AppEnvironment { get; set; }

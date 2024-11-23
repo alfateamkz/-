@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Alfateam.Sales.API.Controllers.Integrations
 {
+    [Route("Integrations/[controller]")]
     public class AlfateamAPIController : AbsController
     {
         public AlfateamAPIController(ControllerParams @params) : base(@params)

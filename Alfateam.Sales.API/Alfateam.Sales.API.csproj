@@ -17,4 +17,9 @@
     <ProjectReference Include="..\Alfateam.Gateways\Alfateam.Gateways.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\Analytics\Leads\RepeatLeads\" />
+    <Folder Include="Models\Analytics\Leads\NewLeads\" />
+  </ItemGroup>
+
 </Project>

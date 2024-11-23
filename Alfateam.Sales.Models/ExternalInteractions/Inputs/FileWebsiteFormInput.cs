@@ -10,6 +10,7 @@ namespace Alfateam.Sales.Models.ExternalInteractions.Inputs
     public class FileWebsiteFormInput : WebsiteFormInput
     {
         public int MaxFilesCount { get; set; }
-        public string AllowedExtensions { get; set; }
+        public int MaxFileSizeInKBs { get; set; }
+        public string? AllowedExtensions { get; set; }
     }
 }

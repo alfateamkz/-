@@ -1,6 +1,7 @@
 ﻿using Alfateam.Core;
 using Alfateam.Sales.Models.Abstractions;
 using Alfateam.Sales.Models.BusinessProposals.Kanban;
+using Alfateam.Sales.Models.Customers;
 using Alfateam.Sales.Models.General;
 using Alfateam.Sales.Models.Invoices.Kanban;
 using Alfateam.Sales.Models.Invoices.PaidInfo;
@@ -21,22 +22,23 @@ namespace Alfateam.Sales.Models.Invoices
     {
         public string UniqueURL { get; set; } = $"{DateTime.UtcNow.ToString("dd-MM-yyyy")}-{System.Guid.NewGuid().ToString()}";
 
-        public User CreatedBy { get; set; }
-        public int CreatedById { get; set; }
+
+        public PersonContact? PersonContact { get; set; }
+        public int? PersonContactId { get; set; }
+
+
+        public Company? Company { get; set; }
+        public int? CompanyId { get; set; }
 
 
 
-        public Customer Customer { get; set; }
-        public int CustomerId { get; set; }
-
-
-        public Order Order { get; set; }
-        public int OrderId { get; set; }
+        public Order? Order { get; set; }
+        public int? OrderId { get; set; }
 
 
 
         public string Title { get; set; }
-        public string HTMLContent { get; set; }
+        public string? HTMLContent { get; set; }
 
 
 
@@ -76,9 +78,22 @@ namespace Alfateam.Sales.Models.Invoices
 
 
         /// <summary>
-        /// Информация о канбане, в котором находится счет на оплату, если не равно null
+        /// Информация о канбане, в котором находится счет на оплату
         /// </summary>
-        public InvoiceKanbanData? KanbanData { get; set; }
-        public int? KanbanDataId { get; set; }
+        public InvoiceKanbanData KanbanData { get; set; }
+        public int KanbanDataId { get; set; }
+
+
+
+        public User CreatedBy { get; set; }
+        public int CreatedById { get; set; }
+
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int BusinessCompanyId { get; set; }
     }
 }

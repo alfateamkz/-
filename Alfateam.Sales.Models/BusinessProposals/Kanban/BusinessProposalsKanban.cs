@@ -17,7 +17,23 @@ namespace Alfateam.Sales.Models.BusinessProposals.Kanban
         public List<BusinessProposalsKanbanStage> Stages { get; set; } = new List<BusinessProposalsKanbanStage>();
 
 
+        public BusinessProposalsKanbanStage InsertStage(int afterStageId, BusinessProposalsKanbanStage stage)
+        {
+            var afterStage = Stages.FirstOrDefault(o => o.Id == afterStageId);
+            if(afterStage == null)
+            {
+                throw new Exception("Этап не найден");
+            }
 
+            foreach(var item in Stages)
+            {
+                item.Order++;
+            }
+            stage.Order = afterStage.Order + 1;
+
+            Stages.Add(stage);
+            return stage;
+        }
 
 
 

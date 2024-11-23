@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Alfateam.Sales.API.Controllers.Owner
 {
+    [Route("Owner/[controller]")]
     public class BusinessController : AbsController
     {
         public BusinessController(ControllerParams @params) : base(@params)

@@ -1,6 +1,7 @@
 ﻿using Alfateam.Core.Filters;
 using Alfateam.Core.Services;
 using Alfateam.DB;
+using Alfateam.DB.ServicesDBs;
 using Alfateam.EDM.Models.Abstractions;
 using Alfateam.EDM.Models.General.Subjects;
 using Alfateam.Gateways.Abstractions;
@@ -22,6 +23,7 @@ namespace Alfateam.Sales.API.Abstractions
     {
         public readonly SalesDbContext DB;
         public readonly IDDbContext IDDB;
+        public readonly CurrencyRatesDbContext CurrencyRatesDB;
         public readonly AbsDBService DBService;
         public readonly AbsFilesService FilesService;
         public readonly IWebHostEnvironment AppEnvironment;
@@ -31,6 +33,7 @@ namespace Alfateam.Sales.API.Abstractions
         {
             this.DB = @params.DB;
             this.IDDB = @params.IDDB;
+            this.CurrencyRatesDB = @params.CurrencyRatesDB;
             this.DBService = @params.DBService;
             this.FilesService = @params.FilesService;
             this.AppEnvironment = @params.AppEnvironment;

@@ -11,11 +11,11 @@ namespace Alfateam.DB.StaticTextsDBs
     {
         public StaticCertCenterDbContext()
         {
-
+            Database.EnsureCreated();
         }
         public StaticCertCenterDbContext(DbContextOptions<StaticCertCenterDbContext> options) : this()
         {
-
+            Database.EnsureCreated();
         }
     }
 }

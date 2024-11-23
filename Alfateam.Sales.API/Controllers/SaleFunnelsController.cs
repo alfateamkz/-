@@ -4,8 +4,10 @@ using Alfateam.Sales.API.Abstractions;
 using Alfateam.Sales.API.Models;
 using Alfateam.Sales.API.Models.DTO.BusinessProposals;
 using Alfateam.Sales.API.Models.DTO.Funnel;
+using Alfateam.Sales.API.Models.DTO.Invoices.Kanban;
 using Alfateam.Sales.API.Models.DTO.Orders;
 using Alfateam.Sales.API.Models.Kanban;
+using Alfateam.Sales.Models.Enums.Statuses;
 using Alfateam.Sales.Models.Funnel;
 using Alfateam.Sales.Models.Orders;
 using Alfateam2._0.Models.Enums;
@@ -49,6 +51,7 @@ namespace Alfateam.Sales.API.Controllers
             return (SalesFunnelDTO)DBService.TryCreateEntity(DB.SalesFunnels, model, (entity) =>
             {
                 entity.BusinessCompanyId = (int)this.CompanyId;
+                AddDefaultFunnelStages(entity);
             }, 
             afterSuccessCallback: (entity) =>
             {
@@ -84,17 +87,24 @@ namespace Alfateam.Sales.API.Controllers
         #region Этапы воронок продаж
 
         [HttpPost, Route("CreateSaleFunnelStage")]
-        public async Task<SalesFunnelStageDTO> CreateSaleFunnelStage(int funnelId, SalesFunnelStageDTO model)
+        public async Task<SalesFunnelStageDTO> CreateSaleFunnelStage(int funnelId, int stageAfterId, SalesFunnelStageDTO model)
         {
-            ThrowIfFunnelDontExist(funnelId);
-            return (SalesFunnelStageDTO)DBService.TryCreateEntity(DB.SalesFunnelStages, model, (entity) =>
+            var funnel = TryGetSalesFunnel(funnelId);
+            if(TryGetFunnelStage(stageAfterId).SalesFunnelId != funnelId)
             {
-                entity.SalesFunnelId = funnelId;
-            },
-            afterSuccessCallback: (entity) =>
+                throw new Exception403("Этап не принадлежит текущей воронке продаж");
+            }
+            else if (!model.IsValid())
             {
-                this.AddHistoryAction("Добавление этапа воронки продаж", $"Добавлен этап воронки продаж {entity.Title}");
-            });
+                throw new Exception400("Проверьте корректность заполнения полей");
+            }
+
+            var stageEntity = model.CreateDBModelFromDTO();
+            funnel.InsertStage(stageAfterId, stageEntity);
+            DBService.UpdateEntity(DB.SalesFunnels, funnel);
+
+            this.AddHistoryAction("Добавление этапа воронки продаж", $"Добавлен этап воронки продаж {stageEntity.Title}");
+            return (SalesFunnelStageDTO)new SalesFunnelStageDTO().CreateDTO(stageEntity);
         }
 
         [HttpPut, Route("UpdateSaleFunnelStage")]
@@ -111,72 +121,19 @@ namespace Alfateam.Sales.API.Controllers
         public async Task DeleteSaleFunnelStage(int id)
         {
             var item = TryGetFunnelStage(id);
-            DBService.TryDeleteEntity(DB.SalesFunnelStages, item);
 
+            if (item.IsSystemStage)
+            {
+                throw new Exception403("Невозможно удалить системную стадию");
+            }
+            else if (GetAvailableOrders(item.SalesFunnelId).Where(o => o.SaleInfo.FunnelStageId == id).Any())
+            {
+                throw new Exception400("Этап воронки продаж не пустой");
+            }
+
+            DBService.TryDeleteEntity(DB.SalesFunnelStages, item);
             this.AddHistoryAction("Удаление этапа воронки продаж", $"Удален этап воронки продаж {item.Title} с id={id}");
         }
-
-        #endregion
-
-        #region Типы этапов воронок продаж
-
-        [HttpGet, Route("GetSaleFunnelStageTypes")]
-        public async Task<ItemsWithTotalCount<SalesFunnelStageTypeDTO>> GetSaleFunnelStageTypes(SearchFilter filter)
-        {
-            return DBService.GetManyWithTotalCount<SalesFunnelStageType, SalesFunnelStageTypeDTO>(GetAvailableSalesFunnelTypes(), filter.Offset, filter.Count, (entity) =>
-            {
-                if (!string.IsNullOrEmpty(filter.Query))
-                {
-                    return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
-                }
-                return true;
-            });
-        }
-
-        [HttpGet, Route("GetSaleFunnelStageType")]
-        public async Task<SalesFunnelStageTypeDTO> GetSaleFunnelStageType(int id)
-        {
-            return (SalesFunnelStageTypeDTO)DBService.TryGetOne(GetAvailableSalesFunnelTypes(), id, new SalesFunnelStageTypeDTO());
-        }
-
-
-
-
-
-        [HttpPost, Route("CreateSaleFunnelStageType")]
-        public async Task<SalesFunnelStageTypeDTO> CreateSaleFunnelStageType(SalesFunnelStageTypeDTO model)
-        {
-            return (SalesFunnelStageTypeDTO)DBService.TryCreateEntity(DB.SalesFunnelStageTypes, model, (entity) =>
-            {
-                entity.BusinessCompanyId = (int)this.CompanyId;
-            },
-            afterSuccessCallback: (entity) =>
-            {
-                this.AddHistoryAction("Добавление статуса этапа для воронок продаж", $"Добавлен статус этапа для воронок продаж {entity.Title}");
-            });
-        }
-
-        [HttpPut, Route("UpdateSaleFunnelStageType")]
-        public async Task<SalesFunnelStageTypeDTO> UpdateSaleFunnelStageType(SalesFunnelStageTypeDTO model)
-        {
-            var item = GetAvailableSalesFunnelTypes().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
-            return (SalesFunnelStageTypeDTO)DBService.TryUpdateEntity(DB.SalesFunnelStageTypes, model, item, afterSuccessCallback: (entity) =>
-            {
-                this.AddHistoryAction("Редактирование статуса этапа для воронок продаж", $"Отредактирован статус этапа для воронок продаж с id={entity.Id}");
-            });
-        }
-
-
-
-        [HttpDelete, Route("DeleteSaleFunnelStageType")]
-        public async Task DeleteSaleFunnelStageType(int id)
-        {
-            var item = GetAvailableSalesFunnelTypes().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
-            DBService.TryDeleteEntity(DB.SalesFunnelStageTypes, item);
-
-            this.AddHistoryAction("Удаление статуса этапа для воронок продаж", $"Удален статус этапа для воронок продаж {item.Title} с id={id}");
-        }
-
 
         #endregion
 
@@ -193,7 +150,7 @@ namespace Alfateam.Sales.API.Controllers
 
             foreach (var stage in funnel.Stages)
             {
-                var items = orders.Where(o => GetOrderSaleFunnelInfo(o, funnelId)?.FunnelStageId == stage.Id);
+                var items = orders.Where(o => o.SaleInfo.FunnelStageId == stage.Id);
 
                 clientModel.Stages.Add(new KanbanStageClientModel<OrderDTO>
                 {
@@ -211,7 +168,7 @@ namespace Alfateam.Sales.API.Controllers
             var order = DBService.TryGetOne(GetAvailableOrders(), orderId);
             TryGetFunnelStage(stageId);
 
-            GetOrderSaleFunnelInfo(order, funnelId).FunnelStageId = stageId;
+            order.SaleInfo.FunnelStageId = stageId;
             DBService.UpdateEntity(DB.Orders, order);
         }
 
@@ -230,17 +187,91 @@ namespace Alfateam.Sales.API.Controllers
 
         private IEnumerable<SalesFunnel> GetAvailableSalesFunnels()
         {
-            return DB.SalesFunnels.Include(o => o.Stages).ThenInclude(o => o.Type)
+            return DB.SalesFunnels.Include(o => o.Stages)
                                   .Where(o => !o.IsDeleted && o.BusinessCompanyId == this.CompanyId);
         }
-        private IEnumerable<SalesFunnelStageType> GetAvailableSalesFunnelTypes()
-        {
-            return DB.SalesFunnelStageTypes.Where(o => !o.IsDeleted && o.BusinessCompanyId == this.CompanyId);
-        }
 
+
+        private SalesFunnel TryGetSalesFunnel(int funnelId)
+        {
+            return DBService.TryGetOne(GetAvailableSalesFunnels(), funnelId);
+        }
         private void ThrowIfFunnelDontExist(int funnelId)
         {
-            DBService.TryGetOne(GetAvailableSalesFunnels(), funnelId);
+            TryGetSalesFunnel(funnelId);
+        }
+
+
+
+        private void AddDefaultFunnelStages(SalesFunnel entity)
+        {
+            entity.Stages.Add(new SalesFunnelStage
+            {
+                Status = SalesFunnelStageStatus.NewOrder,
+                Title = "Новый",
+                TextHexColor = "#07141C",
+                BGHexColor = "#39A8EF",
+                IsSystemStage = true,
+            });
+            entity.Stages.Add(new SalesFunnelStage
+            {
+                Status = SalesFunnelStageStatus.InWork,
+                Title = "Подготовка документов",
+                TextHexColor = "#07141C",
+                BGHexColor = "#2FC6F6",
+                IsSystemStage = false,
+            });
+            entity.Stages.Add(new SalesFunnelStage
+            {
+                Status = SalesFunnelStageStatus.InWork,
+                Title = "Cчёт на предоплату",
+                TextHexColor = "#07141C",
+                BGHexColor = "#55D0E0",
+                IsSystemStage = false,
+            });
+            entity.Stages.Add(new SalesFunnelStage
+            {
+                Status = SalesFunnelStageStatus.InWork,
+                Title = "В работе",
+                TextHexColor = "#07141C",
+                BGHexColor = "#47E4C2",
+                IsSystemStage = false,
+            });
+            entity.Stages.Add(new SalesFunnelStage
+            {
+                Status = SalesFunnelStageStatus.InWork,
+                Title = "Финальный счёт",
+                TextHexColor = "#07141C",
+                BGHexColor = "#FFA900",
+                IsSystemStage = false,
+            });
+
+
+
+            entity.Stages.Add(new SalesFunnelStage
+            {
+                Status = SalesFunnelStageStatus.OrderLost,
+                Title = "Сделка провалена",
+                TextHexColor = "#FFFFFF",
+                BGHexColor = "#FF5752",
+                IsSystemStage = true,
+            });
+            entity.Stages.Add(new SalesFunnelStage
+            {
+                Status = SalesFunnelStageStatus.OrderLost,
+                Title = "Анализ причины провала",
+                TextHexColor = "#FFFFFF",
+                BGHexColor = "#FF5752",
+                IsSystemStage = false,
+            });
+            entity.Stages.Add(new SalesFunnelStage
+            {
+                Status = SalesFunnelStageStatus.OrderClosed,
+                Title = "Сделка успешна",
+                TextHexColor = "#07141C",
+                BGHexColor = "#7BD500",
+                IsSystemStage = true,
+            });
         }
 
         private SalesFunnelStage TryGetFunnelStage(int stageId)
@@ -258,18 +289,15 @@ namespace Alfateam.Sales.API.Controllers
         #region Private order methods
         private IEnumerable<Order> GetAvailableOrders()
         {
-            return DB.Orders.Include(o => o.SaleInfo).ThenInclude(o => o.FunnelInfos)
+            return DB.Orders.Include(o => o.SaleInfo).ThenInclude(o => o.FunnelStage)
+                            .Include(o => o.SaleInfo).ThenInclude(o => o.Funnel)
                             .Where(o => !o.IsDeleted && o.BusinessCompanyId == this.CompanyId);
         }
         private IEnumerable<Order> GetAvailableOrders(int funnelId)
         {
-            return GetAvailableOrders().Where(o => o.SaleInfo.FunnelInfos.Any(o => o.FunnelId == funnelId));
+            return GetAvailableOrders().Where(o => o.SaleInfo.FunnelId == funnelId);
         }
         
-        private OrderSaleFunnelInfo? GetOrderSaleFunnelInfo(Order order, int funnelId)
-        {
-            return order.SaleInfo.FunnelInfos.FirstOrDefault(o => o.FunnelId == funnelId && !o.IsDeleted);
-        }
         #endregion
     }
 }

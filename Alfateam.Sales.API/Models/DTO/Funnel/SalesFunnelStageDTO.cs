@@ -1,5 +1,6 @@
 ﻿using Alfateam.Core.Attributes.DTO;
 using Alfateam.Sales.Models.Enums;
+using Alfateam.Sales.Models.Enums.Statuses;
 using Alfateam.Sales.Models.Funnel;
 using Alfateam.Website.API.Abstractions;
 using System.ComponentModel;
@@ -10,13 +11,21 @@ namespace Alfateam.Sales.API.Models.DTO.Funnel
     {
         public string Title { get; set; }
         public string? Description { get; set; }
+        public string BGHexColor { get; set; }
+        public string TextHexColor { get; set; }
 
 
 
         [ForClientOnly]
-        public SalesFunnelStageTypeDTO Type { get; set; }
-        [HiddenFromClient]
-        public int TypeId { get; set; }
+        public SalesFunnelStageStatus Status { get; set; }
+
+        [ForClientOnly]
+        public bool IsSystemStage { get; set; }
+
+        [ForClientOnly]
+        public int Order { get; set; }
+
+
 
 
 

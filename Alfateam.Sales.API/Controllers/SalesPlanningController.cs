@@ -2,9 +2,11 @@
 using Alfateam.Core.Exceptions;
 using Alfateam.Sales.API.Abstractions;
 using Alfateam.Sales.API.Models;
+using Alfateam.Sales.API.Models.DTO.Abstractions;
 using Alfateam.Sales.API.Models.DTO.Funnel;
 using Alfateam.Sales.API.Models.DTO.Plan;
 using Alfateam.Sales.API.Models.DTO.Scripting;
+using Alfateam.Sales.Models.Abstractions;
 using Alfateam.Sales.Models.Plan;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -131,43 +133,6 @@ namespace Alfateam.Sales.API.Controllers
 
         #endregion
 
-        #region Пункты плана продаж
-
-        [HttpPost, Route("CreateSalesPlanItem")]
-        public async Task<SalesPlanItemDTO> CreateSalesPlanItem(int planId, SalesPlanItemDTO model)
-        {
-            ThrowIfPlanDontExist(planId);
-            return (SalesPlanItemDTO)DBService.TryCreateEntity(DB.SalesPlanItems, model, (entity) =>
-            {
-                entity.SalesPlanId = planId;
-            },
-            afterSuccessCallback: (entity) =>
-            {
-                this.AddHistoryAction("Добавление пункта плана продаж", $"Добавлен пункт плана продаж {entity.Title}");
-            });
-        }
-
-        [HttpPut, Route("UpdateSalesPlanItem")]
-        public async Task<SalesPlanItemDTO> UpdateSalesPlanItem(SalesPlanItemDTO model)
-        {
-            var item = TryGetSalesPlanItem(model.Id);
-            return (SalesPlanItemDTO)DBService.TryUpdateEntity(DB.SalesPlanItems, model, item, afterSuccessCallback: (entity) =>
-            {
-                this.AddHistoryAction("Редактирование пункта плана продаж", $"Отредактирован пункт плана продаж с id={entity.Id}");
-            });
-        }
-
-        [HttpDelete, Route("DeleteSalesPlanItem")]
-        public async Task DeleteSalesPlanItem(int id)
-        {
-            var item = TryGetSalesPlanItem(id);
-            DBService.TryDeleteEntity(DB.SalesPlanItems, item);
-
-            this.AddHistoryAction("Удаление пункта плана продаж", $"Удален пункт плана продаж {item.Title} с id={id}");
-        }
-
-
-        #endregion
 
 
 
@@ -178,7 +143,8 @@ namespace Alfateam.Sales.API.Controllers
         #region Private methods
         private IEnumerable<SalesPlanning> GetAvailableSalesPlannings()
         {
-            return DB.SalesPlannings.Include(o => o.Plans).ThenInclude(o => o.Items)
+            //TODO: SalesPlanning plans includes
+            return DB.SalesPlannings.Include(o => o.Plans)
                                     .Where(o => !o.IsDeleted && o.BusinessCompanyId == this.CompanyId);
         }
         private void ThrowIfSalesPlanningNotVaild(SalesPlanningDTO model)
@@ -220,13 +186,6 @@ namespace Alfateam.Sales.API.Controllers
         private void ThrowIfPlanDontExist(int planId)
         {
             TryGetSalesPlan(planId);
-        }
-        private SalesPlanItem TryGetSalesPlanItem(int itemId)
-        {
-            var item = DBService.TryGetOne(DB.SalesPlanItems, itemId);
-            ThrowIfPlanDontExist(item.SalesPlanId);
-
-            return item;
         }
 
         #endregion

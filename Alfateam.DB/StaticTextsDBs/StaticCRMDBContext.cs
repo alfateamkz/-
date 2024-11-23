@@ -11,11 +11,11 @@ namespace Alfateam.DB.StaticTextsDBs
     {
         public StaticCRMDBContext()
         {
-
+            Database.EnsureCreated();
         }
         public StaticCRMDBContext(DbContextOptions<StaticCRMDBContext> options) : this()
         {
-
+            Database.EnsureCreated();
         }
     }
 }

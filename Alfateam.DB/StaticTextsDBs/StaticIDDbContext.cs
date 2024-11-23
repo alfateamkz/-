@@ -11,11 +11,11 @@ namespace Alfateam.DB.StaticTextsDBs
     {
         public StaticIDDbContext()
         {
-
+            Database.EnsureCreated();
         }
         public StaticIDDbContext(DbContextOptions<StaticIDDbContext> options) : this()
         {
-
+            Database.EnsureCreated();
         }
     }
 }

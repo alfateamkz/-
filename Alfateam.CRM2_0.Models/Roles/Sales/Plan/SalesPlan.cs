@@ -26,5 +26,9 @@ namespace Alfateam.CRM2_0.Models.Roles.Sales.Plan
         /// </summary>
         public int SalesPlanningId { get; set; }
 
+
+
+
+
 	}
 }

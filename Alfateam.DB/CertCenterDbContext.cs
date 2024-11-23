@@ -19,11 +19,11 @@ namespace Alfateam.DB
     {
         public CertCenterDbContext()
         {
-
+            Database.EnsureCreated();
         }
         public CertCenterDbContext(DbContextOptions<CertCenterDbContext> options) : this()
         {
-
+            Database.EnsureCreated();
         }
 
         #region Abstraction

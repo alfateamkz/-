@@ -1,4 +1,5 @@
 ﻿using Alfateam.Core;
+using Alfateam.Sales.Models.Customers;
 using Alfateam.Sales.Models.General;
 using System;
 using System.Collections.Generic;
@@ -13,24 +14,23 @@ namespace Alfateam.Sales.Models.Orders
     /// </summary>
     public class Order : AbsModel
     {
-        public Customer Customer { get; set; }
-		public int CustomerId { get; set; }
-
-
-		public string Title { get; set; }
-        public string Description { get; set; }
+        public PersonContact? PersonContact { get; set; }
+		public int? PersonContactId { get; set; }
 
 
 
-        public Currency Currency { get; set; }
-        public int CurrencyId { get; set; }
-        public double Sum { get; set; }
+        public Company? Company { get; set; }
+        public int? CompanyId { get; set; }
 
 
 
 
-		public OrderStatus Status { get; set; }
-        public int StatusId { get; set; }
+        public string Title { get; set; }
+        public string? Description { get; set; }
+        public CurrencyAndValue Sum { get; set; }
+
+
+
 
 
         public OrderSaleInfo SaleInfo { get; set; }

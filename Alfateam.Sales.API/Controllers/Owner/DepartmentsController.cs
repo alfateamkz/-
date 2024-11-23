@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Alfateam.Sales.API.Controllers.Owner
 {
+    [Route("Owner/[controller]")]
     public class DepartmentsController : AbsController
     {
         public DepartmentsController(ControllerParams @params) : base(@params)

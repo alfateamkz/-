@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Alfateam.Sales.API.Controllers.Owner
 {
+    [Route("Owner/[controller]")]
     public class HistoryActionsController : AbsController
     {
         public HistoryActionsController(ControllerParams @params) : base(@params)

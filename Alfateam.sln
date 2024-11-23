@@ -83,11 +83,21 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.Sales.Models", "Al
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.Sales.API", "Alfateam.Sales.API\Alfateam.Sales.API.csproj", "{99645679-6C32-4BBB-BF89-5ABAC1DCAD0D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.PaymentGateways", "Alfateam.PaymentGateways\Alfateam.PaymentGateways.csproj", "{E8A206F3-B0BC-48B4-98D8-5EA427A5E7DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.PaymentGateways", "Alfateam.PaymentGateways\Alfateam.PaymentGateways.csproj", "{E8A206F3-B0BC-48B4-98D8-5EA427A5E7DE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Marketing", "Marketing", "{ADCAFC78-69BA-434C-8C8B-40B27EFCD586}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.Marketing.Models", "Alfateam.Marketing.Models\Alfateam.Marketing.Models.csproj", "{3CCF07B0-B461-4B83-B7BD-43445ABE5964}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.Marketing.Models", "Alfateam.Marketing.Models\Alfateam.Marketing.Models.csproj", "{3CCF07B0-B461-4B83-B7BD-43445ABE5964}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KnowledgeBase", "KnowledgeBase", "{388AFD0D-7DD8-4E13-A0ED-FE7130B52217}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{0C24D02A-0C27-4CA4-9511-C8DBB13C9FD5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CurrencyRates", "CurrencyRates", "{03AD405F-EBD4-43CF-BF00-5CA23C447BDF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.Services.CurrencyRates.Models", "Alfateam.Services.CurrencyRates.Models\Alfateam.Services.CurrencyRates.Models.csproj", "{8776D9D9-E36F-42D9-B935-23CA00246832}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.Services.CurrencyRates.API", "Alfateam.Services.CurrencyRates.API\Alfateam.Services.CurrencyRates.API.csproj", "{2D8AFFC2-2C95-4555-9080-786C70C5D3E5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -203,6 +213,14 @@ Global
 		{3CCF07B0-B461-4B83-B7BD-43445ABE5964}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CCF07B0-B461-4B83-B7BD-43445ABE5964}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CCF07B0-B461-4B83-B7BD-43445ABE5964}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8776D9D9-E36F-42D9-B935-23CA00246832}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8776D9D9-E36F-42D9-B935-23CA00246832}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8776D9D9-E36F-42D9-B935-23CA00246832}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8776D9D9-E36F-42D9-B935-23CA00246832}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D8AFFC2-2C95-4555-9080-786C70C5D3E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D8AFFC2-2C95-4555-9080-786C70C5D3E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D8AFFC2-2C95-4555-9080-786C70C5D3E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D8AFFC2-2C95-4555-9080-786C70C5D3E5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -230,6 +248,9 @@ Global
 		{62252E94-77D9-4F45-8D69-D99B2598E116} = {38064930-DFD6-4FDE-A5A5-150C5DB0D01B}
 		{99645679-6C32-4BBB-BF89-5ABAC1DCAD0D} = {38064930-DFD6-4FDE-A5A5-150C5DB0D01B}
 		{3CCF07B0-B461-4B83-B7BD-43445ABE5964} = {ADCAFC78-69BA-434C-8C8B-40B27EFCD586}
+		{03AD405F-EBD4-43CF-BF00-5CA23C447BDF} = {0C24D02A-0C27-4CA4-9511-C8DBB13C9FD5}
+		{8776D9D9-E36F-42D9-B935-23CA00246832} = {03AD405F-EBD4-43CF-BF00-5CA23C447BDF}
+		{2D8AFFC2-2C95-4555-9080-786C70C5D3E5} = {03AD405F-EBD4-43CF-BF00-5CA23C447BDF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {91AE9782-0D3F-4611-8C40-D29647166E70}

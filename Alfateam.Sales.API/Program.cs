@@ -8,6 +8,7 @@ using Alfateam.Sales.API.Filters;
 using Alfateam.Sales.API.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Alfateam.DB.ServicesDBs;
 
 namespace Alfateam.Sales.API
 {
@@ -31,14 +32,6 @@ namespace Alfateam.Sales.API
 
 
             // Add services to the container.
-            builder.Services.AddDbContext<DbContext, IDDbContext>(options =>
-            {
-                options.UseMySql(new MySqlServerVersion(new Version(8, 0, 11)), o =>
-                {
-                    o.EnableRetryOnFailure();
-                    o.EnableStringComparisonTranslations();
-                });
-            });
             builder.Services.AddDbContext<DbContext, SalesDbContext>(options =>
             {
                 options.UseMySql(new MySqlServerVersion(new Version(8, 0, 11)), o =>
@@ -47,6 +40,24 @@ namespace Alfateam.Sales.API
                     o.EnableStringComparisonTranslations();
                 });
             });
+            builder.Services.AddDbContext<DbContext, IDDbContext>(options =>
+            {
+                options.UseMySql(new MySqlServerVersion(new Version(8, 0, 11)), o =>
+                {
+                    o.EnableRetryOnFailure();
+                    o.EnableStringComparisonTranslations();
+                });
+            });
+            builder.Services.AddDbContext<DbContext, CurrencyRatesDbContext>(options =>
+            {
+                options.UseMySql(new MySqlServerVersion(new Version(8, 0, 11)), o =>
+                {
+                    o.EnableRetryOnFailure();
+                    o.EnableStringComparisonTranslations();
+                });
+            });
+
+
             builder.Services.AddTransient<AbsDBService>();
             builder.Services.AddTransient<AbsFilesService>();
             builder.Services.AddTransient<ControllerParams>();

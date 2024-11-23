@@ -1,4 +1,5 @@
 ﻿using Alfateam.Core;
+using Alfateam.Sales.Models.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;

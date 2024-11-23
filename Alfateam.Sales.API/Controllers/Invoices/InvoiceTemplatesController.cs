@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Alfateam.Sales.API.Controllers.Invoices
 {
+    [Route("Invoices/[controller]")]
     public class InvoiceTemplatesController : AbsController
     {
         public InvoiceTemplatesController(ControllerParams @params) : base(@params)

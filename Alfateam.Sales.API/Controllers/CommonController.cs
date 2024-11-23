@@ -38,5 +38,15 @@ namespace Alfateam.Sales.API.Controllers
 
             return new BusinessCompanyDTO().CreateDTOs(availableCompanies).Cast<BusinessCompanyDTO>();
         }
+
+
+
+
+
+        [HttpGet, Route("GetConversionRate")]
+        public async Task<double> GetConversionRate(string from, string to, double amount)
+        {
+            return this.CurrencyRatesDB.GetRate(from, to) / amount;
+        }
     }
 }

@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Alfateam.Sales.API.Controllers.BusinessProposals
 {
+
+    [Route("BP/[controller]")]
     public class BusinessProposalsController : AbsController
     {
         public BusinessProposalsController(ControllerParams @params) : base(@params)
@@ -28,9 +30,13 @@ namespace Alfateam.Sales.API.Controllers.BusinessProposals
                 {
                     condition &= entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
                 }
-                if (filter.CustomerId != null)
+                if (filter.PersonContactId != null)
                 {
-                    condition &= entity.CustomerId == filter.CustomerId;
+                    condition &= entity.PersonContactId == filter.PersonContactId;
+                }
+                if (filter.CompanyId != null)
+                {
+                    condition &= entity.CompanyId == filter.CompanyId;
                 }
                 return condition;
             });
@@ -50,12 +56,11 @@ namespace Alfateam.Sales.API.Controllers.BusinessProposals
         {
             return (BusinessProposalDTO)DBService.TryCreateEntity(DB.BusinessProposals, model, (entity) =>
             {
-                entity.CustomerId = model.CustomerId;
+                entity.BusinessCompanyId = (int)this.CompanyId;
             },
             afterSuccessCallback: (entity) =>
             {
-                var customer = DB.Customers.FirstOrDefault(o => o.Id == model.CustomerId);
-                this.AddHistoryAction("Выставление КП клиенту", $"Выставлено КП {entity.Title} клиенту {customer.FIO}");
+                this.AddHistoryAction("Выставление КП", $"Выставлено КП {entity.Title}");
             });
         }
 
@@ -75,7 +80,7 @@ namespace Alfateam.Sales.API.Controllers.BusinessProposals
             var item = GetAvailableProposals().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
             DBService.TryDeleteEntity(DB.BusinessProposals, item);
 
-            this.AddHistoryAction("Удаление КП клиенту", $"Удалено КП {item.Title} клиенту {item.Customer.FIO} с id={id}");
+            this.AddHistoryAction("Удаление КП", $"Удалено КП {item.Title}с id={id}");
         }
 
         #endregion
@@ -90,8 +95,12 @@ namespace Alfateam.Sales.API.Controllers.BusinessProposals
 
         private IEnumerable<BusinessProposal> GetAvailableProposals()
         {
-            return DB.BusinessProposals.Include(o => o.Customer)
-                                       .Where(o => !o.IsDeleted && o.Customer.BusinessCompanyId == this.CompanyId);
+            return DB.BusinessProposals.Include(o => o.PersonContact)
+                                       .Include(o => o.Company)
+                                       .Include(o => o.Sum).ThenInclude(o => o.Currency)
+                                       .Include(o => o.KanbanData).ThenInclude(o => o.Kanban)
+                                       .Include(o => o.KanbanData).ThenInclude(o => o.Stage)
+                                       .Where(o => !o.IsDeleted && o.BusinessCompanyId == this.CompanyId);
         }
 
 

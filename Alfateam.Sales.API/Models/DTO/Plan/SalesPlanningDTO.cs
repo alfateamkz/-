@@ -1,4 +1,5 @@
 ﻿using Alfateam.Core.Attributes.DTO;
+using Alfateam.Sales.API.Models.DTO.Abstractions;
 using Alfateam.Sales.Models.Plan;
 using Alfateam.Website.API.Abstractions;
 

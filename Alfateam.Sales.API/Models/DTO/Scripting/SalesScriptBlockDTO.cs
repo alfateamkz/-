@@ -11,6 +11,9 @@ namespace Alfateam.Sales.API.Models.DTO.Scripting
 
         [Description("Текст фразы")]
         public string Text { get; set; }
+        public string BGHexColor { get; set; }
+        public string TextHexColor { get; set; }
+
 
         [Description("Тип блока")]
         public SalesScriptBlockType Type { get; set; } = SalesScriptBlockType.Intro;
