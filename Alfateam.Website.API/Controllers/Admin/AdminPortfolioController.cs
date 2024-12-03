@@ -27,6 +27,8 @@ using Swashbuckle.AspNetCore.Annotations;
 using Alfateam.Website.API.Filters.AdminSearch;
 using Alfateam.Website.API.Models.DTO;
 using Alfateam.Core;
+using Alfateam.Core.Helpers;
+using Alfateam.Website.API.Helpers;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -121,7 +123,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             var item = GetAvailablePortfolio().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return (PortfolioDTO)DbService.TryUpdateEntity(DB.Portfolios, model, item, (entity) =>
             {
-                HandlePortfolio(entity, DBModelFillMode.Update, model.Content);
+                HandlePortfolio(entity, DBModelFillMode.Update, model.Content.CreateDBModelFromDTO());
             });
         }
 
@@ -135,7 +137,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
             return (PortfolioLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.PortfolioLocalizations, localization, model, mainEntity, (entity) =>
             {
-                HandlePortfolioLocalization(entity, DBModelFillMode.Update, model.Content);
+                HandlePortfolioLocalization(entity, DBModelFillMode.Update, model.Content.CreateDBModelFromDTO());
             });
         }
 
@@ -457,7 +459,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             {
                 FilesService.UploadContentMedia(entity.Content);
             }
-            else if (mode == DBModelFillMode.Update && !entity.Content.AreSame(newContentForUpdate))
+            else if (mode == DBModelFillMode.Update /*&& !entity.Content.AreSame(newContentForUpdate)*/)
             {
                 FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
             }
@@ -486,29 +488,23 @@ namespace Alfateam.Website.API.Controllers.Admin
         #endregion
 
         #region Private get included methods
-        private IQueryable<Portfolio> GetPortfoliosList()
+        private IEnumerable<Portfolio> GetPortfoliosFullIncludedList()
         {
-            return DB.Portfolios.IncludeAvailability()
-                                .Include(o => o.Category).ThenInclude(o => o.MainLanguage)
-                                .Include(o => o.Category).ThenInclude(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
-                                .Include(o => o.Industry).ThenInclude(o => o.MainLanguage)
-                                .Include(o => o.Industry).ThenInclude(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
-                                .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
-                                .Include(o => o.MainLanguage)
-                                .Where(o => !o.IsDeleted);
-        }
-        private IQueryable<Portfolio> GetPortfoliosFullIncludedList()
-        {
-            return DB.Portfolios.IncludeAvailability()
-                                .Include(o => o.Category).ThenInclude(o => o.MainLanguage)
-                                .Include(o => o.Category).ThenInclude(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
-                                .Include(o => o.Industry).ThenInclude(o => o.MainLanguage)
-                                .Include(o => o.Industry).ThenInclude(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
-                                .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
-                                .Include(o => o.Localizations).ThenInclude(o => o.Content).ThenInclude(o => o.Items)
-                                .Include(o => o.Content).ThenInclude(o => o.Items)
-                                .Include(o => o.MainLanguage)
-                                .Where(o => !o.IsDeleted);
+            var portfolios = DB.Portfolios.IncludeAvailability()
+                                          .Include(o => o.Category).ThenInclude(o => o.MainLanguage)
+                                          .Include(o => o.Category).ThenInclude(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
+                                          .Include(o => o.Industry).ThenInclude(o => o.MainLanguage)
+                                          .Include(o => o.Industry).ThenInclude(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
+                                          .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
+                                          .Include(o => o.Localizations).ThenInclude(o => o.Content).ThenInclude(o => o.Items)
+                                          .Include(o => o.Content).ThenInclude(o => o.Items)
+                                          .Include(o => o.MainLanguage)
+                                          .Where(o => !o.IsDeleted)
+                                          .ToList();
+
+            ContentIncludeHelper.IncludeHierarchy(DB, portfolios.Select(o => o.Content));
+            ContentIncludeHelper.IncludeHierarchy(DB, portfolios.SelectMany(o => o.Localizations).Select(o => o.Content));
+            return portfolios;
         }
 
 

@@ -26,6 +26,8 @@ using Alfateam.Website.API.Models.Filters.Admin.AdminSearch;
 using Alfateam.Core;
 using Alfateam.Website.API.Models.DTO;
 using Alfateam2._0.Models;
+using Alfateam.Core.Helpers;
+using Alfateam.Website.API.Helpers;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -121,7 +123,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             var item = GetAvailableJobVacancies().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return (JobVacancyDTO)DbService.TryUpdateEntity(DB.JobVacancies, model, item, (entity) =>
             {
-                HandleJobVacancy(entity, DBModelFillMode.Update, model.InnerContent);
+                HandleJobVacancy(entity, DBModelFillMode.Update, model.InnerContent.CreateDBModelFromDTO());
             });
         }
    
@@ -134,7 +136,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
             return (JobVacancyLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.JobVacancyLocalizations, localization, model, mainEntity, (entity) =>
             {
-                HandleJobVacancyLocalization(entity, DBModelFillMode.Update, model.InnerContent);
+                HandleJobVacancyLocalization(entity, DBModelFillMode.Update, model.InnerContent.CreateDBModelFromDTO());
             });
         }
 
@@ -450,17 +452,23 @@ namespace Alfateam.Website.API.Controllers.Admin
                                   .Include(o => o.Category)
                                   .Where(o => !o.IsDeleted);
         }
-        private IQueryable<JobVacancy> GetVacanciesFullIncludedList()
+        private IEnumerable<JobVacancy> GetVacanciesFullIncludedList()
         {
-            return DB.JobVacancies.IncludeAvailability()
-                                  .Include(o => o.Expierence)
-                                  .Include(o => o.Currency)
-                                  .Include(o => o.WatchesList)
-                                  .Include(o => o.InnerContent).ThenInclude(o => o.Items)
-                                  .Include(o => o.MainLanguage)
-                                  .Include(o => o.Category)
-                                  .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
-                                  .Where(o => !o.IsDeleted);
+            var items = DB.JobVacancies.IncludeAvailability()
+                                       .Include(o => o.Expierence)
+                                       .Include(o => o.Currency)
+                                       .Include(o => o.WatchesList)
+                                       .Include(o => o.InnerContent).ThenInclude(o => o.Items)
+                                       .Include(o => o.MainLanguage)
+                                       .Include(o => o.Category)
+                                       .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
+                                       .Include(o => o.Localizations).ThenInclude(o => o.InnerContent).ThenInclude(o => o.Items)
+                                       .Where(o => !o.IsDeleted)
+                                       .ToList();
+
+            ContentIncludeHelper.IncludeHierarchy(DB, items.Select(o => o.InnerContent));
+            ContentIncludeHelper.IncludeHierarchy(DB, items.SelectMany(o => o.Localizations).Select(o => o.InnerContent));
+            return items;
         }
 
         private IQueryable<JobSummary> GetSummariesList()

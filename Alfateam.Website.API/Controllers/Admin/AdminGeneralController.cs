@@ -383,6 +383,12 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
 
+        [HttpGet, Route("GetTimezone")]
+        public async Task<TimezoneDTO> GetTimezone(int id)
+        {
+            return (TimezoneDTO)DbService.TryGetOne(GetTimezonesList(), id, new TimezoneDTO());
+        }
+
 
 
 

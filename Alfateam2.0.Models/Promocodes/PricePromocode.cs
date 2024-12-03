@@ -20,6 +20,7 @@ namespace Alfateam2._0.Models.Promocodes
         public override PromocodeType Type => PromocodeType.Fixed;
 
         public PricingMatrix Discount { get; set; }
+        public int DiscountId { get; set; }
 
     }
 }

@@ -6,4 +6,20 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="JsonKnownTypes" Version="0.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Alfateam.Core\Alfateam.Core.csproj" />
+    <ProjectReference Include="..\Alfateam.SharedModels\Alfateam.SharedModels.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ExternalInteractions\AlfateamMetrics\" />
+    <Folder Include="ExternalInteractions\AlfateamWebvisor\" />
+    <Folder Include="General\CompanySettings\" />
+    <Folder Include="Integrations\SMM\" />
+  </ItemGroup>
+
 </Project>

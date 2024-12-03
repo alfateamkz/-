@@ -4,13 +4,14 @@ using Alfateam.Core.Attributes.DTO;
 using Alfateam.Website.API.Models.DTO.General;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.HR;
+using Alfateam.Website.API.Models.DTO.ContentItems;
 
 namespace Alfateam.Website.API.Models.DTO.HR
 {
     public class JobVacancyDTO : AvailabilityDTOModel<JobVacancy>
     {
         public string Title { get; set; }
-        public Content InnerContent { get; set; }
+        public ContentDTO InnerContent { get; set; }
         public string Slug => SlugHelper.GetLatynSlug(Title);
 
 

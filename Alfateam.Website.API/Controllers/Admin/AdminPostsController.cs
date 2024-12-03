@@ -28,6 +28,8 @@ using Swashbuckle.AspNetCore.Annotations;
 using Alfateam.Website.API.Filters.AdminSearch;
 using Alfateam.Website.API.Models.DTO;
 using Alfateam.Core;
+using Alfateam.Core.Helpers;
+using Alfateam.Website.API.Helpers;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -125,7 +127,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             var item = GetAvailablePosts().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return (PostDTO)DbService.TryUpdateEntity(DB.Posts, model, item, (entity) =>
             {
-                HandlePost(entity, DBModelFillMode.Update, model.Content);
+                HandlePost(entity, DBModelFillMode.Update, model.Content.CreateDBModelFromDTO());
             });
         }
 
@@ -139,7 +141,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
             return (PostLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.PostLocalizations, localization, model, mainEntity, (entity) =>
             {
-                HandlePostLocalization(entity, DBModelFillMode.Update, model.Content);
+                HandlePostLocalization(entity, DBModelFillMode.Update, model.Content.CreateDBModelFromDTO());
             });
         }
 
@@ -489,25 +491,35 @@ namespace Alfateam.Website.API.Controllers.Admin
         #endregion
 
         #region Private get included methods 
-        private IQueryable<Post> GetPosts()
+        private IEnumerable<Post> GetPosts()
         {
-            return DB.Posts.IncludeAvailability()
-                            .Include(o => o.Category).ThenInclude(o => o.Localizations)
-                            .Include(o => o.Industry).ThenInclude(o => o.Localizations)
-                            .Include(o => o.Content).ThenInclude(o => o.Items)
-                            .Include(o => o.Localizations).ThenInclude(o => o.Content).ThenInclude(o => o.Items)
-                            .Where(o => !o.IsDeleted);
+            var items = DB.Posts.IncludeAvailability()
+                                .Include(o => o.Category).ThenInclude(o => o.Localizations)
+                                .Include(o => o.Industry).ThenInclude(o => o.Localizations)
+                                .Include(o => o.Content).ThenInclude(o => o.Items)
+                                .Include(o => o.Localizations).ThenInclude(o => o.Content).ThenInclude(o => o.Items)
+                                .Where(o => !o.IsDeleted)
+                                .ToList();
+
+            ContentIncludeHelper.IncludeHierarchy(DB, items.Select(o => o.Content));
+            ContentIncludeHelper.IncludeHierarchy(DB, items.SelectMany(o => o.Localizations).Select(o => o.Content));
+            return items;
         }
-        private IQueryable<Post> GetFullIncludedPosts()
+        private IEnumerable<Post> GetFullIncludedPosts()
         {
-            return DB.Posts.IncludeAvailability()
-                            .Include(o => o.Category).ThenInclude(o => o.Localizations)
-                            .Include(o => o.Industry).ThenInclude(o => o.Localizations)
-                            .Include(o => o.Content).ThenInclude(o => o.Items)
-                            .Include(o => o.WatchesList).ThenInclude(o => o.WatchedBy)
-                            .Include(o => o.Localizations).ThenInclude(o => o.Content).ThenInclude(o => o.Items)
-                            .Include(o => o.MainLanguage)
-                            .Where(o => !o.IsDeleted);
+            var items = DB.Posts.IncludeAvailability()
+                                .Include(o => o.Category).ThenInclude(o => o.Localizations)
+                                .Include(o => o.Industry).ThenInclude(o => o.Localizations)
+                                .Include(o => o.Content).ThenInclude(o => o.Items)
+                                .Include(o => o.WatchesList).ThenInclude(o => o.WatchedBy)
+                                .Include(o => o.Localizations).ThenInclude(o => o.Content).ThenInclude(o => o.Items)
+                                .Include(o => o.MainLanguage)
+                                .Where(o => !o.IsDeleted)
+                                .ToList();
+
+            ContentIncludeHelper.IncludeHierarchy(DB, items.Select(o => o.Content));
+            ContentIncludeHelper.IncludeHierarchy(DB, items.SelectMany(o => o.Localizations).Select(o => o.Content));
+            return items;
         }
 
 

@@ -11,9 +11,9 @@ namespace Alfateam.Messenger.API.Models.Filters
     {
         public AccountSocialNetworkType SocialNetworkType { get; set; }
 
-        public IEnumerable<Account> Filter(IEnumerable<Account> items, Func<Account, string> queryPredicate)
+        public IEnumerable<MessengerMailingAccount> Filter(IEnumerable<MessengerMailingAccount> items, Func<MessengerMailingAccount, string> queryPredicate)
         {
-            IEnumerable<Account> filtered = new List<Account>(items);
+            IEnumerable<MessengerMailingAccount> filtered = new List<MessengerMailingAccount>(items);
 
             switch (SocialNetworkType)
             {

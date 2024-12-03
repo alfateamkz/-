@@ -32,6 +32,8 @@ using Alfateam2._0.Models.ContentItems;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Linq;
 using Alfateam.Core;
+using Alfateam.Core.Helpers;
+using Alfateam.Website.API.Helpers;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -285,7 +287,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             CheckFromMember(model.Id);
             return (TeamMemberDTO)DbService.TryUpdateEntity(DB.TeamMembers, model, item, (entity) =>
             {
-                HandleTeamMember(entity, DBModelFillMode.Update, model.DetailContent);
+                HandleTeamMember(entity, DBModelFillMode.Update, model.DetailContent.CreateDBModelFromDTO());
             });
         }
 
@@ -300,7 +302,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             CheckFromMember(localization?.TeamMemberId);
             return (TeamMemberLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.TeamMemberLocalizations, localization, model, mainEntity, (entity) =>
             {
-                HandleTeamMemberLocalization(entity, DBModelFillMode.Update, model.DetailContent);
+                HandleTeamMemberLocalization(entity, DBModelFillMode.Update, model.DetailContent.CreateDBModelFromDTO());
             });
         }
 
@@ -453,23 +455,31 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         private IQueryable<TeamStructure> GetTeamStructuresList()
         {
-            return DB.TeamStructures.IncludeAvailability()
-                                    .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.MainLanguage)
-                                    .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
-                                    .Include(o => o.Groups).ThenInclude(o => o.MainLanguage)
-                                    .Include(o => o.Groups).ThenInclude(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
-                                    .Where(o => !o.IsDeleted);
+            var items = DB.TeamStructures.IncludeAvailability()
+                                          .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.MainLanguage)
+                                          .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
+                                          .Include(o => o.Groups).ThenInclude(o => o.MainLanguage)
+                                          .Include(o => o.Groups).ThenInclude(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
+                                          .Where(o => !o.IsDeleted);
+
+            return items;
         }
-        private IQueryable<TeamStructure> GetTeamStructuresFullIncludedList()
+        private IEnumerable<TeamStructure> GetTeamStructuresFullIncludedList()
         {
-            return DB.TeamStructures.IncludeAvailability()
-                                    .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.MainLanguage)
-                                    .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.DetailContent).ThenInclude(o => o.Items)
-                                    .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.Localizations).ThenInclude(o => o.DetailContent).ThenInclude(o => o.Items)
-                                    .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
-                                    .Include(o => o.Groups).ThenInclude(o => o.MainLanguage)
-                                    .Include(o => o.Groups).ThenInclude(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
-                                    .Where(o => !o.IsDeleted);
+            var items = DB.TeamStructures.IncludeAvailability()
+                                         .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.MainLanguage)
+                                         .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.DetailContent).ThenInclude(o => o.Items)
+                                         .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.Localizations).ThenInclude(o => o.DetailContent).ThenInclude(o => o.Items)
+                                         .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
+                                         .Include(o => o.Groups).ThenInclude(o => o.MainLanguage)
+                                         .Include(o => o.Groups).ThenInclude(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
+                                         .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.Localizations).ThenInclude(o => o.DetailContent).ThenInclude(o => o.Items)
+                                         .Where(o => !o.IsDeleted)
+                                         .ToList();
+
+            ContentIncludeHelper.IncludeHierarchy(DB, items.SelectMany(o => o.Groups).SelectMany(o => o.Members).Select(o => o.DetailContent));
+            ContentIncludeHelper.IncludeHierarchy(DB, items.SelectMany(o => o.Groups).SelectMany(o => o.Members).SelectMany(o => o.Localizations).Select(o => o.DetailContent));
+            return items;
         }
 
 
@@ -480,17 +490,22 @@ namespace Alfateam.Website.API.Controllers.Admin
                                 .Include(o => o.MainLanguage)
                                 .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
                                 .Where(o => !o.IsDeleted)
-                                .AsEnumerable();
+                                .ToList();
         }
 
         private IEnumerable<TeamMember> GetTeamMembersList()
         {
-            return DB.TeamMembers.Include(o => o.MainLanguage)
-                                 .Include(o => o.Localizations).ThenInclude(o => o.DetailContent).ThenInclude(o => o.Items)
-                                 .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
-                                 .Include(o => o.DetailContent).ThenInclude(o => o.Items)
-                                 .Where(o => !o.IsDeleted)
-                                 .AsEnumerable();
+            var items = DB.TeamMembers.Include(o => o.MainLanguage)
+                                      .Include(o => o.Localizations).ThenInclude(o => o.DetailContent).ThenInclude(o => o.Items)
+                                      .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
+                                      .Include(o => o.Localizations).ThenInclude(o => o.DetailContent).ThenInclude(o => o.Items)
+                                      .Include(o => o.DetailContent).ThenInclude(o => o.Items)
+                                      .Where(o => !o.IsDeleted)
+                                      .ToList();
+
+            ContentIncludeHelper.IncludeHierarchy(DB, items.Select(o => o.DetailContent));
+            ContentIncludeHelper.IncludeHierarchy(DB, items.SelectMany(o => o.Localizations).Select(o => o.DetailContent));
+            return items;
         }
         #endregion
 

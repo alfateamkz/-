@@ -10,6 +10,8 @@ namespace Alfateam.Sales.Models.Enums.Statuses
     {
         NewOrder = 1,
         InWork = 2,
+
+
         OrderLost = 8,
         OrderClosed = 9
     }

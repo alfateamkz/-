@@ -95,9 +95,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{0C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CurrencyRates", "CurrencyRates", "{03AD405F-EBD4-43CF-BF00-5CA23C447BDF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.Services.CurrencyRates.Models", "Alfateam.Services.CurrencyRates.Models\Alfateam.Services.CurrencyRates.Models.csproj", "{8776D9D9-E36F-42D9-B935-23CA00246832}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.Services.CurrencyRates.Models", "Alfateam.Services.CurrencyRates.Models\Alfateam.Services.CurrencyRates.Models.csproj", "{8776D9D9-E36F-42D9-B935-23CA00246832}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.Services.CurrencyRates.API", "Alfateam.Services.CurrencyRates.API\Alfateam.Services.CurrencyRates.API.csproj", "{2D8AFFC2-2C95-4555-9080-786C70C5D3E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.Services.CurrencyRates.API", "Alfateam.Services.CurrencyRates.API\Alfateam.Services.CurrencyRates.API.csproj", "{2D8AFFC2-2C95-4555-9080-786C70C5D3E5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.SharedModels", "Alfateam.SharedModels\Alfateam.SharedModels.csproj", "{F395256F-8E1C-4019-B2FF-54CEC2DDB5E1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.SMSGateways", "Alfateam.SMSGateways\Alfateam.SMSGateways.csproj", "{973B73AF-1E8F-4F25-9E46-F6743D724215}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.Telephony.Models", "Alfateam.Telephony.Models\Alfateam.Telephony.Models.csproj", "{4A96AE94-896F-4903-9CF7-DFE777DB38DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -221,6 +227,18 @@ Global
 		{2D8AFFC2-2C95-4555-9080-786C70C5D3E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D8AFFC2-2C95-4555-9080-786C70C5D3E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2D8AFFC2-2C95-4555-9080-786C70C5D3E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F395256F-8E1C-4019-B2FF-54CEC2DDB5E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F395256F-8E1C-4019-B2FF-54CEC2DDB5E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F395256F-8E1C-4019-B2FF-54CEC2DDB5E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F395256F-8E1C-4019-B2FF-54CEC2DDB5E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{973B73AF-1E8F-4F25-9E46-F6743D724215}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{973B73AF-1E8F-4F25-9E46-F6743D724215}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{973B73AF-1E8F-4F25-9E46-F6743D724215}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{973B73AF-1E8F-4F25-9E46-F6743D724215}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A96AE94-896F-4903-9CF7-DFE777DB38DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A96AE94-896F-4903-9CF7-DFE777DB38DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A96AE94-896F-4903-9CF7-DFE777DB38DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A96AE94-896F-4903-9CF7-DFE777DB38DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -251,6 +269,7 @@ Global
 		{03AD405F-EBD4-43CF-BF00-5CA23C447BDF} = {0C24D02A-0C27-4CA4-9511-C8DBB13C9FD5}
 		{8776D9D9-E36F-42D9-B935-23CA00246832} = {03AD405F-EBD4-43CF-BF00-5CA23C447BDF}
 		{2D8AFFC2-2C95-4555-9080-786C70C5D3E5} = {03AD405F-EBD4-43CF-BF00-5CA23C447BDF}
+		{4A96AE94-896F-4903-9CF7-DFE777DB38DD} = {BA742C09-8E0E-489C-B80F-B70CA96C6E34}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {91AE9782-0D3F-4611-8C40-D29647166E70}

@@ -3,6 +3,7 @@ using Alfateam.Website.API.Abstractions;
 using Alfateam.Core.Attributes.DTO;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.Team;
+using Alfateam.Website.API.Models.DTO.ContentItems;
 
 namespace Alfateam.Website.API.Models.DTO.Team
 {
@@ -24,7 +25,7 @@ namespace Alfateam.Website.API.Models.DTO.Team
         public string Slug => SlugHelper.GetLatynSlug($"{Surname} {Name} - {Position}");
 
 
-        public Content DetailContent { get; set; }
+        public ContentDTO DetailContent { get; set; }
         [ForClientOnly]
         public string? CVFilepath { get; set; }
 

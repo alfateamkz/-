@@ -4,6 +4,7 @@ using Alfateam.Core.Attributes.DTO;
 using Alfateam.Website.API.Models.DTO.Posts;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.Posts;
+using Alfateam.Website.API.Models.DTO.ContentItems;
 
 namespace Alfateam.Website.API.Models.DTO.Posts
 {
@@ -14,7 +15,7 @@ namespace Alfateam.Website.API.Models.DTO.Posts
         [ForClientOnly]
         public string ImgPath { get; set; }
         public string ShortDescription { get; set; }
-        public Content Content { get; set; }
+        public ContentDTO Content { get; set; }
 
         [ForClientOnly]
         public string Slug => SlugHelper.GetLatynSlug(Title);

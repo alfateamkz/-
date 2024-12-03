@@ -13,6 +13,9 @@ namespace Alfateam2._0.Models.ContentItems
         public string? Title { get; set; }
         public string? Description { get; set; }
 
+
+
+
         public override bool AreSame(ContentItem other)
         {
             var areSame = base.AreSame(other);

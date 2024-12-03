@@ -29,7 +29,7 @@ namespace Alfateam.Website.API.Services.General
             }
 
             var oldContentItems = GetAllContentItems(oldContent);
-            var newContentItems = GetAllContentItems(oldContent);
+            var newContentItems = GetAllContentItems(newContent);
 
 
             var deletedContentItems = new List<ContentItem>();
@@ -52,28 +52,28 @@ namespace Alfateam.Website.API.Services.General
             }
 
 
-            foreach (var item in deletedContentItems)
-            {
-                if (item is AudioContentItem audio)
-                {
-                    File.Delete(Path.Combine(AppEnvironment.WebRootPath, audio.AudioPath));
-                }
-                else if (item is ImageContentItem image)
-                {
-                    File.Delete(Path.Combine(AppEnvironment.WebRootPath, image.ImgPath));
-                }
-                else if (item is ImageSliderContentItem slider)
-                {
-                    foreach (var img in slider.Images)
-                    {
-                        File.Delete(Path.Combine(AppEnvironment.WebRootPath, img.ImgPath));
-                    }
-                }
-                else if (item is VideoContentItem video)
-                {
-                    File.Delete(Path.Combine(AppEnvironment.WebRootPath, video.VideoPath));
-                }
-            }
+            //foreach (var item in deletedContentItems)
+            //{
+            //    if (item is AudioContentItem audio)
+            //    {
+            //        File.Delete(Path.Combine(AppEnvironment.WebRootPath, audio.AudioPath));
+            //    }
+            //    else if (item is ImageContentItem image)
+            //    {
+            //        File.Delete(Path.Combine(AppEnvironment.WebRootPath, image.ImgPath));
+            //    }
+            //    else if (item is ImageSliderContentItem slider)
+            //    {
+            //        foreach (var img in slider.Images)
+            //        {
+            //            File.Delete(Path.Combine(AppEnvironment.WebRootPath, img.ImgPath));
+            //        }
+            //    }
+            //    else if (item is VideoContentItem video)
+            //    {
+            //        File.Delete(Path.Combine(AppEnvironment.WebRootPath, video.VideoPath));
+            //    }
+            //}
 
             foreach (var item in newCreatedContentItems)
             {
@@ -119,7 +119,7 @@ namespace Alfateam.Website.API.Services.General
                 {
                     foreach (var img in slider.Images)
                     {
-                        img.ImgPath = TryUploadFile(item.Guid, FileType.Image);
+                        img.ImgPath = TryUploadFile(img.Guid, FileType.Image);
                     }
                 }
                 else if (item is VideoContentItem video)
@@ -133,7 +133,7 @@ namespace Alfateam.Website.API.Services.General
 
         private IEnumerable<ContentItem> GetAllContentItems(Content content)
         {
-            var contentItems = content.Items;
+            var contentItems = new List<ContentItem>(content.Items);
 
             foreach (var item in content.Items.Where(o => o is ImageSliderContentItem).Cast<ImageSliderContentItem>())
             {

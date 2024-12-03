@@ -28,6 +28,8 @@ using Alfateam.Core.Exceptions;
 using Alfateam.Core.Enums;
 using Swashbuckle.AspNetCore.Annotations;
 using Alfateam.Core;
+using Alfateam.Core.Helpers;
+using Alfateam.Website.API.Helpers;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -127,7 +129,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             var item = GetAvailablePartners().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return (PartnerDTO)DbService.TryUpdateEntity(DB.Partners, model, item, (entity) =>
             {
-                HandlePartner(entity, DBModelFillMode.Update, model.Content);
+                HandlePartner(entity, DBModelFillMode.Update, model.Content.CreateDBModelFromDTO());
             });
         }
 
@@ -140,7 +142,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
             return (PartnerLocalizationDTO)DbService.TryUpdateLocalizationEntity(DB.PartnerLocalizations, localization, model, mainEntity, (entity) =>
             {
-                HandlePartnerLocalization(entity, DBModelFillMode.Update, model.Content);
+                HandlePartnerLocalization(entity, DBModelFillMode.Update, model.Content.CreateDBModelFromDTO());
             });
         }
 
@@ -236,14 +238,19 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         #region Private get included methods
 
-        private IQueryable<Partner> GetPartnersIncluded()
+        private IEnumerable<Partner> GetPartnersIncluded()
         {
-            return DB.Partners.IncludeAvailability()
-                              .Include(o => o.Content).ThenInclude(o => o.Items)
-                              .Include(o => o.Localizations).ThenInclude(o => o.Content).ThenInclude(o => o.Items)
-                              .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
-                              .Include(o => o.MainLanguage)
-                              .Where(o => !o.IsDeleted);
+            var items = DB.Partners.IncludeAvailability()
+                                   .Include(o => o.Content).ThenInclude(o => o.Items)
+                                   .Include(o => o.Localizations).ThenInclude(o => o.Content).ThenInclude(o => o.Items)
+                                   .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
+                                   .Include(o => o.MainLanguage)
+                                   .Where(o => !o.IsDeleted)
+                                   .ToList();
+
+            ContentIncludeHelper.IncludeHierarchy(DB, items.Select(o => o.Content));
+            ContentIncludeHelper.IncludeHierarchy(DB, items.SelectMany(o => o.Localizations).Select(o => o.Content));
+            return items;
         }
 
         #endregion

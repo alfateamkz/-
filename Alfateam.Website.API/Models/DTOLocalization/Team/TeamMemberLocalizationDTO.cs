@@ -2,6 +2,7 @@
 using Alfateam.Core.Attributes.DTO;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.Localization.Items.Team;
+using Alfateam.Website.API.Models.DTO.ContentItems;
 
 namespace Alfateam.Website.API.Models.DTOLocalization.Team
 {
@@ -16,7 +17,7 @@ namespace Alfateam.Website.API.Models.DTOLocalization.Team
         public string Quote { get; set; }
 
 
-        public Content DetailContent { get; set; }
+        public ContentDTO DetailContent { get; set; }
         [ForClientOnly]
         public string? CVFilepath { get; set; }
     }

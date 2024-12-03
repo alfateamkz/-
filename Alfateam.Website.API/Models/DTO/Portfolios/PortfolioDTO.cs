@@ -4,6 +4,7 @@ using Alfateam.Core.Attributes.DTO;
 using Alfateam.Website.API.Models.DTO.Portfolios;
 using Alfateam2._0.Models.ContentItems;
 using Alfateam2._0.Models.Portfolios;
+using Alfateam.Website.API.Models.DTO.ContentItems;
 
 namespace Alfateam.Website.API.Models.DTO.Portfolios
 {
@@ -13,7 +14,7 @@ namespace Alfateam.Website.API.Models.DTO.Portfolios
         [ForClientOnly]
         public string ImgPath { get; set; }
         public string ShortDescription { get; set; }
-        public Content Content { get; set; }
+        public ContentDTO Content { get; set; }
 
 
 

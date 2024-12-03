@@ -43,6 +43,7 @@ using Alfateam.Website.API.Filters.AdminSearch;
 using Alfateam.Website.API.Models.Filters.Admin.AdminSearch;
 using Alfateam.Core;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Alfateam2._0.Models.Promocodes;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -801,7 +802,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
         private IEnumerable<Promocode> GetAvailablePromocodes()
         {
-            return DbService.GetAvailableModels(this.Session.User, GetPromocodesList()).Cast<Promocode>();
+            return DbService.GetAvailableModels(this.Session.User, GetPromocodesFullIncludedList()).Cast<Promocode>();
         }
 
 
@@ -1022,24 +1023,33 @@ namespace Alfateam.Website.API.Controllers.Admin
         }
 
 
-
-        private IEnumerable<Promocode> GetPromocodesList()
-        {
-            return DB.Promocodes.IncludeAvailability()
-                                .Include(o => o.PriceFrom).ThenInclude(o => o.Costs)
-                                .Include(o => o.PriceTo).ThenInclude(o => o.Costs)
-                                .Where(o => !o.IsDeleted);
-        }
         private IEnumerable<Promocode> GetPromocodesFullIncludedList()
         {
-            return DB.Promocodes.IncludeAvailability()
-                                .Include(o => o.PriceFrom).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
-                                .Include(o => o.PriceFrom).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
-                                .Include(o => o.PriceTo).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
-                                .Include(o => o.PriceTo).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
-                                .Where(o => !o.IsDeleted);
+            var promocodes = DB.Promocodes.IncludeAvailability()
+                                          .Include(o => o.PriceFrom).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
+                                          .Include(o => o.PriceFrom).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
+                                          .Include(o => o.PriceTo).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
+                                          .Include(o => o.PriceTo).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
+                                          .Where(o => !o.IsDeleted)
+                                          .ToList();
+
+            IncludePromocodeItems(promocodes);
+            return promocodes;
         }
 
+
+        private void IncludePromocodeItems(IEnumerable<Promocode> promocodes)
+        {
+            foreach(var promocode in promocodes)
+            {
+                if(promocode is PricePromocode pricePromocode)
+                {
+                    pricePromocode.Discount = DB.PricingMatrices.Include(o => o.Costs).ThenInclude(o => o.Country)
+                                                                .Include(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
+                                                                .FirstOrDefault(o => o.Id == pricePromocode.DiscountId);
+                }
+            }
+        }
 
         #endregion
     }

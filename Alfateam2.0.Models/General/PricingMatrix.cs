@@ -15,6 +15,12 @@ namespace Alfateam2._0.Models.General
     {
         public List<PricingMatrixItem> Costs { get; set; } = new List<PricingMatrixItem>();
 
+
+
+
+
+
+
         public List<Cost> GetLocalCosts(int? countryId)
         {
             PricingMatrixItem found = null;
@@ -38,7 +44,6 @@ namespace Alfateam2._0.Models.General
             return found.Costs;
 
         }
-
         public Cost? GetPrice(int? countryId,int currencyId)
         {
             PricingMatrixItem countryItem = null;

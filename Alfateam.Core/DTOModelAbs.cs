@@ -293,6 +293,7 @@ namespace Alfateam.Website.API.Abstractions
             this.FillDBModel(newItem, DBModelFillMode.Create);
             newItem.Id = 0;
 
+
             return newItem;
         }
         public static IEnumerable<T> CreateDBModelsFromDTO(IEnumerable<DTOModelAbs<T>> models)
@@ -387,7 +388,7 @@ namespace Alfateam.Website.API.Abstractions
 
             foreach (DTOModelAbs dto in DTOs)
             {
-                var createdDbEntity = (AbsModel)dto.GetType().GetMethod("CreateDBModelFromDTO").Invoke(dto, Array.Empty<object>());
+                var createdDbEntity = (AbsModel)dto.GetType().GetMethod("CreateDBModelFromDTO").Invoke(dto, new object[] { });
                 itemSamePropValue.Add(createdDbEntity);
             }
         }
@@ -399,7 +400,7 @@ namespace Alfateam.Website.API.Abstractions
             }
             else if (mode == DBModelFillMode.Create)
             {
-                var createdDbEntity = dtoModelProp.GetValue(this).GetType().GetMethod("CreateDBModelFromDTO").Invoke(dtoModelProp.GetValue(this), Array.Empty<object>());
+                var createdDbEntity = dtoModelProp.GetValue(this).GetType().GetMethod("CreateDBModelFromDTO").Invoke(dtoModelProp.GetValue(this), new object[] {});
                 dbEntityProp.SetValue(dbEntity, createdDbEntity);
             }
         }
