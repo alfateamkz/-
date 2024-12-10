@@ -13,6 +13,8 @@ namespace Alfateam.Marketing.Models.Websites.SEO.Reports.WebsiteSEOAudit
         public List<WebsiteSEOAuditURLResponse> Responses { get; set; } = new List<WebsiteSEOAuditURLResponse>();
         public string ContentType { get; set; }
 
+
+
         public List<WebsiteSEOAuditURLError> Errors { get; set; } = new List<WebsiteSEOAuditURLError>();
         public int ServerResponseTimeInMs { get; set; }
         public double? InternalPageRank { get; set; }

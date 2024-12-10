@@ -19,6 +19,7 @@ namespace Alfateam.Sales.API.Models.DTO.General
 
 
         [Description("Головное ли подразделение. Если да, то оно не может быть удалено")]
+        [ForClientOnly]
         public bool IsRoot { get; set; }
     }
 }

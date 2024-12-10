@@ -21,6 +21,10 @@ namespace Alfateam.Marketing.Models.Abstractions
     [JsonKnownType(typeof(SMSLetteringCampaign), "SMSLetteringCampaign")]
     public class LetteringCampaign : AbsModel
     {
+        [JsonProperty("discriminator")]
+        public string Discriminator { get; set; }
+
+
         public string Title { get; set; }
 
         public List<Segment> IncludedSegments { get; set; } = new List<Segment>();

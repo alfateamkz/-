@@ -9,6 +9,11 @@ namespace Alfateam.Telephony.Models.General.WorkingDays
 {
     public class WorkingDaysModel : AbsModel
     {
+        public WorkingDaysModel() : this(false)
+        {
+
+        }
+
         public WorkingDaysModel(bool createModels = false)
         {
             if (createModels)

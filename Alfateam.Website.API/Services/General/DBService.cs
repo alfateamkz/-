@@ -105,6 +105,7 @@ namespace Alfateam.Website.API.Services.General
             DB.SaveChanges();
 
             model.Id = dbModel.Id;
+            model.CreatedAt = dbModel.CreatedAt;
             return model;
         }
 
@@ -134,6 +135,9 @@ namespace Alfateam.Website.API.Services.General
 
 
             UpdateEntity(parentEntityDbSet, parentEntity);
+
+            model.Id = dbLocalizationModel.Id;
+            model.CreatedAt = dbLocalizationModel.CreatedAt;
 
             return model;
         }
@@ -252,7 +256,12 @@ namespace Alfateam.Website.API.Services.General
         }
         public AvailabilityDTO TryUpdateAvailability(AvailabilityDTO model, Session session)
         {
-            var availability = DB.Availabilities.FirstOrDefault(o => o.Id == model.Id);
+            var availability = DB.Availabilities.Include(o => o.AllowedCountries)
+                                                .Include(o => o.DisallowedCountries)
+                                                .FirstOrDefault(o => o.Id == model.Id);
+
+            availability.AllowedCountries.Clear();
+            availability.DisallowedCountries.Clear();
 
             model.SetDBContext(DB);
             model.FillDBModel(availability, DBModelFillMode.Update);

@@ -15,6 +15,7 @@ namespace Alfateam.Marketing.Models.Websites
 
 
         public WebsiteGroup Group { get; set; }
+        public int GroupId { get; set; }
 
 
         public List<WebsiteOnlineInfo> OnlineInfo { get; set; } = new List<WebsiteOnlineInfo>();

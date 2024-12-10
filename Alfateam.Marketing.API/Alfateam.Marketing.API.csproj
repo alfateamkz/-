@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\ExternalInteractions\" />
+    <Folder Include="Controllers\Integrations\" />
+    <Folder Include="Controllers\SEO\" />
+    <Folder Include="Controllers\SMM\" />
+    <Folder Include="Controllers\Owner\" />
+    <Folder Include="Models\DTO\ExternalInteractions\" />
+    <Folder Include="Models\DTO\General\CompanySettings\" />
+    <Folder Include="Models\DTO\Integrations\Metrics\Apps\" />
+    <Folder Include="Models\DTO\Integrations\Metrics\Websites\" />
+    <Folder Include="Models\DTO\Integrations\SMM\" />
+    <Folder Include="Models\DTO\Integrations\SEO\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Alfateam.DB\Alfateam.DB.csproj" />
+    <ProjectReference Include="..\Alfateam.Gateways\Alfateam.Gateways.csproj" />
+  </ItemGroup>
+
+</Project>

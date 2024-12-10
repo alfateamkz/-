@@ -14,7 +14,7 @@ namespace Alfateam.Marketing.Models.Referral.Items
 
 
         public double Percent { get; set; }
-        public double Treshold { get; set; }
+        public double Threshold { get; set; }
 
     }
 }

@@ -381,13 +381,39 @@ namespace Alfateam.Website.API.Controllers.Admin
                 return entity.Title.Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
             });
         }
-
-
         [HttpGet, Route("GetTimezone")]
         public async Task<TimezoneDTO> GetTimezone(int id)
         {
             return (TimezoneDTO)DbService.TryGetOne(GetTimezonesList(), id, new TimezoneDTO());
         }
+
+
+
+
+
+
+        [HttpGet, Route("GetTimezoneLocalizations")]
+        public async Task<IEnumerable<TimezoneLocalizationDTO>> GetTimezoneLocalizations(int id)
+        {
+            var localizations = DB.TimezoneLocalizations.Include(o => o.LanguageEntity).Where(o => o.TimeZoneId == id && !o.IsDeleted);
+            var mainEntity = GetTimezonesList().FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+
+            return DbService.GetLocalizationModels(localizations, mainEntity, new TimezoneLocalizationDTO()).Cast<TimezoneLocalizationDTO>();
+        }
+
+        [HttpGet, Route("GetTimezoneLocalization")]
+        public async Task<TimezoneLocalizationDTO> GetTimezoneLocalization(int id)
+        {
+            var localization = DB.TimezoneLocalizations.Include(o => o.LanguageEntity).FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            var mainEntity = GetTimezonesList().FirstOrDefault(o => o.Id == localization?.TimeZoneId && !o.IsDeleted);
+
+            return (TimezoneLocalizationDTO)DbService.GetLocalizationModel(localization, mainEntity, new TimezoneLocalizationDTO());
+        }
+
+
+
+
+      
 
 
 
@@ -456,6 +482,13 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         #endregion
+
+
+
+
+
+
+
 
 
         #region Private handle methods

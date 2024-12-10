@@ -112,6 +112,7 @@ namespace Alfateam.Core.Services
             dbSet.Add(dbModel);
             DB.SaveChanges();
             model.Id = dbModel.Id;
+            model.CreatedAt = dbModel.CreatedAt;
 
             afterSuccessCallback?.Invoke(dbModel);
 

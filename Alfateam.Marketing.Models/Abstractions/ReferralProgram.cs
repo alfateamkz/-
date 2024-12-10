@@ -21,6 +21,10 @@ namespace Alfateam.Marketing.Models.Abstractions
     [JsonKnownType(typeof(SimpleReferralProgram), "SimpleReferralProgram")]
     public class ReferralProgram : AbsModel
     {
+        [JsonProperty("discriminator")]
+        public string Discriminator { get; set; }
+
+
         public string Title { get; set; }
         public string? Description { get; set; }
 

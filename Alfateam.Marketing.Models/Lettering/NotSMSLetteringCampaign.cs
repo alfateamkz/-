@@ -11,5 +11,6 @@ namespace Alfateam.Marketing.Models.Lettering
     public class NotSMSLetteringCampaign : LetteringCampaign
     {
         public MailingAccount Account { get; set; }
+        public int AccountId { get; set; }
     }
 }
