@@ -15,6 +15,8 @@ namespace Alfateam.Marketing.Models
 
 
 
+        public bool FromAlfateamSalesCRM { get; set; }
+
 
         /// <summary>
         /// Автоматическое поле

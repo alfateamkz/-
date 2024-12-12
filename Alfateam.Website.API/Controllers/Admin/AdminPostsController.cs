@@ -107,7 +107,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreatePostLocalization")]
         [CheckContentAreaRights(ContentAccessModelType.Posts, 3)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
-        public async Task<PostLocalizationDTO> CreatePostLocalization(int itemId, [FromForm(Name = "localization")] PostLocalizationDTO localization)
+        public async Task<PostLocalizationDTO> CreatePostLocalization(int itemId, [FromForm(Name = "model")] PostLocalizationDTO localization)
         {
             var mainEntity = GetAvailablePosts().FirstOrDefault(o => o.Id == itemId);
             return (PostLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.Posts, mainEntity, localization, (entity) =>

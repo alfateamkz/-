@@ -103,7 +103,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreatePortfolioLocalization")]
         [CheckContentAreaRights(ContentAccessModelType.Portfolio, 3)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
-        public async Task<PortfolioLocalizationDTO> CreatePortfolioLocalization(int itemId, [FromForm(Name = "localization")] PortfolioLocalizationDTO localization)
+        public async Task<PortfolioLocalizationDTO> CreatePortfolioLocalization(int itemId, [FromForm(Name = "model")] PortfolioLocalizationDTO localization)
         {
             var mainEntity = GetAvailablePortfolio().FirstOrDefault(o => o.Id == itemId);
             return (PortfolioLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.Portfolios, mainEntity, localization, (entity) =>

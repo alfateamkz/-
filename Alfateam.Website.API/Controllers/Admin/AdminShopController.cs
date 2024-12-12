@@ -120,7 +120,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreateProductLocalization")]
         [ShopSectionAccess(6)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg (опционально)")]
-        public async Task<ShopProductLocalizationDTO> CreateProductCategoryLocalization(int itemId, [FromForm(Name = "localization")] ShopProductLocalizationDTO localization)
+        public async Task<ShopProductLocalizationDTO> CreateProductCategoryLocalization(int itemId, [FromForm(Name = "model")] ShopProductLocalizationDTO localization)
         {
             var mainEntity = GetAvailableShopProducts().FirstOrDefault(o => o.Id == itemId);
             return (ShopProductLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.ShopProducts, mainEntity, localization, (entity) =>

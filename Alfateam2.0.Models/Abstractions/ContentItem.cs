@@ -25,7 +25,7 @@ namespace Alfateam2._0.Models.Abstractions
     /// </summary>
     public class ContentItem : AbsModel
     {
-        public string Guid { get; set; } = System.Guid.NewGuid().ToString();
+        public string Guid { get; set; } /*= System.Guid.NewGuid().ToString();*/
 
         [JsonProperty("discriminator")]
         public string Discriminator { get; set; }

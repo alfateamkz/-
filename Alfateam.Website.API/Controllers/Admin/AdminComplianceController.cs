@@ -110,7 +110,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("CreateComplianceDocumentLocalization")]
         [CheckContentAreaRights(ContentAccessModelType.Compliance, 3)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем previewImg и документ с именем docFile")]
-        public async Task<ComplianceDocumentLocalizationDTO> CreateComplianceDocumentLocalization(int itemId, [FromForm(Name = "localization")] ComplianceDocumentLocalizationDTO localization)
+        public async Task<ComplianceDocumentLocalizationDTO> CreateComplianceDocumentLocalization(int itemId, [FromForm(Name = "model")] ComplianceDocumentLocalizationDTO localization)
         {
             var mainEntity = GetAvailableComplianceDocuments().FirstOrDefault(o => o.Id == itemId);
             return (ComplianceDocumentLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.ComplianceDocuments, mainEntity, localization, (entity) =>
@@ -220,7 +220,7 @@ namespace Alfateam.Website.API.Controllers.Admin
               || mode == DBModelFillMode.Create)
             {
                 entity.DocumentPath = FilesService.TryUploadFile(docFileName, FileType.Document);
-                entity.KBSize = FilesService.GetFileSizeInBytes(entity.DocumentPath) * 1024;
+                entity.KBSize = FilesService.GetFileSizeInBytes(entity.DocumentPath) / 1024;
             }
         }
         private void HandleComplianceDocumentLocalization(ComplianceDocumentLocalization entity, DBModelFillMode mode)

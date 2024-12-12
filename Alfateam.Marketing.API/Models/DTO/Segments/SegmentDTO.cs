@@ -2,6 +2,7 @@
 using Alfateam.Marketing.Models;
 using Alfateam.Marketing.Models.Segments;
 using Alfateam.Website.API.Abstractions;
+using Alfateam.Marketing.API.Models.DTO.Filters;
 
 namespace Alfateam.Marketing.API.Models.DTO.Segments
 {

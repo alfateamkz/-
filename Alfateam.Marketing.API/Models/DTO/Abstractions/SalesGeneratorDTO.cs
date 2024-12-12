@@ -1,4 +1,5 @@
 ﻿using Alfateam.Marketing.API.Models.DTO.SalesGenerators;
+using Alfateam.Marketing.API.Models.DTO.SalesGenerators.Items;
 using Alfateam.Marketing.API.Models.DTO.Segments;
 using Alfateam.Marketing.Models.Abstractions;
 using Alfateam.Marketing.Models.SalesGenerators;

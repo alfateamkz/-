@@ -10,10 +10,12 @@ using Alfateam.Marketing.Models.Filters.Items.Customers;
 using Alfateam.Marketing.Models.Filters.Items.Leads;
 using Alfateam.Marketing.Models.Filters.Items.Orders;
 using Alfateam.Marketing.Models.General;
+using Alfateam.Marketing.Models.General.Security;
 using Alfateam.Marketing.Models.General.SEO;
 using Alfateam.Marketing.Models.General.SEO.UserAgents;
 using Alfateam.Marketing.Models.Integrations.API;
 using Alfateam.Marketing.Models.Lettering.Items;
+using Alfateam.Marketing.Models.MailingAccounts;
 using Alfateam.Marketing.Models.Referral.Items;
 using Alfateam.Marketing.Models.Referral.Main;
 using Alfateam.Marketing.Models.SalesGenerators.Items;
@@ -80,6 +82,7 @@ namespace Alfateam.DB
         #endregion
 
         #region Autoposting
+        public DbSet<AutopostingAccountCategory> AutopostingAccountCategories { get; set; }
         public DbSet<ContentPlan> ContentPlans { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<PostAttachment> PostAttachments { get; set; }
@@ -119,6 +122,13 @@ namespace Alfateam.DB
 
         #region General
 
+        #region Security
+
+        public DbSet<HistoryAction> HistoryActions { get; set; }
+        public DbSet<UserPermissions> UserPermissions { get; set; }
+
+        #endregion
+
         #region SEO
 
         #region UserAgents
@@ -156,6 +166,12 @@ namespace Alfateam.DB
         public DbSet<LetteringSentResult> LetteringSentResults { get; set; }
 
         #endregion
+
+        #endregion
+
+        #region MailingAccounts
+
+        public DbSet<MailingAccountCategory> MailingAccountCategories { get; set; }
 
         #endregion
 

@@ -2,6 +2,7 @@
 using Alfateam.Marketing.API.Models.DTO.Lettering;
 using Alfateam.Marketing.API.Models.DTO.Segments;
 using Alfateam.Marketing.Models.Abstractions;
+using Alfateam.Marketing.Models.Enums;
 using Alfateam.Marketing.Models.Lettering;
 using Alfateam.Marketing.Models.Lettering.Items;
 using Alfateam.Marketing.Models.Segments;
@@ -20,6 +21,10 @@ namespace Alfateam.Marketing.API.Models.DTO.Abstractions
     {
         [JsonProperty("discriminator")]
         public string Discriminator { get; set; }
+
+
+        [ForClientOnly]
+        public LetteringStatus Status { get; set; }
 
 
         public string Title { get; set; }

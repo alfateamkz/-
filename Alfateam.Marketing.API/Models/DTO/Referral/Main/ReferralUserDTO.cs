@@ -8,6 +8,9 @@ namespace Alfateam.Marketing.API.Models.DTO.Referral.Main
     public class ReferralUserDTO : DTOModelAbs<ReferralUser>
     {
 
+        //TODO: подстановка имени и т.д., как в обычном юзере
+
+
         [ForClientOnly]
         [Description("Рефералы реферала")]
         public List<ReferralUserDTO> Referrals { get; set; } = new List<ReferralUserDTO>();

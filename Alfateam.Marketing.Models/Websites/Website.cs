@@ -19,5 +19,17 @@ namespace Alfateam.Marketing.Models.Websites
 
 
         public List<WebsiteOnlineInfo> OnlineInfo { get; set; } = new List<WebsiteOnlineInfo>();
+
+
+
+
+
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int BusinessCompanyId { get; set; }
     }
 }

@@ -11,5 +11,12 @@ namespace Alfateam.Marketing.Models.Referral.Main
     {
         public DateTime BannedBefore { get; set; }
         public string? BanReason { get; set; }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int ReferralUserId { get; set; }
     }
 }

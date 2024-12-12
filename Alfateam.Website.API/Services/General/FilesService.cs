@@ -45,9 +45,32 @@ namespace Alfateam.Website.API.Services.General
 
             foreach (var newItem in newContentItems)
             {
-                if (!oldContentItems.Any(o => o.Guid == newItem.Guid))
+                var old = oldContentItems.FirstOrDefault(o => o.Guid == newItem.Guid);
+                if (old == null)
                 {
                     newCreatedContentItems.Add(newItem);
+                }
+                else
+                {
+                    if (old is AudioContentItem audio)
+                    {
+                        (newItem as AudioContentItem).AudioPath = audio.AudioPath;
+                    }
+                    else if (old is ImageContentItem image)
+                    {
+                        (newItem as ImageContentItem).ImgPath = image.ImgPath;
+                    }
+                    //else if (item is ImageSliderContentItem slider)
+                    //{
+                    //    foreach (var img in slider.Images)
+                    //    {
+                    //        img.ImgPath = TryUploadFile(item.Guid, FileType.Image);
+                    //    }
+                    //}
+                    else if (old is VideoContentItem video)
+                    {
+                        (newItem as VideoContentItem).VideoPath = video.VideoPath;
+                    }
                 }
             }
 

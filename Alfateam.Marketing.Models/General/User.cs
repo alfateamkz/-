@@ -26,5 +26,14 @@ namespace Alfateam.Marketing.Models.General
 
         public UserPermissions Permissions { get; set; }
         public bool IsBlocked { get; set; }
+
+
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int BusinessCompanyId { get; set; }
     }
 }

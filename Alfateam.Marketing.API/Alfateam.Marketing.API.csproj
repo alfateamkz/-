@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.7.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -15,7 +16,7 @@
     <Folder Include="Controllers\Integrations\" />
     <Folder Include="Controllers\SEO\" />
     <Folder Include="Controllers\SMM\" />
-    <Folder Include="Controllers\Owner\" />
+    <Folder Include="Controllers\Websites\SEO\" />
     <Folder Include="Models\DTO\ExternalInteractions\" />
     <Folder Include="Models\DTO\General\CompanySettings\" />
     <Folder Include="Models\DTO\Integrations\Metrics\Apps\" />
@@ -27,6 +28,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Alfateam.DB\Alfateam.DB.csproj" />
     <ProjectReference Include="..\Alfateam.Gateways\Alfateam.Gateways.csproj" />
+    <ProjectReference Include="..\Alfateam.Marketing.Autoposting.Lib\Alfateam.Marketing.Autoposting.Lib.csproj" />
+    <ProjectReference Include="..\Alfateam.Marketing.Lettering.Lib\Alfateam.Marketing.Lettering.Lib.csproj" />
   </ItemGroup>
 
 </Project>

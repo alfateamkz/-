@@ -110,7 +110,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем localization_{languageEntityId}_mainImg")]
         [HttpPost, Route("CreateEventLocalization")]
         [CheckContentAreaRights(ContentAccessModelType.Events, 3)]
-        public async Task<EventLocalizationDTO> CreateEventLocalization(int itemId, [FromForm(Name = "localization")] EventLocalizationDTO localization)
+        public async Task<EventLocalizationDTO> CreateEventLocalization(int itemId, [FromForm(Name = "model")] EventLocalizationDTO localization)
         {
             var mainEntity = GetAvailableEvents().FirstOrDefault(o => o.Id == itemId);
             return (EventLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.Events, mainEntity, localization, (entity) =>

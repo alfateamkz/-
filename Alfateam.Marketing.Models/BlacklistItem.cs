@@ -16,6 +16,7 @@ namespace Alfateam.Marketing.Models
 
 
 
+
         /// <summary>
         /// Автоматическое поле
         /// </summary>

@@ -1,4 +1,5 @@
 ﻿using Alfateam.Core;
+using Alfateam.Marketing.Models.Enums;
 using Alfateam.Marketing.Models.ExternalInteractions;
 using Alfateam.Marketing.Models.Lettering;
 using Alfateam.Marketing.Models.Lettering.Items;
@@ -24,6 +25,8 @@ namespace Alfateam.Marketing.Models.Abstractions
         [JsonProperty("discriminator")]
         public string Discriminator { get; set; }
 
+
+        public LetteringStatus Status { get; set; }
 
         public string Title { get; set; }
 

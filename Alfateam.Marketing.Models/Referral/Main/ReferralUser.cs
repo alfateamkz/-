@@ -28,5 +28,15 @@ namespace Alfateam.Marketing.Models.Referral.Main
         /// Информация о бане реферала, если он забанен
         /// </summary>
         public ReferralBanInfo? BanInfo { get; set; }
+        public int? BanInfoId { get; set; }
+
+
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int ReferralProgramId { get; set; }
     }
 }

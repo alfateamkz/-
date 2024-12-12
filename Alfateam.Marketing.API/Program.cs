@@ -1,4 +1,6 @@
 
+using Alfateam.Marketing.API.HostedServices;
+
 namespace Alfateam.Marketing.API
 {
     public class Program
@@ -27,6 +29,9 @@ namespace Alfateam.Marketing.API
 
             app.UseAuthorization();
 
+
+            builder.Services.AddHostedService<AutopostingHostedService>();
+            builder.Services.AddHostedService<WebsiteOnlinePingHostedService>();
 
             app.MapControllers();
 

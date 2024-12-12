@@ -15,7 +15,19 @@ namespace Alfateam.Marketing.Models.Autoposting
 
 
 
+        public bool IsActive { get; set; } = true;
+
+
+
         public List<AutopostingAccount> Accounts { get; set; } = new List<AutopostingAccount>();
         public List<Post> Posts { get; set; } = new List<Post>();
+
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int BusinessCompanyId { get; set; }
     }
 }

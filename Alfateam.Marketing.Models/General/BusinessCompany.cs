@@ -57,5 +57,13 @@ namespace Alfateam.Marketing.Models.General
 
         public List<MarketingContact> MarketingContacts { get; set; } = new List<MarketingContact>();
         public List<BlacklistItem> BlacklistItems { get; set; } = new List<BlacklistItem>();
+
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int BusinessId { get; set; }
     }
 }

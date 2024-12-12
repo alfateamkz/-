@@ -10,5 +10,11 @@ namespace Alfateam.Marketing.Models.Websites
     public class WebsiteGroup : AbsModel
     {
         public string Title { get; set; }
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int BusinessCompanyId { get; set; }
     }
 }

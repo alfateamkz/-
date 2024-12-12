@@ -9,10 +9,18 @@ namespace Alfateam.Marketing.Models.Websites.Stats
 {
     public class WebsiteOnlineInfo : AbsModel
     {
-        public DateTime PingedAt { get; set; }
+        public DateTime PingedAt { get; set; } = DateTime.UtcNow;
         public bool IsOnline { get; set; }
         
 
         public TimeSpan ResponseDuration { get; set; }
+
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int WebsiteId { get; set; }
     }
 }

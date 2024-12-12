@@ -69,41 +69,41 @@ namespace Alfateam.Website.API
             {
                 config.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Title = "Эта апишка для сайта и админки",
-                    Description = "Есть сущность Content. В ней есть ContentItems. Они есть нескольких типов: </br></br>" +
-                    "TextContentItem с полем Content. Сюда вставляется HTML контент из BBCode </br>" +
-                    "ImageContentItem - поля ImgPath(путь к картинке), Title и Description </br>" +
-                    "ImageSliderContentItem - поля Title, Description и Images(объекты ImageContentItem) </br>" +
-                    "VideoContentItem - поля VideoPath, Title, Description </br>" +
-                    "AudioContentItem - поля AudioPath, Title, Description </br></br>" +
+                    Title = "пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
+                    Description = "пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Content. пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ ContentItems. пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ: </br></br>" +
+                    "TextContentItem пїЅ пїЅпїЅпїЅпїЅпїЅ Content. пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ HTML пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ BBCode </br>" +
+                    "ImageContentItem - пїЅпїЅпїЅпїЅ ImgPath(пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ), Title пїЅ Description </br>" +
+                    "ImageSliderContentItem - пїЅпїЅпїЅпїЅ Title, Description пїЅ Images(пїЅпїЅпїЅпїЅпїЅпїЅпїЅ ImageContentItem) </br>" +
+                    "VideoContentItem - пїЅпїЅпїЅпїЅ VideoPath, Title, Description </br>" +
+                    "AudioContentItem - пїЅпїЅпїЅпїЅ AudioPath, Title, Description </br></br>" +
                     "" +
-                    "Во всех ContentItem имеется свойств Guid и Discriminator. Discriminator служит для указания типа, Guid для идентификации </br>" +
-                    "Guid задается с фронта. Для всех файлов контента(картинки, аудио, видео) при загрузки ставится Guid, по нему будет заливаться файл  </br>" +
-                    "При апдейте, если изменили файл, то меняем Guid. Если не меняли файл, то и не надо </br>" +
+                    "пїЅпїЅ пїЅпїЅпїЅпїЅ ContentItem пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ Guid пїЅ Discriminator. Discriminator пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, Guid пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ </br>" +
+                    "Guid пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ(пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ) пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Guid, пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ  </br>" +
+                    "пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ Guid. пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ </br>" +
                     "" +
                     "</br></br></br>" +
-                    "Любой ответ api оборачивается в следующую модель</br>" +
+                    "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ api пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ</br>" +
                     "{  </br>" +
                     "&emsp;\"success\": false,</br>" +
-                    "&emsp;\"error\": \"Сущность с данным id не найдена\",</br>" +
+                    "&emsp;\"error\": \"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ id пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ\",</br>" +
                     "&emsp;\"code\": 404,</br>" +
                     "&emsp;\"data\": null</br>" +
                     "}</br></br></br>" +
                     "" +
                     "" +
-                    "Сущность промокода. Есть нескольких типов</br></br>" +
-                    "PricePromocode - содержит валюту и сумму скидки</br>" +
-                    "PercentPromocodeDTO - содержит процент скидки</br>" +
-                    "Во всех Promocode имеется свойств Discriminator. Discriminator служит для указания типа </br>" +
+                    "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ</br></br>" +
+                    "PricePromocode - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ</br>" +
+                    "PercentPromocodeDTO - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ</br>" +
+                    "пїЅпїЅ пїЅпїЅпїЅпїЅ Promocode пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ Discriminator. Discriminator пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ </br>" +
                     "</br></br></br>" +
                     "" +
                     "" +
                     "" +
-                    "Сущность модификатора товара (ProductModifier)</br>" +
-                    "У него есть некоторые поля Type(Color,Combobox,CheckboxOrRadio), IsRequired и AllowMultipleSelection и Options(ProductModifierItem)</br>" +
-                    "ProductModifierItem есть нескольких типов</br>" +
-                    "ColorModifierItem - с полем ColorHex</br>" +
-                    "SimpleModifierItem - со стандартными полями в абстрактной сущности, а именно (Title, Pricing(PricingMatrix), Discriminator(для указания типа), MainLanguageId",
+                    "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (ProductModifier)</br>" +
+                    "пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ Type(Color,Combobox,CheckboxOrRadio), IsRequired пїЅ AllowMultipleSelection пїЅ Options(ProductModifierItem)</br>" +
+                    "ProductModifierItem пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ</br>" +
+                    "ColorModifierItem - пїЅ пїЅпїЅпїЅпїЅпїЅ ColorHex</br>" +
+                    "SimpleModifierItem - пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (Title, Pricing(PricingMatrix), Discriminator(пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ), MainLanguageId",
                     Version = "V1", });
                 config.EnableAnnotations();
 

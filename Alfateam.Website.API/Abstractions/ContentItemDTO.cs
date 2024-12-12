@@ -15,7 +15,7 @@ namespace Alfateam.Website.API.Abstractions
     [JsonKnownType(typeof(VideoContentItemDTO), "VideoContentItem")]
     public class ContentItemDTO : DTOModel<ContentItem>
     {
-        public string Guid { get; set; } = System.Guid.NewGuid().ToString();
+        public string Guid { get; set; }
 
         [JsonProperty("discriminator")]
         public string Discriminator { get; set; }

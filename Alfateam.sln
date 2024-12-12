@@ -105,9 +105,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.SMSGateways", "Alf
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.Telephony.Models", "Alfateam.Telephony.Models\Alfateam.Telephony.Models.csproj", "{4A96AE94-896F-4903-9CF7-DFE777DB38DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.Marketing.API", "Alfateam.Marketing.API\Alfateam.Marketing.API.csproj", "{A4F1CC5A-536A-48EC-905D-6575BDCD17F0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.Marketing.API", "Alfateam.Marketing.API\Alfateam.Marketing.API.csproj", "{A4F1CC5A-536A-48EC-905D-6575BDCD17F0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.Telephony.API", "Alfateam.Telephony.API\Alfateam.Telephony.API.csproj", "{02481846-0D33-4EF7-A7E1-87D27BC64B46}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.Telephony.API", "Alfateam.Telephony.API\Alfateam.Telephony.API.csproj", "{02481846-0D33-4EF7-A7E1-87D27BC64B46}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.Marketing.Autoposting.Lib", "Alfateam.Marketing.Autoposting.Lib\Alfateam.Marketing.Autoposting.Lib.csproj", "{DF8BA61D-9649-4F65-AB9F-3B78DA40D80A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.Marketing.Lettering.Lib", "Alfateam.Marketing.Lettering.Lib\Alfateam.Marketing.Lettering.Lib.csproj", "{F1BD9A99-949D-4AF4-A4C2-CF5836BE7306}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.Marketing.SEO.Lib", "Alfateam.Marketing.SEO.Lib\Alfateam.Marketing.SEO.Lib.csproj", "{2E6AFE61-E2B6-4E9B-AFDA-083DAD2F6D85}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -251,6 +257,18 @@ Global
 		{02481846-0D33-4EF7-A7E1-87D27BC64B46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02481846-0D33-4EF7-A7E1-87D27BC64B46}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02481846-0D33-4EF7-A7E1-87D27BC64B46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF8BA61D-9649-4F65-AB9F-3B78DA40D80A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF8BA61D-9649-4F65-AB9F-3B78DA40D80A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF8BA61D-9649-4F65-AB9F-3B78DA40D80A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF8BA61D-9649-4F65-AB9F-3B78DA40D80A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1BD9A99-949D-4AF4-A4C2-CF5836BE7306}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1BD9A99-949D-4AF4-A4C2-CF5836BE7306}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1BD9A99-949D-4AF4-A4C2-CF5836BE7306}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1BD9A99-949D-4AF4-A4C2-CF5836BE7306}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E6AFE61-E2B6-4E9B-AFDA-083DAD2F6D85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E6AFE61-E2B6-4E9B-AFDA-083DAD2F6D85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E6AFE61-E2B6-4E9B-AFDA-083DAD2F6D85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E6AFE61-E2B6-4E9B-AFDA-083DAD2F6D85}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -284,6 +302,9 @@ Global
 		{4A96AE94-896F-4903-9CF7-DFE777DB38DD} = {BA742C09-8E0E-489C-B80F-B70CA96C6E34}
 		{A4F1CC5A-536A-48EC-905D-6575BDCD17F0} = {ADCAFC78-69BA-434C-8C8B-40B27EFCD586}
 		{02481846-0D33-4EF7-A7E1-87D27BC64B46} = {BA742C09-8E0E-489C-B80F-B70CA96C6E34}
+		{DF8BA61D-9649-4F65-AB9F-3B78DA40D80A} = {ADCAFC78-69BA-434C-8C8B-40B27EFCD586}
+		{F1BD9A99-949D-4AF4-A4C2-CF5836BE7306} = {ADCAFC78-69BA-434C-8C8B-40B27EFCD586}
+		{2E6AFE61-E2B6-4E9B-AFDA-083DAD2F6D85} = {ADCAFC78-69BA-434C-8C8B-40B27EFCD586}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {91AE9782-0D3F-4611-8C40-D29647166E70}

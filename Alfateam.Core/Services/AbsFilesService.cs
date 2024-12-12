@@ -23,7 +23,7 @@ namespace Alfateam.Core.Services
 
         public long GetFileSizeInBytes(string filepath)
         {
-            return new FileInfo(AppEnvironment.WebRootPath + filepath).Length;
+            return new FileInfo(AppEnvironment.ContentRootPath + filepath).Length;
         }
 
 

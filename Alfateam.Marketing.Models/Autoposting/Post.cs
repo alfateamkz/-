@@ -20,6 +20,15 @@ namespace Alfateam.Marketing.Models.Autoposting
         
 
         public TimeSpan? DeleteIn { get; set; }
+        public DateTime? DeletedPostAtSourceAt { get; set; }
+
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int ContentPlanId { get; set; }
 
     }
 }

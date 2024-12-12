@@ -126,6 +126,7 @@ namespace Alfateam.DB
         #endregion
 
         #region Security
+        public DbSet<HistoryAction> HistoryActions { get; set; }
         public DbSet<UserPermissions> UserPermissions { get; set; }
 
         #endregion

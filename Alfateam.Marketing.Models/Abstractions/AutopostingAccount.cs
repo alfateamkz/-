@@ -1,8 +1,10 @@
 ﻿using Alfateam.Core;
 using Alfateam.Marketing.Models.Ads.Accounts;
+using Alfateam.Marketing.Models.Autoposting;
 using Alfateam.Marketing.Models.Autoposting.Accounts.Messengers;
 using Alfateam.Marketing.Models.Autoposting.Accounts.Resources;
 using Alfateam.Marketing.Models.Autoposting.Accounts.Social;
+using Alfateam.Marketing.Models.Enums;
 using JsonKnownTypes;
 using Newtonsoft.Json;
 using System;
@@ -28,5 +30,22 @@ namespace Alfateam.Marketing.Models.Abstractions
     {
         [JsonProperty("discriminator")]
         public string Discriminator { get; set; }
+
+
+        public string Title { get; set; }
+        public AutopostingAccountStatus Status { get; set; }
+
+
+
+        public AutopostingAccountCategory Category { get; set; }
+        public int CategoryId { get; set; }
+
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int BusinessCompanyId { get; set; }
     }
 }

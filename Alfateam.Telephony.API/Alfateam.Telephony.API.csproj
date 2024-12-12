@@ -11,7 +11,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
+    <Folder Include="Controllers\ATE\" />
+    <Folder Include="Controllers\Integrations\" />
+    <Folder Include="Controllers\Calls\" />
+    <Folder Include="Controllers\Owner\" />
     <Folder Include="Models\DTO\ATE\" />
     <Folder Include="Models\DTO\General\Numbers\" />
   </ItemGroup>
