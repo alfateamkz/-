@@ -7,22 +7,26 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AppsFlyerLib" Version="3.1.0" />
+    <PackageReference Include="Google.Apis.Analytics.v3" Version="1.68.0.1679" />
+    <PackageReference Include="Google.Apis.PagespeedInsights.v5" Version="1.68.0.3528" />
+    <PackageReference Include="Google.Apis.SearchConsole.v1" Version="1.68.0.3476" />
+    <PackageReference Include="GoogleTrendsDotNet" Version="1.0.25" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.10" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.7.3" />
+    <PackageReference Include="Yandex.Metrica" Version="3.5.1" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Controllers\ExternalInteractions\" />
-    <Folder Include="Controllers\Integrations\" />
+    <Folder Include="Controllers\Integrations\SMM\" />
     <Folder Include="Controllers\SEO\" />
     <Folder Include="Controllers\SMM\" />
     <Folder Include="Controllers\Websites\SEO\" />
     <Folder Include="Models\DTO\ExternalInteractions\" />
     <Folder Include="Models\DTO\General\CompanySettings\" />
-    <Folder Include="Models\DTO\Integrations\Metrics\Apps\" />
-    <Folder Include="Models\DTO\Integrations\Metrics\Websites\" />
     <Folder Include="Models\DTO\Integrations\SMM\" />
-    <Folder Include="Models\DTO\Integrations\SEO\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,6 +34,7 @@
     <ProjectReference Include="..\Alfateam.Gateways\Alfateam.Gateways.csproj" />
     <ProjectReference Include="..\Alfateam.Marketing.Autoposting.Lib\Alfateam.Marketing.Autoposting.Lib.csproj" />
     <ProjectReference Include="..\Alfateam.Marketing.Lettering.Lib\Alfateam.Marketing.Lettering.Lib.csproj" />
+    <ProjectReference Include="..\Alfateam.SharedModels.DTO\Alfateam.SharedModels.DTO.csproj" />
   </ItemGroup>
 
 </Project>

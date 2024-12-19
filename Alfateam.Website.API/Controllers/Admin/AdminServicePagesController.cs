@@ -283,7 +283,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("AddStackIcon")]
         [CheckContentAreaRights(ContentAccessModelType.Services, 4)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
-        public async Task AddStackIcon(int servicePageId)
+        public async Task<ServicePageStackIconDTO> AddStackIcon(int servicePageId)
         {
             var page = GetAvailableServicePages().FirstOrDefault(o => o.Id == servicePageId && !o.IsDeleted);
             if (page == null)
@@ -291,8 +291,10 @@ namespace Alfateam.Website.API.Controllers.Admin
                 throw new Exception404("Сущность по данному id не найдена");
             }
 
-            HandleServicePageAddStackIcon(page);
+            var icon = HandleServicePageAddStackIcon(page);
             DbService.UpdateEntity(DB.ServicePages, page);
+
+            return (ServicePageStackIconDTO)new ServicePageStackIconDTO().CreateDTO(icon);
         }
 
 
@@ -369,14 +371,16 @@ namespace Alfateam.Website.API.Controllers.Admin
                 entity.MainBlockImgPath = FilesService.TryUploadFile(formFilename, FileType.Image);
             }
         }
-        private void HandleServicePageAddStackIcon(ServicePage entity)
+        private ServicePageStackIcon HandleServicePageAddStackIcon(ServicePage entity)
         {
             const string formFilename = "mainImg";
 
-            entity.StackIcons.Add(new ServicePageStackIcon
+            var icon = new ServicePageStackIcon
             {
                 ImgPath = FilesService.TryUploadFile(formFilename, FileType.Image),
-            });
+            };
+            entity.StackIcons.Add(icon);
+            return icon;
         }
         private void HandleServicePageReview(ServicePageFakeReview entity, DBModelFillMode mode)
         {
@@ -402,24 +406,47 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Private get included methods
         private IEnumerable<ServicePage> GetServicePagesList()
         {
-            return DB.ServicePages.IncludeAvailability()
-                                  .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
-                                  .Include(o => o.Localizations).ThenInclude(o => o.ServiceRibbonItems)
-                                  .Include(o => o.Localizations).ThenInclude(o => o.Reviews)
-                                  .Include(o => o.MainLanguage)
-                                  .Include(o => o.ServiceRibbonItems)
-                                  .Include(o => o.StackIcons)
-                                  .Include(o => o.Reviews)
-                                  .Where(o => !o.IsDeleted)
-                                  .ToList();
+            var items = DB.ServicePages.IncludeAvailability()
+                                       .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
+                                       .Include(o => o.Localizations).ThenInclude(o => o.ServiceRibbonItems)
+                                       .Include(o => o.Localizations).ThenInclude(o => o.Reviews)
+                                       .Include(o => o.MainLanguage)
+                                       .Include(o => o.ServiceRibbonItems)
+                                       .Include(o => o.StackIcons)
+                                       .Include(o => o.Reviews)
+                                       .Where(o => !o.IsDeleted)
+                                       .ToList();
+            foreach(var item in items)
+            {
+                item.Localizations = item.Localizations.Where(o => !o.IsDeleted).ToList();
+                item.Reviews = item.Reviews.Where(o => !o.IsDeleted).ToList();
+                item.ServiceRibbonItems = item.ServiceRibbonItems.Where(o => !o.IsDeleted).ToList();
+                item.StackIcons = item.StackIcons.Where(o => !o.IsDeleted).ToList();
+
+                foreach(var localization in item.Localizations)
+                {
+                    localization.Reviews = localization.Reviews.Where(o => !o.IsDeleted).ToList();
+                    localization.ServiceRibbonItems = localization.ServiceRibbonItems.Where(o => !o.IsDeleted).ToList();
+                }
+            }
+
+            return items;
         }
         private IEnumerable<ServicePageLocalization> GetServicePageLocalizationsIncluded()
         {
-            return DB.ServicePageLocalizations.Include(o => o.LanguageEntity)
-                                              .Include(o => o.ServiceRibbonItems)
-                                              .Include(o => o.Reviews)
-                                              .Where(o => !o.IsDeleted)
-                                              .ToList();
+            var localizations = DB.ServicePageLocalizations.Include(o => o.LanguageEntity)
+                                                           .Include(o => o.ServiceRibbonItems)
+                                                           .Include(o => o.Reviews)
+                                                           .Where(o => !o.IsDeleted)
+                                                           .ToList();
+
+            foreach (var localization in localizations)
+            {
+                localization.Reviews = localization.Reviews.Where(o => !o.IsDeleted).ToList();
+                localization.ServiceRibbonItems = localization.ServiceRibbonItems.Where(o => !o.IsDeleted).ToList();
+            }
+
+            return localizations;
         }
 
         #endregion

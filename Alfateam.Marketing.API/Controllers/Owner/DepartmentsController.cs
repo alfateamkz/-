@@ -1,5 +1,6 @@
 ﻿using Alfateam.Core.Exceptions;
 using Alfateam.Marketing.API.Abstractions;
+using Alfateam.Marketing.API.Helpers;
 using Alfateam.Marketing.API.Models;
 using Alfateam.Marketing.API.Models.DTO.General;
 using Alfateam.Marketing.Models.General;

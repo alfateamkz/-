@@ -26,7 +26,7 @@ namespace Alfateam.Messenger.Models.DTO.Abstractions
     [JsonKnownType(typeof(VKAccountDTO), "VKAccount")]
     [JsonKnownType(typeof(AlfateamMessengerAccountDTO), "AlfateamMessengerAccount")]
     [JsonKnownType(typeof(EmailAccountDTO), "EmailAccount")]
-    public class AccountDTO : DTOModelAbs<MessengerMailingAccount>
+    public class AccountDTO : DTOModelAbs<Account>
     {
         public string Title { get; set; }
         public string? Description { get; set; }

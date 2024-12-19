@@ -130,6 +130,29 @@ namespace Alfateam.Marketing.API.Controllers.Referral
             return (ReferralAccountDTO)DBService.TryGetOne(user.Accounts, accountId, new ReferralAccountDTO());
         }
 
+
+
+
+        [HttpGet, Route("GetTransactions")]
+        public async Task<ItemsWithTotalCount<ReferralAccountTransactionDTO>> GetTransactions(RefUserTransactionsSearchFilter filter)
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpGet, Route("GetTransaction")]
+        public async Task<ReferralAccountTransactionDTO> GetTransaction(int referralProgramId, int userId, int accountId, int transactionId)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        [HttpPut, Route("SetTransactionWithdrawalStatus")]
+        public async Task SetTransactionWithdrawalStatus(int referralProgramId, int userId, int accountId, int transactionId) //другие параметры
+        {
+            throw new NotImplementedException();
+        }
+
+
         #endregion
 
 
@@ -191,7 +214,7 @@ namespace Alfateam.Marketing.API.Controllers.Referral
             }
 
             return referrals;
-        }1
+        }
 
 
         private double GetReferralEarnedSum(int referralProgramId, int userId)

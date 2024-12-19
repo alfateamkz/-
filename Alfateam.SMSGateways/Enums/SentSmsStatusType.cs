@@ -14,6 +14,12 @@ namespace Alfateam.SMSGateways.Enums
         EmptyMessage = 4,
         MessageTextValidationErrorFromGateway = 5,
         InsufficientFunds = 6,
-        PhoneNumberDoesNotExist = 7
+        PhoneNumberDoesNotExist = 7,
+        MessageTooLong = 8,
+        LimitExceeded = 9,
+        AccountBlockedOrDeleted = 10,
+
+        ServiceError = 998,
+        Unauthorized = 999,
     }
 }

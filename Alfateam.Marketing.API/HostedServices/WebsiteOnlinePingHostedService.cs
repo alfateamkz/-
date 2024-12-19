@@ -8,9 +8,9 @@ namespace Alfateam.Marketing.API.HostedServices
     public class WebsiteOnlinePingHostedService : IHostedService
     {
         public readonly MarketingDbContext DB;
-        public WebsiteOnlinePingHostedService(MarketingDbContext db)
+        public WebsiteOnlinePingHostedService()
         {
-            DB = db;
+            DB = new MarketingDbContext();
         }
 
 

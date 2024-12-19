@@ -12,8 +12,8 @@ namespace Alfateam.Messenger.Lib.Abstractions
 {
     public abstract class AbsMessenger
     {
-        public virtual MessengerMailingAccount Account { get; set; }
-        public AbsMessenger(MessengerMailingAccount account)
+        public virtual Account Account { get; set; }
+        public AbsMessenger(Account account)
         {
             if(account == null)
             {

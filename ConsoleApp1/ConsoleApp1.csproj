@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alfateam.Messenger.Lib\Alfateam.Messenger.Lib.csproj" />
+    <ProjectReference Include="..\Alfateam.SMSGateways\Alfateam.SMSGateways.csproj" />
   </ItemGroup>
 
 </Project>

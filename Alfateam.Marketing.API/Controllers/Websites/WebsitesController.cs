@@ -9,6 +9,7 @@ using Alfateam.Marketing.Models.Abstractions;
 using Alfateam.Marketing.Models.Autoposting;
 using Alfateam.Marketing.Models.Websites;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WebsiteModel = Alfateam.Marketing.Models.Websites.Website;
 
 namespace Alfateam.Marketing.API.Controllers.Websites
@@ -164,7 +165,8 @@ namespace Alfateam.Marketing.API.Controllers.Websites
 
         private IEnumerable<WebsiteModel> GetAvailableWebsites()
         {
-            return DB.Websites.Where(o => !o.IsDeleted && o.BusinessCompanyId == this.CompanyId);
+            return DB.Websites.Include(o => o.Group)
+                              .Where(o => !o.IsDeleted && o.BusinessCompanyId == this.CompanyId);
         }
 
 

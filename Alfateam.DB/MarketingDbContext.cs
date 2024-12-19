@@ -1,5 +1,7 @@
-﻿using Alfateam.Marketing.Models;
+﻿using Alfateam.DB.Helpers;
+using Alfateam.Marketing.Models;
 using Alfateam.Marketing.Models.Abstractions;
+using Alfateam.Marketing.Models.Abstractions.Integrations;
 using Alfateam.Marketing.Models.Abstractions.MailingAccounts;
 using Alfateam.Marketing.Models.Abstractions.SEO;
 using Alfateam.Marketing.Models.Ads;
@@ -16,6 +18,7 @@ using Alfateam.Marketing.Models.General.SEO.UserAgents;
 using Alfateam.Marketing.Models.Integrations.API;
 using Alfateam.Marketing.Models.Lettering.Items;
 using Alfateam.Marketing.Models.MailingAccounts;
+using Alfateam.Marketing.Models.MobileApps;
 using Alfateam.Marketing.Models.Referral.Items;
 using Alfateam.Marketing.Models.Referral.Main;
 using Alfateam.Marketing.Models.SalesGenerators.Items;
@@ -33,6 +36,7 @@ using Alfateam.Marketing.Models.Websites.SEO.SiteInfoParser;
 using Alfateam.Marketing.Models.Websites.SEO.SiteInfoParser.Parts;
 using Alfateam.Marketing.Models.Websites.SEO.SiteInfoParser.Parts.Props;
 using Alfateam.Marketing.Models.Websites.Stats;
+using Alfateam.Sales.Models.Funnel;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -54,6 +58,12 @@ namespace Alfateam.DB
         }
 
         #region Abstractions
+
+        #region Integrations
+
+        public DbSet<Integration> Integrations { get; set; }
+
+        #endregion
 
         #region MailingAccounts
         public DbSet<MailingAccount> MailingAccounts { get; set; }
@@ -172,6 +182,12 @@ namespace Alfateam.DB
         #region MailingAccounts
 
         public DbSet<MailingAccountCategory> MailingAccountCategories { get; set; }
+
+        #endregion
+
+        #region MobileApps
+        public DbSet<MobileApp> MobileApps { get; set; }
+        public DbSet<MobileAppGroup> MobileAppGroups { get; set; }
 
         #endregion
 
@@ -323,6 +339,19 @@ namespace Alfateam.DB
 
         public DbSet<BlacklistItem> BlacklistItems { get; set; }
         public DbSet<MarketingContact> MarketingContacts { get; set; }
+
+
+
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseMySql(ConnectionStrings.BuildConnectionString("alfateam_crm_marketing"), new MySqlServerVersion(new Version(8, 0, 11)));
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+        }
     }
 
 }

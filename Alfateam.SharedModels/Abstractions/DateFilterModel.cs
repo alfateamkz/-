@@ -18,12 +18,15 @@ namespace Alfateam.SharedModels.Abstractions
     [JsonKnownType(typeof(PeriodDateFilterModel), "PeriodDateFilterModel")]
     [JsonKnownType(typeof(QuarterDateFilterModel), "QuarterDateFilterModel")]
     [JsonKnownType(typeof(YearDateFilterModel), "YearDateFilterModel")]
-    public abstract class DateFilterModel : AbsModel
+    public class DateFilterModel : AbsModel
     {
         [JsonProperty("discriminator")]
         public string Discriminator { get; set; }
 
 
-        public abstract DateFilterPeriod GetPeriod();
+        public virtual DateFilterPeriod GetPeriod()
+        {
+            throw new NotSupportedException("Это абстрактный класс");
+        }
     }
 }

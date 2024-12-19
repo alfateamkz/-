@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Alfateam.SMSGateways.Abstractions
+namespace Alfateam.Marketing.Models.Abstractions.Integrations
 {
-    public interface ISMSGateway
+    
+    public class MobileAppIntegration : Integration
     {
-        SentSmsStatus Send(string phone, string message);
     }
 }

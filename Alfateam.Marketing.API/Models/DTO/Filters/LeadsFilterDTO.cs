@@ -4,6 +4,7 @@ using Alfateam.Marketing.Models.Filters.Items;
 using Alfateam.Website.API.Abstractions;
 using Alfateam.Marketing.API.Models.DTO.Filters.Items;
 using Alfateam.Marketing.API.Models.DTO.Filters.Items.Leads;
+using Alfateam.SharedModels.DTO.Abstractions;
 
 namespace Alfateam.Marketing.API.Models.DTO.Filters
 {

@@ -9,6 +9,12 @@ namespace Alfateam.SMSGateways
 {
     public class SentSmsStatus
     {
+        public SentSmsStatus(SentSmsStatusType status, string? responseText = null)
+        {
+            Status = status;
+            ResponseText = responseText;
+        }
+
         public SentSmsStatusType Status { get; set; }
         public string? ResponseText { get; set; }
     }

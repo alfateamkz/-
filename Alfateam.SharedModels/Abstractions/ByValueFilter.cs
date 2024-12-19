@@ -14,7 +14,7 @@ namespace Alfateam.SharedModels.Abstractions
     [JsonDiscriminator(Name = "discriminator")]
     [JsonKnownType(typeof(ConditionalByValueFilter), "ConditionalByValueFilter")]
     [JsonKnownType(typeof(RangeByValueFilter), "RangeByValueFilter")]
-    public abstract class ByValueFilter : AbsModel
+    public class ByValueFilter : AbsModel
     {
         [JsonProperty("discriminator")]
         public string Discriminator { get; set; }

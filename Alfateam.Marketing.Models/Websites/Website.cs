@@ -1,4 +1,5 @@
 ﻿using Alfateam.Core;
+using Alfateam.Marketing.Models.Abstractions.Integrations;
 using Alfateam.Marketing.Models.Websites.Stats;
 using System;
 using System.Collections.Generic;
@@ -19,10 +20,7 @@ namespace Alfateam.Marketing.Models.Websites
 
 
         public List<WebsiteOnlineInfo> OnlineInfo { get; set; } = new List<WebsiteOnlineInfo>();
-
-
-
-
+        public List<WebsiteIntegration> Integrations { get; set; } = new List<WebsiteIntegration>();
 
 
 

@@ -19,7 +19,7 @@ namespace Alfateam.Messenger.Models.DTO.General.Security
         public List<AccountDTO> AllowedAccounts { get; set; } = new List<AccountDTO>();
 
         [HiddenFromClient]
-        [DTOFieldBindWith("AllowedAccounts", typeof(MessengerMailingAccount))]
+        [DTOFieldBindWith("AllowedAccounts", typeof(Account))]
         public List<int> AllowedAccountsIds { get; set; } = new List<int>();
     }
 }

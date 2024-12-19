@@ -266,6 +266,9 @@ namespace Alfateam.DB
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
+
             MakeAbstractExternalInteractionModelsHierarchy(modelBuilder);
             MakeAbstractTasksModelsHierarchy(modelBuilder);
 

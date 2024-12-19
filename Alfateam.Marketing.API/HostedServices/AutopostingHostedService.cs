@@ -6,9 +6,9 @@ namespace Alfateam.Marketing.API.HostedServices
     public class AutopostingHostedService : IHostedService
     {
         public readonly MarketingDbContext DB;
-        public AutopostingHostedService(MarketingDbContext db)
+        public AutopostingHostedService()
         {
-            DB = db;
+            DB = new MarketingDbContext();
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
