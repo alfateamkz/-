@@ -7,25 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Models\Measurements\Engagements\" />
-    <Folder Include="Models\Measurements\WebServerToServer\" />
-    <Folder Include="Models\Measurements\ServerToServerEvents\" />
-    <Folder Include="Models\Measurements\PreloadMeasurement\" />
-    <Folder Include="Models\Measurements\PreloadC2SMeasurement\" />
-    <Folder Include="Models\Measurements\PCConsoleCTVEvents\" />
     <Folder Include="Models\Onelink\OnelinkModule\DeleteOneLinkAttributionLink\" />
-    <Folder Include="Models\ROI\AdRevenueAccountIntegrations\" />
-    <Folder Include="Models\ROI\Incost\" />
-    <Folder Include="Models\ROI\TrueRevenueTax\" />
-    <Folder Include="Models\RawDataReport\" />
-    <Folder Include="Models\SKAN\SKANCVSchemaAPIForAdvertisers\" />
-    <Folder Include="Models\SKAN\SKANCVSchemaAPIForAdNetworks\" />
-    <Folder Include="Models\SKAN\SKANConversionStudio\" />
-    <Folder Include="Models\SKAN\SKANAggregatedPostbackByArrivalDate\" />
-    <Folder Include="Models\SKAN\SKANAggregatedPerformanceReport\" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="ConvertCsvToJson" Version="1.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="RestSharp" Version="112.1.0" />
   </ItemGroup>

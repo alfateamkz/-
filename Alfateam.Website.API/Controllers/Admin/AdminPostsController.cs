@@ -446,7 +446,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             {
                 FilesService.UploadContentMedia(entity.Content);
             }
-            else if (mode == DBModelFillMode.Update && !entity.Content.AreSame(newContentForUpdate))
+            else if (mode == DBModelFillMode.Update/* && !entity.Content.AreSame(newContentForUpdate)*/)
             {
                 FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
             }
@@ -465,7 +465,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             {
                 FilesService.UploadContentMedia(entity.Content);
             }
-            else if (mode == DBModelFillMode.Update && !entity.Content.AreSame(newContentForUpdate))
+            else if (mode == DBModelFillMode.Update/* && !entity.Content.AreSame(newContentForUpdate)*/)
             {
                 FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
             }

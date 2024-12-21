@@ -223,7 +223,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
             var oldRoleModel = editingUser.RoleModel;
 
-            editingUser.RoleModel = model.CreateDBModelFromDTO();
+            editingUser.RoleModel = model.CreateDBModelFromDTO(DB.Countries.Where(o => !o.IsDeleted));
             editingUser.RoleModelId = 0;
 
             DB.UserRoleModels.Remove(oldRoleModel);

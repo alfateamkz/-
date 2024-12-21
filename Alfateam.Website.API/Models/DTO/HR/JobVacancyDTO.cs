@@ -30,7 +30,7 @@ namespace Alfateam.Website.API.Models.DTO.HR
         public int? CategoryId { get; set; }
 
 
-        public JobVacancyExpierence Expierence { get; set; }
+        public JobVacancyExpierenceDTO Expierence { get; set; }
 
        
     }

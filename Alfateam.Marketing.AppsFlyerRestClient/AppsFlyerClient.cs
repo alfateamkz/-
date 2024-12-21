@@ -18,8 +18,10 @@ namespace Alfateam.Marketing.AppsFlyerRestClient
 
             AnalyticsAPI = new AnalyticsAPI(this);
             AudiencesAPI = new AudiencesAPI(this);
+            ManagementAPI = new ManagementAPI(this);
             MarketplaceAPI = new MarketplaceAPI(this);
             MeasurementsAPI = new MeasurementsAPI(this);
+            MobileAPI = new MobileAPI(this);
             OnelinkAPI = new OnelinkAPI(this);
             RawDataReportAPI = new RawDataReportAPI(this);
             ROIAPI = new ROIAPI(this);
@@ -30,8 +32,10 @@ namespace Alfateam.Marketing.AppsFlyerRestClient
 
         public AnalyticsAPI AnalyticsAPI { get; private set; }
         public AudiencesAPI AudiencesAPI { get; private set; }
+        public ManagementAPI ManagementAPI { get; private set; }
         public MarketplaceAPI MarketplaceAPI { get; private set; }
         public MeasurementsAPI MeasurementsAPI { get; private set; }
+        public MobileAPI MobileAPI { get; private set; }
         public OnelinkAPI OnelinkAPI { get; private set; }
         public RawDataReportAPI RawDataReportAPI { get; private set; }
         public ROIAPI ROIAPI { get; private set; }

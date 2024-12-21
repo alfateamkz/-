@@ -24,12 +24,40 @@ namespace Alfateam.Website.API.Models.DTO
         public List<ContentAccessModel> ContentAccessTypes { get; set; } = new List<ContentAccessModel>();
 
 
+
+
+
         public override void FillDBModel(UserRoleModel item, DBModelFillMode mode)
         {
             throw new NotSupportedException("Use Fill(UserRoleModel item, List<Country> allCountriesFromDB) instead");
         }
 
-        public void Fill(UserRoleModel item, List<Country> allCountriesFromDB)
+
+
+        public virtual UserRoleModel CreateDBModelFromDTO(IEnumerable<Country> allCountriesFromDB)
+        {
+            var newItem = new UserRoleModel();
+
+            var types = FindAllDerivedTypes<UserRoleModel>();
+            if (types.Any())
+            {
+                var discriminatorProp = this.GetType().GetProperties().FirstOrDefault(o => o.Name == "Discriminator");
+                if (discriminatorProp != null)
+                {
+                    var discriminatorValue = discriminatorProp.GetValue(this);
+                    var foundType = types.FirstOrDefault(o => o.Name.Equals(discriminatorValue));
+
+                    newItem = (UserRoleModel)Activator.CreateInstance(foundType);
+                }
+            }
+
+            this.Fill(newItem, allCountriesFromDB);
+            //newItem.Id = 0;
+
+
+            return newItem;
+        }
+        public void Fill(UserRoleModel item, IEnumerable<Country> allCountriesFromDB)
         {
 
 
@@ -45,7 +73,7 @@ namespace Alfateam.Website.API.Models.DTO
             UpdateCountriesList(item.ForbiddenCountries, ForbiddenCountriesIds, allCountriesFromDB);
         }
 
-        private void UpdateCountriesList(List<Country> countries, List<int> editModelIds, List<Country> allCountriesFromDB)
+        private void UpdateCountriesList(List<Country> countries, List<int> editModelIds, IEnumerable<Country> allCountriesFromDB)
         {
             //Удаляем удаленные на фронте модели
             for (int i = countries.Count - 1; i >= 0; i--)
