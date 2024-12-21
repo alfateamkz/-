@@ -6,4 +6,17 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\Management\Counters\" />
+    <Folder Include="Models\Management\Goals\" />
+    <Folder Include="Models\Management\Filters\" />
+    <Folder Include="Models\Management\ChartAnnotations\" />
+    <Folder Include="Models\Management\Cloud\" />
+    <Folder Include="Models\Management\Grants\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
 </Project>
