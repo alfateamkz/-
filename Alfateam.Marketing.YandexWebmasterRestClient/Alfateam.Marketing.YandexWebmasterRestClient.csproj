@@ -6,4 +6,17 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\Indexing\" />
+    <Folder Include="Models\InSearch\" />
+    <Folder Include="Models\InternalLinks\" />
+    <Folder Include="Models\ExternalLinks\" />
+    <Folder Include="Models\Feeds\" />
+    <Folder Include="Models\Recrawl\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
 </Project>
