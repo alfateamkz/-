@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\DataStream\" />
+    <Folder Include="Models\Management\" />
+    <Folder Include="Models\Reports\" />
+    <Folder Include="Modules\DataStream\" />
+    <Folder Include="Modules\Logs\" />
+    <Folder Include="Modules\Management\" />
+    <Folder Include="Modules\Reports\" />
+    <Folder Include="Modules\Push\" />
+    <Folder Include="Modules\Post\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+</Project>
