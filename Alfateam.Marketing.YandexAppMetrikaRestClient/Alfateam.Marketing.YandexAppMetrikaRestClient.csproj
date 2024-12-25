@@ -7,9 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Models\DataStream\" />
-    <Folder Include="Models\Management\" />
-    <Folder Include="Models\Reports\" />
     <Folder Include="Modules\DataStream\" />
     <Folder Include="Modules\Logs\" />
     <Folder Include="Modules\Management\" />
