@@ -9,7 +9,6 @@
   <ItemGroup>
     <Folder Include="Modules\DataStream\" />
     <Folder Include="Modules\Logs\" />
-    <Folder Include="Modules\Management\" />
     <Folder Include="Modules\Reports\" />
     <Folder Include="Modules\Push\" />
     <Folder Include="Modules\Post\" />
@@ -17,6 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="RestSharp" Version="112.1.0" />
   </ItemGroup>
 
 </Project>

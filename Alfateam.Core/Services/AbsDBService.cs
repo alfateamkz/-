@@ -187,27 +187,32 @@ namespace Alfateam.Core.Services
         {
            
             ValidateToUpdateEntity(item, model);
-
-
-            callback?.Invoke(item);
-
-            UpdateEntity(dbSet, model, item);
+            UpdateEntity(dbSet, model, item, callback);
 
             afterSuccessCallback?.Invoke(item);
-
             return model;
         }
 
+        public T UpdateEntity<T>(DbSet<T> dbSet, DTOModelAbs<T> model, T item, Action<T> callback) where T : AbsModel, new()
+        {
+            model.SetDBContext(DB);
+            model.FillDBModel(item, DBModelFillMode.Update);
 
+            callback?.Invoke(item);
+            UpdateEntity(dbSet, item);
+
+            model = model.CreateDTO(item);
+            return item;
+        }
         public T UpdateEntity<T>(DbSet<T> dbSet, DTOModelAbs<T> model, T item) where T : AbsModel, new()
         {
             model.SetDBContext(DB);
             model.FillDBModel(item, DBModelFillMode.Update);
 
-            dbSet.Update(item);
-            DB.SaveChanges();
+            UpdateEntity(dbSet, item);
 
-            model.CreateDTO(item);
+            //делать ли ref
+            model = model.CreateDTO(item);
             return item;
         }
         public void UpdateEntity<T>(DbSet<T> dbSet, T item) where T : AbsModel

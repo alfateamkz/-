@@ -22,6 +22,7 @@ namespace Alfateam.Website.API.Abstractions
     [ErrorsFilter]
     [APIExceptionFilter/*, APIAsyncExceptionFilter*/]
     [EnableCors]
+    [DisableRequestSizeLimit]
     public abstract class AbsController : ControllerBase
     {
         public readonly IMailGateway MailGateway;

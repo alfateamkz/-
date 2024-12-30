@@ -37,6 +37,11 @@ namespace Alfateam2._0.Models.Abstractions
         /// </summary>
         public int? ImageSliderContentItemId { get; set; }
 
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int? ContentId { get; set; }
+
 
         public virtual bool AreSame(ContentItem other)
         {

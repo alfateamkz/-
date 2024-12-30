@@ -15,6 +15,8 @@ namespace Alfateam.Website.API.Models.DTO.Posts
         [ForClientOnly]
         public string ImgPath { get; set; }
         public string ShortDescription { get; set; }
+
+        [DTOFieldFor(DTOFieldForType.CreationOnly)]
         public ContentDTO Content { get; set; }
 
         [ForClientOnly]

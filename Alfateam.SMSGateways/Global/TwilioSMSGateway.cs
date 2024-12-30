@@ -13,8 +13,7 @@ namespace Alfateam.SMSGateways.Global
     public class TwilioSMSGateway : AbsSMSGateway
     {
 
-        //AC13f02292736a8736fbbb60ab07c84a1e 
-        //69c721743d1de8ae799fef269bdb79d2
+
 
         protected const string BaseUrl = "https://api.twilio.com/";
         protected readonly string Username;
@@ -26,7 +25,7 @@ namespace Alfateam.SMSGateways.Global
         }
         public override async Task<GetBalanceStatus> GetBalance()
         {
-            TwilioClient.Init("", "");
+            TwilioClient.Init("AC13f02292736a8736fbbb60ab07c84a1e", "69c721743d1de8ae799fef269bdb79d2");
 
 
 

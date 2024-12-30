@@ -25,7 +25,9 @@ namespace Alfateam.Website.API.Models.DTO.Team
         public string Slug => SlugHelper.GetLatynSlug($"{Surname} {Name} - {Position}");
 
 
+        [DTOFieldFor(DTOFieldForType.CreationOnly)]
         public ContentDTO DetailContent { get; set; }
+
         [ForClientOnly]
         public string? CVFilepath { get; set; }
 

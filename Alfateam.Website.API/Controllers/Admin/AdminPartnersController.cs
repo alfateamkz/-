@@ -107,7 +107,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         [HttpPost, Route("CreatePartnerLocalization")]
         [CheckContentAreaRights(ContentAccessModelType.Partners, 3)]
-        public async Task<PartnerLocalizationDTO> CreatePartnerLocalization(int itemId, PartnerLocalizationDTO localization)
+        public async Task<PartnerLocalizationDTO> CreatePartnerLocalization(int itemId, [FromForm(Name = "model")] PartnerLocalizationDTO localization)
         {
             var mainEntity = GetAvailablePartners().FirstOrDefault(o => o.Id == itemId);
             return (PartnerLocalizationDTO)DbService.TryCreateLocalizationEntity(DB.Partners, mainEntity, localization, (entity) =>
@@ -124,7 +124,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPut, Route("UpdatePartnerMain")]
         [CheckContentAreaRights(ContentAccessModelType.Partners, 3)]
         [SwaggerOperation(description: "Нужно загрузить логотип через форму с именем logoImg, если изменяем картинку")]
-        public async Task<PartnerDTO> UpdatePostCategoryMain([FromForm(Name = "model")] PartnerDTO model)
+        public async Task<PartnerDTO> UpdatePartnerMain([FromForm(Name = "model")] PartnerDTO model)
         {
             var item = GetAvailablePartners().FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             return (PartnerDTO)DbService.TryUpdateEntity(DB.Partners, model, item, (entity) =>
@@ -135,7 +135,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         [HttpPut, Route("UpdatePartnerLocalization")]
         [CheckContentAreaRights(ContentAccessModelType.Partners, 3)]
-        public async Task<PartnerLocalizationDTO> UpdatePartnerLocalization(PartnerLocalizationDTO model)
+        public async Task<PartnerLocalizationDTO> UpdatePartnerLocalization([FromForm(Name = "model")] PartnerLocalizationDTO model)
         {
             var localization = DB.PartnerLocalizations.FirstOrDefault(o => o.Id == model.Id && !o.IsDeleted);
             var mainEntity = GetAvailablePartners().FirstOrDefault(o => o.Id == localization.PartnerId && !o.IsDeleted);
@@ -210,7 +210,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             }
             else if (mode == DBModelFillMode.Update /*&& !entity.Content.AreSame(newContentForUpdate)*/)
             {
-                FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
+                entity.Content = FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
             }
         }
         private void HandlePartnerLocalization(PartnerLocalization entity, DBModelFillMode mode, Content newContentForUpdate)
@@ -221,7 +221,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             }
             else if (mode == DBModelFillMode.Update /*&& !entity.Content.AreSame(newContentForUpdate)*/)
             {
-                FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
+                entity.Content = FilesService.UpdateContentMedia(entity.Content, newContentForUpdate);
             }
         }
 

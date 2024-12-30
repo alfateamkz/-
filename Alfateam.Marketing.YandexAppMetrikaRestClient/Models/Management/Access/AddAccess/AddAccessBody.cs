@@ -10,16 +10,7 @@ namespace Alfateam.Marketing.YandexAppMetrikaRestClient.Models.Management.Access
 {
     public class AddAccessBody
     {
-        [JsonProperty("user_login")]
-        public string UserLogin { get; set; }
-
-        [JsonProperty("perm")]
-        public GrantPermission Perm { get; set; }
-
-        [JsonProperty("partners")]
-        public List<int> Partners { get; set; } = new List<int>();
-
-        [JsonProperty("event_labels")]
-        public List<string> EventLabels { get; set; } = new List<string>();
+        [JsonProperty("grant")]
+        public AddAccessBodyGrant Grant { get; set; }
     }
 }

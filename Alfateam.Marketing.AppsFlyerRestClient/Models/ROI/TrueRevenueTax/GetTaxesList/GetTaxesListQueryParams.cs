@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Alfateam.Marketing.AppsFlyerRestClient.Models.ROI.TrueRevenueTax
+namespace Alfateam.Marketing.AppsFlyerRestClient.Models.ROI.TrueRevenueTax.GetTaxesList
 {
     public class GetTaxesListQueryParams
     {

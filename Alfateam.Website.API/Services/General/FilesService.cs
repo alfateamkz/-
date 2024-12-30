@@ -17,7 +17,7 @@ namespace Alfateam.Website.API.Services.General
 
         #region Upload content media
 
-        public void UpdateContentMedia(Content oldContent, Content newContent)
+        public Content UpdateContentMedia(Content oldContent, Content newContent)
         {
             if (oldContent == null)
             {
@@ -31,27 +31,15 @@ namespace Alfateam.Website.API.Services.General
             var oldContentItems = GetAllContentItems(oldContent);
             var newContentItems = GetAllContentItems(newContent);
 
-
-            var deletedContentItems = new List<ContentItem>();
-            var newCreatedContentItems = new List<ContentItem>();
-
-            foreach (var oldItem in oldContentItems)
-            {
-                if (!newContentItems.Any(o => o.Guid == oldItem.Guid))
-                {
-                    deletedContentItems.Add(oldItem);
-                }
-            }
+            var deletedContentItems = GetDeletedContentItems(oldContentItems, newContentItems);
+            var newCreatedContentItems = GetNewCreatedContentItems(oldContentItems, newContentItems);
 
             foreach (var newItem in newContentItems)
             {
                 var old = oldContentItems.FirstOrDefault(o => o.Guid == newItem.Guid);
-                if (old == null)
+                if (old != null)
                 {
-                    newCreatedContentItems.Add(newItem);
-                }
-                else
-                {
+                    //newItem.ContentId = old.ContentId;
                     if (old is AudioContentItem audio)
                     {
                         (newItem as AudioContentItem).AudioPath = audio.AudioPath;
@@ -72,58 +60,20 @@ namespace Alfateam.Website.API.Services.General
                         (newItem as VideoContentItem).VideoPath = video.VideoPath;
                     }
                 }
+                else
+                {
+
+                }
             }
 
+            DeleteDeletedItemFiles(deletedContentItems);
+            UploadNewCreatedContentItemFiles(newCreatedContentItems);
 
-            //foreach (var item in deletedContentItems)
-            //{
-            //    if (item is AudioContentItem audio)
-            //    {
-            //        File.Delete(Path.Combine(AppEnvironment.WebRootPath, audio.AudioPath));
-            //    }
-            //    else if (item is ImageContentItem image)
-            //    {
-            //        File.Delete(Path.Combine(AppEnvironment.WebRootPath, image.ImgPath));
-            //    }
-            //    else if (item is ImageSliderContentItem slider)
-            //    {
-            //        foreach (var img in slider.Images)
-            //        {
-            //            File.Delete(Path.Combine(AppEnvironment.WebRootPath, img.ImgPath));
-            //        }
-            //    }
-            //    else if (item is VideoContentItem video)
-            //    {
-            //        File.Delete(Path.Combine(AppEnvironment.WebRootPath, video.VideoPath));
-            //    }
-            //}
-
-            foreach (var item in newCreatedContentItems)
-            {
-                if (item is AudioContentItem audio)
-                {
-                    audio.AudioPath = TryUploadFile(item.Guid, FileType.Audio);
-                }
-                else if (item is ImageContentItem image)
-                {
-                    image.ImgPath = TryUploadFile(item.Guid, FileType.Image);
-                }
-                else if (item is ImageSliderContentItem slider)
-                {
-                    foreach (var img in slider.Images)
-                    {
-                        img.ImgPath = TryUploadFile(item.Guid, FileType.Image);
-                    }
-                }
-                else if (item is VideoContentItem video)
-                {
-                    video.VideoPath = TryUploadFile(item.Guid, FileType.Video);
-                }
-            }
+            return newContent;
         }
         public void UploadContentMedia(Content content)
         {
-            if(content == null)
+            if (content == null)
             {
                 throw new Exception400("content не должен быть равен null");
             }
@@ -147,12 +97,100 @@ namespace Alfateam.Website.API.Services.General
                 }
                 else if (item is VideoContentItem video)
                 {
-                    video.VideoPath =  TryUploadFile(item.Guid, FileType.Video);
+                    video.VideoPath = TryUploadFile(item.Guid, FileType.Video);
                 }
             }
         }
 
 
+        #region UpdateContentMedia Private methods
+
+        private IEnumerable<ContentItem> GetDeletedContentItems(IEnumerable<ContentItem> oldContentItems, IEnumerable<ContentItem> newContentItems)
+        {
+            var deletedContentItems = new List<ContentItem>();
+
+            foreach (var oldItem in oldContentItems)
+            {
+                if (!newContentItems.Any(o => o.Guid == oldItem.Guid))
+                {
+                    deletedContentItems.Add(oldItem);
+                }
+            }
+
+            return deletedContentItems;
+        }
+        private IEnumerable<ContentItem> GetNewCreatedContentItems(IEnumerable<ContentItem> oldContentItems, IEnumerable<ContentItem> newContentItems)
+        {
+            var newCreatedContentItems = new List<ContentItem>();
+
+            foreach (var newItem in newContentItems)
+            {
+                var old = oldContentItems.FirstOrDefault(o => o.Guid == newItem.Guid);
+                if (old == null)
+                {
+                    newCreatedContentItems.Add(newItem);
+                } 
+            }
+
+            return newCreatedContentItems;
+        }
+        private void DeleteDeletedItemFiles(IEnumerable<ContentItem> deletedContentItems)
+        {
+            foreach (var item in deletedContentItems)
+            {
+                if (item is AudioContentItem audio)
+                {
+                    var path = Path.Combine(AppEnvironment.WebRootPath, audio.AudioPath);
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
+                    }
+                }
+                else if (item is ImageContentItem image)
+                {
+                    var path = Path.Combine(AppEnvironment.WebRootPath, image.ImgPath);
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
+                    }
+                }
+                else if (item is VideoContentItem video)
+                {
+                    var path = Path.Combine(AppEnvironment.WebRootPath, video.VideoPath);
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
+                    }
+                }
+            }
+        }
+        private void UploadNewCreatedContentItemFiles(IEnumerable<ContentItem> newCreatedContentItems)
+        {
+            foreach (var item in newCreatedContentItems)
+            {
+                if (item is AudioContentItem audio)
+                {
+                    audio.AudioPath = TryUploadFile(item.Guid, FileType.Audio);
+                }
+                else if (item is ImageContentItem image)
+                {
+                    image.ImgPath = TryUploadFile(item.Guid, FileType.Image);
+                }
+                else if (item is ImageSliderContentItem slider)
+                {
+                    foreach (var img in slider.Images)
+                    {
+                        img.ImgPath = TryUploadFile(item.Guid, FileType.Image);
+                    }
+                }
+                else if (item is VideoContentItem video)
+                {
+                    video.VideoPath = TryUploadFile(item.Guid, FileType.Video);
+                }
+            }
+        }
+
+        #endregion
 
         private IEnumerable<ContentItem> GetAllContentItems(Content content)
         {

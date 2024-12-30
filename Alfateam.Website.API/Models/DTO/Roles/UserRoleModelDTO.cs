@@ -1,10 +1,11 @@
 ﻿using Alfateam.Website.API.Abstractions;
+using Alfateam.Website.API.Models.DTO.Roles.Access;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
 using Alfateam2._0.Models.Roles;
 using Alfateam2._0.Models.Roles.Access;
 
-namespace Alfateam.Website.API.Models.DTO
+namespace Alfateam.Website.API.Models.DTO.Roles
 {
     public class UserRoleModelDTO : DTOModel<UserRoleModel>
     {
@@ -17,11 +18,11 @@ namespace Alfateam.Website.API.Models.DTO
 
 
 
-        public ReviewsAccessModel ReviewsAccess { get; set; }
-        public HRAccessModel HRAccess { get; set; }
-        public ShopAccessModel ShopAccess { get; set; }
-        public OutstaffAccessModel OutstaffAccess { get; set; }
-        public List<ContentAccessModel> ContentAccessTypes { get; set; } = new List<ContentAccessModel>();
+        public ReviewsAccessModelDTO ReviewsAccess { get; set; }
+        public HRAccessModelDTO HRAccess { get; set; }
+        public ShopAccessModelDTO ShopAccess { get; set; }
+        public OutstaffAccessModelDTO OutstaffAccess { get; set; }
+        public List<ContentAccessModelDTO> ContentAccessTypes { get; set; } = new List<ContentAccessModelDTO>();
 
 
 
@@ -41,7 +42,7 @@ namespace Alfateam.Website.API.Models.DTO
             var types = FindAllDerivedTypes<UserRoleModel>();
             if (types.Any())
             {
-                var discriminatorProp = this.GetType().GetProperties().FirstOrDefault(o => o.Name == "Discriminator");
+                var discriminatorProp = GetType().GetProperties().FirstOrDefault(o => o.Name == "Discriminator");
                 if (discriminatorProp != null)
                 {
                     var discriminatorValue = discriminatorProp.GetValue(this);
@@ -51,7 +52,7 @@ namespace Alfateam.Website.API.Models.DTO
                 }
             }
 
-            this.Fill(newItem, allCountriesFromDB);
+            Fill(newItem, allCountriesFromDB);
             //newItem.Id = 0;
 
 
@@ -64,10 +65,10 @@ namespace Alfateam.Website.API.Models.DTO
             item.Role = Role;
             item.IsAllCountriesAccess = IsAllCountriesAccess;
 
-            item.ReviewsAccess = ReviewsAccess;
-            item.HRAccess = HRAccess;
-            item.ShopAccess = ShopAccess;
-            item.OutstaffAccess = OutstaffAccess;
+            item.ReviewsAccess = ReviewsAccess.CreateDBModelFromDTO();
+            item.HRAccess = HRAccess.CreateDBModelFromDTO();
+            item.ShopAccess = ShopAccess.CreateDBModelFromDTO();
+            item.OutstaffAccess = OutstaffAccess.CreateDBModelFromDTO();
 
             UpdateCountriesList(item.AvailableCountries, AvailableCountriesIds, allCountriesFromDB);
             UpdateCountriesList(item.ForbiddenCountries, ForbiddenCountriesIds, allCountriesFromDB);

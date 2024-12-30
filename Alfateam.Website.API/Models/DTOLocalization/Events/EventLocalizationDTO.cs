@@ -1,4 +1,5 @@
-﻿using Alfateam.Website.API.Abstractions;
+﻿using Alfateam.Core.Attributes.DTO;
+using Alfateam.Website.API.Abstractions;
 using Alfateam2._0.Models.Events;
 using Alfateam2._0.Models.Localization.Items.Events;
 
@@ -8,6 +9,8 @@ namespace Alfateam.Website.API.Models.DTOLocalization.Events
     {
         public string Title { get; set; }
         public string Description { get; set; }
+
+        [ForClientOnly]
         public string ImgPath { get; set; }
 
 

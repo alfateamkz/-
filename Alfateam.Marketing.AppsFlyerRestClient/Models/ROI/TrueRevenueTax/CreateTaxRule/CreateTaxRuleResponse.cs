@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Alfateam.Marketing.AppsFlyerRestClient.Models.ROI.AdRevenueAccountIntegrations
+namespace Alfateam.Marketing.AppsFlyerRestClient.Models.ROI.TrueRevenueTax.CreateTaxRule
 {
-    public class SetIntegrationResponse
+    public class CreateTaxRuleResponse
     {
         [JsonProperty("message")]
         public string Message { get; set; }

@@ -16,8 +16,9 @@ namespace Alfateam.Website.API.Models.DTOLocalization.Team
         public string ShortExpierence { get; set; }
         public string Quote { get; set; }
 
-
+        [DTOFieldFor(DTOFieldForType.CreationOnly)]
         public ContentDTO DetailContent { get; set; }
+
         [ForClientOnly]
         public string? CVFilepath { get; set; }
     }

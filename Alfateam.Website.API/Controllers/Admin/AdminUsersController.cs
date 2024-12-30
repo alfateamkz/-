@@ -5,7 +5,6 @@ using Alfateam.Website.API.Extensions;
 using Alfateam.Website.API.Helpers;
 using Alfateam.Website.API.Models.DTO.General;
 using Alfateam.Website.API.Models.DTO.Shop;
-using Alfateam.Website.API.Models.DTO;
 using Alfateam.Website.API.Models.UserModels;
 using Alfateam2._0.Models.Enums;
 using Alfateam2._0.Models.General;
@@ -29,6 +28,7 @@ using Alfateam.Core.Helpers;
 using Alfateam.Website.API.Models.DTO.Team;
 using Alfateam2._0.Models.Team;
 using Alfateam.Core;
+using Alfateam.Website.API.Models.DTO.Roles;
 
 
 

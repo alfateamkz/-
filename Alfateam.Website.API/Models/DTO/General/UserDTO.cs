@@ -2,6 +2,7 @@
 using Alfateam.Core.Attributes.DTO;
 using Alfateam.Website.API.Models.DTO.General;
 using Alfateam2._0.Models.General;
+using Alfateam.Website.API.Models.DTO.Roles;
 
 namespace Alfateam.Website.API.Models.DTO.General
 {

@@ -11,6 +11,8 @@ namespace Alfateam.Website.API.Models.DTO.HR
     public class JobVacancyDTO : AvailabilityDTOModel<JobVacancy>
     {
         public string Title { get; set; }
+
+        [DTOFieldFor(DTOFieldForType.CreationOnly)]
         public ContentDTO InnerContent { get; set; }
         public string Slug => SlugHelper.GetLatynSlug(Title);
 

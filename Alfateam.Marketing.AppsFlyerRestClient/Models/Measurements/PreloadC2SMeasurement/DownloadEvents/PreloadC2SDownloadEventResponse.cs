@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ namespace Alfateam.Marketing.AppsFlyerRestClient.Models.Measurements.PreloadC2SM
 {
     public class PreloadC2SDownloadEventResponse
     {
-        //TODO: PreloadC2SDownloadEventResponse поля найти
+        [JsonProperty("transaction_id")]
+        public string TransactionId { get; set; }
     }
 }
