@@ -11,5 +11,9 @@ namespace Alfateam.Messenger.Models.Chats
     {
         public string PeerId { get; set; }
         public string OurUserId { get; set; }
+
+
+
+        public string OnlineStatusLabel { get; set; }
     }
 }

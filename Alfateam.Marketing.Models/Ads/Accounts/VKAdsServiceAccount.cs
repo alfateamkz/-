@@ -9,5 +9,12 @@ namespace Alfateam.Marketing.Models.Ads.Accounts
 {
     public class VKAdsServiceAccount : AdsServiceAccount
     {
+        public string Login { get; set; }
+        public string Password { get; set; }
+
+
+
+
+        public string AccessToken { get; set; }
     }
 }

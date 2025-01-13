@@ -12,5 +12,6 @@ namespace Alfateam.Marketing.Autoposting.Lib.Enums.Comments
         CommentsClosed = 2,
         NoAccess = 3,
         InvalidData = 4,
+        PostNotFound = 5,
     }
 }

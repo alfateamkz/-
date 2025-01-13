@@ -8,16 +8,19 @@ namespace Alfateam.Marketing.Autoposting.Lib.Models.Comments
 {
     public class Comment
     {
-        public string? Text { get; set; }
-       
+        //public string Id { get; set; }
+        //public string? Text { get; set; }
 
-        public List<CommentAttachment> Attachments { get; set; } = new List<CommentAttachment>();
-        public List<Comment> SubComments { get; set; } = new List<Comment>();
+        //public CommentAuthor? Author { get; set; }
 
 
-        public int LikesCount { get; set; }
+        //public List<CommentAttachment> Attachments { get; set; } = new List<CommentAttachment>();
+        //public List<Comment> SubComments { get; set; } = new List<Comment>();
 
-        public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+
+        //public int LikesCount { get; set; }
+
+        //public DateTime CreatedAt { get; set; }
+        //public DateTime? UpdatedAt { get; set; }
     }
 }

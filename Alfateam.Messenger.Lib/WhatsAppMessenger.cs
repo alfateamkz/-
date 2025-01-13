@@ -4,6 +4,12 @@ using Alfateam.Messenger.Lib.Modules.WhatsApp;
 using Alfateam.Messenger.Models.Abstractions;
 using Alfateam.Messenger.Models.Accounts.Messengers;
 using Alfateam.Messenger.Models.Accounts.SocialNetworks;
+using Microsoft.AspNetCore.Routing;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Appium;
+using OpenQA.Selenium.Appium.Android;
+using OpenQA.Selenium.Appium.Enums;
+using OpenQA.Selenium.Appium.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +20,9 @@ namespace Alfateam.Messenger.Lib
 {
     public class WhatsAppMessenger : AbsMessenger
     {
+        protected AndroidDriver Driver;
+
+
         public WhatsAppAccount WhatsAppAccount => Account as WhatsAppAccount;
         public WhatsAppMessenger(WhatsAppAccount account) : base(account)
         {
@@ -23,31 +32,31 @@ namespace Alfateam.Messenger.Lib
             Peers = new WhatsAppPeersModule(this);
             Stickers = new WhatsAppStickersModule(this);
 
-            var client = new WhatsappBusiness.CloudApi.WhatsAppBusinessClient(new WhatsappBusiness.CloudApi.Configurations.WhatsAppBusinessCloudApiConfig
+            Init().Wait();
+        }
+
+
+        private async Task Init()
+        {
+            var serverUri = new Uri(Environment.GetEnvironmentVariable("APPIUM_HOST") ?? "http://127.0.0.1:4723/wd/hub");
+            var driverOptions = new AppiumOptions()
             {
-
-            });
-
-         
-
-            //var res = client.CreateTemplateMessage();
-            //res.S
+                AutomationName = AutomationName.AndroidUIAutomator2,
+                PlatformName = "Android",
+                DeviceName = "Samsung Galaxy S-XYU",
 
 
-            //client.VerifyCode(new WhatsappBusiness.CloudApi.PhoneNumbers.Requests.VerifyCodeRequest
-            //{
-            //    Code = "12433"
-            //});
+            };
 
-            //client.SendTextMessage(new WhatsappBusiness.CloudApi.Messages.Requests.TextMessageRequest
-            //{
-            //    To = "77058832744",
-            //    Text = new WhatsappBusiness.CloudApi.Messages.Requests.WhatsAppText
-            //    {
-            //        Body = "dsf",
-            //        PreviewUrl = false
-            //    }
-            //});
+            driverOptions.AddAdditionalAppiumOption("noReset", true);
+
+            Driver = new AndroidDriver(serverUri, driverOptions, TimeSpan.FromSeconds(180));
+            Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(30);
+
+            Driver.ActivateApp("com.viber.voip");
+            await Task.Delay(10000);       
         }
     }
+
+
 }

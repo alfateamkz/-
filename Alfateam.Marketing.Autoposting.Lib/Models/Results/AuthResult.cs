@@ -10,6 +10,22 @@ namespace Alfateam.Marketing.Autoposting.Lib.Models.Results
 {
     public class AuthResult : AbsResult
     {
+        public AuthResult()
+        {
+
+        }
+
+        public AuthResult(AuthResultType type)
+        {
+            Type = type;
+        }
+
+        public AuthResult(AuthResultType type, string message)
+        {
+            Type = type;
+            ResponseText = message;
+        }
+
         public AuthResultType Type { get; set; }
     }
 }

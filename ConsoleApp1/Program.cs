@@ -10,16 +10,30 @@ namespace ConsoleApp1
         {
             // var insta = new InstagramMessenger(new Alfateam.Messenger.Models.Accounts.SocialNetworks.InstagramAccount());
 
+
             try
             {
-                var client = new YandexWebmasterClient();
-                client.OAUTH_TOKEN = "dsfsdfdsfdsf";
-                await client.User();
+                var mess = new ViberMessenger(new Alfateam.Messenger.Models.Accounts.Messengers.ViberAccount
+                {
+                    Login = "77057417483"    
+                });
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
 
             }
+
+
+            //try
+            //{
+            //    var client = new YandexWebmasterClient();
+            //    client.OAUTH_TOKEN = "dsfsdfdsfdsf";
+            //    await client.User();
+            //}
+            //catch (Exception e)
+            //{
+
+            //}
 
 
 

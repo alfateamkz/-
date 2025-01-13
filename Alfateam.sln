@@ -123,7 +123,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.Marketing.YandexWe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.Marketing.YandexMetrikaRestClient", "Alfateam.Marketing.YandexMetrikaRestClient\Alfateam.Marketing.YandexMetrikaRestClient.csproj", "{8707EF70-BC68-42CB-A459-49AFC9D6C3C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.Marketing.YandexAppMetrikaRestClient", "Alfateam.Marketing.YandexAppMetrikaRestClient\Alfateam.Marketing.YandexAppMetrikaRestClient.csproj", "{8A23986C-21F7-4F34-938B-C38F5F37A343}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.Marketing.YandexAppMetrikaRestClient", "Alfateam.Marketing.YandexAppMetrikaRestClient\Alfateam.Marketing.YandexAppMetrikaRestClient.csproj", "{8A23986C-21F7-4F34-938B-C38F5F37A343}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Prikol", "Prikol\Prikol.csproj", "{D757B736-0E74-4999-B02D-9AE9C9C8CBE9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.Marketing.YandexDirectRestClient", "Alfateam.Marketing.YandexDirectRestClient\Alfateam.Marketing.YandexDirectRestClient.csproj", "{132EB339-C577-4446-B833-0676C80AF3FB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.Marketing.FacebookAdsRestClient", "Alfateam.Marketing.FacebookAdsRestClient\Alfateam.Marketing.FacebookAdsRestClient.csproj", "{A19833C7-377D-4036-85C4-B1976786308C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -299,6 +305,18 @@ Global
 		{8A23986C-21F7-4F34-938B-C38F5F37A343}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A23986C-21F7-4F34-938B-C38F5F37A343}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A23986C-21F7-4F34-938B-C38F5F37A343}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D757B736-0E74-4999-B02D-9AE9C9C8CBE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D757B736-0E74-4999-B02D-9AE9C9C8CBE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D757B736-0E74-4999-B02D-9AE9C9C8CBE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D757B736-0E74-4999-B02D-9AE9C9C8CBE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{132EB339-C577-4446-B833-0676C80AF3FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{132EB339-C577-4446-B833-0676C80AF3FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{132EB339-C577-4446-B833-0676C80AF3FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{132EB339-C577-4446-B833-0676C80AF3FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A19833C7-377D-4036-85C4-B1976786308C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A19833C7-377D-4036-85C4-B1976786308C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A19833C7-377D-4036-85C4-B1976786308C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A19833C7-377D-4036-85C4-B1976786308C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -339,6 +357,9 @@ Global
 		{1EC51CDD-78C9-45E4-9FB0-E574DA2FAC9F} = {ADCAFC78-69BA-434C-8C8B-40B27EFCD586}
 		{8707EF70-BC68-42CB-A459-49AFC9D6C3C9} = {ADCAFC78-69BA-434C-8C8B-40B27EFCD586}
 		{8A23986C-21F7-4F34-938B-C38F5F37A343} = {ADCAFC78-69BA-434C-8C8B-40B27EFCD586}
+		{D757B736-0E74-4999-B02D-9AE9C9C8CBE9} = {32F98715-830A-4B65-A652-EDC60358CC3F}
+		{132EB339-C577-4446-B833-0676C80AF3FB} = {ADCAFC78-69BA-434C-8C8B-40B27EFCD586}
+		{A19833C7-377D-4036-85C4-B1976786308C} = {ADCAFC78-69BA-434C-8C8B-40B27EFCD586}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {91AE9782-0D3F-4611-8C40-D29647166E70}

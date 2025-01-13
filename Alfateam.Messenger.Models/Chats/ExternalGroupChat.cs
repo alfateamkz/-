@@ -10,6 +10,6 @@ namespace Alfateam.Messenger.Models.Chats
     public class ExternalGroupChat : ExternalMessengerChat
     {
         public string? AdminId { get; set; }
-
+        public int ParticipantsCount { get; set; }
     }
 }

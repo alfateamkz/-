@@ -27,7 +27,17 @@ namespace Alfateam.Messenger.Lib.Modules.Instagram
             throw new NotImplementedException();
         }
 
+        public override Task<Request2FACodeResult> Request2FACode()
+        {
+            throw new NotImplementedException();
+        }
+
         public override async Task<string> GetOurUserId()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override async Task<UserInfo> GetOurUserInfo()
         {
             throw new NotImplementedException();
         }

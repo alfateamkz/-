@@ -59,11 +59,21 @@ namespace Alfateam.Messenger.Lib.Modules.Telegram
             }
         }
 
+        public override Task<Request2FACodeResult> Request2FACode()
+        {
+            throw new NotImplementedException();
+        }
+
 
         public override async Task<string> GetOurUserId()
         {
             var ourUser = await Messenger.Client.GetUserAsync();
             return ourUser.Id.ToString();
+        }
+
+        public override async Task<UserInfo> GetOurUserInfo()
+        {
+            throw new NotImplementedException();
         }
     }
 }

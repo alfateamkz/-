@@ -10,6 +10,20 @@ namespace Alfateam.Marketing.Autoposting.Lib.Models.Results.Posts
 {
     public class PostDeletionResult : AbsResult
     {
+        public PostDeletionResult()
+        {
+
+        }
+        public PostDeletionResult(PostDeletionResultType type)
+        {
+            Type = type;
+        }
+        public PostDeletionResult(PostDeletionResultType type, string text)
+        {
+            Type = type;
+            ResponseText = text;
+        }
+
         public PostDeletionResultType Type { get; set; }
     }
 }

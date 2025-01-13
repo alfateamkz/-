@@ -44,7 +44,17 @@ namespace Alfateam.Messenger.Lib.Modules.VK
             throw new NotImplementedException();
         }
 
+        public override Task<Request2FACodeResult> Request2FACode()
+        {
+            throw new NotImplementedException();
+        }
+
         public override Task<string> GetOurUserId()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override async Task<UserInfo> GetOurUserInfo()
         {
             throw new NotImplementedException();
         }

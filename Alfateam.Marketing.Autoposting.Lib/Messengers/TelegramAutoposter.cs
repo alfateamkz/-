@@ -1,7 +1,7 @@
 ﻿using Alfateam.Marketing.Autoposting.Lib.Abstractions;
+using Alfateam.Marketing.Autoposting.Lib.Abstractions.Posts;
 using Alfateam.Marketing.Autoposting.Lib.Models.Comments;
 using Alfateam.Marketing.Autoposting.Lib.Models.CrtUpdDTO.Comments;
-using Alfateam.Marketing.Autoposting.Lib.Models.CrtUpdDTO.Posts;
 using Alfateam.Marketing.Autoposting.Lib.Models.Posts;
 using Alfateam.Marketing.Autoposting.Lib.Models.Results;
 using Alfateam.Marketing.Autoposting.Lib.Models.Results.Comments;

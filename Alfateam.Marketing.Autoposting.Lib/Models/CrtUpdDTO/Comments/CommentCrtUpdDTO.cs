@@ -10,5 +10,6 @@ namespace Alfateam.Marketing.Autoposting.Lib.Models.CrtUpdDTO.Comments
     {
         public string? Text { get; set; }
         public List<CommentAttachmentCrtUpdDTO> Attachments { get; set; } = new List<CommentAttachmentCrtUpdDTO>();
+
     }
 }
