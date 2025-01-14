@@ -1,4 +1,4 @@
-﻿using Alfateam.Marketing.FacebookAdsRestClient.Models.AdAccountRelated;
+﻿using Alfateam.Marketing.FacebookAdsRestClient.Models.General.Pages;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

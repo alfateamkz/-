@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Enums\AdAccountRelated\CustomAudiencesTOS\" />
     <Folder Include="Exceptions\" />
+    <Folder Include="CustomAudiences\" />
   </ItemGroup>
 
   <ItemGroup>

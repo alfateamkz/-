@@ -1,4 +1,9 @@
-﻿using FacebookAds.Object;
+﻿using Alfateam.Marketing.FacebookAdsRestClient.Models.AdAccountRelated.AdCreatives;
+using Alfateam.Marketing.FacebookAdsRestClient.Models.AdAccountRelated.AdsPixels;
+using Alfateam.Marketing.FacebookAdsRestClient.Models.AdAccountRelated.CustomConversions;
+using System.Data;
+using System.Diagnostics;
+
 
 namespace Alfateam.Marketing.FacebookAdsRestClient
 {
@@ -6,11 +11,7 @@ namespace Alfateam.Marketing.FacebookAdsRestClient
     {
         public FacebookAdsClient()
         {
-            var client = new Facebook.FacebookClient("accessToken");
-            client.Get("","");
-
-            new AdAccount("1").GetCustomAudiencesTos();
-
+            CustomConversion
         }
 
     }

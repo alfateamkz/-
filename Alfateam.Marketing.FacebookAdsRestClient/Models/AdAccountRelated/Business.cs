@@ -1,4 +1,7 @@
 ﻿using Alfateam.Marketing.FacebookAdsRestClient.Abstractions.Models;
+using Alfateam.Marketing.FacebookAdsRestClient.Enums;
+using Alfateam.Marketing.FacebookAdsRestClient.Models.AdAccountRelated.Users;
+using Alfateam.Marketing.FacebookAdsRestClient.Models.General.Pages;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -11,39 +14,63 @@ namespace Alfateam.Marketing.FacebookAdsRestClient.Models.AdAccountRelated
     public class Business
     {
         [JsonProperty("id")]
-        public long id { get; set; }
+        public long Id { get; set; }
 
         [JsonProperty("block_offline_analytics")]
-        public bool block_offline_analytics { get; set; }
+        public bool BlockOfflineAnalytics { get; set; }
 
         [JsonProperty("collaborative_ads_managed_partner_business_info")]
-        public ManagedPartnerBusiness collaborative_ads_managed_partner_business_info { get; set; }
+        public ManagedPartnerBusiness CollaborativeAdsManagedPartnerBusinessInfo { get; set; }
 
         [JsonProperty("collaborative_ads_managed_partner_eligibility")]
-        public BusinessManagedPartnerEligibility collaborative_ads_managed_partner_eligibility { get; set; }
+        public BusinessManagedPartnerEligibility CollaborativeAdsManagedPartnerEligibility { get; set; }
 
         [JsonProperty("created_by")]
-        public AbsUser created_by { get; set; }
+        public AbsUser CreatedBy { get; set; }
 
         [JsonProperty("created_time")]
-        public DateTime created_time { get; set; }
+        public DateTime CreatedTime { get; set; }
 
         [JsonProperty("extended_updated_time")]
-        public DateTime extended_updated_time { get; set; }
+        public DateTime ExtendedUpdatedTime { get; set; }
 
         [JsonProperty("is_hidden")]
-        public bool is_hidden { get; set; }
+        public bool IsHidden { get; set; }
 
         [JsonProperty("link")]
-        public string link { get; set; }
+        public string Link { get; set; }
 
         [JsonProperty("name")]
-        public string name { get; set; }
+        public string Name { get; set; }
 
         [JsonProperty("payment_account_id")]
-        public long payment_account_id { get; set; }
+        public long PaymentAccountId { get; set; }
 
         [JsonProperty("primary_page")]
-        public Page primary_page { get; set; }
+        public Page PrimaryPage { get; set; }
+
+        [JsonProperty("profile_picture_uri")]
+        public string ProfilePictureURI { get; set; }
+
+        [JsonProperty("timezone_id")]
+        public long TimezoneId { get; set; }
+
+        [JsonProperty("two_factor_type")]
+        public BusinessTwoFactorType TwoFactorType { get; set; }
+
+        [JsonProperty("updated_by")]
+        public User UpdatedBy { get; set; } //TODO: BusinessUser|SystemUser
+
+        [JsonProperty("updated_time")]
+        public DateTime UpdatedTime { get; set; }
+
+        [JsonProperty("verification_status")]
+        public BusinessVerificationStatus VerificationStatus { get; set; }
+
+        [JsonProperty("vertical")]
+        public string Vertical { get; set; }
+
+        [JsonProperty("vertical_id")]
+        public long VerticalId { get; set; }
     }
 }
