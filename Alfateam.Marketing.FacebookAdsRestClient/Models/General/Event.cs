@@ -1,4 +1,5 @@
-﻿using Alfateam.Marketing.FacebookAdsRestClient.Enums.General;
+﻿using Alfateam.Marketing.FacebookAdsRestClient.Abstractions.Models;
+using Alfateam.Marketing.FacebookAdsRestClient.Enums.General;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Alfateam.Marketing.FacebookAdsRestClient.Models.General
 {
-    public class Event
+    public class Event : Profile
     {
         [JsonProperty("id")]
         public long Id { get; set; }

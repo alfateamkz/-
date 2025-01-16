@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,10 @@ namespace Alfateam.Marketing.FacebookAdsRestClient.Models.AdAccountRelated.Users
 {
     public class AssignedUser
     {
-        //TODO: AssignedUser fields
+        [JsonProperty("permitted_tasks")]
+        public List<string> PermittedTasks { get; set; } = new List<string>();
+
+        [JsonProperty("tasks")]
+        public List<string> Tasks { get; set; } = new List<string>();
     }
 }

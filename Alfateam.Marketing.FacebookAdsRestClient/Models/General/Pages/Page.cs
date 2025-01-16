@@ -1,4 +1,5 @@
-﻿using Alfateam.Marketing.FacebookAdsRestClient.Enums;
+﻿using Alfateam.Marketing.FacebookAdsRestClient.Abstractions.Models;
+using Alfateam.Marketing.FacebookAdsRestClient.Enums;
 using Alfateam.Marketing.FacebookAdsRestClient.Enums.AdAccountRelated;
 using Alfateam.Marketing.FacebookAdsRestClient.Models.AdAccountRelated;
 using Alfateam.Marketing.FacebookAdsRestClient.Models.AdAccountRelated.Users;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Alfateam.Marketing.FacebookAdsRestClient.Models.General.Pages
 {
-    public class Page
+    public class Page : Profile
     {
         [JsonProperty("id")]
         public long Id { get; set; }

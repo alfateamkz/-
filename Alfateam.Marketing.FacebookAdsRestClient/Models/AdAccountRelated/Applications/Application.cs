@@ -1,4 +1,5 @@
-﻿using Alfateam.Marketing.FacebookAdsRestClient.Enums.AdAccountRelated.Applications;
+﻿using Alfateam.Marketing.FacebookAdsRestClient.Abstractions.Models;
+using Alfateam.Marketing.FacebookAdsRestClient.Enums.AdAccountRelated.Applications;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Alfateam.Marketing.FacebookAdsRestClient.Models.AdAccountRelated.Applications
 {
-    public class Application
+    public class Application : Profile
     {
         [JsonProperty("id")]
         public long Id { get; set; }
