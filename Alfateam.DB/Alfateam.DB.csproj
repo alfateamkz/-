@@ -32,6 +32,7 @@
     <ProjectReference Include="..\Alfateam.Sales.Models\Alfateam.Sales.Models.csproj" />
     <ProjectReference Include="..\Alfateam.Services.CurrencyRates.Models\Alfateam.Services.CurrencyRates.Models.csproj" />
     <ProjectReference Include="..\Alfateam.Telephony.Models\Alfateam.Telephony.Models.csproj" />
+    <ProjectReference Include="..\Alfateam.TicketSystem.Models\Alfateam.TicketSystem.Models.csproj" />
     <ProjectReference Include="..\Alfateam2.0.Models\Alfateam2.0.Models.csproj" />
   </ItemGroup>
 

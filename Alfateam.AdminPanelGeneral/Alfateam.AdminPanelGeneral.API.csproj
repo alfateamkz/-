@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -7,12 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.12" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.7.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Abstractions\" />
-    <Folder Include="Models\" />
+    <ProjectReference Include="..\Alfateam.Administration.Models.DTO\Alfateam.Administration.Models.DTO.csproj" />
+    <ProjectReference Include="..\Alfateam.DB\Alfateam.DB.csproj" />
+    <ProjectReference Include="..\Alfateam.Gateways\Alfateam.Gateways.csproj" />
+    <ProjectReference Include="..\Alfateam.ID.Models.DTO\Alfateam.ID.Models.DTO.csproj" />
   </ItemGroup>
 
 </Project>

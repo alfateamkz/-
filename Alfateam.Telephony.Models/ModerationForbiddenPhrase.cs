@@ -10,5 +10,12 @@ namespace Alfateam.Telephony.Models
     public class ModerationForbiddenPhrase : AbsModel
     {
         public string Phrase { get; set; }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int BusinessCompanyId { get; set; }
     }
 }

@@ -30,5 +30,12 @@ namespace Alfateam.Telephony.Models.Abstractions
 
 
         public string OutgoingCallsPrefix { get; set; }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int BusinessCompanyId { get; set; }
     }
 }

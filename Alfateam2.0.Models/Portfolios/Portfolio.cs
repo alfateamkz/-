@@ -23,7 +23,7 @@ namespace Alfateam2._0.Models.Portfolios
         public Content Content { get; set; }
 
         [NotMapped]
-        public string Slug => SlugHelper.GetLatynSlug(Title);
+        public string Slug => $"{SlugHelper.GetLatynSlug(Title)}-{Id}";
 
         public PortfolioCategory Category { get; set; }
         public int CategoryId { get; set; }

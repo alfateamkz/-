@@ -15,11 +15,14 @@ namespace Alfateam.Website.API.Jobs
                 {
                     using(WebsiteDBContext db = new WebsiteDBContext())
                     {
-                        foreach (var language in db.Languages.Where(o => !o.IsDeleted))
+                        foreach (var language in db.Languages.Where(o => !o.IsDeleted).ToList())
                         {
                             var websiteLocalization = GetWebsiteLocalizationWithIncludes(db, language.Id);
-                            StaticFilesHelper.CreateStaticLocalizationsFile(websiteLocalization);
+                            StaticFilesHelper.CreateStaticLocalizationsFile(websiteLocalization);  
                         }
+
+                        var sitemap = SitemapHelper.GetSitemap(db);
+                        StaticFilesHelper.CreateSitemapXML(sitemap);
                     }
 
                     await Task.Delay(TimeSpan.FromHours(1));
@@ -31,7 +34,7 @@ namespace Alfateam.Website.API.Jobs
 
         #region GetWebsiteLocalizationWithIncludes
 
-        private WebsiteLocalizationTexts GetWebsiteLocalizationWithIncludes(WebsiteDBContext db, int languageId)
+        public static WebsiteLocalizationTexts GetWebsiteLocalizationWithIncludes(WebsiteDBContext db, int languageId)
         {
             var localization = db.WebsiteLocalizationTexts.Include(o => o.ComplianceTexts)
                                                           .Include(o => o.EventTexts)
@@ -44,23 +47,35 @@ namespace Alfateam.Website.API.Jobs
                                                           .Include(o => o.SitemapPageTexts)
                                                           .FirstOrDefault(o => o.LanguageEntityId == languageId);
 
-            IncludeCCWebsiteTexts(db, localization);
-            IncludeStaticPagesTexts(db, localization);
+            if(localization == null)
+            {
+                localization = new WebsiteLocalizationTexts(languageId);
 
-            IncludeHRTexts(db, localization);
-            IncludeInvestTexts(db, localization);
-            IncludePortfolioTexts(db, localization);
-            IncludeTeamTexts(db, localization);
-            IncludeShopTexts(db, localization);
+                db.WebsiteLocalizationTexts.Add(localization);
+                db.SaveChanges();
+            }
+            else
+            {
+                IncludeCCWebsiteTexts(db, localization);
+                IncludeStaticPagesTexts(db, localization);
 
-            IncludeCommonTexts(db, localization);
+                IncludeHRTexts(db, localization);
+                IncludeInvestTexts(db, localization);
+                IncludePortfolioTexts(db, localization);
+                IncludeTeamTexts(db, localization);
+                IncludeShopTexts(db, localization);
+
+                IncludeCommonTexts(db, localization);
+            }
+
+           
 
 
             return localization;
         }
 
 
-        private void IncludeCCWebsiteTexts(WebsiteDBContext db, WebsiteLocalizationTexts texts)
+        private static void IncludeCCWebsiteTexts(WebsiteDBContext db, WebsiteLocalizationTexts texts)
         {
             texts.CCWebsiteLocalizationTexts = db.CCWebsiteLocalizationTexts.Include(o => o.CCAuthLocalizationTexts).ThenInclude(o => o.CCAuthCodeSentPageTexts)
                                                                             .Include(o => o.CCAuthLocalizationTexts).ThenInclude(o => o.CCAuthRestorePageTexts)
@@ -81,7 +96,7 @@ namespace Alfateam.Website.API.Jobs
                                                                             .Include(o => o.CCProjectPageTexts)
                                                                             .FirstOrDefault(o => o.WebsiteLocalizationTextsId == texts.Id);
         }
-        private void IncludeStaticPagesTexts(WebsiteDBContext db, WebsiteLocalizationTexts texts)
+        private static void IncludeStaticPagesTexts(WebsiteDBContext db, WebsiteLocalizationTexts texts)
         {
             texts.StaticPagesLocalizationTexts = db.StaticPagesLocalizationTexts.Include(o => o.InnerLandingsLocalizationTexts).ThenInclude(o => o.ILQualityAndPipelinePageTexts)
                                                                                 .Include(o => o.InnerLandingsLocalizationTexts).ThenInclude(o => o.ILRefProgramPageTexts)
@@ -100,32 +115,32 @@ namespace Alfateam.Website.API.Jobs
 
 
 
-        private void IncludeHRTexts(WebsiteDBContext db, WebsiteLocalizationTexts texts)
+        private static void IncludeHRTexts(WebsiteDBContext db, WebsiteLocalizationTexts texts)
         {
             texts.HRLocalizationTexts = db.HRLocalizationTexts.Include(o => o.HRJobVacanciesListPageTexts)
                                                               .Include(o => o.HRJobVacancyPageText)
                                                               .FirstOrDefault(o => o.WebsiteLocalizationTextsId == texts.Id);
         }
-        private void IncludeInvestTexts(WebsiteDBContext db, WebsiteLocalizationTexts texts)
+        private static void IncludeInvestTexts(WebsiteDBContext db, WebsiteLocalizationTexts texts)
         {
             texts.InvestLocalizationTexts = db.InvestLocalizationTexts.Include(o => o.InvestProjectPageTexts)
                                                                       .Include(o => o.InvestProjectsListPageTexts)
                                                                       .FirstOrDefault(o => o.WebsiteLocalizationTextsId == texts.Id);
         }
-        private void IncludePortfolioTexts(WebsiteDBContext db, WebsiteLocalizationTexts texts)
+        private static void IncludePortfolioTexts(WebsiteDBContext db, WebsiteLocalizationTexts texts)
         {
             texts.PortfolioLocalizationTexts = db.PortfolioLocalizationTexts.Include(o => o.PortfolioItemPageTexts)
                                                                             .Include(o => o.PortfolioListPageTexts)
                                                                             .Include(o => o.PortfolioStatsPageTexts)
                                                                             .FirstOrDefault(o => o.WebsiteLocalizationTextsId == texts.Id);
         }
-        private void IncludeTeamTexts(WebsiteDBContext db, WebsiteLocalizationTexts texts)
+        private static void IncludeTeamTexts(WebsiteDBContext db, WebsiteLocalizationTexts texts)
         {
             texts.TeamLocalizationTexts = db.TeamLocalizationTexts.Include(o => o.TeamMemberPageTexts)
                                                                   .Include(o => o.TeamPageTexts)
                                                                   .FirstOrDefault(o => o.WebsiteLocalizationTextsId == texts.Id);
         }
-        private void IncludeShopTexts(WebsiteDBContext db, WebsiteLocalizationTexts texts)
+        private static void IncludeShopTexts(WebsiteDBContext db, WebsiteLocalizationTexts texts)
         {
             texts.ShopLocalizationTexts = db.ShopLocalizationTexts.Include(o => o.ShopBasketPageTexts)
                                                                   .Include(o => o.ShopDeliveryAddressPageTexts)
@@ -141,7 +156,7 @@ namespace Alfateam.Website.API.Jobs
 
 
 
-        private void IncludeCommonTexts(WebsiteDBContext db, WebsiteLocalizationTexts texts)
+        private static void IncludeCommonTexts(WebsiteDBContext db, WebsiteLocalizationTexts texts)
         {
             texts.CommonTexts = db.CommonTexts.Include(o => o.Header)
                                               .Include(o => o.Footer)

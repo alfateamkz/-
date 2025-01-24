@@ -3,7 +3,7 @@ using Alfateam.Core.Helpers;
 using Alfateam.ID.Abstractions;
 using Alfateam.ID.API.Filters;
 using Alfateam.ID.API.Models;
-using Alfateam.ID.API.Models.DTO;
+using Alfateam.ID.Models.DTO;
 using Alfateam.ID.Models;
 using Alfateam.ID.Models.Enums;
 using Microsoft.AspNetCore.Mvc;

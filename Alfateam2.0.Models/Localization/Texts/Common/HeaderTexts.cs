@@ -12,6 +12,15 @@ namespace Alfateam2._0.Models.Localization.Texts.Common
     /// </summary>
     public class HeaderTexts : LocalizableModel
     {
+        public HeaderTexts()
+        {
+
+        }
+        public HeaderTexts(int languageId) : base(languageId) 
+        {
+
+        }
+
         public string Main { get; set; } = "ГЛАВНАЯ";
         public string OurWorks { get; set; } = "ПОРТФОЛИО";
         public string Cost { get; set; } = "АУТСТАФФ";

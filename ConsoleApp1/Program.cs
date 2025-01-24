@@ -1,6 +1,8 @@
 ﻿using Alfateam.Marketing.YandexWebmasterRestClient;
 using Alfateam.Messenger.Lib;
 using Alfateam.SMSGateways.Countries.Kazakhstan;
+using Microsoft.AspNetCore.SignalR.Client;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace ConsoleApp1
 {
@@ -10,6 +12,11 @@ namespace ConsoleApp1
         {
             // var insta = new InstagramMessenger(new Alfateam.Messenger.Models.Accounts.SocialNetworks.InstagramAccount());
 
+
+            var connection = new HubConnectionBuilder()
+                   .WithUrl("https://localhost:7098/chat")
+                   .
+                   .Build();
 
             try
             {

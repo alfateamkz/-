@@ -21,7 +21,14 @@ namespace Alfateam2._0.Models.Team
 
 
         [NotMapped]
-        public string Slug => SlugHelper.GetLatynSlug($"{Surname} {Name} - {Position}");
+        public string ShownTitle => $"{Surname}-{Name} ({Position})";
+
+
+
+        [NotMapped]
+        public string Slug => SlugHelper.GetLatynSlug($"{Surname}-{Name}-{Position}-{Id}");
+
+
 
 
         public string Position { get; set; }

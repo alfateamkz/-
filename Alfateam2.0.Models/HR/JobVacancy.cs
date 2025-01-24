@@ -35,7 +35,7 @@ namespace Alfateam2._0.Models.HR
 
 
         [NotMapped]
-        public string Slug => SlugHelper.GetLatynSlug(Title);
+        public string Slug => $"{SlugHelper.GetLatynSlug(Title)}-{Id}";
 
         public Content InnerContent { get; set; }
 

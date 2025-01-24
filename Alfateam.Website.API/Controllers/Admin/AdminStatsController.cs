@@ -23,7 +23,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
         [HttpGet, Route("GetVisits")]
-        public async Task<ItemsWithTotalCount<SiteVisitDTO>> GetVisits(SiteVisitFilter filter)
+        public async Task<ItemsWithTotalCount<SiteVisitDTO>> GetVisits([FromQuery] SiteVisitFilter filter)
         {
             var allVisits = DB.SiteVisits.Where(o => o.VisitedAt >= filter.From && o.VisitedAt <= filter.To);
 

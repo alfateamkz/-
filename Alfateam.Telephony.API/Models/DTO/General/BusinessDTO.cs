@@ -1,5 +1,5 @@
 ﻿using Alfateam.Core.Attributes.DTO;
-using Alfateam.Marketing.Models.General;
+using Alfateam.Telephony.Models.General;
 using Alfateam.Telephony.API.Abstractions;
 using Alfateam.Website.API.Abstractions;
 

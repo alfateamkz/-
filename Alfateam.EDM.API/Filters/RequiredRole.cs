@@ -22,7 +22,7 @@ namespace Alfateam.EDM.API.Filters
         {
             var controller = context.Controller as AbsAuthorizedController;
 
-            if ((int)controller.AuthorizedUser.Role < (int)Role)
+            if ((int)controller.AuthorizedUser.Role > (int)Role)
             {
                 context.Result = new Result403("Ваша роль не позволяет выполнить данное действие");
             }

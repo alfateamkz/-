@@ -127,9 +127,25 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.Marketing.YandexAp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Prikol", "Prikol\Prikol.csproj", "{D757B736-0E74-4999-B02D-9AE9C9C8CBE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.Marketing.YandexDirectRestClient", "Alfateam.Marketing.YandexDirectRestClient\Alfateam.Marketing.YandexDirectRestClient.csproj", "{132EB339-C577-4446-B833-0676C80AF3FB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.Marketing.YandexDirectRestClient", "Alfateam.Marketing.YandexDirectRestClient\Alfateam.Marketing.YandexDirectRestClient.csproj", "{132EB339-C577-4446-B833-0676C80AF3FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.Marketing.FacebookAdsRestClient", "Alfateam.Marketing.FacebookAdsRestClient\Alfateam.Marketing.FacebookAdsRestClient.csproj", "{A19833C7-377D-4036-85C4-B1976786308C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.Marketing.FacebookAdsRestClient", "Alfateam.Marketing.FacebookAdsRestClient\Alfateam.Marketing.FacebookAdsRestClient.csproj", "{A19833C7-377D-4036-85C4-B1976786308C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.SitemapXMLGenerator", "Alfateam.SitemapXMLGenerator\Alfateam.SitemapXMLGenerator.csproj", "{56560118-3687-4F09-998C-29C7E6332744}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.ForPubilcWebsites.API", "Alfateam.ForPubilcWebsites.API\Alfateam.ForPubilcWebsites.API.csproj", "{A34C8849-F9CA-4D9C-BAB4-F64717C8D689}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.Administration.Models.DTO", "Alfateam.Administration.Models.DTO\Alfateam.Administration.Models.DTO.csproj", "{DFB7998B-D666-4C17-B87C-08E77091AC11}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alfateam.ID.Models.DTO", "Alfateam.ID.Models.DTO\Alfateam.ID.Models.DTO.csproj", "{46F066D7-C8E1-453E-8DDC-37FDAD501399}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TicketSystem", "TicketSystem", "{5DBA8200-EC60-4DF7-8B00-26695AFB2E3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.TicketSystem.Models", "Alfateam.TicketSystem.Models\Alfateam.TicketSystem.Models.csproj", "{DFF0C33A-6868-4D39-946F-843274C3E3AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.TicketSystem.Models.DTO", "Alfateam.TicketSystem.Models.DTO\Alfateam.TicketSystem.Models.DTO.csproj", "{F04A65CF-1450-46AD-B6AF-1E98B1C3D8AD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alfateam.TicketSystem.API", "Alfateam.TicketSystem.API\Alfateam.TicketSystem.API.csproj", "{F91974D5-FD27-439B-A002-2FA10E152FC2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -317,6 +333,34 @@ Global
 		{A19833C7-377D-4036-85C4-B1976786308C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A19833C7-377D-4036-85C4-B1976786308C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A19833C7-377D-4036-85C4-B1976786308C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56560118-3687-4F09-998C-29C7E6332744}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56560118-3687-4F09-998C-29C7E6332744}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56560118-3687-4F09-998C-29C7E6332744}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56560118-3687-4F09-998C-29C7E6332744}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A34C8849-F9CA-4D9C-BAB4-F64717C8D689}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A34C8849-F9CA-4D9C-BAB4-F64717C8D689}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A34C8849-F9CA-4D9C-BAB4-F64717C8D689}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A34C8849-F9CA-4D9C-BAB4-F64717C8D689}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFB7998B-D666-4C17-B87C-08E77091AC11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFB7998B-D666-4C17-B87C-08E77091AC11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFB7998B-D666-4C17-B87C-08E77091AC11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFB7998B-D666-4C17-B87C-08E77091AC11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46F066D7-C8E1-453E-8DDC-37FDAD501399}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46F066D7-C8E1-453E-8DDC-37FDAD501399}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46F066D7-C8E1-453E-8DDC-37FDAD501399}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46F066D7-C8E1-453E-8DDC-37FDAD501399}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFF0C33A-6868-4D39-946F-843274C3E3AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFF0C33A-6868-4D39-946F-843274C3E3AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFF0C33A-6868-4D39-946F-843274C3E3AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFF0C33A-6868-4D39-946F-843274C3E3AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F04A65CF-1450-46AD-B6AF-1E98B1C3D8AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F04A65CF-1450-46AD-B6AF-1E98B1C3D8AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F04A65CF-1450-46AD-B6AF-1E98B1C3D8AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F04A65CF-1450-46AD-B6AF-1E98B1C3D8AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F91974D5-FD27-439B-A002-2FA10E152FC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F91974D5-FD27-439B-A002-2FA10E152FC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F91974D5-FD27-439B-A002-2FA10E152FC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F91974D5-FD27-439B-A002-2FA10E152FC2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -360,6 +404,11 @@ Global
 		{D757B736-0E74-4999-B02D-9AE9C9C8CBE9} = {32F98715-830A-4B65-A652-EDC60358CC3F}
 		{132EB339-C577-4446-B833-0676C80AF3FB} = {ADCAFC78-69BA-434C-8C8B-40B27EFCD586}
 		{A19833C7-377D-4036-85C4-B1976786308C} = {ADCAFC78-69BA-434C-8C8B-40B27EFCD586}
+		{DFB7998B-D666-4C17-B87C-08E77091AC11} = {EA009B18-F1D8-40E6-93D5-C46BEF067564}
+		{46F066D7-C8E1-453E-8DDC-37FDAD501399} = {4601018F-578F-4ADB-8E34-0DC6D36E5427}
+		{DFF0C33A-6868-4D39-946F-843274C3E3AA} = {5DBA8200-EC60-4DF7-8B00-26695AFB2E3D}
+		{F04A65CF-1450-46AD-B6AF-1E98B1C3D8AD} = {5DBA8200-EC60-4DF7-8B00-26695AFB2E3D}
+		{F91974D5-FD27-439B-A002-2FA10E152FC2} = {5DBA8200-EC60-4DF7-8B00-26695AFB2E3D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {91AE9782-0D3F-4611-8C40-D29647166E70}

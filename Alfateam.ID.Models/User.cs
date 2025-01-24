@@ -15,6 +15,9 @@ namespace Alfateam.ID.Models
         public string Name { get; set; }
         public string? Patronymic { get; set; }
 
+        [NotMapped]
+        public string FIO => $"{Surname} {Name} {Patronymic}";
+
 
 
         public string Email { get; set; }

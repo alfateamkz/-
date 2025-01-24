@@ -44,6 +44,7 @@ namespace Alfateam.DB
 
         #endregion
 
+        public DbSet<BaseCall> Calls { get; set; }
         public DbSet<AudioRecord> AudioRecords { get; set; }
         public DbSet<BaseSMS> BaseSMSs { get; set; }
         public DbSet<ExtInteraction> ExtInteractions { get; set; }
@@ -66,7 +67,6 @@ namespace Alfateam.DB
 
         #endregion
 
-        public DbSet<Call> Calls { get; set; }
         public DbSet<CallRecord> CallRecords { get; set; }
 
         #endregion

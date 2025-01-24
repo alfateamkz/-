@@ -12,6 +12,15 @@ namespace Alfateam2._0.Models.Localization.Texts.Common
     /// </summary>
     public class FooterTexts : LocalizableModel
     {
+        public FooterTexts()
+        {
+
+        }
+        public FooterTexts(int languageId) : base(languageId)
+        {
+
+        }
+
         public string AllRightReserved { get; set; } = "All rights reserved";
 
 

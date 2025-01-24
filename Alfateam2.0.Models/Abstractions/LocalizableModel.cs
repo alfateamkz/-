@@ -1,5 +1,7 @@
 ﻿using Alfateam.Core;
 using Alfateam2._0.Models.General;
+using Newtonsoft.Json;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -14,8 +16,10 @@ namespace Alfateam2._0.Models.Abstractions
     /// </summary>
     public abstract class LocalizableModel : AbsModel
     {
-        [ForeignKey("LanguageEntityId")]
+        [ForeignKey("LanguageEntityId"), SwaggerIgnore]
         public Language LanguageEntity { get; set; }
+
+        [SwaggerIgnore]
         public int LanguageEntityId { get; set; }
 
 
@@ -27,11 +31,6 @@ namespace Alfateam2._0.Models.Abstractions
         public LocalizableModel(int languageId)
         {
             LanguageEntityId = languageId;
-
-
         }
-
-    
-
     }
 }

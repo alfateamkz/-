@@ -8,15 +8,13 @@
 
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.7.3" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Controllers\ATE\" />
-    <Folder Include="Controllers\Integrations\" />
     <Folder Include="Controllers\Calls\" />
-    <Folder Include="Controllers\Owner\" />
     <Folder Include="Models\DTO\ATE\" />
-    <Folder Include="Models\DTO\General\Numbers\" />
   </ItemGroup>
 
   <ItemGroup>

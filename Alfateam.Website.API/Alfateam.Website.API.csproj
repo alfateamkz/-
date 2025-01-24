@@ -51,7 +51,7 @@
   <ItemGroup>
     <PackageReference Include="JsonKnownTypes" Version="0.6.0" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Cors" Version="5.3.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
@@ -73,6 +73,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Alfateam.DB\Alfateam.DB.csproj" />
     <ProjectReference Include="..\Alfateam.Gateways\Alfateam.Gateways.csproj" />
+    <ProjectReference Include="..\Alfateam.SitemapXMLGenerator\Alfateam.SitemapXMLGenerator.csproj" />
     <ProjectReference Include="..\Alfateam2.0.Models\Alfateam2.0.Models.csproj" />
   </ItemGroup>
 

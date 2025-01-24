@@ -13,6 +13,18 @@ namespace Alfateam2._0.Models.Localization.Texts.Grouping
     /// </summary>
     public class CommonTexts : LocalizableModel
     {
+        public CommonTexts()
+        {
+
+        }
+        public CommonTexts(int languageId) : base(languageId)
+        {
+            Header.LanguageEntityId = languageId;
+            Footer.LanguageEntityId = languageId;
+            Links.LanguageEntityId = languageId;
+            ClientCabinet.LanguageEntityId = languageId;
+            SitemapPageTitles.LanguageEntityId = languageId;
+        }
 
         public int WebsiteLocalizationTextsId { get; set; }
 
@@ -21,6 +33,7 @@ namespace Alfateam2._0.Models.Localization.Texts.Grouping
         public FooterTexts Footer { get; set; } = new FooterTexts();
         public LinksLocalization Links { get; set; } = new LinksLocalization();
         public ClientCabinetCommonTexts ClientCabinet { get; set; } = new ClientCabinetCommonTexts();
+        public SitemapPageTitlesTexts SitemapPageTitles { get; set; } = new SitemapPageTitlesTexts();
 
 
 

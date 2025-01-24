@@ -2,12 +2,14 @@
 using Alfateam.Core.Helpers;
 using Alfateam.ID.Abstractions;
 using Alfateam.ID.API.Filters;
-using Alfateam.ID.API.Models.DTO;
+using Alfateam.ID.API.Models;
+using Alfateam.ID.Models.DTO;
 using Alfateam.ID.Models;
 using Alfateam.ID.Models.Abstractions;
 using Alfateam.ID.Models.Enums;
 using Alfateam.ID.Models.Security.Verifications;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Numerics;
 
 namespace Alfateam.ID.API.Controllers
@@ -51,11 +53,42 @@ namespace Alfateam.ID.API.Controllers
             return DB.Users.Any(o => o.Email == email || o.Phone == phone && !o.IsDeleted);
         }
 
+        [HttpPut, Route("Refresh")]
+        public async Task<AuthResultTokens> Refresh(string refreshToken)
+        {
+            var session = DB.Sessions.Include(o => o.User)
+                                     .FirstOrDefault(o => o.RefreshToken == refreshToken);
+
+            if(session == null)
+            {
+                throw new Exception404("Токен не найден");
+            }
+            else if (session.IsDeactivated)
+            {
+                throw new Exception403("Сессия была деактивирована");
+            }
+            else if (session.IsRefreshTokenUsed)
+            {
+                throw new Exception403("Токен уже был ранее использован");
+            }
+
+            session.IsRefreshTokenUsed = true;
+            DBService.UpdateEntity(DB.Sessions, session);
+
+            var newSession = CreateSession(session.User);
+            return new AuthResultTokens
+            {
+                SessID = newSession.SessID,
+                ExpiresAt = newSession.ExpiresAt,
+                RefreshToken = newSession.RefreshToken,
+            };
+        }
+
 
         #region Авторизация
 
         [HttpPut, Route("AuthWithEmailAndPassword")]
-        public async Task<string> AuthWithEmailAndPassword(string email, string password)
+        public async Task<AuthResultTokens> AuthWithEmailAndPassword(string email, string password)
         {
             var user = DB.Users.AsEnumerable().FirstOrDefault(o => o.Email == email
                                                                   && PasswordHelper.CheckEncryptedPassword(password, o.Password));
@@ -63,7 +96,14 @@ namespace Alfateam.ID.API.Controllers
             {
                 throw new Exception404("Неверный email или пароль");
             }
-            return this.CreateSession(user).SessID;
+
+            var session = this.CreateSession(user);
+            return new AuthResultTokens 
+            {
+                SessID = session.SessID,
+                ExpiresAt = session.ExpiresAt,
+                RefreshToken = session.RefreshToken,
+            };
         }
 
 
@@ -76,7 +116,7 @@ namespace Alfateam.ID.API.Controllers
         }
     
         [HttpPut, Route("AuthWithCode")]
-        public async Task<string> AuthWithCode(VerificationType type, string contact, string code)
+        public async Task<AuthResultTokens> AuthWithCode(VerificationType type, string contact, string code)
         {
             User user = null;
             if (type == VerificationType.Phone)
@@ -94,8 +134,15 @@ namespace Alfateam.ID.API.Controllers
             }
 
 
-            VerifyCode(type, contact, code);    
-            return this.CreateSession(user).SessID;
+            VerifyCode(type, contact, code);
+
+            var session = this.CreateSession(user);
+            return new AuthResultTokens
+            {
+                SessID = session.SessID,
+                ExpiresAt = session.ExpiresAt,
+                RefreshToken = session.RefreshToken,
+            };
         }
 
         #endregion   

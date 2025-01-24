@@ -21,6 +21,7 @@ namespace Alfateam2._0.Models.Localization.Texts
             {
                 new TextContentItem
                 {
+                    Guid = System.Guid.NewGuid().ToString(),
                     Content = "Текст комплаенса, задать из админки контент"
                 }
             }

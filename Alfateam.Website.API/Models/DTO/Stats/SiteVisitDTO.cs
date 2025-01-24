@@ -31,6 +31,7 @@ namespace Alfateam.Website.API.Models.DTO.Stats
 
         [ForClientOnly]
         public UserDTO? VisitedBy { get; set; }
+        [ForClientOnly]
         public int? VisitedById { get; set; }
     }
 }

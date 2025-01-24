@@ -20,5 +20,12 @@ namespace Alfateam.Telephony.Models.Abstractions
         public string Discriminator { get; set; }
 
         public string Title { get; set; }
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int BusinessCompanyId { get; set; }
     }
 }

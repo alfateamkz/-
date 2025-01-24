@@ -26,7 +26,7 @@ namespace Alfateam2._0.Models.Events
 
 
         [NotMapped]
-        public string Slug => SlugHelper.GetLatynSlug(Title);
+        public string Slug => $"{SlugHelper.GetLatynSlug(Title)}-{Id}";
 
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }

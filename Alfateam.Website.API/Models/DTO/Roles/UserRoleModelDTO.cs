@@ -69,6 +69,11 @@ namespace Alfateam.Website.API.Models.DTO.Roles
             item.HRAccess = HRAccess.CreateDBModelFromDTO();
             item.ShopAccess = ShopAccess.CreateDBModelFromDTO();
             item.OutstaffAccess = OutstaffAccess.CreateDBModelFromDTO();
+       
+            foreach(var contentAccess in this.ContentAccessTypes)
+            {
+                item.ContentAccessTypes.Add(contentAccess.CreateDBModelFromDTO());
+            }
 
             UpdateCountriesList(item.AvailableCountries, AvailableCountriesIds, allCountriesFromDB);
             UpdateCountriesList(item.ForbiddenCountries, ForbiddenCountriesIds, allCountriesFromDB);

@@ -20,7 +20,7 @@ namespace Alfateam2._0.Models.Shop
 
 
         [NotMapped]
-        public string Slug => SlugHelper.GetLatynSlug(Title);
+        public string Slug => $"{SlugHelper.GetLatynSlug(Title)}-{Id}";
 
 
         public Language MainLanguage { get; set; }

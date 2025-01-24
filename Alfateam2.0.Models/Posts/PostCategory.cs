@@ -19,7 +19,7 @@ namespace Alfateam2._0.Models.Posts
         public string Title { get; set; }
 
         [NotMapped]
-        public string Slug => SlugHelper.GetLatynSlug(Title);
+        public string Slug => $"{SlugHelper.GetLatynSlug(Title)}-{Id}";
 
         public Language MainLanguage { get; set; }
         public int MainLanguageId { get; set; }

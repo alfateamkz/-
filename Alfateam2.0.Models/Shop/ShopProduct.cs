@@ -26,7 +26,7 @@ namespace Alfateam2._0.Models.Shop
 
 
         [NotMapped]
-        public string Slug => SlugHelper.GetLatynSlug(Title);
+        public string Slug => $"{SlugHelper.GetLatynSlug(Title)}-{Id}";
 
         public ShopProductImage MainImage { get; set; }
         public List<ShopProductImage> Images { get; set; } = new List<ShopProductImage>();

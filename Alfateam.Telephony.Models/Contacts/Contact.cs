@@ -16,5 +16,14 @@ namespace Alfateam.Telephony.Models.Contacts
 
         public ContactCategory Category { get; set; }
         public int CategoryId { get; set; }
+
+
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int BusinessCompanyId { get; set; }
     }
 }

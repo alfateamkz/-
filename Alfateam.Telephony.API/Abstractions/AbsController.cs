@@ -35,9 +35,17 @@ namespace Alfateam.Telephony.API.Abstractions
 
         }
 
-        public string AlfateamSessionID => Request.Headers["AlfateamSessionID"];
-        public virtual Session? AlfateamSession => IDDB.Sessions.Include(o => o.User)
-                                                                .FirstOrDefault(o => o.SessID == this.AlfateamSessionID);
+        public string API_KEY => Request.Headers["API_KEY"];
+        public string Domain => Request.Headers["Domain"];
+        public int? BusinessId
+        {
+            get
+            {
+                var business = DB.Businesses.FirstOrDefault(o => o.Domain == this.Domain && !o.IsDeleted);
+                return business?.Id;
+            }
+        }
+        public int? CompanyId => ParseIntValueFromHeader("CompanyId");
 
 
 
@@ -45,14 +53,32 @@ namespace Alfateam.Telephony.API.Abstractions
 
 
 
-        //public string Domain => Request.Headers["Domain"];
-        //public int? BusinessId
-        //{
-        //    get
-        //    {
-        //        var business = DB.Businesses.FirstOrDefault(o => o.Domain == this.Domain && !o.IsDeleted);
-        //        return business?.Id;
-        //    }
-        //}
+
+
+
+
+
+
+        protected int? ParseIntValueFromHeader(string key)
+        {
+            int? id = null;
+
+            if (Request.Headers.ContainsKey(key))
+            {
+                var str = Request.Headers[key].ToString();
+                if (str != null)
+                {
+                    int val = 0;
+                    int.TryParse(str, out val);
+
+                    if (val != 0)
+                    {
+                        id = val;
+                    }
+                }
+            }
+
+            return id;
+        }
     }
 }

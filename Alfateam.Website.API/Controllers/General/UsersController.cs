@@ -29,12 +29,12 @@ namespace Alfateam.Website.API.Controllers.General
         {
         }
 
-        [HttpGet, Route("Login")]
-        public async Task<string> Login(string email,string password)
+        [HttpPost, Route("Login")]
+        public async Task<string> Login([FromBody]LoginModel model)
         {
             var user = DB.Users.ToList()
-                               .FirstOrDefault(o => o.Email.Equals(email, StringComparison.OrdinalIgnoreCase)
-                                && PasswordHelper.CheckEncryptedPassword(password, o.Password));
+                               .FirstOrDefault(o => o.Email.Equals(model.Email, StringComparison.OrdinalIgnoreCase)
+                                && PasswordHelper.CheckEncryptedPassword(model.Password, o.Password));
 
             if(user == null)
             {

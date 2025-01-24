@@ -26,24 +26,24 @@ namespace Alfateam.Core.Services
 
 
         public IEnumerable<DTO> GetMany<T, DTO>(IEnumerable<T> from,
-                                                Func<T, bool> predicate = null) where T : AbsModel, new()
-                                                                                where DTO : DTOModelAbs<T>, new()
+                                                Func<T, bool> predicate = null) where T : AbsModelBase, new()
+                                                                                where DTO : DTOModelAbsGeneric<T>, new()
         {
             return GetManyWithTotalCount<T, DTO>(from, 0, int.MaxValue, predicate).Items;
         }
         public IEnumerable<DTO> GetMany<T,DTO>(IEnumerable<T> from,
                                                       int offset,
                                                       int count,
-                                                      Func<T, bool> predicate = null) where T : AbsModel, new()
-                                                                                      where DTO : DTOModelAbs<T>, new()
+                                                      Func<T, bool> predicate = null) where T : AbsModelBase, new()
+                                                                                      where DTO : DTOModelAbsGeneric<T>, new()
         {
             return GetManyWithTotalCount<T,DTO>(from, offset, count, predicate).Items;
         }
         public ItemsWithTotalCount<DTO> GetManyWithTotalCount<T, DTO>(IEnumerable<T> from, 
                                                                             int offset = 0, 
                                                                             int count = int.MaxValue, 
-                                                                            Func<T,bool> predicate = null) where T : AbsModel, new()
-                                                                                                           where DTO : DTOModelAbs<T>, new()
+                                                                            Func<T,bool> predicate = null) where T : AbsModelBase, new()
+                                                                                                           where DTO : DTOModelAbsGeneric<T>, new()
         {
             var dtoModel = new DTO();
 
@@ -71,8 +71,9 @@ namespace Alfateam.Core.Services
 
 
 
+        #region TryGetOne int id
 
-        public DTOModelAbs<T> TryGetOne<T>(IEnumerable<T> fromModels, int id, DTOModelAbs<T> dTOModel) where T : AbsModel, new()
+        public DTOModelAbsGeneric<T> TryGetOne<T>(IEnumerable<T> fromModels, int id, DTOModelAbsGeneric<T> dTOModel) where T : AbsModel, new()
         {
             var dbModel = TryGetOne(fromModels, id);
             return dTOModel.CreateDTO(dbModel);
@@ -88,15 +89,36 @@ namespace Alfateam.Core.Services
             return item;
         }
 
+        #endregion
+
+        #region TryGetOne string id
+
+        public DTOModelAbsGeneric<T> TryGetOne<T>(IEnumerable<T> fromModels, string id, DTOModelAbsGeneric<T> dTOModel) where T : AbsModelGuid, new()
+        {
+            var dbModel = TryGetOne(fromModels, id);
+            return dTOModel.CreateDTO(dbModel);
+        }
+        public T TryGetOne<T>(IEnumerable<T> fromModels, string id) where T : AbsModelGuid, new()
+        {
+            var item = fromModels.FirstOrDefault(o => o.Id == id && !o.IsDeleted);
+            if (item is null)
+            {
+                throw new Exception404("Запись по данному id не найдена");
+            }
+
+            return item;
+        }
+
+        #endregion
 
         #endregion
 
         #region Create
 
-        public DTOModelAbs<T> TryCreateEntity<T>(DbSet<T> dbSet,
-                                                 DTOModelAbs<T> model,
-                                                 Action<T> callback = null,
-                                                 Action<T> afterSuccessCallback = null) where T : AbsModel, new()
+        public DTOModelAbsGeneric<T> TryCreateEntity<T>(DbSet<T> dbSet,
+                                                        DTOModelAbsGeneric<T> model,
+                                                        Action<T> callback = null,
+                                                        Action<T> afterSuccessCallback = null) where T : AbsModelBase, new()
         {
             model.SetDBContext(DB);
             ValidateToCreateEntity(model);
@@ -111,7 +133,14 @@ namespace Alfateam.Core.Services
 
             dbSet.Add(dbModel);
             DB.SaveChanges();
-            model.Id = dbModel.Id;
+
+
+            //Установка id (int или string)
+            var dtoModelIdProp = model.GetType().GetProperties().FirstOrDefault(o => o.Name == "Id");
+            var dbModelIdProp = dbModel.GetType().GetProperties().FirstOrDefault(o => o.Name == "Id");
+            dtoModelIdProp.SetValue(model, dbModelIdProp.GetValue(dbModel));
+
+
             model.CreatedAt = dbModel.CreatedAt;
 
             afterSuccessCallback?.Invoke(dbModel);
@@ -119,9 +148,9 @@ namespace Alfateam.Core.Services
             return model;
         }
 
-        public IEnumerable<DTOModelAbs<T>> TryCreateEntities<T>(DbSet<T> dbSet, 
-                                                                IEnumerable<DTOModelAbs<T>> models,
-                                                                Action<IEnumerable<T>> callback = null) where T : AbsModel, new()
+        public IEnumerable<DTOModelAbsGeneric<T>> TryCreateEntities<T>(DbSet<T> dbSet, 
+                                                                       IEnumerable<DTOModelAbsGeneric<T>> models,
+                                                                       Action<IEnumerable<T>> callback = null) where T : AbsModelBase, new()
         {
             var dbModels = new List<T>();
 
@@ -143,21 +172,32 @@ namespace Alfateam.Core.Services
 
             for(int i = 0; i<models.Count(); i++)
             {
-                models.ElementAt(i).Id = dbModels[i].Id;
+                var dtoModel = models.ElementAt(i);
+                var dbModel = dbModels[i];
+
+                //Установка id (int или string)
+                var dtoModelIdProp = dtoModel.GetType().GetProperties().FirstOrDefault(o => o.Name == "Id");
+                var dbModelIdProp = dbModel.GetType().GetProperties().FirstOrDefault(o => o.Name == "Id");
+                dtoModelIdProp.SetValue(dtoModel, dbModelIdProp.GetValue(dbModel));
             }
 
             return models;
         }
 
 
-        public T CreateEntity<T>(DbSet<T> dbSet, T item) where T : AbsModel
+
+
+
+
+
+        public T CreateEntity<T>(DbSet<T> dbSet, T item) where T : AbsModelBase
         {
             dbSet.Add(item);
             DB.SaveChanges();
 
             return item;
         }
-        public T CreateEntity<T>(DbSet<T> dbSet, DTOModelAbs<T> model) where T : AbsModel, new()
+        public T CreateEntity<T>(DbSet<T> dbSet, DTOModelAbsGeneric<T> model) where T : AbsModelBase, new()
         {
             var item = new T();
 
@@ -179,11 +219,11 @@ namespace Alfateam.Core.Services
         #region Update
 
 
-        public DTOModelAbs<T> TryUpdateEntity<T>(DbSet<T> dbSet, 
-                                                DTOModelAbs<T> model, 
-                                                T item, 
-                                                Action<T> callback = null,
-                                                Action<T> afterSuccessCallback = null) where T : AbsModel, new()
+        public DTOModelAbsGeneric<T> TryUpdateEntity<T>(DbSet<T> dbSet,
+                                                       DTOModelAbsGeneric<T> model, 
+                                                       T item, 
+                                                       Action<T> callback = null,
+                                                       Action<T> afterSuccessCallback = null) where T : AbsModelBase, new()
         {
            
             ValidateToUpdateEntity(item, model);
@@ -193,7 +233,7 @@ namespace Alfateam.Core.Services
             return model;
         }
 
-        public T UpdateEntity<T>(DbSet<T> dbSet, DTOModelAbs<T> model, T item, Action<T> callback) where T : AbsModel, new()
+        public T UpdateEntity<T>(DbSet<T> dbSet, DTOModelAbsGeneric<T> model, T item, Action<T> callback) where T : AbsModelBase, new()
         {
             model.SetDBContext(DB);
             model.FillDBModel(item, DBModelFillMode.Update);
@@ -204,7 +244,7 @@ namespace Alfateam.Core.Services
             model = model.CreateDTO(item);
             return item;
         }
-        public T UpdateEntity<T>(DbSet<T> dbSet, DTOModelAbs<T> model, T item) where T : AbsModel, new()
+        public T UpdateEntity<T>(DbSet<T> dbSet, DTOModelAbsGeneric<T> model, T item) where T : AbsModelBase, new()
         {
             model.SetDBContext(DB);
             model.FillDBModel(item, DBModelFillMode.Update);
@@ -215,12 +255,12 @@ namespace Alfateam.Core.Services
             model = model.CreateDTO(item);
             return item;
         }
-        public void UpdateEntity<T>(DbSet<T> dbSet, T item) where T : AbsModel
+        public void UpdateEntity<T>(DbSet<T> dbSet, T item) where T : AbsModelBase
         {
             dbSet.Update(item);
             DB.SaveChanges();
         }
-        public void UpdateEntities<T>(DbSet<T> dbSet, IEnumerable<T> items) where T : AbsModel
+        public void UpdateEntities<T>(DbSet<T> dbSet, IEnumerable<T> items) where T : AbsModelBase
         {
             dbSet.UpdateRange(items);
             DB.SaveChanges();
@@ -229,7 +269,7 @@ namespace Alfateam.Core.Services
         #endregion
 
         #region Delete
-        public void TryDeleteEntity<T>(DbSet<T> dbSet, T item, bool softDelete = true, Action afterSuccessCallback = null) where T : AbsModel
+        public void TryDeleteEntity<T>(DbSet<T> dbSet, T item, bool softDelete = true, Action afterSuccessCallback = null) where T : AbsModelBase
         {
             if (item == null)
             {
@@ -239,7 +279,7 @@ namespace Alfateam.Core.Services
 
             afterSuccessCallback?.Invoke();
         }
-        public void DeleteEntity<T>(DbSet<T> dbSet, T item, bool softDelete = true) where T : AbsModel
+        public void DeleteEntity<T>(DbSet<T> dbSet, T item, bool softDelete = true) where T : AbsModelBase
         {
             if (softDelete)
             {
@@ -256,7 +296,7 @@ namespace Alfateam.Core.Services
 
 
 
-        public void DeleteEntities<T>(DbSet<T> dbSet,IEnumerable<T> items, bool softDelete = true) where T : AbsModel
+        public void DeleteEntities<T>(DbSet<T> dbSet,IEnumerable<T> items, bool softDelete = true) where T : AbsModelBase
         {
             foreach (var item in items)
             {
@@ -279,9 +319,9 @@ namespace Alfateam.Core.Services
 
 
         #region Validate methods
-        public virtual void ValidateToCreateEntity<T>(DTOModelAbs<T> item) where T : AbsModel, new()
+        public virtual void ValidateToCreateEntity<T>(DTOModelAbsGeneric<T> item) where T : AbsModelBase, new()
         {
-            if (item.Id != 0)
+            if(item is AbsModel withIntIdItem && withIntIdItem.Id != 0)
             {
                 throw new Exception400("Id должен быть нулевым");
             }
@@ -293,14 +333,16 @@ namespace Alfateam.Core.Services
             }
 
         }
-        public virtual void ValidateToUpdateEntity<T>(T item, DTOModelAbs<T> model) where T : AbsModel, new()
+        public virtual void ValidateToUpdateEntity<T>(T item, DTOModelAbsGeneric<T> model) where T : AbsModelBase, new()
         {
             if (item == null)
             {
                 throw new Exception404("Запись по данному id не найдена");
             }
 
-            if (item.Id != model.Id)
+            var dtoModelIdProp = model.GetType().GetProperties().FirstOrDefault(o => o.Name == "Id");
+            var dbModelIdProp = item.GetType().GetProperties().FirstOrDefault(o => o.Name == "Id");
+            if (dbModelIdProp.GetValue(item) != dtoModelIdProp.GetValue(model))
             {
                 throw new Exception400("Нельзя изменить id сущности");
             }

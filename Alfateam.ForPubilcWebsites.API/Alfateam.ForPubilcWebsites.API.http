@@ -1,0 +1,6 @@
+@Alfateam.ForPubilcWebsites.API_HostAddress = http://localhost:5267
+
+GET {{Alfateam.ForPubilcWebsites.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -221,6 +221,7 @@ namespace Alfateam.DB
         public DbSet<FooterTexts> FooterTexts { get; set; }
         public DbSet<HeaderTexts> HeaderTexts { get; set; }
         public DbSet<LinksLocalization> LinksLocalization { get; set; }
+        public DbSet<SitemapPageTitlesTexts> SitemapPageTitlesTexts { get; set; }
 
         #endregion
 

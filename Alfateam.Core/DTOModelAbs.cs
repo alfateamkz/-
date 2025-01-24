@@ -12,9 +12,6 @@ namespace Alfateam.Website.API.Abstractions
 
     public abstract class DTOModelAbs
     {
-        [DTOFieldFor(DTOFieldForType.UpdateOnly)]
-        public int Id { get; set; }
-
         [ForClientOnly]
         public DateTime CreatedAt { get; set; }
 
@@ -137,11 +134,13 @@ namespace Alfateam.Website.API.Abstractions
 
     }
 
-    public abstract class DTOModelAbs<T> : DTOModelAbs where T : AbsModel, new()
+
+
+    public abstract class DTOModelAbsGeneric<T> : DTOModelAbs where T : AbsModelBase, new()
     {
         #region Клиентские модели (для просмотра)
 
-        public DTOModelAbs<T> CreateDTO(T item)
+        public DTOModelAbsGeneric<T> CreateDTO(T item)
         {
             if(item == null)
             {
@@ -159,7 +158,7 @@ namespace Alfateam.Website.API.Abstractions
                     var discriminatorValue = discriminatorProp.GetValue(item);
                     var foundType = types.FirstOrDefault(o => o.Name.Equals($"{discriminatorValue}DTO"));
 
-                    clone = (DTOModelAbs<T>)Activator.CreateInstance(foundType);
+                    clone = (DTOModelAbsGeneric<T>)Activator.CreateInstance(foundType);
                 }
             }
 
@@ -201,9 +200,9 @@ namespace Alfateam.Website.API.Abstractions
             return clone;
         }
 
-        public IEnumerable<DTOModelAbs<T>> CreateDTOs(IEnumerable<T> items)
+        public IEnumerable<DTOModelAbsGeneric<T>> CreateDTOs(IEnumerable<T> items)
         {
-            var models = new List<DTOModelAbs<T>>();
+            var models = new List<DTOModelAbsGeneric<T>>();
             foreach (var item in items)
             {
                 models.Add(CreateDTO(item));
@@ -291,12 +290,23 @@ namespace Alfateam.Website.API.Abstractions
             }
         
             this.FillDBModel(newItem, DBModelFillMode.Create);
-            newItem.Id = 0;
 
+            var idProp = newItem.GetType().GetProperties().FirstOrDefault(o => o.Name =="Id");
+            if(idProp != null)
+            {
+                if(idProp.PropertyType == typeof(int))
+                {
+                    idProp.SetValue(newItem, 0);
+                }
+                else if (idProp.PropertyType == typeof(string))
+                {
+                    idProp.SetValue(newItem, System.Guid.NewGuid().ToString());
+                }
+            }
 
             return newItem;
         }
-        public static IEnumerable<T> CreateDBModelsFromDTO(IEnumerable<DTOModelAbs<T>> models)
+        public static IEnumerable<T> CreateDBModelsFromDTO(IEnumerable<DTOModelAbsGeneric<T>> models)
         {
             var items = new List<T>();
 
@@ -352,7 +362,7 @@ namespace Alfateam.Website.API.Abstractions
 
         #region Fill DB Prop Methods
 
-        private void FillDBProp_FromListOfIds(AbsModel dbEntity, PropertyInfo dbEntityProp, PropertyInfo dtoModelProp)
+        private void FillDBProp_FromListOfIds(AbsModelBase dbEntity, PropertyInfo dbEntityProp, PropertyInfo dtoModelProp)
         {
             var itemPropBindAttr = dtoModelProp.GetCustomAttributes().FirstOrDefault(o => o.GetType() == typeof(DTOFieldBindWith)) as DTOFieldBindWith;
             if (itemPropBindAttr != null)
@@ -378,7 +388,7 @@ namespace Alfateam.Website.API.Abstractions
                 }
             }
         }
-        private void FillDBProp_FromDTOsList(AbsModel dbEntity, PropertyInfo dbEntityProp, PropertyInfo dtoModelProp)
+        private void FillDBProp_FromDTOsList(AbsModelBase dbEntity, PropertyInfo dbEntityProp, PropertyInfo dtoModelProp)
         {
             var itemSamePropValue = ((IList)dbEntityProp.GetValue(dbEntity));
             itemSamePropValue.Clear();
@@ -392,7 +402,7 @@ namespace Alfateam.Website.API.Abstractions
                 itemSamePropValue.Add(createdDbEntity);
             }
         }
-        private void FillDBProp_FromDTOModel(AbsModel dbEntity, PropertyInfo dbEntityProp, PropertyInfo dtoModelProp, DBModelFillMode mode)
+        private void FillDBProp_FromDTOModel(AbsModelBase dbEntity, PropertyInfo dbEntityProp, PropertyInfo dtoModelProp, DBModelFillMode mode)
         {
             if (mode == DBModelFillMode.Update)
             {
@@ -404,7 +414,7 @@ namespace Alfateam.Website.API.Abstractions
                 dbEntityProp.SetValue(dbEntity, createdDbEntity);
             }
         }
-        private void FillDBProp_SimpleValue(AbsModel dbEntity,PropertyInfo dbEntityProp, object dtoPropValue)
+        private void FillDBProp_SimpleValue(AbsModelBase dbEntity,PropertyInfo dbEntityProp, object dtoPropValue)
         {
             dbEntityProp.SetValue(dbEntity, dtoPropValue);
         }
@@ -459,9 +469,9 @@ namespace Alfateam.Website.API.Abstractions
         #endregion
 
 
-        public DTOModelAbs<T> Clone()
+        public DTOModelAbsGeneric<T> Clone()
         {
-            return this.MemberwiseClone() as DTOModelAbs<T>;
+            return this.MemberwiseClone() as DTOModelAbsGeneric<T>;
         }
 
         public Type GetTypeOfDBEntity()
@@ -470,6 +480,20 @@ namespace Alfateam.Website.API.Abstractions
         }
 
     }
+
+
+    public abstract class DTOModelAbs<T> : DTOModelAbsGeneric<T> where T : AbsModel, new()
+    {
+        [DTOFieldFor(DTOFieldForType.UpdateOnly)]
+        public virtual int Id { get; set; }
+    }
+
+    public abstract class DTOModelAbsGuid<T> : DTOModelAbsGeneric<T> where T : AbsModelGuid, new()
+    {
+        [DTOFieldFor(DTOFieldForType.UpdateOnly)]
+        public virtual string Id { get; set; }
+    }
+
 
     public enum DBModelFillMode
     {

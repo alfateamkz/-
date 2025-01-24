@@ -33,7 +33,8 @@ namespace Alfateam2._0.Models.Localization.Texts.Grouping
 
 
 
-            CommonTexts.LanguageEntityId = languageId;
+            CommonTexts = new CommonTexts(languageId);
+
             ComplianceTexts.LanguageEntityId = languageId;
             EventTexts.LanguageEntityId = languageId;
             MassMediaAboutUsTexts.LanguageEntityId = languageId;
@@ -63,7 +64,7 @@ namespace Alfateam2._0.Models.Localization.Texts.Grouping
 
 
 
-        public CommonTexts CommonTexts { get; set; } = new CommonTexts();
+        public CommonTexts CommonTexts { get; set; }
         public ComplianceTexts ComplianceTexts { get; set; } = new ComplianceTexts();
         public EventTexts EventTexts { get; set; } = new EventTexts();
         public MassMediaAboutUsTexts MassMediaAboutUsTexts { get; set; } = new MassMediaAboutUsTexts();

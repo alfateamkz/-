@@ -9,6 +9,14 @@ namespace Alfateam2._0.Models.Localization.Texts.Common
 {
     public class ClientCabinetCommonTexts : LocalizableModel
     {
+        public ClientCabinetCommonTexts()
+        {
+
+        }
+        public ClientCabinetCommonTexts(int languageId) : base(languageId)
+        {
+
+        }
 
         public string LastBreadcrump { get; set; } = "Личный кабинет";
         public string Header { get; set; } = "ЛИЧНЫЙ КАБИНЕТ";

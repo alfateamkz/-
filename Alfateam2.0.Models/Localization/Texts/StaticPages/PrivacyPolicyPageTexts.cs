@@ -20,6 +20,7 @@ namespace Alfateam2._0.Models.Localization.Texts.StaticPages
             {
                 new TextContentItem
                 {
+                    Guid = System.Guid.NewGuid().ToString(),
                     Content = "Текст политики конфиденциальности, задать из админки контент"
                 }
             }

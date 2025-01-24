@@ -14,5 +14,11 @@ namespace Alfateam.Telephony.Models.HLR.Results
 
 
         public List<HLRTaskIterationResultNumber> Numbers { get; set; } = new List<HLRTaskIterationResultNumber>();
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int HLRTaskId { get; set; }
     }
 }

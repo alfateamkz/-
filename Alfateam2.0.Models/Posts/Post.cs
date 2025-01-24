@@ -24,7 +24,7 @@ namespace Alfateam2._0.Models.Posts
 
 
         [NotMapped]
-        public string Slug => SlugHelper.GetLatynSlug(Title);
+        public string Slug => $"{SlugHelper.GetLatynSlug(Title)}-{Id}";
 
         public PostCategory Category { get; set; }
         public int CategoryId { get; set; }

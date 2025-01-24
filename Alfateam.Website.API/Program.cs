@@ -170,7 +170,7 @@ namespace Alfateam.Website.API
 
             app.MapControllers();
 
-            //new StaticFilesJob().Start();
+            new StaticFilesJob().Start();
 
             app.Run();
         }

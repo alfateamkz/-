@@ -17,9 +17,11 @@ namespace Alfateam.ID.Models.Payments
         public string CurrencyCode { get; set; }    
         public decimal Sum { get; set; }
         public string Comment { get; set; }
+        public string? ProductIdentifier { get; set; }
 
 
 
+        public User User { get; set; }
         public int UserId { get; set; }
 
     }

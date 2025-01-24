@@ -15,10 +15,15 @@ namespace Alfateam.ID.Models.Security
 
         public string SessID { get; set; } = Guid.NewGuid().ToString();
         public DateTime ExpiresAt { get; set; } = DateTime.UtcNow.AddHours(12);
+        public string RefreshToken { get; set; } = Guid.NewGuid().ToString();
         public bool IsDeactivated { get; set; }
+        public bool IsRefreshTokenUsed { get; set; }
 
 
         [JsonIgnore]
         public bool IsExpired => DateTime.UtcNow >= ExpiresAt;
+
+        [JsonIgnore]
+        public bool IsActive => !IsExpired && !IsDeactivated;
     }
 }

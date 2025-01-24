@@ -12,7 +12,7 @@ namespace Alfateam.Telephony.Models.SMS
     public class SentSMS : BaseSMS
     {
         public User SentBy { get; set; }
-        public int SentId { get; set; }
+        public int SentById { get; set; }
 
 
         public DateTime SentAt { get; set; }

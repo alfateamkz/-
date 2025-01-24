@@ -20,7 +20,7 @@ namespace Alfateam2._0.Models.Events
 
 
         [NotMapped]
-        public string Slug => SlugHelper.GetLatynSlug(Title);
+        public string Slug => $"{SlugHelper.GetLatynSlug(Title)}-{Id}";
 
         public Language MainLanguage { get; set; }
         public int MainLanguageId { get; set; }
