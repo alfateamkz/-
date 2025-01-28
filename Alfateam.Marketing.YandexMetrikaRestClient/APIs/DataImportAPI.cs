@@ -1,6 +1,5 @@
 ﻿using Alfateam.Marketing.YandexMetrikaRestClient.Abstractions;
 using Alfateam.Marketing.YandexMetrikaRestClient.Modules.DataImport;
-using Alfateam.Marketing.YandexMetrikaRestClient.Modules.Stat;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,4 +1,5 @@
-﻿using Alfateam.Messenger.API.Abstractions;
+﻿using Alfateam.Marketing.Models.Abstractions.MailingAccounts;
+using Alfateam.Messenger.API.Abstractions;
 using Alfateam.Messenger.API.Enums;
 using Alfateam.Messenger.Models.Abstractions;
 using Alfateam.Messenger.Models.Accounts;
@@ -11,9 +12,9 @@ namespace Alfateam.Messenger.API.Models.Filters
     {
         public AccountSocialNetworkType SocialNetworkType { get; set; }
 
-        public IEnumerable<MessengerMailingAccount> Filter(IEnumerable<MessengerMailingAccount> items, Func<MessengerMailingAccount, string> queryPredicate)
+        public IEnumerable<Account> Filter(IEnumerable<Account> items, Func<Account, string> queryPredicate)
         {
-            IEnumerable<MessengerMailingAccount> filtered = new List<MessengerMailingAccount>(items);
+            IEnumerable<Account> filtered = new List<Account>(items);
 
             switch (SocialNetworkType)
             {

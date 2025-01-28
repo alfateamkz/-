@@ -7,5 +7,8 @@ namespace Alfateam.CertificationCenter.Models.DTO.Cancellation
     {
         [ForClientOnly]
         public AlfateamEDSDTO EDSToCancel { get; set; }
+
+        [HiddenFromClient]
+        public int EDSToCancelId { get; set; }
     }
 }

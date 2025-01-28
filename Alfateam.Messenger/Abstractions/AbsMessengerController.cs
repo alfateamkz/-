@@ -15,7 +15,7 @@ namespace Alfateam.Messenger.API.Abstractions
 
 
         public int? AccountId => ParseIntValueFromHeader("AccountId");
-        public MessengerMailingAccount? Account => DB.Accounts.FirstOrDefault(o => o.Id == AccountId);
+        public Account? Account => DB.Accounts.FirstOrDefault(o => o.Id == AccountId);
         public AbsMessenger? Messenger => AccountsPool.GetOrCreateMessenger(Account);
     }
 }

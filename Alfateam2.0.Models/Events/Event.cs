@@ -25,11 +25,14 @@ namespace Alfateam2._0.Models.Events
         public string? EventMembers { get; set; }
 
 
+
+
         [NotMapped]
         public string Slug => $"{SlugHelper.GetLatynSlug(Title)}-{Id}";
 
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public string? EventPlace { get; set; }
         public General.TimeZone TimeZone { get; set; }
         public int TimeZoneId { get; set; }
 

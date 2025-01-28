@@ -1,7 +1,9 @@
 ﻿using Alfateam.CertificationCenter.Models.DTO.Abstractions;
-using Alfateam.CertificationCenter.Models.DTO.Files;
+using Alfateam.CertificationCenter.Models.DTO.General.Biometric;
+using Alfateam.CertificationCenter.Models.DTO.General.Documents;
 using Alfateam.CertificationCenter.Models.Enums;
-using Alfateam.CertificationCenter.Models.Files;
+using Alfateam.CertificationCenter.Models.General.Biometric;
+using Alfateam.CertificationCenter.Models.General.Documents;
 using Alfateam.Core.Attributes.DTO;
 
 namespace Alfateam.CertificationCenter.Models.DTO.IssueRequests
@@ -11,18 +13,9 @@ namespace Alfateam.CertificationCenter.Models.DTO.IssueRequests
         public EDSFor EDSFor { get; set; }
 
 
-        [ForClientOnly]
-        public List<AttachedImageDTO> PersonalDocumentImages { get; set; } = new List<AttachedImageDTO>();
-        [ForClientOnly]
-        public AttachedVideoDTO PersonalDocumentVideo { get; set; }
-        [ForClientOnly]
-        public AttachedVideoDTO PersonalBiometryVideo { get; set; }
-
-
-        [ForClientOnly]
-        public List<AttachedImageDTO> CompanyDocumentImages { get; set; } = new List<AttachedImageDTO>();
-        [ForClientOnly]
-        public AttachedVideoDTO? CompanyDocumentVideo { get; set; }
+        public SentDocumentDTO PersonalDocument { get; set; }
+        public SentBiometricIdentificationDTO PersonalBiometricIdentification { get; set; }
+        public SentDocumentDTO? CompanyDocument { get; set; }
 
 
 

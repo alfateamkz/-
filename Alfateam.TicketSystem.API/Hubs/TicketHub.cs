@@ -67,6 +67,8 @@ namespace Alfateam.TicketSystem.API.Hubs
             DBService.UpdateEntity(DB.Tickets, ticket);
 
             DBService.CreateEntity(DB.TicketMessages, message);
+            HandleMessageFilesSuccess(message);
+
             await SendCommandToTicketMembersOnly(ticket,"Receive", parameters.Message.CreateDTO(message));
         }
         public async Task SendMessageAsAdmin(SendMessageAsAdminParameters parameters)
@@ -95,6 +97,8 @@ namespace Alfateam.TicketSystem.API.Hubs
             DBService.UpdateEntity(DB.Tickets, ticket);
 
             DBService.CreateEntity(DB.TicketMessages, message);
+            HandleMessageFilesSuccess(message);
+
             await SendCommandToTicketMembersOnly(ticket, "Receive", parameters.Message.CreateDTO(message));
         }
 
@@ -221,13 +225,20 @@ namespace Alfateam.TicketSystem.API.Hubs
         {
             if (message is TextTicketMessage textTicketMessage)
             {
+                UploadedFilesService.ThrowIfAnyFileNotAvailable(textTicketMessage.Attachments.Select(o => o.FileId));
+            }
+            message.TicketId = ticketId;
+        }
+
+        private void HandleMessageFilesSuccess(TicketMessage message)
+        {
+            if (message is TextTicketMessage textTicketMessage)
+            {
                 foreach (var attachment in textTicketMessage.Attachments)
                 {
                     UploadedFilesService.TryBindFileWithEntity(attachment.FileId, UploadedFileRelatedEntity.MessageAttachment, attachment.Id);
                 }
             }
-
-            message.TicketId = ticketId;
         }
 
         #endregion

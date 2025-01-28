@@ -17,6 +17,38 @@ namespace Alfateam.TicketSystem.API.Services
         }
 
 
+        public bool AreAllFilesAvailable(IEnumerable<string> fileIds)
+        {
+            return fileIds.All(o => IsFileAvailable(o));
+        }
+        public bool IsFileAvailable(string fileId)
+        {
+            var file = DBService.TryGetOne(DB.UploadedFiles, fileId);
+            return !file.IsUsed;
+        }
+
+
+
+
+
+        public void ThrowIfAnyFileNotAvailable(IEnumerable<string> fileIds)
+        {
+            if (!AreAllFilesAvailable(fileIds))
+            {
+                throw new Exception400("Файл(ы) уже используется(ются) в другой сущности");
+            }
+        }
+        public void ThrowIfFileNotAvailable(string fileId)
+        {
+            if (!IsFileAvailable(fileId))
+            {
+                throw new Exception400("Файл уже используется в другой сущности");
+            }
+        }
+
+
+
+
 
         public void TryBindFileWithEntity(string fileId, UploadedFileRelatedEntity entityType, int entityId)
         {

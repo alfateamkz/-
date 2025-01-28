@@ -10,5 +10,6 @@ namespace Alfateam.CertificationCenter.Models.Cancellation
     public class EDSCancellationRequest : CancellationRequest
     {
         public AlfateamEDS EDSToCancel { get; set; }
+        public int EDSToCancelId { get; set; }
     }
 }

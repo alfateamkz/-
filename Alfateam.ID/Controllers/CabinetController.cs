@@ -7,6 +7,7 @@ using Alfateam.ID.Models.DTO;
 using Alfateam.ID.Models;
 using Alfateam.ID.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
+using Alfateam.DB.Services.Models;
 
 namespace Alfateam.ID.API.Controllers
 {
@@ -59,7 +60,14 @@ namespace Alfateam.ID.API.Controllers
         [HttpPut, Route("SendChangeContactCode")]
         public async Task SendChangeContactCode(VerificationType type)
         {
-            SendCode(type, this.Session.User.GetContact(type), "Изменение контакта в Alfateam ID", "Код для изменения контакта в Alfateam ID:");
+            CodesService.SendCode(new AlfateamIDSendCodeParams
+            {
+                Type = type,
+                Contact = this.Session.User.GetContact(type),
+                ActionFor = VerificationFor.ContactChangeVerification,
+                LetterTitle = "Изменение контакта в Alfateam ID",
+                MessageText = "Код для изменения контакта в Alfateam ID:",
+            });
         }
 
         [HttpPut, Route("VerifyChangeContact")]
@@ -67,7 +75,8 @@ namespace Alfateam.ID.API.Controllers
         {
             var user = this.Session.User;
 
-            VerifyCode(type, user.GetContact(type), code);
+
+            CodesService.VerifyCode(type, VerificationFor.ContactChangeVerification, user.GetContact(type), code);
             if (type == VerificationType.Phone)
             {
                 user.Phone = newContact;

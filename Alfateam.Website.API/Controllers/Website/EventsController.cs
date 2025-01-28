@@ -27,7 +27,7 @@ namespace Alfateam.Website.API.Controllers.Website
         }
   
         [HttpGet, Route("GetEventsByFilter")]
-        public async Task<IEnumerable<EventDTO>> GetEventsByFilter(ClientEventsSearchFilter filter)
+        public async Task<IEnumerable<EventDTO>> GetEventsByFilter([FromQuery] ClientEventsSearchFilter filter)
         {
             var events = GetEventsWithIncludes();
 
@@ -79,7 +79,7 @@ namespace Alfateam.Website.API.Controllers.Website
             return DB.Events.IncludeAvailability()
                             .Include(o => o.Category).ThenInclude(o => o.Localizations)
                             .Include(o => o.Format).ThenInclude(o => o.Localizations)
-                            .Include(o => o.TimeZone)
+                            .Include(o => o.TimeZone).ThenInclude(o => o.Localizations)
                             .Include(o => o.Localizations)
                             .ToList()
                             .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));

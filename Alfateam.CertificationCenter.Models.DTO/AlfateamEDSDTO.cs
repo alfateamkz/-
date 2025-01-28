@@ -9,15 +9,6 @@ namespace Alfateam.CertificationCenter.Models.DTO
     public class AlfateamEDSDTO : DTOModelAbs<AlfateamEDS>
     {
 
-        [Description("Кому выдана ЭЦП - код страны")]
-        [ForClientOnly]
-        public string OwnerCountryCode { get; set; }
-
-
-        [Description("Кому выдана ЭЦП - ID номер (например, ИНН в РФ, ИИН\\БИН в РК и т.д.)")]
-        [ForClientOnly]
-        public string OwnerIdentificationNumber { get; set; }
-
         [Description("Для кого ЭЦП (Individual - физ.лицо\\самозанятый, Business - ИП/ООО/прочее)")]
         [ForClientOnly]
         public EDSFor For { get; set; }
@@ -33,22 +24,18 @@ namespace Alfateam.CertificationCenter.Models.DTO
         public string OwnerStringInfo { get; set; }
 
 
-        [Description("Уникальный публичный ключ ЭЦП")]
-        [ForClientOnly]
-        public string PublicKey { get; set; }
-
-
 
 
         [ForClientOnly]
-        public bool IsValid => ValidBefore > DateTime.UtcNow && !IsRevoked;
+        public bool IsActive => ValidFrom > DateTime.UtcNow && ValidBefore < DateTime.UtcNow && !IsRevoked;
+
         [ForClientOnly]
         public bool IsRevoked => RevokedAt != null;
 
 
 
         [ForClientOnly]
-        public DateTime IssuedAt { get; set; }
+        public DateTime ValidFrom { get; set; }
         [ForClientOnly]
         public DateTime ValidBefore { get; set; }
         [ForClientOnly]

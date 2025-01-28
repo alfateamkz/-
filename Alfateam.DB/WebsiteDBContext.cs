@@ -62,7 +62,7 @@ namespace Alfateam.DB
         public WebsiteDBContext()
         {
 
-            Database.Migrate();
+            Database.EnsureCreated();
             MakeDefaultEntities();
 
             //if (Database.EnsureCreated())
@@ -73,7 +73,7 @@ namespace Alfateam.DB
         public WebsiteDBContext(DbContextOptions<WebsiteDBContext> options)
         {
 
-            Database.Migrate();
+            Database.EnsureCreated();
             MakeDefaultEntities();
 
             //if (Database.EnsureCreated())

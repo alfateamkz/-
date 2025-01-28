@@ -53,6 +53,7 @@ namespace Alfateam.Website.API.Controllers.Website
             return (ReviewDTO)DbService.TryCreateEntity(DB.Reviews, model, (entity) =>
             {
                 entity.UserId = (int)GetUserIdIfSessionValid();
+                entity.CountryId = (int)this.CountryId;
             });
         }
 

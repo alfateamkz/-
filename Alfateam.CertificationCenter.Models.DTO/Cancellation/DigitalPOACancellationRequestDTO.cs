@@ -7,5 +7,9 @@ namespace Alfateam.CertificationCenter.Models.DTO.Cancellation
     {
         [ForClientOnly]
         public AlfateamDigitalPOADTO DigitalPOAToCancel { get; set; }
+
+        [HiddenFromClient]
+        public int DigitalPOAToCancelId { get; set; }
+
     }
 }

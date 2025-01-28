@@ -1,6 +1,9 @@
 ﻿using Alfateam.CertificationCenter.Models.Abstraction;
+using Alfateam.CertificationCenter.Models.DocumentRecognizedInfo;
 using Alfateam.CertificationCenter.Models.Enums;
-using Alfateam.CertificationCenter.Models.Files;
+using Alfateam.CertificationCenter.Models.General.Biometric;
+using Alfateam.CertificationCenter.Models.General.Documents;
+using Alfateam.CertificationCenter.Models.RequestSuccessDocs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,18 +18,28 @@ namespace Alfateam.CertificationCenter.Models.IssueRequests
         public EDSFor EDSFor { get; set; }
 
 
-        public List<AttachedImage> PersonalDocumentImages { get; set; } = new List<AttachedImage>();
-        public AttachedVideo PersonalDocumentVideo { get; set; }
-        public AttachedVideo PersonalBiometryVideo { get; set; }
+
+        public SentDocument PersonalDocument { get; set; }
+        public int PersonalDocumentId { get; set; }
 
 
-        public List<AttachedImage> CompanyDocumentImages { get; set; } = new List<AttachedImage>();
-        public AttachedVideo? CompanyDocumentVideo { get; set; }
 
-        
+        public SentBiometricIdentification PersonalBiometricIdentification { get; set; }
+        public int PersonalBiometricIdentificationId { get; set; }
+
+
+        public SentDocument? CompanyDocument { get; set; }
+        public int? CompanyDocumentId { get; set; }
+
+
+
 
         public int? AlfateamIDSMSVerificationId { get; set; }
         public int? AlfateamIDEmailVerificationId { get; set; }
 
+
+
+        public EDSIssueRequestSuccessDocs? SuccessDocs { get; set; }
+        public int? SuccessDocsId { get; set; }
     }
 }

@@ -13,9 +13,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Alfateam.CertGenerators\Alfateam.CertGenerators.csproj" />
     <ProjectReference Include="..\Alfateam.CerticationCenter.Models\Alfateam.CertificationCenter.Models.csproj" />
     <ProjectReference Include="..\Alfateam.CertificationCenter.Models.DTO\Alfateam.CertificationCenter.Models.DTO.csproj" />
     <ProjectReference Include="..\Alfateam.Core\Alfateam.Core.csproj" />
+    <ProjectReference Include="..\Alfateam.DB.Services\Alfateam.DB.Services.csproj" />
     <ProjectReference Include="..\Alfateam.DB\Alfateam.DB.csproj" />
     <ProjectReference Include="..\Alfateam.Gateways\Alfateam.Gateways.csproj" />
   </ItemGroup>

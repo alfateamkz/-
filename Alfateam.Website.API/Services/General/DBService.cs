@@ -54,7 +54,7 @@ namespace Alfateam.Website.API.Services.General
         }
 
 
-        public DTOModelAbs<T> GetLocalizationModel<T>(T localization, AbsModel mainEntity, LocalizationDTOModel<T> newDTO) where T : LocalizableModel, new()
+        public DTOModelAbsGeneric<T> GetLocalizationModel<T>(T localization, AbsModel mainEntity, LocalizationDTOModel<T> newDTO) where T : LocalizableModel, new()
         {
             if (localization == null)
             {
@@ -69,7 +69,7 @@ namespace Alfateam.Website.API.Services.General
 
             return newDTO.CreateDTO(localization);
         }
-        public IEnumerable<DTOModelAbs<T>> GetLocalizationModels<T>(IEnumerable<T> localizations, AbsModel mainEntity, LocalizationDTOModel<T> newDTO) where T : LocalizableModel, new()
+        public IEnumerable<DTOModelAbsGeneric<T>> GetLocalizationModels<T>(IEnumerable<T> localizations, AbsModel mainEntity, LocalizationDTOModel<T> newDTO) where T : LocalizableModel, new()
         {
             if (mainEntity == null)
             {
@@ -290,7 +290,7 @@ namespace Alfateam.Website.API.Services.General
 
 
         #region Validate methods
-        public override void ValidateToCreateEntity<T>(DTOModelAbs<T> item)
+        public override void ValidateToCreateEntity<T>(DTOModelAbsGeneric<T> item)
         {
             base.ValidateToCreateEntity(item);
 
@@ -304,7 +304,7 @@ namespace Alfateam.Website.API.Services.General
                 }
             }
         }
-        public override void ValidateToUpdateEntity<T>(T item, DTOModelAbs<T> model)
+        public override void ValidateToUpdateEntity<T>(T item, DTOModelAbsGeneric<T> model)
         {
             base.ValidateToUpdateEntity(item, model);
 

@@ -10,5 +10,6 @@ namespace Alfateam.CertificationCenter.Models.Cancellation
     public class DigitalPOACancellationRequest : CancellationRequest
     {
         public AlfateamDigitalPOA DigitalPOAToCancel { get; set; }
+        public int DigitalPOAToCancelId { get; set; }
     }
 }

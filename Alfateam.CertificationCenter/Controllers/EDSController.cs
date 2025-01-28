@@ -1,130 +1,275 @@
-﻿using Alfateam.CertificationCenter.Abstractions;
+﻿using Alfateam.CertGenerators;
+using Alfateam.CertGenerators.Enums;
+using Alfateam.CertGenerators.Models;
+using Alfateam.CertificationCenter.Abstractions;
+using Alfateam.CertificationCenter.API.Abstractions;
 using Alfateam.CertificationCenter.Models;
+using Alfateam.CertificationCenter.Models.Cancellation;
 using Alfateam.CertificationCenter.Models.DTO;
+using Alfateam.CertificationCenter.Models.DTO.Cancellation;
 using Alfateam.CertificationCenter.Models.DTO.IssueRequests;
 using Alfateam.CertificationCenter.Models.Enums;
 using Alfateam.CertificationCenter.Models.General;
 using Alfateam.CertificationCenter.Models.IssueRequests;
 using Alfateam.Core.Enums;
 using Alfateam.Core.Exceptions;
+using Alfateam.DB.Services.Models;
+using Alfateam.ID.Models.Enums;
+using Alfateam.TicketSystem.Models.Tickets.Messages;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Globalization;
+using System.Net.Mail;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Alfateam.CertificationCenter.Controllers
 {
-    public class EDSController : AbsController
+    public class EDSController : AbsAuthorizedController
     {
         public EDSController(ControllerParams @params) : base(@params)
         {
         }
 
+        #region Получение ЭЦП и запросов на выпуск\аннулирование
+
         [HttpGet, Route("GetEDSList")]
         public async Task<IEnumerable<AlfateamEDSDTO>> GetEDSList()
         {
-            var payments = DB.AlfateamEDSs.Where(o => o.OwnerAlfateamID == this.AlfateamSession.User.Guid && !o.IsDeleted);
-            return new AlfateamEDSDTO().CreateDTOs(payments).Cast<AlfateamEDSDTO>();
+            return new AlfateamEDSDTO().CreateDTOs(GetAvailableEDSList()).Cast<AlfateamEDSDTO>();
+        }
+
+        [HttpGet, Route("GetEDS")]
+        public async Task<AlfateamEDSDTO> GetEDS(int edsId)
+        {
+            return (AlfateamEDSDTO)DBService.TryGetOne(GetAvailableEDSList(), edsId, new AlfateamEDSDTO());
+        }
+
+        [HttpGet, Route("GetEDSIssueRequests")]
+        public async Task<IEnumerable<EDSIssueRequestDTO>> GetEDSIssueRequests()
+        {
+            return new EDSIssueRequestDTO().CreateDTOs(GetAvailableIssueRequests()).Cast<EDSIssueRequestDTO>();
+        }
+
+        [HttpGet, Route("GetEDSCancellationRequests")]
+        public async Task<IEnumerable<EDSCancellationRequestDTO>> GetPOACancellationRequests()
+        {
+            return new EDSCancellationRequestDTO().CreateDTOs(CancellationRequestsService.GetAvailableEDSCancellations(this.AlfateamSession.User.Guid))
+                                                  .Cast<EDSCancellationRequestDTO>();
         }
 
 
+
+
+
+
+        #endregion
+
+        #region Отправка запроса на выпуск ЭЦП
+
         [HttpPost, Route("SendIssueRequest")]
-        [SwaggerOperation(Description = "Надо обязательно залить следующие файлы: \r\n" +
-            "1. список фото документа лица, кто подает заявление, список файлов по имени PersonalDocumentImages_{номер} \r\n" +
-            "2. видеозапись документа - видео по имени PersonalDocumentVideo \r\n" +
-            "3. биометрия (видеозапись ебала) - видео по имени PersonalBiometryVideo \r\n" +
-            "4. Если ЭЦП для компании, то список фото по имени CompanyDocumentImages_{номер} \r\n" +
-            "5. Если ЭЦП для компании, то видеозапись документа - видео по имени CompanyDocumentVideo \r\n")]
-        public async Task SendIssueRequest([FromForm(Name = "model")]EDSIssueRequestDTO model)
+        public async Task SendIssueRequest(EDSIssueRequestDTO model)
         {
-            DBService.TryCreateEntity(DB.IssueRequests, model, async (entity) =>
+            DBService.TryCreateEntity(DB.IssueRequests, model, callback: (entity) =>
             {
                 var issueRequest = entity as EDSIssueRequest;
 
-                if (model.LatitudeFrom < -180 || model.LatitudeFrom > 180)
+                this.ThrowIfGeoCoordinateNotCorrect("LatitudeFrom", model.LatitudeFrom);
+                this.ThrowIfGeoCoordinateNotCorrect("LongitudeFrom", model.LongitudeFrom);
+
+
+                UploadedFilesService.ThrowIfAnyFileNotAvailable(issueRequest.PersonalDocument.Images.Select(o => o.Id));
+                UploadedFilesService.ThrowIfFileNotAvailable(issueRequest.PersonalBiometricIdentification.VideoId);
+                if(issueRequest.EDSFor == EDSFor.Business)
                 {
-                    throw new Exception400("Поле Latitude должно быть в диапазоне от -180 до 180");
+                    UploadedFilesService.ThrowIfAnyFileNotAvailable(issueRequest.CompanyDocument.Images.Select(o => o.Id));
                 }
-                else if (model.LongitudeFrom < -180 || model.LongitudeFrom > 180)
-                {
-                    throw new Exception400("Поле Latitude должно быть в диапазоне от -180 до 180");
-                }
-                else if(!Request.Form.Files.Any(o => o.Name.StartsWith("PersonalDocumentImages_")))
-                {
-                    throw new Exception400("Не прикреплено ни одно фото документа заявителя");
-                }
-                else if (!Request.Form.Files.Any(o => o.Name == "PersonalDocumentVideo"))
-                {
-                    throw new Exception400("Не прикреплено видео документа заявителя");
-                }
-                else if (!Request.Form.Files.Any(o => o.Name == "PersonalBiometryVideo"))
-                {
-                    throw new Exception400("Не прикреплено видео биометрии (видеозаписи ебала) заявителя");
-                }
-                else if (!Request.Form.Files.Any(o => o.Name.StartsWith("CompanyDocumentImages_"))
-                           && model.EDSFor == EDSFor.Business)
-                {
-                    throw new Exception400("Не прикреплено ни одно фото документа компании");
-                }
-                else if (!Request.Form.Files.Any(o => o.Name == "CompanyDocumentVideo")
-                          && model.EDSFor == EDSFor.Business)
-                {
-                    throw new Exception400("Не прикреплено видео документа компании");
-                }
-
-
-
-
-
-
-                foreach(var file in Request.Form.Files.Where(o => o.Name.StartsWith("PersonalDocumentImages_")))
-                {
-                    issueRequest.PersonalDocumentImages.Add(new Models.Files.AttachedImage
-                    {
-                        FilePath = FilesService.TryUploadFile(file, FileType.Image)
-                    });
-                }
-                issueRequest.PersonalDocumentVideo = new Models.Files.AttachedVideo
-                {
-                    FilePath = FilesService.TryUploadFile("PersonalDocumentVideo", FileType.Video)
-                };
-                issueRequest.PersonalBiometryVideo = new Models.Files.AttachedVideo
-                {
-                    FilePath = FilesService.TryUploadFile("PersonalBiometryVideo", FileType.Video)
-                };
-
-
-
-                if(model.EDSFor == EDSFor.Business)
-                {
-                    foreach (var file in Request.Form.Files.Where(o => o.Name.StartsWith("CompanyDocumentImages_")))
-                    {
-                        issueRequest.CompanyDocumentImages.Add(new Models.Files.AttachedImage
-                        {
-                            FilePath = FilesService.TryUploadFile(file, FileType.Image)
-                        });
-                    }
-
-                    issueRequest.CompanyDocumentVideo = new Models.Files.AttachedVideo
-                    {
-                        FilePath = FilesService.TryUploadFile("CompanyDocumentVideo", FileType.Video)
-                    };
-                }
-
-
-
 
                 entity.AlfateamIDFrom = this.AlfateamSession.User.Guid;
                 entity.StatusInfo = new IssueRequestInfo
                 {
                     Status = Models.Enums.IssueRequestStatus.Waiting
                 };
+            }, 
+            afterSuccessCallback: (entity) =>
+            {
+                var issueRequest = entity as EDSIssueRequest;
 
+                foreach (var image in issueRequest.PersonalDocument.Images)
+                {
+                    UploadedFilesService.BindFileWithEntity(image.Id, UploadedFileRelatedEntity.SentDocument, issueRequest.PersonalDocument.Id);
+                }
+                UploadedFilesService.BindFileWithEntity(issueRequest.PersonalBiometricIdentification.VideoId, UploadedFileRelatedEntity.SentBiometricIdentification, issueRequest.PersonalBiometricIdentification.Id);
 
-
-
+                if (issueRequest.EDSFor == EDSFor.Business)
+                {
+                    foreach (var image in issueRequest.CompanyDocument.Images)
+                    {
+                        UploadedFilesService.BindFileWithEntity(image.Id, UploadedFileRelatedEntity.SentDocument, issueRequest.CompanyDocument.Id);
+                    }
+                }
             });
         }
 
+        [HttpGet, Route("IssueEDS")]
+        public async Task<byte[]> IssueEDS(int requestId,string certPassword)
+        {
+            var request = DBService.TryGetOne(GetAvailableIssueRequests(), requestId);
+            if(request.StatusInfo.Status == IssueRequestStatus.Issued)
+            {
+                throw new Exception403("Сертификат уже был ранее выпущен. Если вы потеряли сертификат или забыли пароль, " +
+                    "то СРОЧНО аннулируйте текущий сертификат и отправьте запрос на выпуск нового сертификата");
+            }
+            if (request.StatusInfo.Status != IssueRequestStatus.Approved)
+            {
+                throw new Exception403("Запрос на выпуск сертификата не был еще подтвержден или был отклонен");
+            }
+
+            var authorizedUser = this.AlfateamSession.User;
+
+            GenerateCertificateInfo generatedEDS = null;
+
+            Gender edsOwnerGender = default;
+            switch (request.SuccessDocs.PersonalDocumentRecognizedInfo.Gender)
+            {
+                case DocumentOwnerGender.M:
+                    edsOwnerGender = Gender.M;
+                    break;
+                case DocumentOwnerGender.F:
+                    edsOwnerGender = Gender.F;
+                    break;
+                default:
+                    throw new Exception400("Какой-то полупокер");
+            }
+
+            var physicalParams = new AlfateamEDSGeneratorPhysicalParams
+            {
+                Password = certPassword,
+                DateOfBirth = request.SuccessDocs.PersonalDocumentRecognizedInfo.BirthDate,
+                Name = request.SuccessDocs.PersonalDocumentRecognizedInfo.Name,
+                Surname = request.SuccessDocs.PersonalDocumentRecognizedInfo.Surname,
+                GivenName = request.SuccessDocs.PersonalDocumentRecognizedInfo.Patronynic,
+                CountryOfResidence = request.SuccessDocs.PersonalDocumentRecognizedInfo.DocumentCountryCode,
+                CountryCodeOfCitizenship = request.SuccessDocs.PersonalDocumentRecognizedInfo.CitizenshipCountryCode,
+                EmailAddress = authorizedUser.Email,
+                TelephoneNumber = authorizedUser.Phone,
+                PlaceOfBirth = "",
+                UniqueIdentifier = request.SuccessDocs.PersonalDocumentRecognizedInfo.DocumentNumber,
+                Gender = edsOwnerGender
+            };
+
+            if (request.EDSFor == EDSFor.Individual)
+            {
+                generatedEDS = AlfateamEDSGenerator.GenerateAlfateamEDSForPhysical(physicalParams);
+            }
+            else if(request.EDSFor == EDSFor.Business)
+            {
+                generatedEDS = AlfateamEDSGenerator.GenerateAlfateamEDSForOrganization(new AlfateamEDSGeneratorOrganizationParams(physicalParams)
+                {
+                    CommonName = request.SuccessDocs.CompanyDocumentRecognizedInfo.CompanyName,
+                    Title = request.SuccessDocs.CompanyDocumentRecognizedInfo.CompanyFullName,
+                    Organization = request.SuccessDocs.CompanyDocumentRecognizedInfo.CompanyFullName,
+                    CountryCode = request.SuccessDocs.CompanyDocumentRecognizedInfo.CompanyCountryCode,
+                    StateOrProvinceName = request.SuccessDocs.CompanyDocumentRecognizedInfo.LegalAddressState,
+                    OrganizationUnitName = request.SuccessDocs.CompanyDocumentRecognizedInfo.CompanyMainSector,
+                    Street = request.SuccessDocs.CompanyDocumentRecognizedInfo.LegalAddressStreetAndHouse,
+                    LocalityName = request.SuccessDocs.CompanyDocumentRecognizedInfo.LegalAddressCity,
+                    OrganizationIdentifier = request.SuccessDocs.CompanyDocumentRecognizedInfo.BusinessNumber,
+                    PostalCode = request.SuccessDocs.CompanyDocumentRecognizedInfo.PostalAddressZIP,
+                    PostalAddress = request.SuccessDocs.CompanyDocumentRecognizedInfo.PostalAddress,
+                    Role = "",
+                });
+            }
+
+            request.StatusInfo.Status = IssueRequestStatus.Issued;
+            var alfateamEDSEntity = new AlfateamEDS
+            {
+                For = request.EDSFor,
+                OwnerAlfateamID = request.AlfateamIDFrom,
+                IssuerStringInfo = generatedEDS.PFX.Issuer,
+                OwnerStringInfo = generatedEDS.PFX.Subject,
+                ValidBefore = generatedEDS.PFX.NotAfter,
+                ValidFrom = generatedEDS.PFX.NotBefore,
+                PublicKey = generatedEDS.PFX.GetPublicKeyString(),
+            };
+            DBService.CreateEntity(DB.AlfateamEDSs, alfateamEDSEntity);
+            DBService.UpdateEntity(DB.IssueRequests, request);
+
+            return generatedEDS.PFX.Export(X509ContentType.Pfx, certPassword);
+        }
+
+        #endregion
+
+        #region Отправка запроса на аннулирование ЭЦП
+
+        [HttpPost, Route("SendCancellationRequest")]
+        public async Task SendCancellationRequest(EDSCancellationRequestDTO model)
+        {
+            DBService.TryGetOne(GetAvailableEDSList(), model.EDSToCancelId);
+            CancellationRequestsService.TrySendCancellationRequest(model);
+        }
+
+        [HttpPut, Route("SendCancellationRequestCode")]
+        public async Task SendCancellationRequestCode(int cancellationRequestId, VerificationType type)
+        {
+            CancellationRequestsService.ThrowIfCodeIsAlreadyConfirmed(type, cancellationRequestId, this.AlfateamSession.User.Guid);
+            CodesService.SendCode(new AlfateamIDSendCodeParams
+            {
+                Type = type,
+                Contact = this.AlfateamSession.User.GetContact(type),
+                ActionFor = VerificationFor.CertCenter_AlfateamEDSCancellation,
+                LetterTitle = "Подтверждение аннулирования ЭЦП",
+                MessageText = "Код для подтверждения аннулирования ЭЦП в Alfateam ID:",
+            });
+        }
+
+        [HttpPut, Route("VerifyCancellationRequestCode")]
+        public async Task VerifyCancellationRequestCode(int cancellationRequestId, VerificationType type, string code, string newContact)
+        {
+            var user = this.AlfateamSession.User;
+            var request = DBService.TryGetOne(CancellationRequestsService.GetAvailableEDSCancellations(user.Guid), cancellationRequestId);
+            CancellationRequestsService.VerifyCancellationRequestCode(user, cancellationRequestId, type, code, newContact);
+
+            if (request.AlfateamIDSMSVerificationId != null && request.AlfateamIDEmailVerificationId != null)
+            {
+                request.StatusInfo.Status = CancellationRequestStatus.Approved;
+                request.EDSToCancel.RevokedAt = DateTime.UtcNow;
+            }
+            DBService.UpdateEntity(DB.CancellationRequests, request);
+        }
 
 
+        #endregion
+
+
+
+
+
+
+
+
+        #region Private methods
+        private IEnumerable<AlfateamEDS> GetAvailableEDSList()
+        {
+            return DB.AlfateamEDSs.Where(o => o.OwnerAlfateamID == this.AlfateamSession.User.Guid && !o.IsDeleted);
+        }
+        private IEnumerable<EDSIssueRequest> GetAvailableIssueRequests()
+        {
+            var items = DB.IssueRequests.Where(o => o.AlfateamIDFrom == this.AlfateamSession.User.Guid && !o.IsDeleted).Cast<EDSIssueRequest>();
+            foreach (var item in items)
+            {
+                item.PersonalDocument = DB.SentDocuments.FirstOrDefault(o => o.Id == item.PersonalDocumentId);
+                item.PersonalBiometricIdentification = DB.SentBiometricIdentifications.FirstOrDefault(o => o.Id == item.PersonalBiometricIdentificationId);
+                item.CompanyDocument = DB.SentDocuments.FirstOrDefault(o => o.Id == item.CompanyDocumentId);
+
+                item.SuccessDocs = DB.EDSIssueRequestSuccessDocs.Include(o => o.PersonalDocumentRecognizedInfo)
+                                                                .Include(o => o.CompanyDocumentRecognizedInfo)
+                                                                .FirstOrDefault(o => o.Id == item.SuccessDocsId);
+
+            }
+
+            return items;
+        }
+        #endregion
     }
 }

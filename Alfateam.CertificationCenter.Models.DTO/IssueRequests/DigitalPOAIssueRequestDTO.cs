@@ -1,8 +1,10 @@
 ﻿using Alfateam.CertificationCenter.Models.DTO.Abstractions;
-using Alfateam.CertificationCenter.Models.DTO.Files;
 using Alfateam.CertificationCenter.Models.DTO.General;
-using Alfateam.CertificationCenter.Models.Files;
+using Alfateam.CertificationCenter.Models.DTO.General.Biometric;
+using Alfateam.CertificationCenter.Models.DTO.General.Documents;
 using Alfateam.CertificationCenter.Models.General;
+using Alfateam.CertificationCenter.Models.General.Biometric;
+using Alfateam.CertificationCenter.Models.General.Documents;
 
 namespace Alfateam.CertificationCenter.Models.DTO.IssueRequests
 {
@@ -14,9 +16,8 @@ namespace Alfateam.CertificationCenter.Models.DTO.IssueRequests
 
         public string Powers { get; set; }
 
-
-        public List<AttachedImageDTO> PersonForDocumentImages { get; set; } = new List<AttachedImageDTO>();
-        public AttachedVideoDTO PersonForDocumentVideo { get; set; }
+        public SentDocumentDTO PersonForDocument { get; set; }
+        public SentBiometricIdentificationDTO PersonForBiometricIdentification { get; set; }
 
 
         public EDSSignedDTO DigitalSignature { get; set; }

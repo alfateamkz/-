@@ -137,18 +137,17 @@ namespace Alfateam.Marketing.Autoposting.Lib.Resources
         {
             await RefreshIfTokenExpiredAndThrowIf401();
 
-            var uploadedFiles = new List<VC_RUFileUploadResultFile>();
-            if (model.Attachments.Any())
-            {
-                var dictionary = new Dictionary<string, string>();
-                int counter = 0;
 
-                foreach(var attachment in model.Attachments)
-                {
-                    dictionary.Add($"files_{counter++}", attachment.Path);
-                }
-                uploadedFiles = await UploadFiles(dictionary);
+            if(model is BlogPostCrtUpdDTO blogPost)
+            {
+                var post = CreateVC_RUPost(blogPost);
             }
+            else if (model is SocialMediaPostCrtUpdDTO socialMediaPost)
+            {
+                var post = CreateVC_RUPost(socialMediaPost);
+            }
+
+
 
             throw new NotImplementedException();
 
@@ -546,6 +545,16 @@ namespace Alfateam.Marketing.Autoposting.Lib.Resources
             }
 
             return post;
+        }
+
+        public override bool CanEditComment(string postId, string commentId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool CanUpdatePost(string postId)
+        {
+            throw new NotImplementedException();
         }
 
 

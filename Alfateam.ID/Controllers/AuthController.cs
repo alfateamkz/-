@@ -11,6 +11,8 @@ using Alfateam.ID.Models.Security.Verifications;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Numerics;
+using Microsoft.AspNetCore.Cors.Infrastructure;
+using Alfateam.DB.Services.Models;
 
 namespace Alfateam.ID.API.Controllers
 {
@@ -112,29 +114,22 @@ namespace Alfateam.ID.API.Controllers
         [HttpPut, Route("SendAuthCode")]
         public async Task SendAuthCode(VerificationType type, string contact)
         {
-            SendCode(type, contact, "Авторизация в Alfateam ID", "Код для авторизации в Alfateam ID:");
+            GetUserThrowIfUserNotFound(type, contact);
+            CodesService.SendCode(new AlfateamIDSendCodeParams
+            {
+                Type = type,
+                Contact = contact,
+                ActionFor = VerificationFor.Auth,
+                LetterTitle = "Авторизация в Alfateam ID",
+                MessageText = "Код для авторизации в Alfateam ID:",
+            });
         }
     
         [HttpPut, Route("AuthWithCode")]
         public async Task<AuthResultTokens> AuthWithCode(VerificationType type, string contact, string code)
         {
-            User user = null;
-            if (type == VerificationType.Phone)
-            {
-                user = DB.Users.FirstOrDefault(o => o.Phone == contact);
-            }
-            else if (type == VerificationType.Email)
-            {
-                user = DB.Users.FirstOrDefault(o => o.Email == contact);
-            }
-               
-            if (user == null)
-            {
-                throw new Exception404("Неверный email или пароль");
-            }
-
-
-            VerifyCode(type, contact, code);
+            User user = GetUserThrowIfUserNotFound(type, contact);
+            CodesService.VerifyCode(type, VerificationFor.Auth, contact, code);
 
             var session = this.CreateSession(user);
             return new AuthResultTokens
@@ -163,7 +158,14 @@ namespace Alfateam.ID.API.Controllers
                 throw new Exception403("Email уже верифицирован");
             }
 
-            SendCode(type, user.GetContact(type), "Верификация в Alfateam ID", "Код для верификации контакта в Alfateam ID:");
+            CodesService.SendCode(new AlfateamIDSendCodeParams
+            {
+                Type = type,
+                Contact = user.GetContact(type),
+                ActionFor = VerificationFor.ContactVerification,
+                LetterTitle = "Верификация в Alfateam ID",
+                MessageText = "Код для верификации контакта в Alfateam ID:",
+            });
         }
 
 
@@ -173,7 +175,7 @@ namespace Alfateam.ID.API.Controllers
         {
             var user = this.Session.User;
 
-            VerifyCode(type, contact, code);
+            CodesService.VerifyCode(type, VerificationFor.ContactVerification, contact, code);
             if (type == VerificationType.Phone)
             {
                 user.IsPhoneVerified = true;
@@ -191,7 +193,36 @@ namespace Alfateam.ID.API.Controllers
 
 
 
-  
+
+
+
+
+
+        #region Private methods
+
+        private User GetUserByContact(VerificationType type, string contact)
+        {
+            if (type == VerificationType.Phone)
+            {
+                return DB.Users.FirstOrDefault(o => o.Phone == contact && !o.IsDeleted);
+            }
+            else if (type == VerificationType.Email)
+            {
+                return DB.Users.FirstOrDefault(o => o.Email == contact && !o.IsDeleted);
+            }
+            return null;
+        }
+        private User GetUserThrowIfUserNotFound(VerificationType type, string contact)
+        {
+            User user = GetUserByContact(type, contact);
+            if (user == null)
+            {
+                throw new Exception404("Неверный email или телефон");
+            }
+            return user;
+        }
+
+        #endregion
 
     }
 }

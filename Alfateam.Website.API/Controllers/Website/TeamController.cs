@@ -26,6 +26,7 @@ namespace Alfateam.Website.API.Controllers.Website
                                         .Include(o => o.Groups).ThenInclude(o => o.MainLanguage)
                                         .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.Localizations)
                                         .Include(o => o.Groups).ThenInclude(o => o.Members).ThenInclude(o => o.MainLanguage)
+                                        .ToList()
                                         .FirstOrDefault(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
             return (TeamStructureDTO)new TeamStructureDTO().CreateDTOWithLocalization(team, LanguageId);
         }
@@ -36,6 +37,7 @@ namespace Alfateam.Website.API.Controllers.Website
             var member = DB.TeamMembers.Include(o => o.DetailContent).ThenInclude(o => o.Items)
                                        .Include(o => o.Localizations).ThenInclude(o => o.DetailContent).ThenInclude(o => o.Items)
                                        .Include(o => o.MainLanguage)
+                                       .ToList()
                                        .FirstOrDefault(o => o.Id == id);
             return (TeamMemberDTO)new TeamMemberDTO().CreateDTOWithLocalization(member, LanguageId);
         }

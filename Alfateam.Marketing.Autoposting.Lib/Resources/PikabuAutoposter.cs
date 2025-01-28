@@ -11,77 +11,93 @@ using System.Threading.Tasks;
 using Alfateam.Marketing.Autoposting.Lib.Models.Posts;
 using Alfateam.Marketing.Autoposting.Lib.Models.Comments;
 using Alfateam.Marketing.Autoposting.Lib.Abstractions.Posts;
+using Alfateam.Marketing.Autoposting.Lib.Models;
 
 namespace Alfateam.Marketing.Autoposting.Lib.Resources
 {
     public class PikabuAutoposter : AbsAutoposter
     {
-        public override AuthResult Auth()
+        public override Task<AuthResult> Auth()
         {
             throw new NotImplementedException();
         }
 
-        public override CommentCreationResult CreateComment(string postId, CommentCrtUpdDTO model, string? replyCommentId = null)
+        public override bool CanEditComment(string postId, string commentId)
         {
             throw new NotImplementedException();
         }
 
-        public override PostCreationResult CreatePost(PostCrtUpdDTO model)
+        public override bool CanUpdatePost(string postId)
         {
             throw new NotImplementedException();
         }
 
-        public override CommentDeletionResult DeleteComment(string postId, string commentId)
+        public override Task<CommentCreationResult> CreateComment(string postId, CommentCrtUpdDTO model, string? replyCommentId = null)
         {
             throw new NotImplementedException();
         }
 
-        public override PostDeletionResult DeletePost(string postId)
+        public override Task<PostCreationResult> CreatePost(PostCrtUpdDTO model)
         {
             throw new NotImplementedException();
         }
 
-        public override CommentUpdateResult EditComment(string postId, string commentId, CommentCrtUpdDTO model)
+        public override Task<CommentDeletionResult> DeleteComment(string postId, string commentId)
         {
             throw new NotImplementedException();
         }
 
-        public override Post GetPost(string postId)
+        public override Task<PostDeletionResult> DeletePost(string postId)
         {
             throw new NotImplementedException();
         }
 
-        public override Comment GetPostComment(string postId, string commentId)
+        public override Task<CommentUpdateResult> EditComment(string postId, string commentId, CommentCrtUpdDTO model)
         {
             throw new NotImplementedException();
         }
 
-        public override IEnumerable<Comment> GetPostComments(string postId, int offset = 0, int count = 20)
+        public override Task<Profile> GetAuthorizedProfile()
         {
             throw new NotImplementedException();
         }
 
-        public override IEnumerable<Post> GetPosts(int offset = 0, int count = 20)
+        public override Task<Post> GetPost(string postId)
         {
             throw new NotImplementedException();
         }
 
-        public override LogoutResult Logout()
+        public override Task<Comment> GetPostComment(string postId, string commentId)
         {
             throw new NotImplementedException();
         }
 
-        public override AuthResult Ping()
+        public override Task<IEnumerable<Comment>> GetPostComments(string postId, int offset = 0, int count = 20)
         {
             throw new NotImplementedException();
         }
 
-        public override AuthResult Send2FACode(string code)
+        public override Task<IEnumerable<Post>> GetPosts(int offset = 0, int count = 20)
         {
             throw new NotImplementedException();
         }
 
-        public override PostUpdateResult UpdatePost(string postId, PostCrtUpdDTO model)
+        public override Task<LogoutResult> Logout()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<AuthResult> Ping()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<AuthResult> Send2FACode(string code)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<PostUpdateResult> UpdatePost(string postId, PostCrtUpdDTO model)
         {
             throw new NotImplementedException();
         }

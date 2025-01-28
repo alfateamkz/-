@@ -21,6 +21,12 @@ namespace Alfateam.Website.API.Models.DTO.Events
 
 
 
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public string? EventPlace { get; set; }
+
+
+
         [ForClientOnly]
         public string Slug => SlugHelper.GetLatynSlug(Title);
 
@@ -30,7 +36,7 @@ namespace Alfateam.Website.API.Models.DTO.Events
         [ForClientOnly]
         public EventFormatDTO Format { get; set; }
         [ForClientOnly]
-        public TimezoneDTO Timezone { get; set; }
+        public TimezoneDTO TimeZone { get; set; }
 
 
 

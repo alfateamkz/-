@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Alfateam.Core;
 using System.ComponentModel.DataAnnotations.Schema;
+using Alfateam.ID.Models.Enums;
 
 namespace Alfateam.ID.Models.Abstractions
 {
@@ -21,7 +22,10 @@ namespace Alfateam.ID.Models.Abstractions
         public string Discriminator { get; set; }
 
 
+        public VerificationFor ActionFor { get; set; }
         public DateTime ValidBefore { get; set; } = DateTime.UtcNow.AddMinutes(5);
+
+
 
         [NotMapped]
         public bool IsExpired => ValidBefore < DateTime.UtcNow;

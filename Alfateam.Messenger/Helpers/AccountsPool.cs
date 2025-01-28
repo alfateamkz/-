@@ -16,11 +16,11 @@ namespace Alfateam.Messenger.API.Helpers
         {
             return Messengers;
         }
-        public static AbsMessenger? GetMessenger(MessengerMailingAccount account)
+        public static AbsMessenger? GetMessenger(Account account)
         {
             return Messengers.FirstOrDefault(o => o.Account.Id == account?.Id);
         }
-        public static AbsMessenger? GetOrCreateMessenger(MessengerMailingAccount account)
+        public static AbsMessenger? GetOrCreateMessenger(Account account)
         {
             if(account == null)
             {
@@ -40,7 +40,7 @@ namespace Alfateam.Messenger.API.Helpers
 
 
 
-        public static bool TryAddAccount(MessengerMailingAccount account)
+        public static bool TryAddAccount(Account account)
         {
             if(GetMessenger(account) != null)
             {
@@ -74,7 +74,7 @@ namespace Alfateam.Messenger.API.Helpers
             }
             return false;
         }
-        public static bool TryRemoveAccount(MessengerMailingAccount account)
+        public static bool TryRemoveAccount(Account account)
         {
             var messenger = GetMessenger(account);
             if (messenger != null)

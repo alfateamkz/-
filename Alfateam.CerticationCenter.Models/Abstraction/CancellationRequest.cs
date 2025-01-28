@@ -1,5 +1,4 @@
 ﻿using Alfateam.CertificationCenter.Models.Cancellation;
-using Alfateam.CertificationCenter.Models.Files;
 using Alfateam.CertificationCenter.Models.General;
 using Alfateam.Core;
 using JsonKnownTypes;

@@ -124,16 +124,24 @@ namespace Alfateam.TicketSystem.API.Controllers.Tickets
                 };
             }
 
-            if(message is TextTicketMessage textTicketMessage)
+
+
+            if (message is TextTicketMessage textTicketMessage)
             {
-                foreach(var attachment in textTicketMessage.Attachments)
-                {
-                    UploadedFilesService.TryBindFileWithEntity(attachment.FileId, UploadedFileRelatedEntity.MessageAttachment, attachment.Id);
-                }
+                UploadedFilesService.ThrowIfAnyFileNotAvailable(textTicketMessage.Attachments.Select(o => o.FileId));
             }
 
             DBService.CreateEntity(DB.Tickets, newTicket);
             UseTicketDistributionStrategy(newTicket);
+
+
+            if (message is TextTicketMessage textTicketMessage2)
+            {
+                foreach (var attachment in textTicketMessage2.Attachments)
+                {
+                    UploadedFilesService.TryBindFileWithEntity(attachment.FileId, UploadedFileRelatedEntity.MessageAttachment, attachment.Id);
+                }
+            }
 
             return (TicketDTO)new TicketDTO().CreateDTO(newTicket);
         }

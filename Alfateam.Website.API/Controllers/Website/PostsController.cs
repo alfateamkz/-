@@ -28,7 +28,7 @@ namespace Alfateam.Website.API.Controllers.Website
         }
 
         [HttpGet, Route("GetPostsByFilter")]
-        public async Task<IEnumerable<PostDTO>> GetPostsByFilter(ClientPostsSearchFilter filter)
+        public async Task<IEnumerable<PostDTO>> GetPostsByFilter([FromQuery] ClientPostsSearchFilter filter)
         {
             var posts = GetPosts();
 
@@ -90,8 +90,8 @@ namespace Alfateam.Website.API.Controllers.Website
         {
             var items = DB.PostCategories.IncludeAvailability()
                                          .Include(o => o.Localizations)
-                                         .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
-                                         .ToList();
+                                         .ToList()
+                                         .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
             return new PostCategoryDTO().CreateDTOsWithLocalization(items,LanguageId).Cast<PostCategoryDTO>();
         }
         [HttpGet, Route("GetPostIndustries")]
@@ -99,23 +99,24 @@ namespace Alfateam.Website.API.Controllers.Website
         {
             var items = DB.PostIndustries.IncludeAvailability()
                                          .Include(o => o.Localizations)
-                                         .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId))
-                                         .ToList();
+                                         .ToList()
+                                         .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
             return new PostIndustryDTO().CreateDTOsWithLocalization(items, LanguageId).Cast<PostIndustryDTO>();
         }
 
 
         #region Private methods
-        private IQueryable<Post> GetPosts()
+        private IEnumerable<Post> GetPosts()
         {
             return DB.Posts.IncludeAvailability()
                             .Include(o => o.Category).ThenInclude(o => o.Localizations)
                             .Include(o => o.Industry).ThenInclude(o => o.Localizations)
                             .Include(o => o.Content).ThenInclude(o => o.Items)
                             .Include(o => o.Localizations).ThenInclude(o => o.Content).ThenInclude(o => o.Items)
+                            .ToList()
                             .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
         }
-        private IQueryable<Post> GetFullIncludedPosts()
+        private IEnumerable<Post> GetFullIncludedPosts()
         {
             return DB.Posts.IncludeAvailability()
                             .Include(o => o.Category).ThenInclude(o => o.Localizations)
@@ -124,6 +125,7 @@ namespace Alfateam.Website.API.Controllers.Website
                             .Include(o => o.WatchesList).ThenInclude(o => o.WatchedBy)
                             .Include(o => o.Localizations).ThenInclude(o => o.Content).ThenInclude(o => o.Items)
                             .Include(o => o.MainLanguage)
+                            .ToList()
                             .Where(o => !o.IsDeleted && o.Availability.IsAvailable(CountryId));
         }
 

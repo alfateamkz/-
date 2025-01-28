@@ -11,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using Alfateam.CRM2_0.Models.General.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Server.IISIntegration;
+using Alfateam.DB.Services;
 
 namespace Alfateam.ID
 {
@@ -48,6 +49,7 @@ namespace Alfateam.ID
             });
             builder.Services.AddTransient<AbsDBService>();
             builder.Services.AddTransient<AbsFilesService>();
+            builder.Services.AddTransient<AlfateamIDCodesService>();
             builder.Services.AddTransient<ControllerParams>();
 
            

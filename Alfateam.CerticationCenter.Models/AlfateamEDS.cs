@@ -20,14 +20,6 @@ namespace Alfateam.CertificationCenter.Models
 
 
         /// <summary>
-        /// Кому выдана ЭЦП - код страны
-        /// </summary>
-        public string OwnerCountryCode { get; set; }
-        /// <summary>
-        /// Кому выдана ЭЦП - ID номер (например, ИНН в РФ, ИИН\БИН в РК и т.д.)
-        /// </summary>
-        public string OwnerIdentificationNumber { get; set; }
-        /// <summary>
         /// Для кого ЭЦП (Individual - физ.лицо\самозанятый, Business - ИП/ООО/прочее)
         /// </summary>
         public EDSFor For { get; set; }
@@ -36,7 +28,7 @@ namespace Alfateam.CertificationCenter.Models
         /// <summary>
         /// Текстовое название издателя ЭЦП
         /// </summary>
-        public string IssuerStringInfo { get; set; } = "ТОО \"Альфатим ИТ (Alfateam)\", БИН 220640023065";
+        public string IssuerStringInfo { get; set; }
         /// <summary>
         /// Текстовое название владельца ЭЦП
         /// </summary>
@@ -49,22 +41,18 @@ namespace Alfateam.CertificationCenter.Models
         public string PublicKey { get; set; }
 
 
-        /// <summary>
-        /// Пароль для авторизации ЭЦП
-        /// </summary>
-        public string Password { get; set; }
 
 
 
         [NotMapped]
-        public bool IsValid => ValidBefore > DateTime.UtcNow && !IsRevoked;
+        public bool IsActive => ValidFrom > DateTime.UtcNow && ValidBefore < DateTime.UtcNow && !IsRevoked;
         [NotMapped]
         public bool IsRevoked => RevokedAt != null;
 
 
 
 
-        public DateTime IssuedAt { get; set; }
+        public DateTime ValidFrom { get; set; }
         public DateTime ValidBefore { get; set; }
         public DateTime? RevokedAt { get; set; }
     }

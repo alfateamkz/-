@@ -1,6 +1,9 @@
 ﻿using Alfateam.CertificationCenter.Models.Abstraction;
-using Alfateam.CertificationCenter.Models.Files;
+using Alfateam.CertificationCenter.Models.DocumentRecognizedInfo;
 using Alfateam.CertificationCenter.Models.General;
+using Alfateam.CertificationCenter.Models.General.Biometric;
+using Alfateam.CertificationCenter.Models.General.Documents;
+using Alfateam.CertificationCenter.Models.RequestSuccessDocs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,10 +21,21 @@ namespace Alfateam.CertificationCenter.Models.IssueRequests
         public string Powers { get; set; }
 
 
-        public List<AttachedImage> PersonForDocumentImages { get; set; } = new List<AttachedImage>();
-        public AttachedVideo PersonForDocumentVideo { get; set; }
+
+        public SentDocument PersonForDocument { get; set; }
+        public int PersonForDocumentId { get; set; }
+
+
+        public SentBiometricIdentification PersonForBiometricIdentification { get; set; }
+        public int PersonForBiometricIdentificationId { get; set; }
+
 
 
         public EDSSigned DigitalSignature { get; set; }
+
+
+
+
+        public DigitalPOAIssueRequestSuccessDocs? SuccessDocs { get; set; }
     }
 }

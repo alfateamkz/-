@@ -1,4 +1,3 @@
-
 using Alfateam.Core.Filters.Swagger;
 using Alfateam.Core.Services;
 using Alfateam.DB;
@@ -8,6 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Alfateam.CertificationCenter.Models;
 using Alfateam.CertificationCenter.API.Filters;
+using Alfateam.CertificationCenter.API.Jobs;
+using Alfateam.CertificationCenter.API.Services;
+using Alfateam.DB.Services;
 
 namespace Alfateam.CertificationCenter
 {
@@ -30,7 +32,7 @@ namespace Alfateam.CertificationCenter
             builder.Services.AddTransient<ISMSGateway, SMSGateway>();
 
             // Add services to the container.
-            builder.Services.AddDbContext<DbContext, IDDbContext>(options =>
+            builder.Services.AddDbContext<IDDbContext>(options =>
             {
                 options.UseMySql(new MySqlServerVersion(new Version(8, 0, 11)), o =>
                 {
@@ -48,6 +50,9 @@ namespace Alfateam.CertificationCenter
             });
             builder.Services.AddTransient<AbsDBService>();
             builder.Services.AddTransient<AbsFilesService>();
+            builder.Services.AddTransient<AlfateamIDCodesService>();
+            builder.Services.AddTransient<CancellationRequestsService>();
+            builder.Services.AddTransient<UploadedFilesService>();
             builder.Services.AddTransient<ControllerParams>();
 
 
@@ -83,6 +88,8 @@ namespace Alfateam.CertificationCenter
 
             app.MapControllers();
 
+
+            UnusedUploadedFilesJob.Start();
             app.Run();
         }
     }

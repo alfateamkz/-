@@ -8,13 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.12" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Alfateam.Marketing.YandexWebmasterRestClient\Alfateam.Marketing.YandexWebmasterRestClient.csproj" />
-    <ProjectReference Include="..\Alfateam.Messenger.Lib\Alfateam.Messenger.Lib.csproj" />
-    <ProjectReference Include="..\Alfateam.SMSGateways\Alfateam.SMSGateways.csproj" />
+    <ProjectReference Include="..\Alfateam.CertGenerators\Alfateam.CertGenerators.csproj" />
   </ItemGroup>
 
 </Project>

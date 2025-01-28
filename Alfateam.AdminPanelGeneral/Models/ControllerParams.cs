@@ -9,6 +9,7 @@ namespace Alfateam.AdminPanelGeneral.API.Models
     {
         public ControllerParams(IDDbContext iddb,
                                AdmininstrationDbContext admininstrationDb,
+                               CertCenterDbContext certCenterDb,
 
                                SalesDbContext salesDb,
                                MarketingDbContext marketingDb,
@@ -24,6 +25,7 @@ namespace Alfateam.AdminPanelGeneral.API.Models
         {
             IdDb = iddb;
             AdmininstrationDb = admininstrationDb;
+            CertCenterDb = certCenterDb;
 
             SalesDb = salesDb;
             MarketingDb = marketingDb;
@@ -41,8 +43,7 @@ namespace Alfateam.AdminPanelGeneral.API.Models
 
         public IDDbContext IdDb { get; set; }
         public AdmininstrationDbContext AdmininstrationDb { get; set; }
-
-
+        public CertCenterDbContext CertCenterDb { get; set; }
 
 
 

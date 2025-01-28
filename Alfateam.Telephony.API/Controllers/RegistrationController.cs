@@ -8,7 +8,7 @@ using Alfateam.Telephony.Models.Integrations.API;
 
 namespace Alfateam.Telephony.API.Controllers
 {
-    public class RegistrationController : AbsController
+    public class RegistrationController : AbsAuthorizedController
     {
         public RegistrationController(ControllerParams @params) : base(@params)
         {

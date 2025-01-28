@@ -45,6 +45,9 @@ namespace Alfateam.DB._Migrations.WebsiteDB
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<int?>("ImageSliderContentItemId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
@@ -273,6 +276,9 @@ namespace Alfateam.DB._Migrations.WebsiteDB
                         .HasColumnType("longtext");
 
                     b.Property<string>("EventOrganizer")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("EventPlace")
                         .HasColumnType("longtext");
 
                     b.Property<int>("FormatId")
@@ -3373,6 +3379,129 @@ namespace Alfateam.DB._Migrations.WebsiteDB
                     b.ToTable("LinksLocalization");
                 });
 
+            modelBuilder.Entity("Alfateam2._0.Models.Localization.Texts.Common.SitemapPageTitlesTexts", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AboutUs")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("AgreementSearch")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Chronology")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Compliance")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Contacts")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("EmployeeJobLanding")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Events")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("JobVacancies")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("LanguageEntityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MainPage")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Outstaff")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Patners")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Portfolio")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Posts")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PrivacyPolicy")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ProjectManagerJobLanding")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("RestorePassword")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Reviews")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("SalesManagerJobLanding")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Services")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Shop")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("SignIn")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("SignUp")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Stats")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Team")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LanguageEntityId");
+
+                    b.ToTable("SitemapPageTitlesTexts");
+                });
+
             modelBuilder.Entity("Alfateam2._0.Models.Localization.Texts.ComplianceTexts", b =>
                 {
                     b.Property<int>("Id")
@@ -3708,6 +3837,9 @@ namespace Alfateam.DB._Migrations.WebsiteDB
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<int>("SitemapPageTitlesId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -3725,6 +3857,8 @@ namespace Alfateam.DB._Migrations.WebsiteDB
                     b.HasIndex("LanguageEntityId");
 
                     b.HasIndex("LinksId");
+
+                    b.HasIndex("SitemapPageTitlesId");
 
                     b.HasIndex("WebsiteLocalizationTextsId")
                         .IsUnique();
@@ -8076,9 +8210,6 @@ namespace Alfateam.DB._Migrations.WebsiteDB
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("ImageSliderContentItemId")
-                        .HasColumnType("int");
-
                     b.Property<string>("ImgPath")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -9366,6 +9497,17 @@ namespace Alfateam.DB._Migrations.WebsiteDB
                     b.Navigation("LanguageEntity");
                 });
 
+            modelBuilder.Entity("Alfateam2._0.Models.Localization.Texts.Common.SitemapPageTitlesTexts", b =>
+                {
+                    b.HasOne("Alfateam2._0.Models.General.Language", "LanguageEntity")
+                        .WithMany()
+                        .HasForeignKey("LanguageEntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LanguageEntity");
+                });
+
             modelBuilder.Entity("Alfateam2._0.Models.Localization.Texts.ComplianceTexts", b =>
                 {
                     b.HasOne("Alfateam2._0.Models.ContentItems.Content", "Content")
@@ -9595,6 +9737,12 @@ namespace Alfateam.DB._Migrations.WebsiteDB
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Alfateam2._0.Models.Localization.Texts.Common.SitemapPageTitlesTexts", "SitemapPageTitles")
+                        .WithMany()
+                        .HasForeignKey("SitemapPageTitlesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Alfateam2._0.Models.Localization.Texts.Grouping.WebsiteLocalizationTexts", null)
                         .WithOne("CommonTexts")
                         .HasForeignKey("Alfateam2._0.Models.Localization.Texts.Grouping.CommonTexts", "WebsiteLocalizationTextsId")
@@ -9610,6 +9758,8 @@ namespace Alfateam.DB._Migrations.WebsiteDB
                     b.Navigation("LanguageEntity");
 
                     b.Navigation("Links");
+
+                    b.Navigation("SitemapPageTitles");
                 });
 
             modelBuilder.Entity("Alfateam2._0.Models.Localization.Texts.Grouping.HRLocalizationTexts", b =>

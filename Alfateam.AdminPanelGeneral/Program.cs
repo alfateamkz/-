@@ -62,6 +62,14 @@ namespace Alfateam.AdminPanelGeneral
                     o.EnableStringComparisonTranslations();
                 });
             });
+            builder.Services.AddDbContext<CertCenterDbContext>(options =>
+            {
+                options.UseMySql(new MySqlServerVersion(new Version(8, 0, 11)), o =>
+                {
+                    o.EnableRetryOnFailure();
+                    o.EnableStringComparisonTranslations();
+                });
+            });
 
 
 

@@ -1,11 +1,11 @@
 ﻿using Alfateam.ID.Abstractions;
-using Alfateam.ID.API.Abstractions.DTO;
 using Alfateam.ID.API.Filters;
 using Alfateam.ID.API.Models;
 using Alfateam.ID.Models.DTO.Payments;
 using Alfateam.ID.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using Alfateam.ID.Models.DTO.Abstractions;
 
 namespace Alfateam.ID.API.Controllers
 {

@@ -33,7 +33,7 @@ namespace Alfateam.Website.API.Controllers.Website
         }
 
         [HttpGet, Route("GetJobVacanciesByFilter")]
-        public async Task<IEnumerable<JobVacancyCard>> GetJobVacanciesByFilter(JobVacanciesFIlter filter)
+        public async Task<IEnumerable<JobVacancyCard>> GetJobVacanciesByFilter([FromQuery] JobVacanciesFIlter filter)
         {
             var vacancies = GetVacancies();
 

@@ -148,11 +148,12 @@ namespace Alfateam.Core.Helpers
             foreach(var prop in item.GetType().GetProperties())
             {
 
-                if(type == DTOJsonSerializationType.GET && !prop.GetCustomAttributes().Any(o => o is HiddenFromClient))
+                if(type == DTOJsonSerializationType.GET 
+                    && !prop.GetCustomAttributes().Any(o => o is HiddenFromClient || o is DTOHiddenField))
                 {
                     neededProps.Add(prop);
                 }
-                else if (type != DTOJsonSerializationType.GET && !prop.GetCustomAttributes().Any(o => o is ForClientOnly))
+                else if (type != DTOJsonSerializationType.GET && !prop.GetCustomAttributes().Any(o => o is ForClientOnly || o is DTOHiddenField))
                 {
                     var fieldForAttr = prop.GetCustomAttributes().FirstOrDefault(o => o is DTOFieldFor) as DTOFieldFor;
                     if (fieldForAttr != null)

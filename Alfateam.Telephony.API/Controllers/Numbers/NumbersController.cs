@@ -18,6 +18,7 @@ namespace Alfateam.Telephony.API.Controllers.Numbers
     {
         public NumbersController(ControllerParams @params) : base(@params)
         {
+
         }
 
 
@@ -116,8 +117,10 @@ namespace Alfateam.Telephony.API.Controllers.Numbers
         }
 
         [HttpPost, Route("Call")]
-        public async Task SendSMS(int numberId, string phone)
+        public async Task Call(int numberId, string phone)
         {
+   
+
             //TODO: фактический звонок с номера
         }
 

@@ -12,6 +12,7 @@ namespace Alfateam.CertificationCenter.Models.Enums
         Rejected = 2,
 
 
-        Approved = 999
+        Approved = 999,
+        Issued = 9999
     }
 }

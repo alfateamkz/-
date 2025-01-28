@@ -461,6 +461,10 @@ namespace Alfateam.Website.API.Abstractions
             {
                 return false;
             }
+            else if (dtoPropInfo.GetCustomAttributes().Any(o => o.GetType() == typeof(DTOHiddenField)))
+            {
+                return false;
+            }
 
             return true;
         }

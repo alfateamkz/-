@@ -57,8 +57,8 @@ namespace Alfateam.Marketing.API.Helpers.Pools
                     return new TelegramAutoposter();
                 case PikabuAutopostingAccount:
                     return new PikabuAutoposter();
-                case VC_RUAutopostingAccount:
-                    return new VC_RUAutoposter();
+                case VC_RUAutopostingAccount vcRuAccount:
+                    return new VC_RUAutoposter(vcRuAccount.Email, vcRuAccount.Password);
                 case YandexZenAutopostingAccount:
                     return new YandexZenAutoposter();
                 case FacebookAutopostingAccount:

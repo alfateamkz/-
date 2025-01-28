@@ -42,7 +42,7 @@ namespace Alfateam.TicketSystem.API
                     o.EnableStringComparisonTranslations();
                 });
             });
-            builder.Services.AddDbContext<DbContext, IDDbContext>(options =>
+            builder.Services.AddDbContext<IDDbContext>(options =>
             {
                 options.UseMySql(new MySqlServerVersion(new Version(8, 0, 11)), o =>
                 {

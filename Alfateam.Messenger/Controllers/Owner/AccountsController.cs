@@ -69,7 +69,7 @@ namespace Alfateam.Messenger.API.Controllers.Owner
 
         #region Private methods
 
-        private IEnumerable<MessengerMailingAccount> GetAvailableAccounts()
+        private IEnumerable<Account> GetAvailableAccounts()
         {
             var user = this.AuthorizedUser;
 

@@ -1,6 +1,5 @@
 ﻿using Alfateam.Marketing.FacebookAdsRestClient.Enums.AdAccountRelated;
 using Alfateam.Marketing.FacebookAdsRestClient.Models.General;
-using FacebookAds.Object;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

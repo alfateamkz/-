@@ -9,5 +9,7 @@ namespace Alfateam.Marketing.Models.Autoposting.Accounts.Resources
 {
     public class VC_RUAutopostingAccount : AutopostingAccount
     {
+        public string Email { get; set; }
+        public string Password { get; set; }
     }
 }

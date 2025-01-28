@@ -45,7 +45,17 @@ namespace Alfateam.Website.API.Helpers
             {
                 sitemapPageTitles = db.SitemapPageTitlesTexts.Include(o => o.LanguageEntity)
                                                              .FirstOrDefault(o => o.LanguageEntity.Code == "RU");
+                if( sitemapPageTitles == null)
+                {
+                    sitemapPageTitles = new Alfateam2._0.Models.Localization.Texts.Common.SitemapPageTitlesTexts()
+                    {
+                        LanguageEntityId = language.Id,
+                    };
+                    db.SitemapPageTitlesTexts.Add(sitemapPageTitles);
+                    db.SaveChanges();
+                }
             }
+            
 
 
             var root = new SitemapItem($"{country.Code}-{language.Code}", sitemapPageTitles.MainPage);

@@ -89,7 +89,7 @@ namespace Alfateam.EDM.API.Controllers.Director
                                                .Where(o => o.EDMSubjectId == id && !o.IsDeleted);
             if (allDepartments.SelectMany(o => o.Documents).Any(o => !o.IsDeleted))
             {
-                throw new Exception403("Невозможно удалить субъкт документооборота, т.к. он уже участвовал в документообороте");
+                throw new Exception403("Невозможно удалить субъект документооборота, т.к. он уже участвовал в документообороте");
             }
 
             DBService.TryDeleteEntity(DB.EDMSubjects, subject); 

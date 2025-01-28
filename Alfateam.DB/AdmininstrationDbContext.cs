@@ -11,7 +11,6 @@ using Alfateam.Administration.Models.StaticTextsConstructor;
 using Alfateam.Administration.Models.Stats;
 using Alfateam.CertificationCenter.Models.Abstraction;
 using Alfateam.CertificationCenter.Models.Cancellation;
-using Alfateam.CertificationCenter.Models.Files;
 using Alfateam.CertificationCenter.Models.IssueRequests;
 using Microsoft.EntityFrameworkCore;
 using System;

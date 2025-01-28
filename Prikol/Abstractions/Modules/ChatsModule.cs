@@ -1,6 +1,5 @@
 ﻿using Alfateam.Messenger.Lib.Enums;
 using Alfateam.Messenger.Models.Abstractions.Chats;
-using Alfateam.Messenger.Models.DTO.Abstractions.Chats;
 using System;
 using System.Collections.Generic;
 using System.Linq;

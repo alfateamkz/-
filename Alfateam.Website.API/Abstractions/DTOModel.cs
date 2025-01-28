@@ -88,6 +88,11 @@ namespace Alfateam.Website.API.Abstractions
         #region Клиентские модели (для просмотра)
         public DTOModel<T> CreateDTOWithLocalization(T item, int? languageId)
         {
+            if(item == null)
+            {
+                return null;
+            }
+
             var dto = this.CreateDTO(item) as DTOModel<T>;
 
             var localizationsListProp = item.GetType().GetProperties().FirstOrDefault(o => o.Name == "Localizations");

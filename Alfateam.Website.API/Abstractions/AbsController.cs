@@ -32,9 +32,42 @@ namespace Alfateam.Website.API.Abstractions
         public readonly FilesService FilesService;
 
         protected string UserSessid => Request.Headers["Sessid"];
-        protected int? CountryId => ParseIntValueFromHeader("CountryId");
-        protected int? CurrencyId => ParseIntValueFromHeader("CurrencyId");
-        protected int? LanguageId => ParseIntValueFromHeader("LanguageId");
+        protected int? CountryId
+        {
+            get
+            {
+                var id = ParseIntValueFromHeader("CountryId");
+                if(id == null)
+                {
+                    id = DB.Countries.FirstOrDefault(o => !o.IsDeleted && !o.IsHidden).Id;
+                }
+                return id;
+            }
+        }
+        protected int? CurrencyId
+        {
+            get
+            {
+                var id = ParseIntValueFromHeader("CurrencyId");
+                if (id == null)
+                {
+                    id = DB.Currencies.FirstOrDefault(o => !o.IsDeleted && !o.IsHidden).Id;
+                }
+                return id;
+            }
+        }
+        protected int? LanguageId
+        {
+            get
+            {
+                var id = ParseIntValueFromHeader("LanguageId");
+                if (id == null)
+                {
+                    id = DB.Languages.FirstOrDefault(o => !o.IsDeleted && !o.IsHidden).Id;
+                }
+                return id;
+            }
+        }
 
         public AbsController(ControllerParams @params)
         {

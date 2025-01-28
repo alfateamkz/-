@@ -20,8 +20,6 @@ namespace Alfateam.CertificationCenter.Models.DTO.Abstractions
         public string Discriminator { get; set; }
 
 
-        [ForClientOnly]
-        public string AlfateamIDFrom { get; set; }
         public double LatitudeFrom { get; set; }
         public double LongitudeFrom { get; set; }
 

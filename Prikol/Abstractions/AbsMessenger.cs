@@ -1,6 +1,5 @@
 ﻿using Alfateam.Messenger.Lib.Abstractions.Modules;
 using Alfateam.Messenger.Lib.Enums;
-using Alfateam.Messenger.Lib.Modules.Telegram;
 using Alfateam.Messenger.Models.Abstractions;
 using System;
 using System.Collections.Generic;

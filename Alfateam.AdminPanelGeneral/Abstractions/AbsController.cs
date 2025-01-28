@@ -18,6 +18,7 @@ namespace Alfateam.AdminPanelGeneral.API.Abstractions
     {
         public readonly IDDbContext IdDb;
         public readonly AdmininstrationDbContext AdmininstrationDb;
+        public readonly CertCenterDbContext CertCenterDb;
 
 
         public readonly SalesDbContext SalesDb;
@@ -37,6 +38,7 @@ namespace Alfateam.AdminPanelGeneral.API.Abstractions
         {
             this.IdDb = @params.IdDb;
             this.AdmininstrationDb = @params.AdmininstrationDb;
+            this.CertCenterDb = @params.CertCenterDb;
 
             this.SalesDb = @params.SalesDb;
             this.MarketingDb = @params.MarketingDb;
