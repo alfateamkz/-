@@ -20,4 +20,9 @@
     <ProjectReference Include="..\Alfateam.ID.Models.DTO\Alfateam.ID.Models.DTO.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\Products\Sales\" />
+    <Folder Include="Controllers\Products\Telephony\" />
+  </ItemGroup>
+
 </Project>

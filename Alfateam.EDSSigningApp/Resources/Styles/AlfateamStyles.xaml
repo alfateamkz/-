@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary 
+    xmlns:controls="clr-namespace:Alfateam.EDSSigningApp.Controls"
+    xmlns:AlohaControls="clr-namespace:AlohaKit.Controls;assembly=AlohaKit"
+    xmlns:HMControls="clr-namespace:HMControls;assembly=HMControls"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="Alfateam.EDSSigningApp.Resources.Styles.AlfateamStyles">
+
+
+    <Color x:Key="DarkBlue">#061B2E</Color>
+    <Color x:Key="Dark">#637587</Color>
+    <Color x:Key="SwitcherGreen">#34C759</Color>
+    <Color x:Key="Light">#FCFCFC</Color>
+    <Color x:Key="ControlBorderColor">#F9F9F9</Color>
+    <Color x:Key="White">#FFFFFF</Color>
+    <Color x:Key="Error">#B61616</Color>
+
+
+    <x:Double x:Key="MainHeader">24</x:Double>
+    <x:Double x:Key="PopupHeader">20</x:Double>
+    <x:Double x:Key="DefaultFontSize">16</x:Double>
+    <x:Double x:Key="SmallFontSize">11</x:Double>
+
+    <x:String x:Key="GilroyFont">GilroyRegular</x:String>
+    <x:String x:Key="GilroyBoldFont">GilroyBold</x:String>
+    <x:String x:Key="GilroyRegularItalicFont">GilroyRegularItalic</x:String>
+    <x:String x:Key="GilroySemiBoldFont">GilroySemiBold</x:String>
+
+    <!--<Style TargetType="ContentPage">
+        <Setter Property="TextColor" Value="{StaticResource DarkBlue}" />
+        <Setter Property="FontSize" Value="{StaticResource DefaultFontSize}" />
+    </Style>-->
+
+
+    <Style TargetType="ImageButton">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="BorderWidth" Value="0" />
+    </Style>
+
+    <Style TargetType="Button">
+        <Setter Property="TextColor" Value="{StaticResource White}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource DarkBlue}" />
+        <Setter Property="FontFamily" Value="{StaticResource GilroyFont}"/>
+        <Setter Property="FontSize" Value="{StaticResource DefaultFontSize}"/>
+        <Setter Property="BorderWidth" Value="0"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="14,10"/>
+        <Setter Property="MinimumHeightRequest" Value="53"/>
+        <Setter Property="MinimumWidthRequest" Value="53"/>
+        <!--<Setter Property="VisualStateManager.VisualStateGroups">
+            <VisualStateGroupList>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal" />
+                    <VisualState x:Name="Disabled">
+                        <VisualState.Setters>
+                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray200}}" />
+                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
+                        </VisualState.Setters>
+                    </VisualState>
+                    <VisualState x:Name="PointerOver" />
+                </VisualStateGroup>
+            </VisualStateGroupList>
+        </Setter>-->
+    </Style>
+
+    <Style TargetType="Label">
+        <Setter Property="Margin" Value="0,0,0,0"/>
+        <Setter Property="TextColor" Value="{StaticResource DarkBlue}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="FontFamily" Value="{StaticResource GilroyFont}" />
+        <Setter Property="FontSize" Value="{StaticResource DefaultFontSize}" />
+    </Style>
+
+    <Style x:Key="Bold" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource GilroyBoldFont}" />
+    </Style>
+
+    <Style x:Key="RegularItalic" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource GilroyRegularItalicFont}" />
+    </Style>
+
+    <Style x:Key="SemiBold" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource GilroySemiBoldFont}" />
+    </Style>
+
+    <Style x:Key="ValidityDateSpanStyle" TargetType="Label">
+        <!--<Style.Triggers>
+            <DataTrigger TargetType="Label" Binding="{x:Binding Path=EDS.IsNotInDateOfValidity}" Value="True">
+                <Setter Property="TextColor" Value="{StaticResource Error}" />
+            </DataTrigger>
+            <DataTrigger TargetType="Label" Binding="{x:Binding Path=EDS.IsNotInDateOfValidity}" Value="False">
+                <Setter Property="TextColor" Value="{StaticResource Dark}" />
+            </DataTrigger>
+        </Style.Triggers>-->
+    </Style>
+
+    <Style TargetType="AlohaControls:ToggleSwitch">
+        <Setter Property="Margin" Value="0,10,0,0"/>
+        <Setter Property="WidthRequest" Value="50"/>
+        <Setter Property="HeightRequest" Value="30"/>
+        <Setter Property="VerticalOptions" Value="Start"/>
+        <Setter Property="HorizontalOptions" Value="Start"/>
+        <Setter Property="HasShadow" Value="False"/>
+        <Setter Property="ThumbBrush" Value="{StaticResource Light}"/>
+        <Style.Triggers>
+            <Trigger TargetType="AlohaControls:ToggleSwitch" Property="IsOn" Value="False">
+                <Setter Property="Background" Value="{StaticResource DarkBlue}" />
+            </Trigger>
+            <Trigger TargetType="AlohaControls:ToggleSwitch" Property="IsOn" Value="True">
+                <Setter Property="Background" Value="{StaticResource SwitcherGreen}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="HMControls:StandardPicker">
+        <Setter Property="Margin" Value="0,10,0,0"/>
+        <Setter Property="HeightRequest" Value="50"/>
+        <Setter Property="VerticalOptions" Value="Start"/>
+        <Setter Property="HorizontalOptions" Value="Start"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="Shadow" Value="{x:Null}"/>
+        <Setter Property="TextColor" Value="{StaticResource DarkBlue}"/>
+        <Setter Property="FontSize" Value="{StaticResource DefaultFontSize}"/>
+        <Setter Property="BorderColor" Value="{StaticResource ControlBorderColor}"/>
+        <Setter Property="BackgroundColor" Value="{StaticResource White}"/>
+        <Setter Property="Background" Value="{StaticResource White}"/>
+    </Style>
+
+    <Style TargetType="HMControls:StandardEntry">
+        <Setter Property="Margin" Value="0,10,0,0"/>
+        <Setter Property="Padding" Value="10,10,10,10"/>
+        <Setter Property="HeightRequest" Value="50"/>
+        <Setter Property="VerticalOptions" Value="Start"/>
+        <Setter Property="HorizontalOptions" Value="Start"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="Shadow" Value="{x:Null}"/>
+        <Setter Property="TextColor" Value="{StaticResource DarkBlue}"/>
+        <Setter Property="FontSize" Value="{StaticResource DefaultFontSize}"/>
+        <Setter Property="BorderColor" Value="{StaticResource ControlBorderColor}"/>
+        <Setter Property="PlaceholderColor" Value="#CCCCCC"/>
+        <Setter Property="BackgroundColor" Value="{StaticResource White}"/>
+        <Setter Property="Background" Value="{StaticResource White}"/>
+    </Style>
+
+
+
+</ResourceDictionary>

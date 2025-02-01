@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Alfateam.Messenger.API.Models;
 using Alfateam.Messenger.API.Filters;
-using Alfateam.Messenger.API.Controllers.Messenger;
 using Alfateam.Messenger.API.Services;
+using Alfateam.Messenger.API.Hubs;
 
 namespace Alfateam.Messenger
 {

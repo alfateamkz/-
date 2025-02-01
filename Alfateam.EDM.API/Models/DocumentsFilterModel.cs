@@ -9,6 +9,12 @@ namespace Alfateam.EDM.API.Models
 {
     public class DocumentsFilterModel
     {
+        public int Offset { get; set; }
+        public int Count { get; set; }
+
+
+        public bool? Drafts { get; set; }
+
         public int? DepartmentId { get; set; }
         public bool IncludingSubsidiaryDepartments { get; set; }
 
@@ -32,8 +38,9 @@ namespace Alfateam.EDM.API.Models
 
 
 
-        public List<Document> FilterDocuments(List<Document> documents, EDMDbContext db, EDMSubject ourEDMSubject)
+        public IEnumerable<Document> FilterDocuments(List<Document> documents, EDMDbContext db, EDMSubject ourEDMSubject)
         {
+            documents = FilterByDrafts(documents);
             documents = FilterByDocType(documents);
             documents = FilterByDateSort(documents);
             documents = FilterByStatus(documents, db, ourEDMSubject);
@@ -42,6 +49,14 @@ namespace Alfateam.EDM.API.Models
             return documents;
         }
 
+        public List<Document> FilterByDrafts(List<Document> documents)
+        {
+            if (this.Drafts != null)
+            {
+                documents = documents.Where(o => o.DraftInfoId != null == this.Drafts).ToList();
+            }
+            return documents;
+        }
         public List<Document> FilterByDocType(List<Document> documents)
         {
             if (this.DocumentTypeId != null)

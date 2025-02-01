@@ -47,6 +47,7 @@ namespace Alfateam.Website.API.Models.DTO.Shop
 
         [ForClientOnly]
         public ShopProductImage MainImage { get; set; }
+
         [ForClientOnly]
         public List<ShopProductImage> Images { get; set; } = new List<ShopProductImage>();
 

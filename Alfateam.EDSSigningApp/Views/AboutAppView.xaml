@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<abstractions:AbsContentView 
+    x:Name="this"
+    xmlns:abstractions="clr-namespace:Alfateam.EDSSigningApp.Abstractions"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="Alfateam.EDSSigningApp.Views.AboutAppView">
+
+    <Grid>
+
+        <VerticalStackLayout
+            Spacing="20">
+
+            <HorizontalStackLayout 
+                InputTransparent="{OnIdiom Phone=False, Default=True}"
+                Spacing="15">
+                <HorizontalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="onGoBackTapped"/>
+                </HorizontalStackLayout.GestureRecognizers>
+
+                <ImageButton
+                      IsVisible="{OnIdiom Phone=True, Default=False}"
+                      Source="arrow_back_icon.png"
+                      HeightRequest="22"
+                      WidthRequest="15"
+                      HorizontalOptions="Start"
+                      VerticalOptions="Center"/>
+
+                <Label 
+                    Margin="0,-3,0,0"
+                    FontFamily="{StaticResource GilroyBoldFont}"
+                    FontSize="{StaticResource MainHeader}"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center"
+                    Text="О приложении" />
+
+            </HorizontalStackLayout>
+
+            <VerticalStackLayout Spacing="8">
+
+                <Label>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <FormattedString.Spans>
+                                <Span Text="Версия: " />
+                                <Span 
+                                    TextColor="{StaticResource Dark}"
+                                    Text="{x:Binding Source={x:Reference this}, Path=VersionAndOS}" />
+                            </FormattedString.Spans>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+
+                <Label>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <FormattedString.Spans>
+                                <Span Text="Разработчик: " />
+                                <Span 
+                                    TextColor="{StaticResource Dark}"
+                                    Text='ТОО "Альфатим ИТ" (Alfateam)' />
+                            </FormattedString.Spans>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+
+            </VerticalStackLayout>
+
+
+
+            <VerticalStackLayout 
+                 Spacing="10">
+
+                <Label 
+                    FontSize="{StaticResource PopupHeader}"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center"
+                    Text="Документы" />
+
+                <VerticalStackLayout 
+                    Spacing="5">
+
+                    <Label 
+                        TextColor="{StaticResource Dark}"
+                        HorizontalOptions="Start"
+                        VerticalOptions="Center"
+                        Text="Оферта">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="onOfertaTapped"/>
+                        </Label.GestureRecognizers>
+                    </Label>
+
+                    <Label 
+                         TextColor="{StaticResource Dark}"
+                         HorizontalOptions="Start"
+                         VerticalOptions="Center"
+                         Text="Политика конфиденциальности">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="onPrivacyPolicyTapped"/>
+                        </Label.GestureRecognizers>
+                    </Label>
+
+                    <Label 
+                       TextColor="{StaticResource Dark}"
+                       HorizontalOptions="Start"
+                       VerticalOptions="Center"
+                       Text="Документация">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="onDocsTapped"/>
+                        </Label.GestureRecognizers>
+                    </Label>
+
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+
+        <Label 
+            Margin="0,0,0,20"
+            TextColor="{StaticResource Dark}"
+            FontSize="{StaticResource DefaultFontSize}"
+            HorizontalOptions="Start"
+            VerticalOptions="End">
+            <Label.FormattedText>
+                <FormattedString>
+                    <FormattedString.Spans>
+                        <Span Text="© All rights reserved "/>
+                        <Span Text="{x:Binding Source={x:Reference this}, Path=CurrentYear}"/>
+                    </FormattedString.Spans>
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
+
+    </Grid>
+    
+</abstractions:AbsContentView>

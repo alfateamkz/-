@@ -184,6 +184,7 @@ namespace Alfateam.CertificationCenter.Controllers
             request.StatusInfo.Status = IssueRequestStatus.Issued;
             var alfateamEDSEntity = new AlfateamEDS
             {
+                EDSSerialNumber = generatedEDS.PFX.SerialNumber,
                 For = request.EDSFor,
                 OwnerAlfateamID = request.AlfateamIDFrom,
                 IssuerStringInfo = generatedEDS.PFX.Issuer,

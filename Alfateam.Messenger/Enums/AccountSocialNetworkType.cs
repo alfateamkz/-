@@ -10,6 +10,5 @@
         Instagram = 6,
         Facebook = 7,
         Email = 8,
-        Alfateam = 9
     }
 }

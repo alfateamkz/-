@@ -9,6 +9,8 @@ using Alfateam.Core.Filters.Swagger;
 using Microsoft.OpenApi.Models;
 using Alfateam.EDM.API.Filters;
 using Alfateam.EDM.API.Services;
+using Alfateam.EDM.API.Jobs;
+using Alfateam.DB.Services;
 
 namespace Alfateam.EDM.API
 {
@@ -28,14 +30,19 @@ namespace Alfateam.EDM.API
 
 
 
-            builder.Services.AddTransient<DocumentsService>();
-            builder.Services.AddTransient<DocumentApprovalService>();
-
-
             builder.Services.AddTransient<IMailGateway, MailGateway>();
             builder.Services.AddTransient<ISMSGateway, SMSGateway>();
 
-            // Add services to the container.
+
+
+            builder.Services.AddDbContext<CertCenterDbContext>(options =>
+            {
+                options.UseMySql(new MySqlServerVersion(new Version(8, 0, 11)), o =>
+                {
+                    o.EnableRetryOnFailure();
+                    o.EnableStringComparisonTranslations();
+                });
+            });
             builder.Services.AddDbContext<EDMDbContext>(options =>
             {
                 options.UseMySql(new MySqlServerVersion(new Version(8, 0, 11)), o =>
@@ -44,7 +51,6 @@ namespace Alfateam.EDM.API
                     o.EnableStringComparisonTranslations();
                 });
             });
-            // Add services to the container.
             builder.Services.AddDbContext<IDDbContext>(options =>
             {
                 options.UseMySql(new MySqlServerVersion(new Version(8, 0, 11)), o =>
@@ -55,6 +61,10 @@ namespace Alfateam.EDM.API
             });
             builder.Services.AddTransient<AbsDBService>(x => new AbsDBService(x.GetRequiredService<EDMDbContext>()));
             builder.Services.AddTransient<AbsFilesService>();
+            builder.Services.AddTransient<CertCenterVerificationService>();
+            builder.Services.AddTransient<DocumentsService>();
+            builder.Services.AddTransient<DocumentApprovalService>();
+            builder.Services.AddTransient<UploadedFilesService>();
             builder.Services.AddTransient<ControllerParams>();
 
 
@@ -85,6 +95,9 @@ namespace Alfateam.EDM.API
 
 
             app.MapControllers();
+
+            UnusedUploadedFilesJob.Start();
+            ApprovalRoutesJob.Start();
 
             app.Run();
         }

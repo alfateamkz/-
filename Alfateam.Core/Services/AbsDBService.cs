@@ -342,7 +342,8 @@ namespace Alfateam.Core.Services
 
             var dtoModelIdProp = model.GetType().GetProperties().FirstOrDefault(o => o.Name == "Id");
             var dbModelIdProp = item.GetType().GetProperties().FirstOrDefault(o => o.Name == "Id");
-            if (dbModelIdProp.GetValue(item) != dtoModelIdProp.GetValue(model))
+
+            if (!dbModelIdProp.GetValue(item).Equals(dtoModelIdProp.GetValue(model)))
             {
                 throw new Exception400("Нельзя изменить id сущности");
             }

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<abstractions:AbsContentView 
+    x:Name="this"
+    xmlns:controls="clr-namespace:Alfateam.EDSSigningApp.Controls"
+    xmlns:AlohaControls="clr-namespace:AlohaKit.Controls;assembly=AlohaKit"
+    xmlns:HMControls="clr-namespace:HMControls;assembly=HMControls"
+    xmlns:abstractions="clr-namespace:Alfateam.EDSSigningApp.Abstractions"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="Alfateam.EDSSigningApp.Views.CertsListView">
+    <Grid 
+        RowDefinitions="50,*">
+
+        <Grid 
+            Grid.Row="0"
+            ColumnDefinitions="*, 50">
+
+            <Grid Grid.Column="0">
+
+                <Label 
+                    FontFamily="{StaticResource GilroyBoldFont}"
+                    FontSize="{StaticResource MainHeader}"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Start"
+                    Text="Сертификаты" />
+
+            </Grid>
+
+            <Grid Grid.Column="1">
+
+                <ImageButton 
+                    Clicked="onAddCertBtnClicked"
+                    Source="add_cert_icon.png"
+                    HorizontalOptions="End"
+                    VerticalOptions="Center"
+                    WidthRequest="20"
+                    HeightRequest="20" />
+
+            </Grid>
+
+        </Grid>
+
+
+        <Grid 
+            Grid.Row="1">
+
+            <CollectionView 
+                ItemsSource="{x:Binding Source={x:Reference this}, Path=EDSList, Mode=TwoWay}"
+                VerticalOptions="Fill"
+                HorizontalOptions="Fill">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <controls:CertListItem 
+                            Tapped="onItemTapped"
+                            MinimumHeightRequest="75"
+                            VerticalOptions="Start"
+                            HorizontalOptions="Fill"
+                            BindingContext="{Binding}"/>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label 
+                IsVisible="False"
+                TextColor="{StaticResource Dark}"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center"
+                Text="Сертификатов нет">
+                <Label.Style>
+                    <Style TargetType="Label">
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{x:Binding Source={x:Reference this}, Path=EDSList.Count, Mode=OneTime}" Value="0">
+                                <Setter Property="IsVisible" Value="True"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Label.Style>
+            </Label>
+
+        </Grid>
+        
+    
+        
+    </Grid>
+</abstractions:AbsContentView>

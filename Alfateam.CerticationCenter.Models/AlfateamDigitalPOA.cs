@@ -18,6 +18,10 @@ namespace Alfateam.CertificationCenter.Models
 
 
 
+        public string SerialNumber { get; set; } = Guid.NewGuid().ToString();
+
+
+
         /// <summary>
         /// Кем выдана доверенность - код страны
         /// </summary>

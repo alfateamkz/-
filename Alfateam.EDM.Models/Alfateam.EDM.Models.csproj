@@ -19,4 +19,8 @@
     <ProjectReference Include="..\Alfateam.Core\Alfateam.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Integrations\NewFolder\" />
+  </ItemGroup>
+
 </Project>

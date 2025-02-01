@@ -28,6 +28,12 @@ namespace Alfateam.EDM.Models.Documents.DocumentSigning.ApproveStrategies
             ApprovalRouteStageId = stageId;
             Comment = comment;
         }
+
+
+
+
+
+
         public ApprovalRoute ApprovalRoute { get; set; }
         public int ApprovalRouteId { get; set; }
 

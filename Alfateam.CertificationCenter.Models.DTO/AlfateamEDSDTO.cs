@@ -8,6 +8,8 @@ namespace Alfateam.CertificationCenter.Models.DTO
 {
     public class AlfateamEDSDTO : DTOModelAbs<AlfateamEDS>
     {
+        [ForClientOnly]
+        public string EDSSerialNumber { get; set; }
 
         [Description("Для кого ЭЦП (Individual - физ.лицо\\самозанятый, Business - ИП/ООО/прочее)")]
         [ForClientOnly]

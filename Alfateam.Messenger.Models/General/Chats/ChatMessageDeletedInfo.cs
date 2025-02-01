@@ -1,4 +1,5 @@
 ﻿using Alfateam.Core;
+using Alfateam.Messenger.Models.Abstractions;
 using Alfateam.Messenger.Models.Accounts;
 using System;
 using System.Collections.Generic;
@@ -10,12 +11,12 @@ namespace Alfateam.Messenger.Models.General.Chats
 {
     public class ChatMessageDeletedInfo : AbsModel
     {
-        public AlfateamMessengerAccount DeletedBy { get; set; }
+        public Peer PeerBy { get; set; }
         public int DeletedById { get; set; }
 
 
 
-        public DateTime DeletedAt { get; set; }
-        public bool DeletedForAll { get; set; }
+        public DateTime MessageDeletedAt { get; set; }
+        public bool MessageDeletedForAll { get; set; }
     }
 }

@@ -63,6 +63,6 @@ namespace Alfateam.EDM.Models.Abstractions
                 return edmCounterparty.EDMSubjectId == edmSubject.SubjectId;
             }
             return false;
-        }
+        }      
     }
 }

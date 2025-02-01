@@ -1,5 +1,4 @@
 ﻿using Alfateam.Core;
-using Alfateam.Messenger.Models.Attachments;
 using Alfateam.Messenger.Models.General.Chats.OfflineAutoTime;
 using JsonKnownTypes;
 using Newtonsoft.Json;
@@ -17,5 +16,7 @@ namespace Alfateam.Messenger.Models.Abstractions
     [JsonKnownType(typeof(OfflineAutoMessageSendBySchedule), "OfflineAutoMessageSendBySchedule")]
     public class OfflineAutoMessageSendTime : AbsModel
     {
+        [JsonProperty("discriminator")]
+        public string Discriminator { get; set; }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using Alfateam.Messenger.Lib.Abstractions.Modules;
-using Alfateam.Messenger.Models.Abstractions.Attachments;
+using Alfateam.Messenger.Models.Abstractions;
 using Alfateam.Messenger.Models.Abstractions.Messages;
 using System;
 using System.Collections.Generic;
@@ -23,17 +23,17 @@ namespace Alfateam.Messenger.Lib.Modules.WhatsApp
             throw new NotImplementedException();
         }
 
-        public override async Task<Message> EditMessage(string chatId, string messageId, string text)
+        public override async Task<MessageBase> EditMessage(string chatId, string messageId, string text)
         {
             throw new NotImplementedException();
         }
 
-        public override async Task<Message> GetMessage(string chatId, string messageId)
+        public override async Task<MessageBase> GetMessage(string chatId, string messageId)
         {
             throw new NotImplementedException();
         }
 
-        public override async Task<IEnumerable<Message>> GetMessages(string chatId, int offset, int count)
+        public override async Task<IEnumerable<MessageBase>> GetMessages(string chatId, int offset, int count)
         {
             throw new NotImplementedException();
         }
@@ -43,12 +43,12 @@ namespace Alfateam.Messenger.Lib.Modules.WhatsApp
             throw new NotImplementedException();
         }
 
-        public override async Task<Message> SendStickerMessage(string chatId, string stickerId)
+        public override async Task<MessageBase> SendStickerMessage(string chatId, string stickerId)
         {
             throw new NotImplementedException();
         }
 
-        public override async Task<Message> SendTextMessage(string chatId, string message, List<MessageAttachment> attachments = null)
+        public override async Task<MessageBase> SendTextMessage(string chatId, string message, List<MessageAttachmentBase> attachments = null)
         {
             throw new NotImplementedException();
         }
@@ -58,7 +58,7 @@ namespace Alfateam.Messenger.Lib.Modules.WhatsApp
             throw new NotImplementedException();
         }
 
-        public override async Task<Message> SendVoiceMessage(string chatId, byte[] message)
+        public override async Task<MessageBase> SendVoiceMessage(string chatId, byte[] message)
         {
             throw new NotImplementedException();
         }

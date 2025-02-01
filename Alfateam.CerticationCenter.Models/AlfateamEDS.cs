@@ -11,6 +11,7 @@ namespace Alfateam.CertificationCenter.Models
 {
     public class AlfateamEDS : AbsModel
     {
+        public string EDSSerialNumber { get; set; }
 
         /// <summary>
         /// Пользователь-владелец, кому выдана ЭЦП

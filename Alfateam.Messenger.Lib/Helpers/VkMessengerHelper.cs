@@ -1,5 +1,4 @@
 ﻿using Alfateam.Messenger.Models.Abstractions.Messages;
-using Alfateam.Messenger.Models.Abstractions.Messages.External;
 using Alfateam.Messenger.Models.Chats;
 using System;
 using System.Collections.Generic;
@@ -12,13 +11,13 @@ namespace Alfateam.Messenger.Lib.Helpers
 {
     public static class VkMessengerHelper
     {
-        public static ExternalGroupChat ConvertVKGroupChatToUniversal(VkNet.Model.Chat chat)
+        public static GroupChat ConvertVKGroupChatToUniversal(VkNet.Model.Chat chat)
         {
-            ExternalGroupChat universal = new ExternalGroupChat
+            GroupChat universal = new GroupChat
             {
-                ChatId = chat.Id.ToString(),
-                ChatPhotoPath = chat.Photo200,
-                AdminId = chat.AdminId.ToString(),
+                //ChatId = chat.Id.ToString(),
+                //ChatPhotoPath = chat.Photo200,
+                //AdminId = chat.AdminId.ToString(),
                 Title = chat.Title,
             };
 
@@ -26,17 +25,17 @@ namespace Alfateam.Messenger.Lib.Helpers
 
             return universal;
         }
-        public static ExternalPrivateChat ConvertVKPrivateChatToUniversal(VkApi api, VkNet.Model.Conversation chat)
+        public static PrivateChat ConvertVKPrivateChatToUniversal(VkApi api, VkNet.Model.Conversation chat)
         {
-            ExternalPrivateChat universal = new ExternalPrivateChat
+            PrivateChat universal = new PrivateChat
             {
-                ChatId = "",
-                PeerId = chat.Peer.Id.ToString(),
-                OurUserId = api.UserId.ToString(),
-                Messages = new List<ExternalMessengerMessage>
-                {
+                ExtChatId = "",
+                //PeerId = chat.Peer.Id.ToString(),
+                //OurUserId = api.UserId.ToString(),
+                //Messages = new List<ExternalMessengerMessage>
+                //{
 
-                },
+                //},
             };
 
 
@@ -45,7 +44,7 @@ namespace Alfateam.Messenger.Lib.Helpers
         }
 
 
-        public static Message ConvertVKTextMessageToUniversal()
+        public static MessageBase ConvertVKTextMessageToUniversal()
         {
             throw new Exception();
         }

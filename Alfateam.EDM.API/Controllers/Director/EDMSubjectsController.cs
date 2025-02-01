@@ -1,10 +1,14 @@
-﻿using Alfateam.Core.Enums;
+﻿using Alfateam.Core;
+using Alfateam.Core.Enums;
 using Alfateam.Core.Exceptions;
 using Alfateam.EDM.API.Abstractions;
 using Alfateam.EDM.API.Filters;
 using Alfateam.EDM.API.Models;
+using Alfateam.EDM.API.Models.DTO;
 using Alfateam.EDM.API.Models.DTO.Abstractions;
 using Alfateam.EDM.API.Models.DTO.General.Subjects;
+using Alfateam.EDM.Models;
+using Alfateam.EDM.Models.Abstractions;
 using Alfateam.EDM.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,19 +24,28 @@ namespace Alfateam.EDM.API.Controllers.Director
         {
         }
 
+        #region Субъекты ЭДО
 
         [HttpGet, Route("GetSubjects")]
-        public async Task<IEnumerable<EDMSubjectDTO>> GetSubjects()
+        public async Task<ItemsWithTotalCount<EDMSubjectDTO>> GetSubjects([FromQuery] SearchFilter filter)
         {
-            var subjects = DB.EDMSubjects.Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
-            return new EDMSubjectDTO().CreateDTOs(subjects).Cast<EDMSubjectDTO>();
+            return DBService.GetManyWithTotalCount<EDMSubject, EDMSubjectDTO>(GetAvailableSubjects(), filter.Offset, filter.Count, (entity) =>
+            {
+                bool condition = true;
+
+                if (!string.IsNullOrEmpty(filter.Query))
+                {
+                    condition &= entity.ToString().Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+                }
+
+                return condition;
+            });
         }
 
         [HttpGet, Route("GetSubject")]
         public async Task<EDMSubjectDTO> GetSubject(int id)
         {
-            var subjects = DB.EDMSubjects.Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
-            return (EDMSubjectDTO)DBService.TryGetOne(subjects, id, new EDMSubjectDTO());
+            return (EDMSubjectDTO)DBService.TryGetOne(GetAvailableSubjects(), id, new EDMSubjectDTO());
         }
 
         [HttpPost, Route("CreateSubject")]
@@ -54,22 +67,16 @@ namespace Alfateam.EDM.API.Controllers.Director
         [HttpPut, Route("UpdateSubject")]
         public async Task<EDMSubjectDTO> UpdateSubject(EDMSubjectDTO model)
         {
-            var subjects = DB.EDMSubjects.Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
-            var subject = DBService.TryGetOne(subjects, model.Id);
-
+            var subject = DBService.TryGetOne(GetAvailableSubjects(), model.Id);
             return (EDMSubjectDTO)DBService.TryUpdateEntity(DB.EDMSubjects, model, subject);
         }
 
         [HttpPut, Route("UploadLogo")]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем logoFile")]
-        public async Task<string> UploadLogo(int companyId)
+        public async Task<string> UploadLogo(int subjectId)
         {
-            const string formFilename = "logoFile";
-
-            var subjects = DB.EDMSubjects.Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
-            var subject = DBService.TryGetOne(subjects, companyId);
-
-            subject.LogoPath = FilesService.TryUploadFile(formFilename, FileType.Image);
+            var subject = DBService.TryGetOne(GetAvailableSubjects(), subjectId);
+            subject.LogoPath = FilesService.TryUploadFile("logoFile", FileType.Image);
             DBService.UpdateEntity(DB.EDMSubjects, subject);
 
             return subject.LogoPath;
@@ -81,10 +88,7 @@ namespace Alfateam.EDM.API.Controllers.Director
         [HttpDelete, Route("DeleteSubject")]
         public async Task DeleteSubject(int id)
         {
-            var subjects = DB.EDMSubjects.Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
-            var subject = DBService.TryGetOne(subjects, id);
-
-
+            var subject = DBService.TryGetOne(GetAvailableSubjects(), id);
             var allDepartments = DB.Departments.Include(o => o.Documents)
                                                .Where(o => o.EDMSubjectId == id && !o.IsDeleted);
             if (allDepartments.SelectMany(o => o.Documents).Any(o => !o.IsDeleted))
@@ -94,5 +98,23 @@ namespace Alfateam.EDM.API.Controllers.Director
 
             DBService.TryDeleteEntity(DB.EDMSubjects, subject); 
         }
+
+        #endregion
+
+
+
+
+
+
+
+
+        #region Private methods
+        private IEnumerable<EDMSubject> GetAvailableSubjects()
+        {
+            return DB.EDMSubjects.Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
+        }
+
+
+        #endregion
     }
 }

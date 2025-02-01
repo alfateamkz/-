@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<abstractions:AbsContentView 
+    x:Name="this"
+    xmlns:controls="clr-namespace:Alfateam.EDSSigningApp.Controls"
+    xmlns:AlohaControls="clr-namespace:AlohaKit.Controls;assembly=AlohaKit"
+    xmlns:HMControls="clr-namespace:HMControls;assembly=HMControls"
+    xmlns:abstractions="clr-namespace:Alfateam.EDSSigningApp.Abstractions"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="Alfateam.EDSSigningApp.Views.SettingsView">
+    <VerticalStackLayout 
+        Spacing="15">
+
+        <HorizontalStackLayout 
+            Margin="0,0,0,5"
+            Spacing="15">
+            <HorizontalStackLayout.GestureRecognizers>
+                <TapGestureRecognizer Tapped="onGoBackTapped"/>
+            </HorizontalStackLayout.GestureRecognizers>
+
+            <ImageButton
+                Source="arrow_back_icon.png"
+                HeightRequest="22"
+                WidthRequest="15"
+                HorizontalOptions="Start"
+                VerticalOptions="Center"/>
+
+            <Label 
+                Margin="0,-3,0,0"
+                FontFamily="{StaticResource GilroyBoldFont}"
+                FontSize="{StaticResource MainHeader}"
+                HorizontalOptions="Start"
+                VerticalOptions="Center"
+                Text="Настройки" />
+
+        </HorizontalStackLayout>
+
+        <VerticalStackLayout
+            Spacing="5">
+
+            <Label 
+                TextColor="{StaticResource Dark}"
+                HorizontalOptions="Start"
+                VerticalOptions="Center"
+                Text="Язык" />
+
+            <HMControls:StandardPicker 
+                ItemsSource="{x:Binding Source={x:Reference this}, Path=Languages, Mode=TwoWay}"
+                HorizontalOptions="Fill"/>
+
+        </VerticalStackLayout>
+
+        <Grid
+            HeightRequest="30"
+            ColumnDefinitions="*,50"
+            VerticalOptions="Start">
+
+            <Grid Grid.Column="0">
+                <Label 
+                    TextColor="{StaticResource Dark}"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center"
+                    Text="Использовать прокси" />
+            </Grid>
+
+            <Grid Grid.Column="1">
+                <AlohaControls:ToggleSwitch 
+                    IsOn="{x:Binding Source={x:Reference this}, Path=Settings.ProxySettings.UseProxy, Mode=TwoWay}"
+                    VerticalOptions="Fill"
+                    HorizontalOptions="Fill"/>
+            </Grid>
+
+        </Grid>
+
+        <VerticalStackLayout
+            IsVisible="{x:Binding Source={x:Reference this}, Path=Settings.ProxySettings.UseProxy, Mode=TwoWay}"
+            Spacing="15">
+            
+            <Grid 
+                ColumnSpacing="{OnIdiom Phone=Default,Default=15}"
+                RowSpacing="{OnIdiom Phone=15,Default=Default}"
+                ColumnDefinitions="{OnIdiom Phone='*',Default='*,*'}"
+                RowDefinitions="{OnIdiom Phone='77, 77',Default='*'}">
+
+
+                <VerticalStackLayout
+                    Grid.Column="{OnIdiom Phone=0,Default=0}"
+                    Grid.Row="{OnIdiom Phone=0,Default=0}"
+                    Spacing="0">
+
+                    <Label 
+                       TextColor="{StaticResource Dark}"
+                       HorizontalOptions="Start"
+                       VerticalOptions="Center"
+                       Text="Адрес" />
+
+                    <HMControls:StandardEntry 
+                        Text="{x:Binding Source={x:Reference this}, Path=Settings.ProxySettings.Address, Mode=TwoWay}"
+                        Placeholder="Введите адрес"
+                        VerticalOptions="Start"
+                        HorizontalOptions="Fill" />
+
+                </VerticalStackLayout>
+
+                <VerticalStackLayout
+                     Grid.Column="{OnIdiom Phone=0,Default=1}"
+                     Grid.Row="{OnIdiom Phone=1,Default=0}"
+                     Spacing="0">
+
+                    <Label 
+                       TextColor="{StaticResource Dark}"
+                       HorizontalOptions="Start"
+                       VerticalOptions="Center"
+                       Text="Порт" />
+
+                    <HMControls:StandardEntry 
+                        Keyboard="Numeric"
+                        Text="{x:Binding Source={x:Reference this}, Path=Settings.ProxySettings.Port, Mode=TwoWay}"
+                        Placeholder="Введите порт"
+                        VerticalOptions="Start"
+                        HorizontalOptions="Fill" />
+
+                </VerticalStackLayout>
+
+            </Grid>
+
+            <Grid
+                Margin="0,10,0,0"
+                HeightRequest="30"
+                ColumnDefinitions="*,50"
+                VerticalOptions="Start">
+
+                <Grid Grid.Column="0">
+                    <Label 
+                        TextColor="{StaticResource Dark}"
+                        HorizontalOptions="Start"
+                        VerticalOptions="Center"
+                        Text="Прокси требует авторизации" />
+                </Grid>
+
+                <Grid Grid.Column="1">
+                    <AlohaControls:ToggleSwitch 
+                        IsOn="{x:Binding Source={x:Reference this}, Path=Settings.ProxySettings.UseProxyAuth, Mode=TwoWay}"
+                        VerticalOptions="Fill"
+                        HorizontalOptions="Fill"/>
+                </Grid>
+
+            </Grid>
+
+            <Grid 
+                IsVisible="{x:Binding Source={x:Reference this}, Path=Settings.ProxySettings.UseProxyAuth, Mode=TwoWay}"
+                ColumnSpacing="{OnIdiom Phone=Default,Default=15}"
+                RowSpacing="{OnIdiom Phone=15,Default=Default}"
+                ColumnDefinitions="{OnIdiom Phone='*',Default='*,*'}"
+                RowDefinitions="{OnIdiom Phone='77, 77',Default='*'}">
+
+
+                <VerticalStackLayout
+                    Grid.Column="{OnIdiom Phone=0,Default=0}"
+                    Grid.Row="{OnIdiom Phone=0,Default=0}"
+                    Spacing="0">
+
+                    <Label 
+                        TextColor="{StaticResource Dark}"
+                        HorizontalOptions="Start"
+                        VerticalOptions="Center"
+                        Text="Логин" />
+
+                    <HMControls:StandardEntry 
+                        Text="{x:Binding Source={x:Reference this}, Path=Settings.ProxySettings.Login, Mode=TwoWay}"
+                        Placeholder="Введите логин"
+                        VerticalOptions="Start"
+                        HorizontalOptions="Fill" />
+
+                </VerticalStackLayout>
+
+                <VerticalStackLayout
+                    Grid.Column="{OnIdiom Phone=0,Default=1}"
+                    Grid.Row="{OnIdiom Phone=1,Default=0}"
+                    Spacing="0">
+
+                    <Label 
+                        TextColor="{StaticResource Dark}"
+                        HorizontalOptions="Start"
+                        VerticalOptions="Center"
+                        Text="Пароль" />
+
+                    <HMControls:StandardEntry 
+                        IsPassword="True"
+                        Text="{x:Binding Source={x:Reference this}, Path=Settings.ProxySettings.Password, Mode=TwoWay}"
+                        Placeholder="Введите пароль"
+                        VerticalOptions="Start"
+                        HorizontalOptions="Fill" />
+
+                </VerticalStackLayout>
+
+            </Grid>
+
+
+        </VerticalStackLayout>
+        
+    </VerticalStackLayout>
+</abstractions:AbsContentView>

@@ -30,5 +30,11 @@ namespace Alfateam.EDM.Models.General.Subjects
 
 
         public bool IsSelfEmployed { get; set; }
+
+
+        public override string ToString()
+        {
+            return $"{Surname} {Name} {Patronymic}";
+        }
     }
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Alfateam.Core;
 using System.ComponentModel.DataAnnotations.Schema;
 using Alfateam.EDM.Models.Enums;
+using Alfateam.EDM.Models.Documents.Meta.Structure;
 
 namespace Alfateam.EDM.Models.Documents
 {
@@ -16,33 +17,45 @@ namespace Alfateam.EDM.Models.Documents
         {
 
         }
-        public DocumentType(string title, int? minRequiredDocumentSides, DocumentTypeEnum type)
+
+
+        public DocumentType(string title, int? minRequiredDocumentSides, DocTypeMetadataStructure metadataStructure)
         {
             Title = title;
             MinRequiredDocumentSides = minRequiredDocumentSides;
-            Type = type;
+            MetadataStructure = metadataStructure;
 
             IsDefaultType = true;
         }
-        public DocumentType(string title, int? minRequiredDocumentSides, DocumentTypeEnum type, bool isInternal)
+        public DocumentType(string title, int? minRequiredDocumentSides, DocTypeMetadataStructure metadataStructure, bool isInternal)
         {
             Title = title;
             MinRequiredDocumentSides = minRequiredDocumentSides;
-            Type = type;
+            MetadataStructure = metadataStructure;
             IsInternalDocument = isInternal;
 
             IsDefaultType = true;
         }
+        public DocumentType(string title, int documentSidesCount, DocumentTypePurpose purpose)
+        {
+            Title = title;
+            MinRequiredDocumentSides = documentSidesCount;
+            MaxRequiredDocumentSides = documentSidesCount;
+            Purpose = purpose;
+
+            MetadataStructure = new DocTypeMetadataStructure();
+            IsDefaultType = true;
+        }
 
 
 
+        public DocumentTypePurpose Purpose { get; set; } = DocumentTypePurpose.ForDocumentWithFile;
         public string Title { get; set; }
         public string? Description { get; set; }
         public int? MinRequiredDocumentSides { get; set; }
         public int? MaxRequiredDocumentSides { get; set; }
+        public DocTypeMetadataStructure MetadataStructure { get; set; }
 
-
-        public DocumentTypeEnum Type { get; set; } = DocumentTypeEnum.NonFormalized;
 
 
 

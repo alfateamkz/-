@@ -9,7 +9,7 @@ namespace Alfateam.EDM.API.Abstractions
     [ApiController]
     [Route("[controller]")]
     [AuthorizedUser]
-    [CheckCompanyAccess]
+    [CheckCompanyAccessAndTrustedIP]
     public abstract class AbsAuthorizedController : AbsController
     {
         public AbsAuthorizedController(ControllerParams @params) : base(@params)

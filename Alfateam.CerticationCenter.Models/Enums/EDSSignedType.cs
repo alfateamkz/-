@@ -9,6 +9,10 @@ namespace Alfateam.CertificationCenter.Models.Enums
     public enum EDSSignedType
     {
         AlfateamEDS = 1,
-        OtherEDS = 2
+        RU_FTS = 2, //Federal Tax Service = ФНС
+        KZ_NCA = 3,
+
+
+        OtherEDS = 999
     }
 }

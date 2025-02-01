@@ -1,7 +1,6 @@
 ﻿using Alfateam.Messenger.Lib.Abstractions.Modules;
 using Alfateam.Messenger.Lib.Enums;
-using Alfateam.Messenger.Models.Abstractions.Chats;
-using Alfateam.Messenger.Models.DTO.Abstractions.Chats;
+using Alfateam.Messenger.Models.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,11 +18,11 @@ namespace Alfateam.Messenger.Lib.Modules.Facebook
         }
 
 
-        public override async Task<Chat> CreateChat(Chat chat)
+        public override async Task<ChatBase> CreateChat(ChatBase chat)
         {
             throw new NotImplementedException();
         }
-        public override async Task<Chat> EditChat(Chat chat)
+        public override async Task<ChatBase> EditChat(ChatBase chat)
         {
             throw new NotImplementedException();
         }
@@ -33,12 +32,12 @@ namespace Alfateam.Messenger.Lib.Modules.Facebook
             throw new NotImplementedException();
         }
 
-        public override async Task<Chat> GetChat(string id)
+        public override async Task<ChatBase> GetChat(string id)
         {
             throw new NotImplementedException();
         }
 
-        public override async Task<IEnumerable<Chat>> GetChats(int offset, int count)
+        public override async Task<IEnumerable<ChatBase>> GetChats(int offset, int count)
         {
             throw new NotImplementedException();
         }

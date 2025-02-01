@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<abstractions:AbsContentPage 
+    x:Name="this"
+    xmlns:blur="clr-namespace:UraniumUI.Blurs;assembly=UraniumUI.Blurs"
+    xmlns:controls="clr-namespace:Alfateam.EDSSigningApp.Controls"
+    xmlns:abstractions="clr-namespace:Alfateam.EDSSigningApp.Abstractions"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="Alfateam.EDSSigningApp.Pages.SelectCert"
+    Background="{StaticResource Light}"
+    BackgroundColor="{StaticResource Light}"
+    Title="SelectCert">
+    <Grid 
+        Padding="15"
+        RowDefinitions="50,*">
+        <!--<Grid.Effects>
+            <blur:BlurEffect 
+                Mode="Light"
+                AccentColor="Black"
+                AccentOpacity="0.2"/>
+        </Grid.Effects>-->
+
+        <Grid 
+            Grid.Row="0"
+            ColumnDefinitions="*, 50">
+
+            <Grid Grid.Column="0">
+
+        
+                
+                <Label 
+                    FontFamily="{StaticResource GilroyBoldFont}"
+                    FontSize="{StaticResource MainHeader}"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Start"
+                    Text="Выберите сертификат" />
+
+            </Grid>
+
+            <!--<Grid Grid.Column="1">
+
+                <ImageButton 
+                    Clicked="onAddCertBtnClicked"
+                    Source="add_cert_icon.png"
+                    HorizontalOptions="End"
+                    VerticalOptions="Center"
+                    WidthRequest="20"
+                    HeightRequest="20" />
+
+            </Grid>-->
+
+        </Grid>
+
+
+        <Grid 
+            Grid.Row="1">
+
+            <CollectionView 
+                ItemsSource="{x:Binding Source={x:Reference this}, Path=EDSList, Mode=TwoWay}"
+                SelectionMode="None"
+                VerticalOptions="Fill"
+                HorizontalOptions="Fill">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <controls:CertListItem 
+                            Tapped="onItemTapped"
+                            MinimumHeightRequest="75"
+                            VerticalOptions="Start"
+                            HorizontalOptions="Fill"
+                            BindingContext="{Binding}">
+                            <!--<controls:CertListItem.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="controlTapped"/>
+                            </controls:CertListItem.GestureRecognizers>-->
+                        </controls:CertListItem>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label 
+                IsVisible="False"
+                TextColor="{StaticResource Dark}"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center"
+                Text="Сертификатов нет">
+                <Label.Style>
+                    <Style TargetType="Label">
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{x:Binding Source={x:Reference this}, Path=EDSList.Count, Mode=OneTime}" Value="0">
+                                <Setter Property="IsVisible" Value="True"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Label.Style>
+            </Label>
+
+        </Grid>
+
+
+
+    </Grid>
+</abstractions:AbsContentPage>

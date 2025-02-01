@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<abstractions:AbsContentView 
+    x:Name="this"
+    xmlns:abstractions="clr-namespace:Alfateam.EDSSigningApp.Abstractions"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="Alfateam.EDSSigningApp.Views.AboutCertViewForPhones">
+    <VerticalStackLayout 
+        Spacing="20">
+
+        <HorizontalStackLayout 
+            Spacing="10">
+            <HorizontalStackLayout.GestureRecognizers>
+                <TapGestureRecognizer Tapped="onGoBackTapped"/>
+            </HorizontalStackLayout.GestureRecognizers>
+
+            <ImageButton
+                Source="arrow_back_icon.png"
+                HeightRequest="22"
+                WidthRequest="15"
+                HorizontalOptions="Start"
+                VerticalOptions="Center"/>
+
+            <Label 
+                Margin="0,-3,0,0"
+                FontFamily="{StaticResource GilroyBoldFont}"
+                FontSize="{StaticResource MainHeader}"
+                HorizontalOptions="Start"
+                VerticalOptions="Center"
+                Text="О сертификате" />
+
+        </HorizontalStackLayout>
+
+        <VerticalStackLayout 
+            Spacing="5">
+            <Label 
+               HorizontalOptions="Start"
+               Text="Владелец" />
+            <Label 
+               TextColor="{StaticResource Dark}"
+               HorizontalOptions="Start"
+               Text="{x:Binding Source={x:Reference this}, Path=EDS.Owner}" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout 
+              Spacing="15"
+              IsVisible="{x:Binding Source={x:Reference this}, Path=EDS.HasOrganizationInfo}">
+
+            <VerticalStackLayout 
+                Spacing="5">
+                <Label 
+                    HorizontalOptions="Start"
+                    Text="Организация" />
+                <Label 
+                    TextColor="{StaticResource Dark}"
+                    HorizontalOptions="Start"
+                    Text="{x:Binding Source={x:Reference this}, Path=EDS.OwnerOrganization}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout 
+                Spacing="5">
+                <Label 
+                     HorizontalOptions="Start"
+                     Text="Идентификационный номер: " />
+                <Label 
+                    TextColor="{StaticResource Dark}"
+                    HorizontalOptions="Start"
+                    Text="{x:Binding Source={x:Reference this}, Path=EDS.OwnerOrganizationNumber}" />
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+
+        <VerticalStackLayout 
+           Spacing="5">
+            <Label 
+                HorizontalOptions="Start"
+                Text="Тип владельца" />
+            <Label 
+                TextColor="{StaticResource Dark}"
+                HorizontalOptions="Start"
+                Text="{x:Binding Source={x:Reference this}, Path=EDS.OwnerType}" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout 
+            Spacing="5">
+            <Label 
+                HorizontalOptions="Start"
+                Text="Срок действия" />
+            <Label 
+                TextColor="{StaticResource Dark}"
+                HorizontalOptions="Start">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <FormattedString.Spans>
+                            <Span 
+                                Style="{StaticResource ValidityDateSpanStyle}"
+                                Text="{x:Binding Source={x:Reference this}, Path=EDS.ValidityPeriodString}" />
+                        </FormattedString.Spans>
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+        </VerticalStackLayout>
+
+        <VerticalStackLayout 
+            Spacing="5">
+            <Label 
+                HorizontalOptions="Start"
+                Text="Удостоверяющий центр" />
+            <Label 
+                TextColor="{StaticResource Dark}"
+                HorizontalOptions="Start"
+                Text="{x:Binding Source={x:Reference this}, Path=EDS.CA_Info}" />
+        </VerticalStackLayout>
+
+
+    </VerticalStackLayout>
+</abstractions:AbsContentView>

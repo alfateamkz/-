@@ -24,7 +24,6 @@ namespace Alfateam.Messenger.Models.DTO.Abstractions
     [JsonKnownType(typeof(FacebookAccountDTO), "FacebookAccount")]
     [JsonKnownType(typeof(InstagramAccountDTO), "InstagramAccount")]
     [JsonKnownType(typeof(VKAccountDTO), "VKAccount")]
-    [JsonKnownType(typeof(AlfateamMessengerAccountDTO), "AlfateamMessengerAccount")]
     [JsonKnownType(typeof(EmailAccountDTO), "EmailAccount")]
     public class AccountDTO : DTOModelAbs<Account>
     {

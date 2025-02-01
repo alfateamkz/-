@@ -1,6 +1,8 @@
 ﻿using Alfateam.Core.Attributes.DTO;
 using Alfateam.EDM.API.Models.DTO.Documents;
 using Alfateam.EDM.API.Models.DTO.Documents.DocumentSigning;
+using Alfateam.EDM.API.Models.DTO.Documents.DocumentSigning.Sides;
+using Alfateam.EDM.API.Models.DTO.Documents.Meta;
 using Alfateam.EDM.API.Models.DTO.Documents.Types;
 using Alfateam.EDM.API.Models.DTO.General;
 using Alfateam.EDM.Models.Abstractions;
@@ -11,11 +13,13 @@ using Alfateam.EDM.Models.Enums.DocumentStatuses;
 using Alfateam.Website.API.Abstractions;
 using JsonKnownTypes;
 using Newtonsoft.Json;
+using System.ComponentModel;
 
 namespace Alfateam.EDM.API.Models.DTO.Abstractions
 {
     [JsonConverter(typeof(JsonKnownTypesConverter<DocumentDTO>))]
     [JsonDiscriminator(Name = "discriminator")]
+    [JsonKnownType(typeof(DocumentsParcelDTO), "DocumentsParcel")]
     [JsonKnownType(typeof(DocumentWithFileDTO), "NonFormalizedDocument")]
     [JsonKnownType(typeof(PriceListDocumentDTO), "PriceListDocument")]
     [JsonKnownType(typeof(WithPositionItemsDocumentDTO), "WithPositionItemsDocument")]
@@ -24,16 +28,29 @@ namespace Alfateam.EDM.API.Models.DTO.Abstractions
         [JsonProperty("discriminator")]
         public string Discriminator { get; set; }
 
-        /// <summary>
-        /// Если DraftInfo != null, то документ - черновик
-        /// </summary>
+
+
+        [ForClientOnly]
+        public DocumentTypeDTO Type { get; set; }
+        public DocumentMetadataDTO Metadata { get; set; }
+
+
+
+
+
+        [Description("Если DraftInfo != null, то документ - черновик")]
+        [DTOFieldFor(DTOFieldForType.CreationOnly)]
         public DocumentDraftInfoDTO? DraftInfo { get; set; }
 
 
         [ForClientOnly]
         public UserDTO CreatedBy { get; set; }
+
         [ForClientOnly]
         public int CreatedById { get; set; }
+
+
+
 
 
         public string Title { get; set; }
@@ -42,11 +59,12 @@ namespace Alfateam.EDM.API.Models.DTO.Abstractions
 
 
         public bool IsSigningRequired { get; set; }
-        public List<DocumentSigningSideDTO> SigningSides { get; set; } = new List<DocumentSigningSideDTO>();
 
-        /// <summary>
-        /// Документы, имеющие отношения к текущему документу. Например, счета на оплату, акты выполненных работ и т.д. 
-        /// </summary>
+
+        [DTOFieldFor(DTOFieldForType.CreationOnly)]
+        public List<AlfateamEDMDocumentSigningSideDTO> SigningSides { get; set; } = new List<AlfateamEDMDocumentSigningSideDTO>();
+
+        [Description("Документы, имеющие отношения к текущему документу. Например, счета на оплату, акты выполненных работ и т.д. ")]
         [ForClientOnly]
         public List<DocumentDTO> RelatedDocuments { get; set; } = new List<DocumentDTO>();
 
@@ -58,9 +76,13 @@ namespace Alfateam.EDM.API.Models.DTO.Abstractions
         public DocumentApprovalMetadataDTO Approval { get; set; }
 
         [ForClientOnly]
-        public DocumentSigningMetadataDTO Signing { get; set; }
+        public DocumentCancellationApprovalMetadataDTO CancellationApproval { get; set; }
+
         [ForClientOnly]
-        public DocumentSigningMetadataDTO? Cancellation { get; set; }
+        public DocumentSigningMetadataDTO Signing { get; set; }
+
+        [ForClientOnly]
+        public DocumentSigningMetadataDTO Cancellation { get; set; }
 
 
 

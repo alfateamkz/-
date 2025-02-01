@@ -10,6 +10,7 @@ namespace Alfateam.Messenger.Models.Stickers.Alfateam
 {
     public class AlfateamSticker : AbsSticker
     {
+        public string Title { get; set; }
         public string CorrespondingEmoji { get; set; }
         public string Filepath { get; set; }
 

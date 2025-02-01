@@ -8,6 +8,10 @@ namespace Alfateam.CertificationCenter.Models.DTO
     public class AlfateamDigitalPOADTO : DTOModelAbs<AlfateamDigitalPOA>
     {
 
+        [ForClientOnly]
+        public string SerialNumber { get; set; }
+
+
         [Description("Кем выдана доверенность  - код страны")]
         [ForClientOnly]
         public string IssuerCountryCode { get; set; }

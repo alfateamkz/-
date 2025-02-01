@@ -7,19 +7,26 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DocxTemplater" Version="2.3.4" />
+    <PackageReference Include="EPPlus" Version="7.5.3" />
+    <PackageReference Include="iTextSharp" Version="5.5.13.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.10" />
+    <PackageReference Include="PDFsharp" Version="6.1.1" />
+    <PackageReference Include="PDFsharp-MigraDoc" Version="6.1.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.7.3" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Alfateam.CertGenerators\Alfateam.CertGenerators.csproj" />
     <ProjectReference Include="..\Alfateam.Core\Alfateam.Core.csproj" />
+    <ProjectReference Include="..\Alfateam.DB.Services\Alfateam.DB.Services.csproj" />
     <ProjectReference Include="..\Alfateam.DB\Alfateam.DB.csproj" />
     <ProjectReference Include="..\Alfateam.Gateways\Alfateam.Gateways.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\DTO\Documents\Templates\" />
+    <Folder Include="Controllers\Chats\" />
   </ItemGroup>
 
 </Project>

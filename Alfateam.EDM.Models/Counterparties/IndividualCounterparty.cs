@@ -28,5 +28,12 @@ namespace Alfateam.EDM.Models.Counterparties
         /// </summary>
         public string IdentificationDocumentData { get; set; }
 
+
+
+        public override string ToString()
+        {
+            return $"{Surname} {Name} {Patronymic}";
+        }
+
     }
 }

@@ -1,9 +1,15 @@
 ﻿using Alfateam.Messenger.API.Abstractions;
 using Alfateam.Messenger.API.Models;
 using Alfateam.Messenger.Lib.Enums;
-using Alfateam.Messenger.Models.DTO.Abstractions.Chats;
+using Alfateam.Messenger.Models.Abstractions;
+using Alfateam.Messenger.Models.Chats;
+using Alfateam.Messenger.Models.DTO.Abstractions;
 using Alfateam.Messenger.Models.DTO.Abstractions.Messages;
+using Alfateam.Messenger.Models.Peers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Telegram.Bot.Types;
+using static TdLib.TdApi;
 
 namespace Alfateam.Messenger.API.Controllers.Messenger
 {
@@ -13,39 +19,58 @@ namespace Alfateam.Messenger.API.Controllers.Messenger
         {
         }
 
+        #region Получение списка чатов
 
         [HttpGet, Route("GetChats")]
-        public async Task<IEnumerable<ChatDTO>> GetChats(int offset = 0, int count = 20)
+        public async Task<IEnumerable<ChatBaseDTO>> GetChats(int offset = 0, int count = 20)
         {
-            var chats = await Messenger.Chats.GetChats(offset, count);
-            return new ChatDTO().CreateDTOs(chats).Cast<ChatDTO>();
+            IEnumerable<ChatBase> chats = null;
+            if (Account != null)
+            {
+                chats = await Messenger.Chats.GetChats(offset, count);
+            }
+            else if (false)
+            {
+
+            }
+            else
+            {
+                chats = GetAvailableAlfateamChats();
+            }
+
+            return new ChatBaseDTO().CreateDTOs(chats).Cast<ChatBaseDTO>();
         }
 
         [HttpGet, Route("GetChat")]
-        public async Task<ChatDTO> GetChat(string chatId)
+        public async Task<ChatBaseDTO> GetChat(string chatId)
         {
-            var chat = await Messenger.Chats.GetChat(chatId);
-            return (ChatDTO)new ChatDTO().CreateDTO(chat);
+            ChatBase chat = null;
+            if(Account != null)
+            {
+                chat = await Messenger.Chats.GetChat(chatId);
+            }
+            else if (false)
+            {
+
+            }
+            else
+            {
+                chat = GetAvailableAlfateamChats().FirstOrDefault(o => o.Id == Convert.ToInt32(chatId));
+            }
+
+            ThrowIfNull(chat);
+            return (ChatBaseDTO)new ChatBaseDTO().CreateDTO(chat);
         }
 
-        [HttpPost, Route("CreateChat")]
-        public async Task<ChatDTO> CreateChat(ChatDTO model)
-        {
-            var newChat = await Messenger.Chats.CreateChat(model.CreateDBModelFromDTO());
-            return (ChatDTO)new ChatDTO().CreateDTO(newChat);
-        }
+        #endregion
 
-        [HttpPut, Route("EditChat")]
-        public async Task<ChatDTO> EditChat(ChatDTO model)
-        {
-            var newChat = await Messenger.Chats.EditChat(model.CreateDBModelFromDTO());
-            return (ChatDTO)new ChatDTO().CreateDTO(newChat);
-        }
 
-        [HttpDelete, Route("DeleteChat")]
-        public async Task<ChatDeletionResult> DeleteChat(string chatId)
-        {
-            return await Messenger.Chats.DeleteChat(chatId);
-        }
+
+
+
+
+
+
+     
     }
 }

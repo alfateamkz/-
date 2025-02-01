@@ -1,6 +1,7 @@
 ﻿using Alfateam.Core;
 using Alfateam.EDM.Models.Documents.DocumentSigning.Signatures;
 using Alfateam.EDM.Models.Documents.Types;
+using Alfateam.EDM.Models.General;
 using JsonKnownTypes;
 using Newtonsoft.Json;
 using System;
@@ -14,9 +15,7 @@ namespace Alfateam.EDM.Models.Abstractions
     [JsonConverter(typeof(JsonKnownTypesConverter<Signature>))]
     [JsonDiscriminator(Name = "discriminator")]
     [JsonKnownType(typeof(AlfateamEDMSignature), "AlfateamEDMSignature")]
-    [JsonKnownType(typeof(MarkedAsElectronicallySignature), "MarkedAsElectronicallySignature")]
     [JsonKnownType(typeof(ScanSignature), "ScanSignature")]
-    [JsonKnownType(typeof(ScanSignatureWithoutDocFlow), "ScanSignatureWithoutDocFlow")]
     public class Signature : AbsModel
     {
         [JsonProperty("discriminator")]
@@ -24,6 +23,10 @@ namespace Alfateam.EDM.Models.Abstractions
 
         public DocumentSigningSide Side { get; set; }
         public int SideId { get; set; }
+
+
+        public User SignedBy { get; set; }
+        public int SignedById { get; set; }
 
 
         /// <summary>

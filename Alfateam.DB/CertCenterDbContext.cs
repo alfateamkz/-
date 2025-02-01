@@ -66,6 +66,7 @@ namespace Alfateam.DB
         public DbSet<CancellationRequestInfo> CancellationRequestInfo { get; set; }
         public DbSet<EDSSigned> EDSSigned { get; set; }
         public DbSet<IssueRequestInfo> IssueRequestInfo { get; set; }
+        public DbSet<SentSignatureFromApp> SentSignaturesFromApp { get; set; }
         public DbSet<VerificationRequestInfo> VerificationRequestInfo { get; set; }
 
         #endregion

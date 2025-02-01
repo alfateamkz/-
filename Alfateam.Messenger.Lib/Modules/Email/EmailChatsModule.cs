@@ -1,7 +1,6 @@
 ﻿using Alfateam.Messenger.Lib.Abstractions.Modules;
 using Alfateam.Messenger.Lib.Enums;
-using Alfateam.Messenger.Models.Abstractions.Chats;
-using Alfateam.Messenger.Models.DTO.Abstractions.Chats;
+using Alfateam.Messenger.Models.Abstractions;
 using MailKit;
 using System;
 using System.Collections.Generic;
@@ -18,11 +17,11 @@ namespace Alfateam.Messenger.Lib.Modules.Email
         {
             Messenger = messenger;
         }
-        public override async Task<Chat> CreateChat(Chat chat)
+        public override async Task<ChatBase> CreateChat(ChatBase chat)
         {
             throw new NotImplementedException();
         }
-        public override async Task<Chat> EditChat(Chat chat)
+        public override async Task<ChatBase> EditChat(ChatBase chat)
         {
             throw new NotImplementedException();
         }
@@ -32,12 +31,12 @@ namespace Alfateam.Messenger.Lib.Modules.Email
             throw new NotImplementedException();
         }
 
-        public override async Task<Chat> GetChat(string id)
+        public override async Task<ChatBase> GetChat(string id)
         {
             throw new NotImplementedException();
         }
 
-        public override async Task<IEnumerable<Chat>> GetChats(int offset, int count)
+        public override async Task<IEnumerable<ChatBase>> GetChats(int offset, int count)
         {
             await Messenger.Imap.Inbox.OpenAsync(MailKit.FolderAccess.ReadWrite);
             var messageSummaries = await Messenger.Imap.Inbox.FetchAsync(0,-1, new FetchRequest(MessageSummaryItems.All));

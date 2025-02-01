@@ -1,7 +1,7 @@
 ﻿using Alfateam.Messenger.Lib.Abstractions.Modules;
 using Alfateam.Messenger.Lib.Enums;
 using Alfateam.Messenger.Lib.Extensions;
-using Alfateam.Messenger.Models.Abstractions.Chats;
+using Alfateam.Messenger.Models.Abstractions;
 using Alfateam.Messenger.Models.Chats;
 using OpenQA.Selenium;
 using System;
@@ -26,7 +26,7 @@ namespace Alfateam.Messenger.Lib.Modules.Viber
 
 
 
-        public override async Task<Chat> CreateChat(Chat chat)
+        public override async Task<ChatBase> CreateChat(ChatBase chat)
         {     
             await Messenger.ThrowIfNotAuthorized();
 
@@ -40,14 +40,14 @@ namespace Alfateam.Messenger.Lib.Modules.Viber
             throw new NotImplementedException();
         }
 
-        public override async Task<Chat> EditChat(Chat chat)
+        public override async Task<ChatBase> EditChat(ChatBase chat)
         {
             await Messenger.ThrowIfNotAuthorized();
 
             throw new NotImplementedException();
         }
 
-        public override async Task<Chat> GetChat(string id)
+        public override async Task<ChatBase> GetChat(string id)
         {
             await Messenger.ThrowIfNotAuthorized();
 
@@ -75,23 +75,23 @@ namespace Alfateam.Messenger.Lib.Modules.Viber
                     }
                 }
 
-                return new ExternalGroupChat
+                return new GroupChat
                 {
                     Title = chatName,
-                    ParticipantsCount = participantsCount
+                    //ParticipantsCount = participantsCount
                 };
             }
 
-            return new ExternalPrivateChat
+            return new PrivateChat
             {
-                Title = chatName,
-                OurUserId = this.Messenger.Account.Login,
-                PeerId = id,
-                OnlineStatusLabel = textUnderChatName,
+                //Title = chatName,
+                //OurUserId = this.Messenger.Account.Login,
+                //PeerId = id,
+                //OnlineStatusLabel = textUnderChatName,
             };
         }
 
-        public override async Task<IEnumerable<Chat>> GetChats(int offset, int count)
+        public override async Task<IEnumerable<ChatBase>> GetChats(int offset, int count)
         {
             await Messenger.ThrowIfNotAuthorized();
 

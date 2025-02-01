@@ -1,5 +1,4 @@
 ﻿using Alfateam.Core;
-using Alfateam.Messenger.Models.Abstractions.Chats;
 using Alfateam.Messenger.Models.Accounts;
 using Alfateam.Messenger.Models.Accounts.Messengers;
 using Alfateam.Messenger.Models.Accounts.SocialNetworks;
@@ -25,7 +24,6 @@ namespace Alfateam.Messenger.Models.Abstractions
     [JsonKnownType(typeof(FacebookAccount), "FacebookAccount")]
     [JsonKnownType(typeof(InstagramAccount), "InstagramAccount")]
     [JsonKnownType(typeof(VKAccount), "VKAccount")]
-    [JsonKnownType(typeof(AlfateamMessengerAccount), "AlfateamMessengerAccount")]
     [JsonKnownType(typeof(EmailAccount), "EmailAccount")]
     public class Account : AbsModel
     {
@@ -43,7 +41,7 @@ namespace Alfateam.Messenger.Models.Abstractions
 
 
 
-        public List<Chat> Chats { get; set; } = new List<Chat>();
+        public List<ChatBase> Chats { get; set; } = new List<ChatBase>();
 
 
 

@@ -8,18 +8,22 @@ using Alfateam.EDM.Models.ApprovalRoutes.RouteStageExecutors;
 using Alfateam.EDM.Models.Counterparties;
 using Alfateam.EDM.Models.Documents;
 using Alfateam.EDM.Models.Documents.DocumentSigning;
+using Alfateam.EDM.Models.Documents.DocumentSigning.ApproveStrategies;
 using Alfateam.EDM.Models.Documents.DocumentSigning.Results;
 using Alfateam.EDM.Models.Documents.DocumentSigning.Sides;
 using Alfateam.EDM.Models.Documents.DocumentSigning.Signatures;
+using Alfateam.EDM.Models.Documents.Formats;
+using Alfateam.EDM.Models.Documents.Meta.Fields;
+using Alfateam.EDM.Models.Documents.Meta.Structure;
 using Alfateam.EDM.Models.Documents.Templates;
 using Alfateam.EDM.Models.Documents.Types;
 using Alfateam.EDM.Models.Documents.Types.Items;
-using Alfateam.EDM.Models.Documents.TypesMetadata;
 using Alfateam.EDM.Models.Enums;
 using Alfateam.EDM.Models.General;
 using Alfateam.EDM.Models.General.PowersOfAttorney;
 using Alfateam.EDM.Models.General.Security;
 using Alfateam.EDM.Models.General.Subjects;
+using Alfateam.EDM.Models.Integrations.API;
 using Alfateam.ID.Models.Abstractions;
 using Alfateam.ID.Models.Payments.Ways;
 using Alfateam.ID.Models.Security.Verifications;
@@ -57,8 +61,9 @@ namespace Alfateam.DB
 
         #endregion
         public DbSet<Counterparty> Counterparties { get; set; }
-        public DbSet<DocTypeMetadata> DocTypeMetadatas { get; set; }
         public DbSet<Document> Documents { get; set; }
+        public DbSet<DocumentApproveStrategy> DocumentApproveStrategies { get; set; }
+        public DbSet<DocumentMetadataField> DocumentMetadataFields { get; set; }
         public DbSet<DocumentSigningResult> DocumentSigningResults { get; set; }
         public DbSet<DocumentSigningSide> DocumentSigningSides { get; set; }
         public DbSet<EDMSubject> EDMSubjects { get; set; }
@@ -98,7 +103,8 @@ namespace Alfateam.DB
         #endregion
 
         #endregion
-        public DbSet<DocumentsParcel> DocumentsParcels { get; set; }
+
+        public DbSet<DocumentStorageFile> DocumentStorageFiles { get; set; }
         public DbSet<DocumentType> DocumentTypes { get; set; }
         #endregion
 
@@ -122,11 +128,21 @@ namespace Alfateam.DB
 
         #endregion
 
+        #region Integrations
+
+        #region API
+        public DbSet<AlfateamAPIKey> AlfateamAPIKeys { get; set; }
+        public DbSet<AlfateamAPIRequestEntry> AlfateamAPIRequestEntries { get; set; }
+
+        #endregion
+
+        #endregion
+
         public DbSet<BannedCounterparty> BannedCounterparties { get; set; }
         public DbSet<CounterpartyGroup> CounterpartyGroups { get; set; }
         public DbSet<CounterpartyInvitation> CounterpartyInvitations { get; set; }
         public DbSet<EDMProvider> EDMProviders { get; set; }
-
+        public DbSet<UploadedFile> UploadedFiles { get; set; }
 
 
 
@@ -188,24 +204,125 @@ namespace Alfateam.DB
         {
             if(!DocumentTypes.Any(o => o.IsDefaultType))
             {
-                DocumentTypes.Add(new DocumentType("Акт расхождений", 2, DocumentTypeEnum.ActDisagreement));
-                DocumentTypes.Add(new DocumentType("Акт", 2, DocumentTypeEnum.Act));
-                DocumentTypes.Add(new DocumentType("Акт сверки", 2, DocumentTypeEnum.ActReconciliation));
-                DocumentTypes.Add(new DocumentType("Договор", 2, DocumentTypeEnum.Agreement));
-                DocumentTypes.Add(new DocumentType("Доверенность", 1, DocumentTypeEnum.Attorney));
-                DocumentTypes.Add(new DocumentType("Реестр сертификатов", 1, DocumentTypeEnum.CertificateRegistry));
-                DocumentTypes.Add(new DocumentType("Претензия", 2, DocumentTypeEnum.Claim));
-                DocumentTypes.Add(new DocumentType("Накладная", 2, DocumentTypeEnum.Consignment));
-                DocumentTypes.Add(new DocumentType("Детализация", 2, DocumentTypeEnum.Detalization));
-                DocumentTypes.Add(new DocumentType("Счет на оплату", 2, DocumentTypeEnum.Invoice));
-                DocumentTypes.Add(new DocumentType("Письмо", 2, DocumentTypeEnum.Letter));
-                DocumentTypes.Add(new DocumentType("Неформализованный документ", 1, DocumentTypeEnum.NonFormalized));
-                DocumentTypes.Add(new DocumentType("Протокол согласования цены", 1, DocumentTypeEnum.PriceListAgreement));
-                DocumentTypes.Add(new DocumentType("Ценовой лист", 2, DocumentTypeEnum.PriceList));
-                DocumentTypes.Add(new DocumentType("Доп.соглашение к договору", 2, DocumentTypeEnum.SupplementaryAgreement));
-                DocumentTypes.Add(new DocumentType("Транспортная накладная", 3, DocumentTypeEnum.Waybill));
+                //Типы для документа с файлом - для подписания с контрагентами
+                DocumentTypes.Add(new DocumentType("Акт расхождений", 2, new DocTypeMetadataStructure
+                {
+                   Fields = new List<DocTypeMetadataStructureField>
+                   {
+                       new DocTypeMetadataStructureField("Валюта","CurrencyCode", DocTypeMetadataStructureFieldType.CurrencyCode, true, true),
+                       new DocTypeMetadataStructureField("Сумма","Sum", DocTypeMetadataStructureFieldType.Double, true, true)
+                   }
+                }));
+                DocumentTypes.Add(new DocumentType("Акт", 2, new DocTypeMetadataStructure
+                {
+                    Fields = new List<DocTypeMetadataStructureField>
+                    {
+                        new DocTypeMetadataStructureField("Валюта","CurrencyCode", DocTypeMetadataStructureFieldType.CurrencyCode, true, true),
+                        new DocTypeMetadataStructureField("Сумма без НДС","SumWithoutVAT", DocTypeMetadataStructureFieldType.Double, true, true),
+                        new DocTypeMetadataStructureField("НДС","VAT", DocTypeMetadataStructureFieldType.Double, true, true),
+                        new DocTypeMetadataStructureField("Причина","Reason", DocTypeMetadataStructureFieldType.Double, false, false),
+                    }
+                }));
+                DocumentTypes.Add(new DocumentType("Акт сверки", 2, new DocTypeMetadataStructure()));
+                DocumentTypes.Add(new DocumentType("Договор", 2, new DocTypeMetadataStructure
+                {
+                    Fields = new List<DocTypeMetadataStructureField>
+                    {
+                        new DocTypeMetadataStructureField("Тип договора","AgreementType", DocTypeMetadataStructureFieldType.Double, false, false),
+                        new DocTypeMetadataStructureField("Валюта","CurrencyCode", DocTypeMetadataStructureFieldType.CurrencyCode, true, true),
+                        new DocTypeMetadataStructureField("Сумма без НДС","SumWithoutVAT", DocTypeMetadataStructureFieldType.Double, true, true),
+                        new DocTypeMetadataStructureField("НДС","VAT", DocTypeMetadataStructureFieldType.Double, true, true),
+                    }
+                }));
+                DocumentTypes.Add(new DocumentType("Доверенность", 1, new DocTypeMetadataStructure()));
+                DocumentTypes.Add(new DocumentType("Реестр сертификатов", 1, new DocTypeMetadataStructure()));
+                DocumentTypes.Add(new DocumentType("Претензия", 2, new DocTypeMetadataStructure
+                {
+                    Fields = new List<DocTypeMetadataStructureField>
+                    {
+                        new DocTypeMetadataStructureField("Валюта","CurrencyCode", DocTypeMetadataStructureFieldType.CurrencyCode, true, true),
+                        new DocTypeMetadataStructureField("Сумма","Sum", DocTypeMetadataStructureFieldType.Double, true, true)
+                    }
+                }));
+                DocumentTypes.Add(new DocumentType("Накладная", 2, new DocTypeMetadataStructure
+                {
+                    Fields = new List<DocTypeMetadataStructureField>
+                    {
+                        new DocTypeMetadataStructureField("Валюта","CurrencyCode", DocTypeMetadataStructureFieldType.CurrencyCode, true, true),
+                        new DocTypeMetadataStructureField("Сумма без НДС","SumWithoutVAT", DocTypeMetadataStructureFieldType.Double, true, true),
+                        new DocTypeMetadataStructureField("НДС","VAT", DocTypeMetadataStructureFieldType.Double, true, true),
+                        new DocTypeMetadataStructureField("Причина","Reason", DocTypeMetadataStructureFieldType.Double, false, false),
+                    }
+                }));
+                DocumentTypes.Add(new DocumentType("Детализация", 2, new DocTypeMetadataStructure()));
+                DocumentTypes.Add(new DocumentType("Счет на оплату", 2, new DocTypeMetadataStructure
+                {
+                    Fields = new List<DocTypeMetadataStructureField>
+                    {
+                        new DocTypeMetadataStructureField("Валюта","CurrencyCode", DocTypeMetadataStructureFieldType.CurrencyCode, true, true),
+                        new DocTypeMetadataStructureField("Сумма без НДС","SumWithoutVAT", DocTypeMetadataStructureFieldType.Double, true, true),
+                        new DocTypeMetadataStructureField("НДС","VAT", DocTypeMetadataStructureFieldType.Double, true, true),
+                        new DocTypeMetadataStructureField("Причина","Reason", DocTypeMetadataStructureFieldType.Double, false, false),
+                    }
+                }));
+                DocumentTypes.Add(new DocumentType("Письмо", 2, new DocTypeMetadataStructure()));
+                DocumentTypes.Add(new DocumentType("Неформализованный документ", 1, new DocTypeMetadataStructure()));
+                DocumentTypes.Add(new DocumentType("Протокол согласования цены", 1, new DocTypeMetadataStructure()));
+                DocumentTypes.Add(new DocumentType("Ценовой лист", 2, new DocTypeMetadataStructure
+                {
+                    Fields = new List<DocTypeMetadataStructureField>
+                    {
+                        new DocTypeMetadataStructureField("К договору - номер","ToAgreementNumber", DocTypeMetadataStructureFieldType.String, true, true),
+                        new DocTypeMetadataStructureField("К договору - дата","ToAgreementDate", DocTypeMetadataStructureFieldType.Date, true, true),
+                        new DocTypeMetadataStructureField("Действует с","PricesStartsFrom", DocTypeMetadataStructureFieldType.Date, true, true),
+                        new DocTypeMetadataStructureField("Действует до","PricesActualBefore", DocTypeMetadataStructureFieldType.Date, true, true),
+                    }
+                }));
+                DocumentTypes.Add(new DocumentType("Доп.соглашение к договору", 2, new DocTypeMetadataStructure
+                {
+                    Fields = new List<DocTypeMetadataStructureField>
+                    {
+                        new DocTypeMetadataStructureField("Тип договора","AgreementType", DocTypeMetadataStructureFieldType.Double, false, false),
+                        new DocTypeMetadataStructureField("Валюта","CurrencyCode", DocTypeMetadataStructureFieldType.CurrencyCode, true, true),
+                        new DocTypeMetadataStructureField("Сумма без НДС","SumWithoutVAT", DocTypeMetadataStructureFieldType.Double, true, true),
+                        new DocTypeMetadataStructureField("НДС","VAT", DocTypeMetadataStructureFieldType.Double, true, true),
+                        new DocTypeMetadataStructureField("К договору - номер","ToAgreementNumber", DocTypeMetadataStructureFieldType.String, true, true),
+                        new DocTypeMetadataStructureField("К договору - дата","ToAgreementDate", DocTypeMetadataStructureFieldType.Date, true, true),
+                    }
+                }));
+                DocumentTypes.Add(new DocumentType("Транспортная накладная", 3, new DocTypeMetadataStructure()));
 
-                DocumentTypes.Add(new DocumentType("Накладная", 1, DocumentTypeEnum.InternalConsignment, true));
+
+
+
+
+
+
+
+
+                //Типы для документа с файлом - внутренние
+                DocumentTypes.Add(new DocumentType("Накладная", 1, new DocTypeMetadataStructure
+                {
+                    Fields = new List<DocTypeMetadataStructureField>
+                    {
+                        new DocTypeMetadataStructureField("Валюта","CurrencyCode", DocTypeMetadataStructureFieldType.CurrencyCode, true, true),
+                        new DocTypeMetadataStructureField("Сумма без НДС","SumWithoutVAT", DocTypeMetadataStructureFieldType.Double, true, true),
+                        new DocTypeMetadataStructureField("НДС","VAT", DocTypeMetadataStructureFieldType.Double, true, true),
+                        new DocTypeMetadataStructureField("Причина","Reason", DocTypeMetadataStructureFieldType.Double, false, false),
+                    }
+                }, true));
+
+
+
+
+
+
+
+
+                //Служебные типы
+                DocumentTypes.Add(new DocumentType("Пакет документов", 2, DocumentTypePurpose.ForDocumentParcel));
+                DocumentTypes.Add(new DocumentType("Ценовой лист (цифровой)", 2, DocumentTypePurpose.ForPriceListDocument));
+                DocumentTypes.Add(new DocumentType("Счет на оплату/Акт выполненных работ (цифровой)", 2, DocumentTypePurpose.ForWithPositionItemsDocument));
             }
         }
 
@@ -242,10 +359,26 @@ namespace Alfateam.DB
             //Abstract Document
             modelBuilder.Entity<Document>().HasDiscriminator(b => b.Discriminator);
             modelBuilder.Entity<Document>().HasMany(o => o.DepartmentsReferences).WithMany(o => o.Documents);
+            modelBuilder.Entity<DocumentsParcel>();
             modelBuilder.Entity<DocumentWithFile>();
             modelBuilder.Entity<PriceListDocument>();
             modelBuilder.Entity<WithPositionItemsDocument>();
-       
+
+
+            //Abstract DocumentApproveStrategy
+            modelBuilder.Entity<DocumentApproveStrategy>().HasDiscriminator(b => b.Discriminator);
+            modelBuilder.Entity<DocumentApprovalDepartmentStrategy>();
+            modelBuilder.Entity<DocumentApprovalRouteStrategy>();
+
+            //Abstract DocumentMetadataField
+            modelBuilder.Entity<DocumentMetadataField>().HasDiscriminator(b => b.Discriminator);
+            modelBuilder.Entity<DocumentMetadataCurrencyCodeField>();
+            modelBuilder.Entity<DocumentMetadataDateField>();
+            modelBuilder.Entity<DocumentMetadataDoubleField>();
+            modelBuilder.Entity<DocumentMetadataIntegerField>();
+            modelBuilder.Entity<DocumentMetadataStringField>();
+            modelBuilder.Entity<DocumentMetadataTaxSumInfoField>();
+
 
             //Abstract EDMSubject
             modelBuilder.Entity<EDMSubject>().HasDiscriminator(b => b.Discriminator);
@@ -267,35 +400,15 @@ namespace Alfateam.DB
             //Abstract Signature
             modelBuilder.Entity<Signature>().HasDiscriminator(b => b.Discriminator);
             modelBuilder.Entity<AlfateamEDMSignature>();
-            modelBuilder.Entity<MarkedAsElectronicallySignature>();
             modelBuilder.Entity<ScanSignature>();
-            modelBuilder.Entity<ScanSignatureWithoutDocFlow>();
 
-            //Abstract Signature
+            //Abstract DocumentSigningResult
             modelBuilder.Entity<DocumentSigningResult>().HasDiscriminator(b => b.Discriminator);
             modelBuilder.Entity<DocumentRejectedResult>();
             modelBuilder.Entity<DocumentSuccessfullySignedResult>();
 
-            //Abstract DocTypeMetadata
-            modelBuilder.Entity<DocTypeMetadata>().HasDiscriminator(b => b.Discriminator);
-            modelBuilder.Entity<ActDisagreementDocTypeMetadata>();
-            modelBuilder.Entity<ActDocTypeMetadata>();
-            modelBuilder.Entity<ActReconciliationDocTypeMetadata>();
-            modelBuilder.Entity<AgreementDocTypeMetadata>();
-            modelBuilder.Entity<AttorneyDocTypeMetadata>();
-            modelBuilder.Entity<CertificateRegistryDocTypeMetadata>();
-            modelBuilder.Entity<ClaimDocTypeMetadata>();
-            modelBuilder.Entity<ConsignmentDocTypeMetadata>();
-            modelBuilder.Entity<DetalizationDocTypeMetadata>();
-            modelBuilder.Entity<InvoiceDocTypeMetadata>();
-            modelBuilder.Entity<LetterDocTypeMetadata>();
-            modelBuilder.Entity<NonFormalizedDocTypeMetadata>();
-            modelBuilder.Entity<PriceListAgreementDocTypeMetadata>();
-            modelBuilder.Entity<PriceListDocTypeMetadata>();
-            modelBuilder.Entity<SupplementaryAgreementDocTypeMetadata>();
-            modelBuilder.Entity<WaybillDocTypeMetadata>();
 
-            //Abstract Signature
+            //Abstract PowerOfAttorney
             modelBuilder.Entity<PowerOfAttorney>().HasDiscriminator(b => b.Discriminator);
             modelBuilder.Entity<DigitalPowerOfAttorney>();
             modelBuilder.Entity<NotarizedPowerOfAttorney>();

@@ -1,7 +1,4 @@
 ﻿using Alfateam.Messenger.Lib.Abstractions.Modules;
-using Alfateam.Messenger.Models.Abstractions.Attachments;
-using Alfateam.Messenger.Models.Attachments.Alfateam;
-using MessageDbModel = Alfateam.Messenger.Models.Abstractions.Messages.Message;
 using DbFileAttachmentType = Alfateam.Messenger.Models.Enums.FileAttachmentType;
 using System;
 using System.Collections.Generic;
@@ -9,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using VkNet.Model;
+using Alfateam.Messenger.Models.Abstractions.Messages;
+using Alfateam.Messenger.Models.Abstractions;
 
 namespace Alfateam.Messenger.Lib.Modules.VK
 {
@@ -27,18 +26,18 @@ namespace Alfateam.Messenger.Lib.Modules.VK
             throw new NotImplementedException();
         }
 
-        public override async Task<MessageDbModel> GetMessage(string chatId, string messageId)
+        public override async Task<MessageBase> GetMessage(string chatId, string messageId)
         {
             throw new NotImplementedException();
         }
 
-        public override async Task<IEnumerable<MessageDbModel>> GetMessages(string chatId, int offset, int count)
+        public override async Task<IEnumerable<MessageBase>> GetMessages(string chatId, int offset, int count)
         {
 
             throw new NotImplementedException();
         }
 
-        public override async Task<MessageDbModel> SendStickerMessage(string chatId, string stickerId)
+        public override async Task<MessageBase> SendStickerMessage(string chatId, string stickerId)
         {
             var result = Messenger.VkApi.Messages.SendSticker(new MessagesSendStickerParams
             {
@@ -48,44 +47,44 @@ namespace Alfateam.Messenger.Lib.Modules.VK
 
             throw new NotImplementedException();
         }
-        public override async Task<MessageDbModel> SendTextMessage(string chatId, string message, List<MessageAttachment> attachments = null)
+        public override async Task<MessageBase> SendTextMessage(string chatId, string message, List<MessageAttachmentBase> attachments = null)
         {
             var mediaAttachments = new List<MediaAttachment>();
             foreach(var attachment in attachments)
             {
-                if(attachment is FileMessageAttachment fileMessageAttachment)
-                {
-                    switch (fileMessageAttachment.Type)
-                    {
-                        case DbFileAttachmentType.Image:
-                            mediaAttachments.Add(new Photo()
-                            {
-                                CanComment = false,
+                //if(attachment is FileMessageAttachment fileMessageAttachment)
+                //{
+                //    switch (fileMessageAttachment.Type)
+                //    {
+                //        case DbFileAttachmentType.Image:
+                //            mediaAttachments.Add(new Photo()
+                //            {
+                //                CanComment = false,
 
-                            });
-                            break;
-                        case DbFileAttachmentType.Video:
-                            mediaAttachments.Add(new Video()
-                            {
-                                CanComment = false,
+                //            });
+                //            break;
+                //        case DbFileAttachmentType.Video:
+                //            mediaAttachments.Add(new Video()
+                //            {
+                //                CanComment = false,
 
-                            });
-                            break;
-                        case DbFileAttachmentType.Audio:
-                            mediaAttachments.Add(new Audio()
-                            {
+                //            });
+                //            break;
+                //        case DbFileAttachmentType.Audio:
+                //            mediaAttachments.Add(new Audio()
+                //            {
                                
 
-                            });
-                            break;
-                        case DbFileAttachmentType.Document:
-                            mediaAttachments.Add(new Document()
-                            {
+                //            });
+                //            break;
+                //        case DbFileAttachmentType.Document:
+                //            mediaAttachments.Add(new Document()
+                //            {
                                 
-                            });
-                            break;
-                    }
-                }    
+                //            });
+                //            break;
+                //    }
+                //}    
             }
 
             var result = Messenger.VkApi.Messages.Send(new VkNet.Model.MessagesSendParams
@@ -100,7 +99,7 @@ namespace Alfateam.Messenger.Lib.Modules.VK
             throw new NotImplementedException();
         }
 
-        public override async Task<MessageDbModel> SendVoiceMessage(string chatId, byte[] message)
+        public override async Task<MessageBase> SendVoiceMessage(string chatId, byte[] message)
         {
             throw new NotImplementedException();
         }
@@ -119,7 +118,7 @@ namespace Alfateam.Messenger.Lib.Modules.VK
 
 
 
-        public override async Task<MessageDbModel> EditMessage(string chatId, string messageId, string text)
+        public override async Task<MessageBase> EditMessage(string chatId, string messageId, string text)
         {
             var editResult = Messenger.VkApi.Messages.Edit(new MessageEditParams
             {

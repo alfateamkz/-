@@ -22,14 +22,12 @@ namespace Alfateam.EDM.API.Controllers.Director
         {
         }
 
+        #region Подразделения субъекта
 
         [HttpGet, Route("GetDepartmentsTree")]
         public async Task<DepartmentDTO> GetDepartmentsTree()
         {
-            var subjects = DB.EDMSubjects.Include(o => o.Department)
-                                         .Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
-            var subject = DBService.TryGetOne(subjects, (int)this.EDMSubjectId);
-
+            var subject = DBService.TryGetOne(GetAvailableSubjects(), (int)this.EDMSubjectId);
             DepartmentsHelper.HideSoftDeletedDepartments(subject.Department);
             return (DepartmentDTO)new DepartmentDTO().CreateDTO(subject.Department);
         }
@@ -38,12 +36,8 @@ namespace Alfateam.EDM.API.Controllers.Director
         [HttpPost, Route("CreateDepartment")]
         public async Task<DepartmentDTO> CreateDepartment(int parentDepartmentId, DepartmentDTO model)
         {
-            var subjects = DB.EDMSubjects.Include(o => o.Department)
-                                    .Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
-            var subject = DBService.TryGetOne(subjects, (int)this.EDMSubjectId);
-
-            var allDepartments = DB.Departments.Where(o => o.EDMSubjectId == subject.Id && !o.IsDeleted);
-            DBService.TryGetOne(allDepartments, parentDepartmentId);
+            var subject = DBService.TryGetOne(GetAvailableSubjects(), (int)this.EDMSubjectId);
+            ThrowIfDepartmentNotExistOrAvailable(subject, parentDepartmentId);
 
             return (DepartmentDTO)DBService.TryCreateEntity(DB.Departments, model, (entity) =>
             {
@@ -54,13 +48,8 @@ namespace Alfateam.EDM.API.Controllers.Director
         [HttpPut, Route("UpdateDepartment")]
         public async Task<DepartmentDTO> UpdateDepartment(DepartmentDTO model)
         {
-            var subjects = DB.EDMSubjects.Include(o => o.Department)
-                                         .Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
-            var subject = DBService.TryGetOne(subjects, (int)this.EDMSubjectId);
-
-            var allDepartments = DB.Departments.Where(o => o.EDMSubjectId == subject.Id && !o.IsDeleted);
-            var department = DBService.TryGetOne(allDepartments, model.Id);
-
+            var subject = DBService.TryGetOne(GetAvailableSubjects(), (int)this.EDMSubjectId);
+            var department = DBService.TryGetOne(GetSubjectDepartments(subject), model.Id);
             return (DepartmentDTO)DBService.TryUpdateEntity(DB.Departments, model, department);
         }
 
@@ -68,14 +57,8 @@ namespace Alfateam.EDM.API.Controllers.Director
         [HttpDelete, Route("DeleteDepartment")]
         public async Task DeleteDepartment(int id)
         {
-            var subjects = DB.EDMSubjects.Include(o => o.Department).ThenInclude(o => o.Documents)
-                                         .Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
-            var subject = DBService.TryGetOne(subjects, (int)this.EDMSubjectId);
-
-
-            var allDepartments = DB.Departments.Where(o => o.EDMSubjectId == subject.Id && !o.IsDeleted);
-            var department = DBService.TryGetOne(allDepartments, id);
-
+            var subject = DBService.TryGetOne(GetAvailableSubjects(), (int)this.EDMSubjectId);
+            var department = DBService.TryGetOne(GetSubjectDepartments(subject), id);
             if (department.IsRoot)
             {
                 throw new Exception403("Невозможно удалить головное подразделение");
@@ -97,9 +80,34 @@ namespace Alfateam.EDM.API.Controllers.Director
             DBService.UpdateEntity(DB.EDMSubjects, subject);
         }
 
+        #endregion
 
 
 
+
+
+
+
+
+        #region Private methods
+        private IEnumerable<EDMSubject> GetAvailableSubjects()
+        {
+            return DB.EDMSubjects.Include(o => o.Department)
+                                 .Where(o => !o.IsDeleted && o.BusinessId == this.BusinessId);
+        }
+
+        private List<Department> GetSubjectDepartments(EDMSubject subject)
+        {
+            return DepartmentsHelper.GetThisAndAllSubDepartments(subject.Department,true);
+        }
+
+        private void ThrowIfDepartmentNotExistOrAvailable(EDMSubject subject, int departmentId)
+        {
+            DBService.TryGetOne(GetSubjectDepartments(subject), departmentId);
+        }
+
+
+        #endregion
 
 
     }

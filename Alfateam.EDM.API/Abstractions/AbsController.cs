@@ -1,5 +1,7 @@
 ﻿using Alfateam.Core.Services;
 using Alfateam.DB;
+using Alfateam.DB.Services;
+using Alfateam.EDM.API.Filters;
 using Alfateam.EDM.API.Models;
 using Alfateam.EDM.API.Models.DTO.General;
 using Alfateam.EDM.API.Services;
@@ -15,10 +17,12 @@ namespace Alfateam.EDM.API.Abstractions
 {
     [ApiController]
     [Route("[controller]")]
+    [AlfateamAPIKeyFilter]
     public abstract class AbsController : ControllerBase
     {
         public readonly EDMDbContext DB;
         public readonly IDDbContext IDDB;
+
         public readonly AbsDBService DBService;
         public readonly AbsFilesService FilesService;
         public readonly IWebHostEnvironment AppEnvironment;
@@ -26,12 +30,15 @@ namespace Alfateam.EDM.API.Abstractions
         public readonly ISMSGateway SMSGateway;
 
 
+        public readonly CertCenterVerificationService CertCenterVerificationService;
         public readonly DocumentsService DocService;
         public readonly DocumentApprovalService DocApprovalService;
+        public readonly UploadedFilesService UploadedFilesService;
         public AbsController(ControllerParams @params)
         {
             this.DB = @params.DB;
             this.IDDB = @params.IDDB;
+
             this.DBService = @params.DBService;
             this.FilesService = @params.FilesService;
             this.AppEnvironment = @params.AppEnvironment;
@@ -39,11 +46,14 @@ namespace Alfateam.EDM.API.Abstractions
             this.SMSGateway = @params.SMSGateway;
 
 
+            this.CertCenterVerificationService = @params.CertCenterVerificationService;
             this.DocService = @params.DocService;
             this.DocApprovalService = @params.DocApprovalService;
+            this.UploadedFilesService = @params.UploadedFilesService;
         }
 
 
+        public string API_KEY => Request.Headers["API_KEY"];
         public string Domain => Request.Headers["Domain"];
         public int? EDMSubjectId => ParseIntValueFromHeader("EDMSubjectId");
         public string AlfateamSessionID => Request.Headers["AlfateamSessionID"];

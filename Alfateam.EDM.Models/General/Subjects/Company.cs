@@ -37,5 +37,11 @@ namespace Alfateam.EDM.Models.General.Subjects
 
 
         public List<ApprovalRoute> ApprovalRoutes { get; set; } = new List<ApprovalRoute>();
+
+
+        public override string ToString()
+        {
+            return Title;
+        }
     }
 }

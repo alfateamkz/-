@@ -6,12 +6,7 @@ namespace Alfateam.EDM.API.Models.DTO.Documents.DocumentSigning.Signatures
 {
     public class AlfateamEDMSignatureDTO : SignatureDTO
     {
-        [ForClientOnly]
-        public UserDTO SignedBy { get; set; }
-        [ForClientOnly]
-        public int SignedById { get; set; }
-
-
-        public string Hash { get; set; }
+        public string PublicKey { get; set; }
+        public byte[] Signature { get; set; }
     }
 }

@@ -11,5 +11,11 @@ namespace Alfateam.EDM.Models.Counterparties
     {
         public EDMSubject Subject { get; set; }
         public int SubjectId { get; set; }
+
+
+        public override string ToString()
+        {
+            return Subject.ToString();
+        }
     }
 }

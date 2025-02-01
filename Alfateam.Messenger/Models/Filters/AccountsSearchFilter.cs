@@ -39,9 +39,6 @@ namespace Alfateam.Messenger.API.Models.Filters
                 case AccountSocialNetworkType.Email:
                     filtered = filtered.Where(o => o is EmailAccount);
                     break;
-                case AccountSocialNetworkType.Alfateam:
-                    filtered = filtered.Where(o => o is AlfateamMessengerAccount);
-                    break;
             }
 
 

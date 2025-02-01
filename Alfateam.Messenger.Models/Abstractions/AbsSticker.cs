@@ -18,5 +18,7 @@ namespace Alfateam.Messenger.Models.Abstractions
     [JsonKnownType(typeof(ExternalSticker), "ExternalSticker")]
     public class AbsSticker : AbsModel
     {
+        [JsonProperty("discriminator")]
+        public string Discriminator { get; set; }
     }
 }

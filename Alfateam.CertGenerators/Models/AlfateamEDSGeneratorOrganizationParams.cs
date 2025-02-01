@@ -9,6 +9,8 @@ namespace Alfateam.CertGenerators.Models
 {
     public class AlfateamEDSGeneratorOrganizationParams : AlfateamEDSGeneratorPhysicalParams
     {
+        //TODO: валидация полей в AlfateamEDSGenerator********Params
+
         public AlfateamEDSGeneratorOrganizationParams()
         {
 

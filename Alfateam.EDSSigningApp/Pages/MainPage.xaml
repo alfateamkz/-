@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<abstractions:AbsContentPage
+    x:Name="this"
+    xmlns:abstractions="clr-namespace:Alfateam.EDSSigningApp.Abstractions"
+    xmlns:controls="clr-namespace:Alfateam.EDSSigningApp.Controls"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="Alfateam.EDSSigningApp.Pages.MainPage"
+    Background="{StaticResource Light}"
+    BackgroundColor="{StaticResource Light}"
+    Title="MainPage">
+    <Grid
+        RowDefinitions="{OnIdiom Phone='*,70', Default='*'}"
+        ColumnDefinitions="{OnIdiom Default='94, *', Phone='*'}">
+
+        <Frame 
+            x:Name="contentLayout"
+            Padding="{OnIdiom Phone='15,10,15,0', Default='20,0,15,0'}"
+            Background="Transparent"
+            BackgroundColor="Transparent"
+            Grid.Row="{OnIdiom Phone=0, Default=0}"
+            Grid.Column="{OnIdiom Phone=0, Default=1}">
+            
+        </Frame>
+
+        <controls:NavigationButtons 
+            Margin="{OnIdiom Phone=0, Default='0,30,0,0'}"
+            Grid.Row="{OnIdiom Phone=1, Default=0}"
+            Grid.Column="{OnIdiom Phone=0, Default=0}"/>
+
+    </Grid>
+</abstractions:AbsContentPage>

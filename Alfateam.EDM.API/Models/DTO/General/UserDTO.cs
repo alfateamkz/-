@@ -20,6 +20,10 @@ namespace Alfateam.EDM.API.Models.DTO.General
         public string? Patronymic { get; set; }
 
 
+        [ForClientOnly]
+        public string FIO => $"{Surname} {Name} {Patronymic}";
+
+
         [DTOFieldFor(DTOFieldForType.CreationOnly)]
         public string Email { get; set; }
         [DTOFieldFor(DTOFieldForType.CreationOnly)]

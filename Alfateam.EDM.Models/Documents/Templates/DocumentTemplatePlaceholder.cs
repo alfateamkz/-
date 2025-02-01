@@ -11,5 +11,6 @@ namespace Alfateam.EDM.Models.Documents.Templates
     {
         public string Title { get; set; }
         public string Placeholder { get; set; }
+        public bool IsRequired { get; set; }
     }
 }

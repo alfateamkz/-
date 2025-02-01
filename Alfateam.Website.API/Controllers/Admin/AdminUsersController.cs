@@ -185,9 +185,12 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         [HttpPut, Route("UpdateUser")]
         [UsersSectionAccess]
-        public async Task UpdateUser(UpdateUserModel model)
+        public async Task UpdateUser(UpdateUserAdminModel model)
         {
             var found = GetAvailableUsers().FirstOrDefault(o => o.Id == model.Id);
+
+            //TODO: проверка уникальности телефона и почты
+
             DbService.TryUpdateEntity(DB.Users, model, found);
         }
 

@@ -1,11 +1,14 @@
 ﻿using Alfateam.Core;
 using Alfateam.EDM.Models.Abstractions.ApprovalRoutes;
 using Alfateam.EDM.Models.ApprovalRoutes.AfterDocSigning;
-using Alfateam.EDM.Models.Attributes;
 using Alfateam.EDM.Models.Documents;
 using Alfateam.EDM.Models.Documents.DocumentSigning;
 using Alfateam.EDM.Models.Documents.DocumentSigning.Sides;
+using Alfateam.EDM.Models.Documents.Formats;
+using Alfateam.EDM.Models.Documents.Meta;
+using Alfateam.EDM.Models.Documents.Meta.Fields;
 using Alfateam.EDM.Models.Documents.Types;
+using Alfateam.EDM.Models.Enums;
 using Alfateam.EDM.Models.Enums.DocumentStatuses;
 using Alfateam.EDM.Models.General;
 using JsonKnownTypes;
@@ -27,6 +30,7 @@ namespace Alfateam.EDM.Models.Abstractions
     /// </summary>
     [JsonConverter(typeof(JsonKnownTypesConverter<Document>))]
     [JsonDiscriminator(Name = "discriminator")]
+    [JsonKnownType(typeof(DocumentsParcel), "DocumentsParcel")]
     [JsonKnownType(typeof(DocumentWithFile), "NonFormalizedDocument")]
     [JsonKnownType(typeof(PriceListDocument), "PriceListDocument")]
     [JsonKnownType(typeof(WithPositionItemsDocument), "WithPositionItemsDocument")]
@@ -35,19 +39,20 @@ namespace Alfateam.EDM.Models.Abstractions
         [JsonProperty("discriminator")]
         public string Discriminator { get; set; }
 
+
+        public DocumentType Type { get; set; }
+        public int TypeId { get; set; }
+
+
+        public DocumentMetadata Metadata { get; set; }
+
+
         /// <summary>
         /// Если DraftInfo != null, то документ - черновик
         /// </summary>
         public DocumentDraftInfo? DraftInfo { get; set; }
         public int? DraftInfoId { get; set; }
 
-
-
-        public DocumentType Type { get; set; }
-        public int TypeId { get; set; }
-
-
-        public DocTypeMetadata DocTypeData { get; set; }
 
 
         public User CreatedBy { get; set; }
@@ -68,7 +73,7 @@ namespace Alfateam.EDM.Models.Abstractions
 
 
         public bool IsSigningRequired { get; set; }
-        public List<DocumentSigningSide> SigningSides { get; set; } = new List<DocumentSigningSide>();
+        public List<AlfateamEDMDocumentSigningSide> SigningSides { get; set; } = new List<AlfateamEDMDocumentSigningSide>();
 
 
 
@@ -117,11 +122,7 @@ namespace Alfateam.EDM.Models.Abstractions
 
 
 
-        public bool IsValidDocumentTypeMetadata()
-        {
-            var relatedToAttr = Type.GetType().GetField(Type.ToString()).GetCustomAttributes(typeof(DocTypeRelatedTo), false)[0] as DocTypeRelatedTo;
-            return DocTypeData.GetType() == relatedToAttr.TypeOfDocTypeMetadata;
-        }
+   
 
         public bool IsOurDocument(int edmSubjectId)
         {        
@@ -148,5 +149,81 @@ namespace Alfateam.EDM.Models.Abstractions
                              || Signing?.Status == DocumentSigningResultType.DocumentFlowCompleted;
         [NotMapped]
         public bool IsCancelled => Cancellation.Status == DocumentCancellationResult.Cancelled;
+
+
+
+
+
+
+        public void Init(int createdById)
+        {
+            this.CreatedById = createdById;
+            this.Approval = new DocumentApprovalMetadata();
+            this.Signing = new DocumentSigningMetadata();
+            this.Cancellation = new DocumentCancellationMetadata();
+            this.CancellationApproval = new DocumentCancellationApprovalMetadata();
+        }
+
+
+
+
+
+        public bool IsValidDocumentTypeMetadata()
+        {
+            foreach (var structureField in Type.MetadataStructure.Fields)
+            {
+                var docMetadataField = Metadata.Fields.FirstOrDefault(o => o.FieldName == structureField.JSONName);
+                if (docMetadataField == null && structureField.IsRequired)
+                {
+                    return false;
+                }
+                else if (docMetadataField != null)
+                {
+                    if (!AreSameType(docMetadataField, structureField.FieldType))
+                    {
+                        return false;
+                    }
+
+                    if (structureField.IsRequired)
+                    {
+                        if (docMetadataField is DocumentMetadataStringField stringField && string.IsNullOrEmpty(stringField.Value))
+                        {
+                            return false;
+                        }
+                        else if (docMetadataField is DocumentMetadataCurrencyCodeField currencyCodeField && string.IsNullOrEmpty(currencyCodeField.Value))
+                        {
+                            return false;
+                        }
+                        else if (docMetadataField is DocumentMetadataTaxSumInfoField taxSumInfoField && taxSumInfoField.Value == null)
+                        {
+                            return false;
+                        }
+                    }
+
+
+
+                }
+            }
+            return true;
+        }
+        private bool AreSameType(DocumentMetadataField field, DocTypeMetadataStructureFieldType type)
+        {
+            switch (type)
+            {
+                case DocTypeMetadataStructureFieldType.String:
+                    return field is DocumentMetadataStringField;
+                case DocTypeMetadataStructureFieldType.CurrencyCode:
+                    return field is DocumentMetadataCurrencyCodeField;
+                case DocTypeMetadataStructureFieldType.Double:
+                    return field is DocumentMetadataDoubleField;
+                case DocTypeMetadataStructureFieldType.Date:
+                    return field is DocumentMetadataDateField;
+                case DocTypeMetadataStructureFieldType.Integer:
+                    return field is DocumentMetadataIntegerField;
+                case DocTypeMetadataStructureFieldType.TaxSumInfo:
+                    return field is DocumentMetadataTaxSumInfoField;
+            }
+            throw new NotImplementedException("AreSameType type not implemented");
+        }
     }
 }

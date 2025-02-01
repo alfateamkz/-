@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<abstractions:AbsContentView 
+    x:Name="this"
+    xmlns:ui="clr-namespace:Xe.AcrylicView;assembly=Xe.AcrylicView" 
+    xmlns:abstractions="clr-namespace:Alfateam.EDSSigningApp.Abstractions"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="Alfateam.EDSSigningApp.Controls.CertListItem">
+
+
+    <Frame 
+        Background="{StaticResource White}"
+        BackgroundColor="{StaticResource White}"
+        HasShadow="True"
+        CornerRadius="12"
+        Padding="0">
+        <Frame.GestureRecognizers>
+            <TapGestureRecognizer Tapped="onTapped"/>
+        </Frame.GestureRecognizers>
+        <Grid 
+            Padding="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <!--<Grid.Style>
+        <Style TargetType="Grid">
+            
+        </Style>
+    </Grid.Style>-->
+
+            <Grid Grid.Column="0">
+
+                <Image
+                    Source="cert_icon.png"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Start"
+                    Margin="7,12,0,0"
+                    WidthRequest="30"
+                    HeightRequest="30">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Style.Triggers>
+                                <DataTrigger TargetType="Image" Binding="{x:Binding Source={x:Reference this}, Path=EDS.Type}" Value="Alfateam">
+                                    <Setter Property="Source" Value="cert_alfateam_icon.png" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+
+            </Grid>
+
+            <Grid Grid.Column="1">
+
+                <VerticalStackLayout>
+
+                    <Label Style="{StaticResource SemiBold}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <FormattedString.Spans>
+                                    <Span Text="Владелец: " />
+                                    <Span Text="{x:Binding Source={x:Reference this}, Path=EDS.Owner}" />
+                                </FormattedString.Spans>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+
+                    <VerticalStackLayout IsVisible="{x:Binding Source={x:Reference this}, Path=EDS.HasOrganizationInfo}">
+
+                        <Label 
+                            FontSize="{StaticResource SmallFontSize}">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <FormattedString.Spans>
+                                        <Span 
+                                            FontFamily="{StaticResource GilroySemiBoldFont}"
+                                            Text="Организация: " />
+                                        <Span 
+                                            TextColor="{StaticResource Dark}"
+                                            Text="{x:Binding Source={x:Reference this}, Path=EDS.OwnerOrganization}" />
+                                    </FormattedString.Spans>
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+
+                        <Label FontSize="{StaticResource SmallFontSize}">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <FormattedString.Spans>
+                                        <Span
+                                            FontFamily="{StaticResource GilroySemiBoldFont}"
+                                            Text="Идентификационный номер: " />
+                                        <Span 
+                                           TextColor="{StaticResource Dark}"
+                                           Text="{x:Binding Source={x:Reference this}, Path=EDS.OwnerOrganizationNumber}" />
+                                    </FormattedString.Spans>
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+
+                    </VerticalStackLayout>
+
+                    <Label FontSize="{StaticResource SmallFontSize}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <FormattedString.Spans>
+                                    <Span 
+                                        FontFamily="{StaticResource GilroySemiBoldFont}"
+                                        Text="Срок действия: " />
+                                    <Span 
+                                        Style="{StaticResource ValidityDateSpanStyle}"
+                                        Text="{x:Binding Source={x:Reference this}, Path=EDS.ValidityPeriodString}" />
+                                </FormattedString.Spans>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+
+                    <Label FontSize="{StaticResource SmallFontSize}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <FormattedString.Spans>
+                                    <Span 
+                                        FontFamily="{StaticResource GilroySemiBoldFont}"
+                                        Text="Регион: " />
+                                    <Span 
+                                        TextColor="{StaticResource Dark}"
+                                        Text="{x:Binding Source={x:Reference this}, Path=EDS.OwnerCountry}" />
+                                </FormattedString.Spans>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+
+                </VerticalStackLayout>
+
+            </Grid>
+
+            <ui:AcrylicView 
+                TintColor="#FCFCFC"
+                BackgroundColor="Transparent"
+                TintOpacity="0.9"
+                Opacity="0.9"
+                Grid.Column="0"
+                Padding="0"
+                Grid.ColumnSpan="2"
+                VerticalOptions="FillAndExpand"
+                HorizontalOptions="FillAndExpand"
+                EffectStyle="Custom">
+
+
+
+                <Grid     
+                    
+                    VerticalOptions="FillAndExpand"
+                    HorizontalOptions="FillAndExpand">
+            
+                    <Label 
+                        TextColor="Transparent"
+                        FontSize="{StaticResource SmallFontSize}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <FormattedString.Spans>
+                                    <Span 
+                          FontFamily="{StaticResource GilroySemiBoldFont}"
+                          Text="РегиоРегион:234324324234324324324Регион:234324324234324324324Регион:234324324234324324324Регион:234324324234324324324Регион:234324324234324324324н:23432432423432432432432432 егион:23432432423432432432432432егион:23432432423432432432432432егион:23432432423432432432432432егион:23432432423432432432432432егион:23432432423432432432432432432423432432432432432егион:23432432423432432432432432" />
+                      
+                                </FormattedString.Spans>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    
+                    
+
+
+
+                </Grid>
+
+            </ui:AcrylicView>
+
+        </Grid>
+    </Frame>
+</abstractions:AbsContentView>

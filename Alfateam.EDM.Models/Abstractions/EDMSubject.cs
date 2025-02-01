@@ -1,6 +1,7 @@
 ﻿using Alfateam.Core;
 using Alfateam.EDM.Models.ApprovalRoutes;
 using Alfateam.EDM.Models.Documents;
+using Alfateam.EDM.Models.Documents.Templates;
 using Alfateam.EDM.Models.Documents.Types;
 using Alfateam.EDM.Models.Enums;
 using Alfateam.EDM.Models.General;
@@ -58,8 +59,10 @@ namespace Alfateam.EDM.Models.Abstractions
 
 
 
-        public List<DocumentType> CustomDocumentTypes { get; set; } = new List<DocumentType>();
 
+        public List<DocumentTemplate> DocumentTemplates { get; set; } = new List<DocumentTemplate>();
+        public List<DocumentType> CustomDocumentTypes { get; set; } = new List<DocumentType>();
+        public List<DocumentStorageFile> DocumentStorageFiles { get; set; } = new List<DocumentStorageFile>();
 
 
         /// <summary>

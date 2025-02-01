@@ -10,9 +10,7 @@ namespace Alfateam.EDM.Models.Documents.DocumentSigning.Signatures
 {
     public class ScanSignature : Signature
     {
-        public User SignedBy { get; set; }
-        public int SignedById { get; set; }
-
-        public string ScanPath { get; set; }
+        public UploadedFile File { get; set; }
+        public string FileId { get; set; }
     }
 }

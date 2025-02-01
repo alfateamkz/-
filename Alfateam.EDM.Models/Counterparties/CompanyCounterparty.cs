@@ -20,5 +20,11 @@ namespace Alfateam.EDM.Models.Counterparties
         /// ИНН (в РФ), БИН\ИИН (в КЗ), в других странах может быть другое
         /// </summary>
         public string BusinessNumber { get; set; }
+
+
+        public override string ToString()
+        {
+            return Title;
+        }
     }
 }

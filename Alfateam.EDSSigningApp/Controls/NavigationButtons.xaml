@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<abstractions:AbsContentView 
+    x:Name="this"
+    xmlns:abstractions="clr-namespace:Alfateam.EDSSigningApp.Abstractions" 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="Alfateam.EDSSigningApp.Controls.NavigationButtons">
+    <Grid 
+        RowSpacing="{OnIdiom Phone=Default, Default='20'}"
+        RowDefinitions="{OnIdiom Phone='*', Default='60,60,60,*'}"
+        ColumnDefinitions="{OnIdiom Phone='*,*,*',Default='*'}">
+
+        
+        <VerticalStackLayout 
+            Grid.Row="{OnIdiom Phone=0, Default=0}"
+            Grid.Column="{OnIdiom Phone=0, Default=0}"
+            Spacing="12">
+            <VerticalStackLayout.GestureRecognizers>
+                <TapGestureRecognizer Tapped="onMainBtnTapped" />
+            </VerticalStackLayout.GestureRecognizers>
+
+            <Image 
+                WidthRequest="20"
+                HeightRequest="26"
+                Source="nav_main_icon.png"
+                VerticalOptions="Start"
+                HorizontalOptions="Center"/>
+
+            <Label 
+                TextColor="{StaticResource Dark}"
+                FontSize="{StaticResource SmallFontSize}"
+                Text="Главная"
+                VerticalOptions="Start" 
+                HorizontalOptions="Center" />
+
+        </VerticalStackLayout>
+
+        <VerticalStackLayout 
+              Grid.Row="{OnIdiom Phone=0, Default=1}"
+              Grid.Column="{OnIdiom Phone=1, Default=0}"
+              Spacing="12">
+            <VerticalStackLayout.GestureRecognizers>
+                <TapGestureRecognizer Tapped="onAboutUsBtnTapped" />
+            </VerticalStackLayout.GestureRecognizers>
+
+            <Image 
+              WidthRequest="25"
+              HeightRequest="25"
+              Source="nav_about_us_icon.png"
+              VerticalOptions="Start"
+              HorizontalOptions="Center"/>
+
+            <Label 
+              TextColor="{StaticResource Dark}"
+              FontSize="{StaticResource SmallFontSize}"
+              Text="О нас"
+              VerticalOptions="Start" 
+              HorizontalOptions="Center" />
+
+        </VerticalStackLayout>
+
+        <VerticalStackLayout 
+           Grid.Row="{OnIdiom Phone=0, Default=2}"
+           Grid.Column="{OnIdiom Phone=2, Default=0}"
+           Spacing="12">
+            <VerticalStackLayout.GestureRecognizers>
+                <TapGestureRecognizer Tapped="onSettingsBtnTapped" />
+            </VerticalStackLayout.GestureRecognizers>
+
+            <Image 
+               WidthRequest="30"
+               HeightRequest="30"
+               Source="nav_settings_icon.png"
+               VerticalOptions="Start"
+               HorizontalOptions="Center"/>
+
+            <Label 
+               TextColor="{StaticResource Dark}"
+               FontSize="{StaticResource SmallFontSize}"
+               Text="Настройки"
+               VerticalOptions="Start" 
+               HorizontalOptions="Center" />
+
+        </VerticalStackLayout>
+
+    </Grid>
+</abstractions:AbsContentView>

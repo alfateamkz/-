@@ -2,6 +2,7 @@
 using Alfateam.Core.Exceptions;
 using Alfateam.Core.Services;
 using Alfateam.DB;
+using Alfateam.DB.Services;
 using Alfateam.EDM.API.Helpers;
 using Alfateam.EDM.API.Models.DTO.Abstractions;
 using Alfateam.EDM.API.Models.DTO.Documents.DocumentSigning.Results;
@@ -10,6 +11,8 @@ using Alfateam.EDM.Models.Abstractions;
 using Alfateam.EDM.Models.Counterparties;
 using Alfateam.EDM.Models.Documents.DocumentSigning.Results;
 using Alfateam.EDM.Models.Documents.DocumentSigning.Signatures;
+using Alfateam.EDM.Models.Documents.Formats;
+using Alfateam.EDM.Models.Documents.Types;
 using Alfateam.EDM.Models.Enums;
 using Alfateam.EDM.Models.Enums.DocumentStatuses;
 using Alfateam.EDM.Models.General;
@@ -22,15 +25,20 @@ namespace Alfateam.EDM.API.Services
         private EDMDbContext DB;
         private AbsDBService DBService;
         private AbsFilesService FilesService;
-        public DocumentsService(EDMDbContext db, AbsDBService dbService, AbsFilesService filesService)
+        private CertCenterVerificationService CertCenterVerificationService;
+        public DocumentsService(EDMDbContext db, 
+                               AbsDBService dbService, 
+                               AbsFilesService filesService,
+                               CertCenterVerificationService certCenterVerificationService)
         {
             DB = db;
             DBService = dbService;
             FilesService = filesService;
+            CertCenterVerificationService = certCenterVerificationService;
         }
 
 
-        public IEnumerable<Document> GetAvailableDocuments(EDMSubject ourEDMSubject, User authorizedUser, bool drafts = false)
+        public IEnumerable<Document> GetAvailableDocuments(EDMSubject ourEDMSubject, User authorizedUser, bool? drafts = false)
         {
             List<Department> departments = new List<Department>();
 
@@ -72,14 +80,14 @@ namespace Alfateam.EDM.API.Services
 
             var documents = new List<Document>();
 
-            if (drafts)
+            if (drafts == true)
             {
                 documents = dbDocuments.Where(o => o.DraftInfo != null && o.DraftInfo.Department.EDMSubjectId == ourEDMSubject.Id)
                                        .ToList()
                                        .Where(o => departments.Any(a => a.Id == o.DraftInfo.DepartmentId))
                                        .ToList();
             }
-            else
+            else if (drafts == false)
             {
                 documents = dbDocuments.AsEnumerable()
                                        .Where(o => o.SigningSides.Any(o => o.IsThisSubject(ourEDMSubject)))
@@ -140,223 +148,27 @@ namespace Alfateam.EDM.API.Services
 
 
 
-        public void ThrowIfDocSigTypeIncorrect(Document document, SignatureDTO signature)
+
+
+        public void ThrowIfDocumentTypeNotValid(Document document)
         {
-            if (document.Cancellation.SignatureType == SignatureType.AlfateamEDM && signature is not AlfateamEDMSignatureDTO)
+            var type = DBService.TryGetOne(DB.DocumentTypes, document.TypeId);
+            if (type.Purpose == DocumentTypePurpose.ForDocumentWithFile && document is not DocumentWithFile)
             {
-                throw new Exception400("Неверный тип подписи");
+                throw new Exception400("Тип документа не соответствует документу. Должен быть документ с файлом");
             }
-            else if (document.Cancellation.SignatureType == SignatureType.SignedByOtherEDM && signature is not MarkedAsElectronicallySignatureDTO)
+            else if (type.Purpose == DocumentTypePurpose.ForPriceListDocument && document is not PriceListDocument)
             {
-                throw new Exception400("Неверный тип подписи");
+                throw new Exception400("Тип документа не соответствует документу. Должен быть ценовой лист");
             }
-            else if (document.Cancellation.SignatureType == SignatureType.TraditionalSignature && signature is not ScanSignatureDTO)
+            else if (type.Purpose == DocumentTypePurpose.ForWithPositionItemsDocument && document is not WithPositionItemsDocument)
             {
-                throw new Exception400("Неверный тип подписи");
+                throw new Exception400("Тип документа не соответствует документу. Должен быть документ с позициями");
             }
-            else if (document.Cancellation.SignatureType == SignatureType.TraditionalSignatureWithoutDF && signature is not ScanSignatureWithoutDocFlowDTO)
+            else if (type.Purpose == DocumentTypePurpose.ForDocumentParcel && document is not DocumentsParcel)
             {
-                throw new Exception400("Неверный тип подписи");
+                throw new Exception400("Тип документа не соответствует документу. Должен быть пакет документов");
             }
         }
-        public void ThrowIfDocSigningSideAccessError(Document document, DocumentSigningSide side)
-        {
-            if (side == null)
-            {
-                throw new Exception404("Сущность с данным id не найдена");
-            }
-
-            var sides = DB.DocumentSigningSides.Where(o => !o.IsDeleted && o.DocumentId == document.Id);
-            if (!sides.Any(o => o.Id == side.Id))
-            {
-                throw new Exception403("Текущая сторона подписания не принадлежит данному документу");
-            }
-        }
-      
-        
-        
-
-
-        public void SetDocSigningResultWithDocFlow(Document document, 
-                                                   EDMSubject ourEDMSubject, 
-                                                   User authorizedUser, 
-                                                   DocumentSigningResultDTO model, 
-                                                   bool isCancellation)
-        {
-            if (model is DocumentRejectedResultDTO rejectResult)
-            {
-                SetRejectedResult(document, ourEDMSubject, authorizedUser, isCancellation, rejectResult);
-            }
-            else if (model is DocumentSuccessfullySignedResultDTO signedResult)
-            {
-                SetSignedResult(document, ourEDMSubject, authorizedUser, isCancellation, signedResult);
-            }
-        }
-       
-        
-        private void SetDocSigningResultWithoutDocFlow(Document document,
-                                                       DocumentSigningResultDTO model,
-                                                       bool isCancellation)
-        {
-
-        }
-
-
-
-
-
-
-        #region Приватные методы для подписания документа
-
-        private void SetRejectedResult(Document document,
-                                       EDMSubject ourEDMSubject,
-                                       User authorizedUser,
-                                       bool isCancellation,
-                                       DocumentRejectedResultDTO rejectResult)
-        {
-            DBService.TryCreateEntity(DB.DocumentSigningResults, rejectResult, (entity) =>
-            {
-                if (isCancellation)
-                {
-                    entity.DocumentCancellationMetadataId = document.Cancellation.Id;
-                    document.Cancellation.Status = DocumentCancellationResult.CancellationRejected;
-                }
-                else
-                {
-                    entity.DocumentSigningMetadataId = document.Signing.Id;
-                    document.Signing.Status = DocumentSigningResultType.SigningRejected;
-                }
-
-                entity.SideId = this.TryGetOurSigningSide(document, ourEDMSubject).Id;
-                (entity as DocumentRejectedResult).RejectedById = authorizedUser.Id;
-            });
-
-
-            document.StatusChangedAt = DateTime.UtcNow;
-            DBService.UpdateEntity(DB.Documents, document);
-        }
-
-        private void SetSignedResult(Document document,
-                                     EDMSubject ourEDMSubject,
-                                     User authorizedUser,
-                                     bool isCancellation,
-                                     DocumentSuccessfullySignedResultDTO signedResult)
-        {
-            this.ThrowIfDocSigTypeIncorrect(document, signedResult.Signature);
-            var ourSide = this.TryGetOurSigningSide(document, ourEDMSubject);
-
-            if (this.IsOnlyOurSideNotSigned(document, ourSide.Id, isCancellation))
-            {
-                CreateSignature(document, ourSide, ourEDMSubject, authorizedUser, signedResult, isCancellation);
-
-                if (isCancellation)
-                {
-                    document.Cancellation.Status = DocumentCancellationResult.Cancelled;
-                }
-                else
-                {
-                    document.Signing.Status = DocumentSigningResultType.Signed;
-                }
-
-                document.StatusChangedAt = DateTime.UtcNow;
-                DBService.UpdateEntity(DB.Documents, document);
-            }
-            else
-            {
-                CreateSignature(document, ourSide, ourEDMSubject, authorizedUser, signedResult, isCancellation);
-            }
-        }
-
-
-
-
-
-
-        private void CreateSignature(Document document, 
-                                     DocumentSigningSide ourSide, 
-                                     EDMSubject ourEDMSubject, 
-                                     User authorizedUser, 
-                                     DocumentSigningResultDTO model, 
-                                     bool isCancellation)
-        {
-            DBService.TryCreateEntity(DB.DocumentSigningResults, model, async (entity) =>
-            {
-                if (isCancellation)
-                {
-                    entity.DocumentCancellationMetadataId = document.Cancellation.Id;
-                }
-                else
-                {
-                    entity.DocumentSigningMetadataId = document.Signing.Id;
-                }
-
-                entity.SideId = ourSide.Id;
-
-                var signature = (entity as DocumentSuccessfullySignedResult).Signature;
-                await HandleSignatureBaseWithDocFlow(document, ourEDMSubject, authorizedUser, signature);
-
-                if (signature is AlfateamEDMSignature edmSignature)
-                {
-                    edmSignature.SignedById = authorizedUser.Id;
-                }
-                else if (signature is ScanSignature scanSignature)
-                {
-                    scanSignature.SignedById = authorizedUser.Id;
-                }
-            });
-        }
-
-
-
-
-
-
-        private async Task HandleSignatureBaseWithDocFlow(Document document, 
-                                                          EDMSubject ourEDMSubject, 
-                                                          User authorizedUser, 
-                                                          Signature signature)
-        {
-            await HandleSignatureBase(document, authorizedUser, signature);
-
-            var sides = DB.DocumentSigningSides.Where(o => !o.IsDeleted && o.DocumentId == document.Id);
-            var ourSide = sides.FirstOrDefault(o => o.IsThisSubject(ourEDMSubject));
-
-            this.ThrowIfDocSigningSideAccessError(document, ourSide);
-            signature.SideId = ourSide.Id;
-        }
-        private async Task HandleSignatureBaseWithoutDocFlow(Document document, 
-                                                             User authorizedUser, 
-                                                             Signature signature,
-                                                             DocumentSigningSide side)
-        {
-            await HandleSignatureBase(document, authorizedUser, signature);
-
-            this.ThrowIfDocSigningSideAccessError(document, side);
-            signature.SideId = side.Id;
-        }
-        private async Task HandleSignatureBase(Document document, 
-                                              User authorizedUser, 
-                                              Signature signature)
-        {
-            if (signature is AlfateamEDMSignature edmSignature)
-            {
-                edmSignature.SignedById = authorizedUser.Id;
-            }
-            else if (signature is MarkedAsElectronicallySignature markedAsElectronicallySignature)
-            {
-                DBService.TryGetOne(DB.EDMProviders, markedAsElectronicallySignature.EDMProviderId);
-            }
-            else if (signature is ScanSignature scanSignature)
-            {
-                scanSignature.SignedById = authorizedUser.Id;
-                scanSignature.ScanPath = FilesService.TryUploadFile("signedDoc", FileType.Document);
-            }
-            else if (signature is ScanSignatureWithoutDocFlow scanSignatureWithoutDocFlow)
-            {
-                scanSignatureWithoutDocFlow.ScanPath = FilesService.TryUploadFile("signedDoc", FileType.Document);
-            }
-        }
-
-        #endregion
     }
 }

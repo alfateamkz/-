@@ -10,10 +10,7 @@ namespace Alfateam.EDM.Models.Documents.DocumentSigning.Signatures
 {
     public class AlfateamEDMSignature : Signature
     {
-        public User SignedBy { get; set; }
-        public int SignedById { get; set; }
-
-
-        public string Hash { get; set; }
+        public string PublicKey { get; set; }
+        public byte[] Signature { get; set; }
     }
 }

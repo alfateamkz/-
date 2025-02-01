@@ -1,5 +1,5 @@
 ﻿using Alfateam.Messenger.Lib.Abstractions.Modules;
-using Alfateam.Messenger.Models.Abstractions.Attachments;
+using Alfateam.Messenger.Models.Abstractions;
 using Alfateam.Messenger.Models.Abstractions.Messages;
 using System;
 using System.Collections.Generic;
@@ -23,17 +23,17 @@ namespace Alfateam.Messenger.Lib.Modules.Viber
             throw new NotImplementedException();
         }
 
-        public override Task<Message> EditMessage(string chatId, string messageId, string text)
+        public override Task<MessageBase> EditMessage(string chatId, string messageId, string text)
         {
             throw new NotImplementedException();
         }
 
-        public override Task<Message> GetMessage(string chatId, string messageId)
+        public override Task<MessageBase> GetMessage(string chatId, string messageId)
         {
             throw new NotImplementedException();
         }
 
-        public override Task<IEnumerable<Message>> GetMessages(string chatId, int offset, int count)
+        public override Task<IEnumerable<MessageBase>> GetMessages(string chatId, int offset, int count)
         {
             throw new NotImplementedException();
         }
@@ -43,12 +43,12 @@ namespace Alfateam.Messenger.Lib.Modules.Viber
             throw new NotImplementedException();
         }
 
-        public override Task<Message> SendStickerMessage(string chatId, string stickerId)
+        public override Task<MessageBase> SendStickerMessage(string chatId, string stickerId)
         {
             throw new NotImplementedException();
         }
 
-        public override Task<Message> SendTextMessage(string chatId, string message, List<MessageAttachment> attachments = null)
+        public override Task<MessageBase> SendTextMessage(string chatId, string message, List<MessageAttachmentBase> attachments = null)
         {
             throw new NotImplementedException();
         }
@@ -58,7 +58,7 @@ namespace Alfateam.Messenger.Lib.Modules.Viber
             throw new NotImplementedException();
         }
 
-        public override Task<Message> SendVoiceMessage(string chatId, byte[] message)
+        public override Task<MessageBase> SendVoiceMessage(string chatId, byte[] message)
         {
             throw new NotImplementedException();
         }

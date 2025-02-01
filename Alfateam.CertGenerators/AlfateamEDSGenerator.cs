@@ -13,6 +13,8 @@ using Alfateam.CertGenerators.Enums;
 using System.Text;
 using Org.BouncyCastle.Asn1.Pkcs;
 using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Tls;
+using System.Globalization;
 
 namespace Alfateam.CertGenerators
 {
@@ -86,6 +88,10 @@ namespace Alfateam.CertGenerators
 
 
 
+        public static X509Certificate2 GetCertFromBytes(byte[] certificate, string password)
+        {
+            return new X509Certificate2(certificate, password, X509KeyStorageFlags.Exportable);
+        }
 
         public static byte[] SignData(string data, byte[] certificate, string password)
         {
@@ -100,6 +106,9 @@ namespace Alfateam.CertGenerators
         }
 
 
+
+
+
         public static bool VerifyAlfateamEDS(string data, byte[] signature, string publicKeyString)
         {
             byte[] publicKeyBytes = Convert.FromBase64String(publicKeyString);
@@ -109,6 +118,27 @@ namespace Alfateam.CertGenerators
         }
 
 
+        public static string? GetValueFromX509String(string x509string, string key)
+        {
+            var propsValuesStrings = x509string.Split(',');
+            var dictionary = new Dictionary<string, string>();
+
+            foreach (var prop in propsValuesStrings)
+            {
+                int indexOfEqualitySign = prop.IndexOf('=');
+
+                var propName = prop.Substring(0, indexOfEqualitySign).Trim();
+                var propValue = prop.Substring(indexOfEqualitySign + 1).Trim();
+
+                dictionary[propName] = propValue;
+            }
+
+            if (dictionary.ContainsKey(key))
+            {
+                return dictionary[key];
+            }
+            return null;
+        }
 
 
 

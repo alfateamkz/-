@@ -1,4 +1,6 @@
 ﻿using Alfateam.Core;
+using Alfateam.Messenger.Models.Integrations.API;
+using Alfateam.Messenger.Models.Integrations.ExtMessenger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +15,10 @@ namespace Alfateam.Messenger.Models.General
 
         public SubscriptionInfo SubscriptionInfo { get; set; }
         public List<CompanyWorkSpace> Workspaces { get; set; } = new List<CompanyWorkSpace>();
+        public List<AlfateamAPIKey> APIKeys { get; set; } = new List<AlfateamAPIKey>();
+        public List<ExtMessengerIntegration> ExtMessengerIntegrations { get; set; } = new List<ExtMessengerIntegration>();
+
+
 
 
 

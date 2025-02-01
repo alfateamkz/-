@@ -1,7 +1,12 @@
-﻿using Alfateam.EDM.API.Abstractions;
+﻿using Alfateam.Core;
+using Alfateam.EDM.API.Abstractions;
 using Alfateam.EDM.API.Models;
 using Alfateam.EDM.API.Models.DTO;
+using Alfateam.EDM.API.Models.DTO.Abstractions;
+using Alfateam.EDM.Models;
+using Alfateam.EDM.Models.Counterparties;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Alfateam.EDM.API.Controllers.Counterparties
 {
@@ -11,18 +16,28 @@ namespace Alfateam.EDM.API.Controllers.Counterparties
         {
         }
 
+        #region Группы (категории) контрагентов
+
         [HttpGet, Route("GetCounterpartyGroups")]
-        public async Task<IEnumerable<CounterpartyGroupDTO>> GetCounterpartyGroups()
+        public async Task<ItemsWithTotalCount<CounterpartyGroupDTO>> GetCounterpartyGroups([FromQuery] SearchFilter filter)
         {
-            var groups = DB.CounterpartyGroups.Where(o => !o.IsDeleted && o.EDMSubjectId == this.EDMSubjectId);
-            return new CounterpartyGroupDTO().CreateDTOs(groups).Cast<CounterpartyGroupDTO>();
+            return DBService.GetManyWithTotalCount<CounterpartyGroup, CounterpartyGroupDTO>(GetAvailableCounterpartyGroups(), filter.Offset, filter.Count, (entity) =>
+            {
+                bool condition = true;
+
+                if (!string.IsNullOrEmpty(filter.Query))
+                {
+                    condition &= entity.ToString().Contains(filter.Query, StringComparison.OrdinalIgnoreCase);
+                }
+
+                return condition;
+            });
         }
 
         [HttpGet, Route("GetCounterpartyGroup")]
         public async Task<CounterpartyGroupDTO> GetCounterpartyGroup(int id)
         {
-            var groups = DB.CounterpartyGroups.Where(o => !o.IsDeleted && o.EDMSubjectId == this.EDMSubjectId);
-            return (CounterpartyGroupDTO)DBService.TryGetOne(groups, id, new CounterpartyGroupDTO());
+            return (CounterpartyGroupDTO)DBService.TryGetOne(GetAvailableCounterpartyGroups(), id, new CounterpartyGroupDTO());
         }
 
 
@@ -38,9 +53,7 @@ namespace Alfateam.EDM.API.Controllers.Counterparties
         [HttpPut, Route("UpdateCounterpartyGroup")]
         public async Task<CounterpartyGroupDTO> UpdateCounterpartyGroup(CounterpartyGroupDTO model)
         {
-            var groups = DB.CounterpartyGroups.Where(o => !o.IsDeleted && o.EDMSubjectId == this.EDMSubjectId);
-            var group = DBService.TryGetOne(groups, model.Id);
-
+            var group = DBService.TryGetOne(GetAvailableCounterpartyGroups(), model.Id);
             return (CounterpartyGroupDTO)DBService.TryUpdateEntity(DB.CounterpartyGroups, model, group);
         }
 
@@ -48,10 +61,27 @@ namespace Alfateam.EDM.API.Controllers.Counterparties
         [HttpDelete, Route("DeleteCounterpartyGroup")]
         public async Task DeleteCounterpartyGroup(int id)
         {
-            var groups = DB.CounterpartyGroups.Where(o => !o.IsDeleted && o.EDMSubjectId == this.EDMSubjectId);
-            var group = DBService.TryGetOne(groups, id);
-
+            var group = DBService.TryGetOne(GetAvailableCounterpartyGroups(), id);
             DBService.TryDeleteEntity(DB.CounterpartyGroups, group);
         }
+
+        #endregion
+
+
+
+
+
+
+
+
+
+        #region Private methods
+        private IEnumerable<CounterpartyGroup> GetAvailableCounterpartyGroups()
+        {
+            return DB.CounterpartyGroups.Where(o => !o.IsDeleted && o.EDMSubjectId == this.EDMSubjectId);
+        }
+
+
+        #endregion
     }
 }

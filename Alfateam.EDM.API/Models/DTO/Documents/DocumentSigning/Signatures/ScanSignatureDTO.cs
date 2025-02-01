@@ -7,11 +7,9 @@ namespace Alfateam.EDM.API.Models.DTO.Documents.DocumentSigning.Signatures
     public class ScanSignatureDTO : SignatureDTO
     {
         [ForClientOnly]
-        public UserDTO SignedBy { get; set; }
-        [ForClientOnly]
-        public int SignedById { get; set; }
+        public UploadedFileDTO File { get; set; }
 
-        [ForClientOnly]
-        public string ScanPath { get; set; }
+        [HiddenFromClient]
+        public string FileId { get; set; }
     }
 }

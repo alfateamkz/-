@@ -2,7 +2,7 @@
 using Alfateam.Messenger.API.Abstractions;
 using Alfateam.Messenger.API.Models;
 using Alfateam.Messenger.Models;
-using Alfateam.Messenger.Models.Abstractions.Chats;
+using Alfateam.Messenger.Models.Abstractions;
 using Alfateam.Messenger.Models.DTO.General.Chats;
 using Alfateam.Messenger.Models.General.Chats;
 using Microsoft.AspNetCore.Mvc;
@@ -108,22 +108,24 @@ namespace Alfateam.Messenger.API.Controllers.Messenger
         #region Private methods
 
 
-        private IEnumerable<Chat> GetAvailableChats()
+        private IEnumerable<ChatBase> GetAvailableChats()
         {
             var chats = DB.Chats.Include(o => o.PersonalSettings).ThenInclude(o => o.Folder)
-                               .Include(o => o.PersonalSettings).ThenInclude(o => o.Background)
-                               .Include(o => o.PersonalSettings).ThenInclude(o => o.Notifications)
-                               .Where(o => !o.IsDeleted && o.AccountId == this.AccountId);
+                                .Include(o => o.PersonalSettings).ThenInclude(o => o.Background)
+                                .Include(o => o.PersonalSettings).ThenInclude(o => o.Notifications)
+                                .Where(o => !o.IsDeleted /*&& o.AccountId == this.AccountId*/);
+
+            throw new NotImplementedException(); //TODO: GetAvailableChats
 
             return chats;
         }
-        private Chat TryGetChat(int id)
+        private ChatBase TryGetChat(int id)
         {
             return DBService.TryGetOne(GetAvailableChats(), id);
         }
 
 
-        private ChatPersonalSettings GetOrCreateChatPersonalSettings(Chat chat)
+        private ChatPersonalSettings GetOrCreateChatPersonalSettings(ChatBase chat)
         {
             var found = chat.PersonalSettings.FirstOrDefault(o => o.UserId == this.AccountId);
             if(found == null)

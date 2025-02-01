@@ -5,10 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using VkNet;
-using Alfateam.Messenger.Models.DTO.Abstractions.Chats;
-using ChatModel = Alfateam.Messenger.Models.Abstractions.Chats.Chat;
 using VkNet.Model;
 using Alfateam.Messenger.Lib.Enums;
+using Alfateam.Messenger.Models.Abstractions;
 
 namespace Alfateam.Messenger.Lib.Modules.VK
 {
@@ -22,11 +21,11 @@ namespace Alfateam.Messenger.Lib.Modules.VK
         }
 
 
-        public override async Task<ChatModel> CreateChat(ChatModel chat)
+        public override async Task<ChatBase> CreateChat(ChatBase chat)
         {
             throw new NotImplementedException();
         }
-        public override async Task<ChatModel> EditChat(ChatModel chat)
+        public override async Task<ChatBase> EditChat(ChatBase chat)
         {
             throw new NotImplementedException();
         }
@@ -36,12 +35,12 @@ namespace Alfateam.Messenger.Lib.Modules.VK
             throw new NotImplementedException();
         }
 
-        public override async Task<ChatModel> GetChat(string id)
+        public override async Task<ChatBase> GetChat(string id)
         {
             throw new NotImplementedException();
         }
 
-        public override async Task<IEnumerable<ChatModel>> GetChats(int offset, int count)
+        public override async Task<IEnumerable<ChatBase>> GetChats(int offset, int count)
         {
             var response = Messenger.VkApi.Messages.GetConversations(new GetConversationsParams
             {

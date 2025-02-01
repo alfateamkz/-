@@ -9,6 +9,7 @@ namespace Alfateam.Messenger.API.Models
     {
         public ControllerParams(MessengerDbContext db,
                                 IDDbContext iddb,
+
                                 AbsDBService dBService,
                                 AbsFilesService filesService,
                                 IWebHostEnvironment appEnv,
@@ -19,6 +20,7 @@ namespace Alfateam.Messenger.API.Models
         {
             DB = db;
             IDDB = iddb;
+
             DBService = dBService;
             FilesService = filesService;
             AppEnvironment = appEnv;
@@ -31,6 +33,9 @@ namespace Alfateam.Messenger.API.Models
 
         public MessengerDbContext DB { get; set; }
         public IDDbContext IDDB { get; set; }
+
+
+
         public AbsDBService DBService { get; set; }
         public AbsFilesService FilesService { get; set; }
         public IWebHostEnvironment AppEnvironment { get; set; }

@@ -1,6 +1,5 @@
 ﻿using Alfateam.Messenger.API.Abstractions;
 using Alfateam.Messenger.API.Models;
-using Alfateam.Messenger.Models.DTO.Abstractions.Chats;
 using Alfateam.Messenger.Models.DTO.General.Chats;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
