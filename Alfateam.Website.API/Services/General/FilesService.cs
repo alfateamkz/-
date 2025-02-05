@@ -138,7 +138,7 @@ namespace Alfateam.Website.API.Services.General
         {
             foreach (var item in deletedContentItems)
             {
-                if (item is AudioContentItem audio)
+                if (item is AudioContentItem audio && !string.IsNullOrEmpty(audio.AudioPath))
                 {
                     var path = Path.Combine(AppEnvironment.WebRootPath, audio.AudioPath);
                     if (File.Exists(path))
@@ -146,7 +146,7 @@ namespace Alfateam.Website.API.Services.General
                         File.Delete(path);
                     }
                 }
-                else if (item is ImageContentItem image)
+                else if (item is ImageContentItem image && !string.IsNullOrEmpty(image.ImgPath))
                 {
                     var path = Path.Combine(AppEnvironment.WebRootPath, image.ImgPath);
                     if (File.Exists(path))
@@ -154,7 +154,7 @@ namespace Alfateam.Website.API.Services.General
                         File.Delete(path);
                     }
                 }
-                else if (item is VideoContentItem video)
+                else if (item is VideoContentItem video && !string.IsNullOrEmpty(video.VideoPath))
                 {
                     var path = Path.Combine(AppEnvironment.WebRootPath, video.VideoPath);
                     if (File.Exists(path))

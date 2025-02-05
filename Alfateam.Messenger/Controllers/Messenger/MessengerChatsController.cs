@@ -29,13 +29,13 @@ namespace Alfateam.Messenger.API.Controllers.Messenger
             {
                 chats = await Messenger.Chats.GetChats(offset, count);
             }
-            else if (false)
+            else if (!string.IsNullOrEmpty(ExtMessengerSecret))
             {
-
+                chats = AlfateamMessengerService.GetAvailableAlfateamExtMessengerChats((int)this.ExtMessengerUserId);
             }
             else
             {
-                chats = GetAvailableAlfateamChats();
+                chats = AlfateamMessengerService.GetAvailableAlfateamChats(this.AuthorizedUser.Id);
             }
 
             return new ChatBaseDTO().CreateDTOs(chats).Cast<ChatBaseDTO>();
@@ -49,13 +49,15 @@ namespace Alfateam.Messenger.API.Controllers.Messenger
             {
                 chat = await Messenger.Chats.GetChat(chatId);
             }
-            else if (false)
+            else if (!string.IsNullOrEmpty(ExtMessengerSecret))
             {
-
+                chat = AlfateamMessengerService.GetAvailableAlfateamExtMessengerChats((int)this.ExtMessengerUserId)
+                                               .FirstOrDefault(o => o.Id == Convert.ToInt32(chatId));
             }
             else
             {
-                chat = GetAvailableAlfateamChats().FirstOrDefault(o => o.Id == Convert.ToInt32(chatId));
+                chat = AlfateamMessengerService.GetAvailableAlfateamChats(this.AuthorizedUser.Id)
+                                               .FirstOrDefault(o => o.Id == Convert.ToInt32(chatId));
             }
 
             ThrowIfNull(chat);

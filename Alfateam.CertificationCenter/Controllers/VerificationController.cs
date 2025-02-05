@@ -76,7 +76,7 @@ namespace Alfateam.CertificationCenter.API.Controllers
                 entity.AlfateamIDFrom = this.AlfateamSession.User.Guid;
                 entity.StatusInfo = new VerificationRequestInfo
                 {
-                    Status = Models.Enums.VerificationRequestStatus.Waiting
+                    Status = VerificationRequestStatus.Waiting
                 };
             },
             afterSuccessCallback: (entity) =>
@@ -85,9 +85,9 @@ namespace Alfateam.CertificationCenter.API.Controllers
 
                 foreach (var image in verificationRequest.Document.Images)
                 {
-                    UploadedFilesService.BindFileWithEntity(image.Id, UploadedFileRelatedEntity.SentDocument, verificationRequest.Document.Id);
+                    UploadedFilesService.TryBindFileWithEntity(image.Id);
                 }
-                UploadedFilesService.BindFileWithEntity(verificationRequest.BiometricIdentification.VideoId, UploadedFileRelatedEntity.SentBiometricIdentification, verificationRequest.BiometricIdentification.Id);
+                UploadedFilesService.TryBindFileWithEntity(verificationRequest.BiometricIdentification.VideoId);
             });
         }
 

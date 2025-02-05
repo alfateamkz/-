@@ -11,6 +11,7 @@ using Alfateam.EDM.API.Filters;
 using Alfateam.EDM.API.Services;
 using Alfateam.EDM.API.Jobs;
 using Alfateam.DB.Services;
+using Alfateam.DB.Services.Jobs;
 
 namespace Alfateam.EDM.API
 {
@@ -96,7 +97,7 @@ namespace Alfateam.EDM.API
 
             app.MapControllers();
 
-            UnusedUploadedFilesJob.Start();
+            UnusedUploadedFilesJob.Start<EDMDbContext>();
             ApprovalRoutesJob.Start();
 
             app.Run();

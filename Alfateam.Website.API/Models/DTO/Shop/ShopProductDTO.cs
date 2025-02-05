@@ -46,10 +46,10 @@ namespace Alfateam.Website.API.Models.DTO.Shop
 
 
         [ForClientOnly]
-        public ShopProductImage MainImage { get; set; }
+        public ShopProductImageDTO MainImage { get; set; }
 
         [ForClientOnly]
-        public List<ShopProductImage> Images { get; set; } = new List<ShopProductImage>();
+        public List<ShopProductImageDTO> Images { get; set; } = new List<ShopProductImageDTO>();
 
 
 
@@ -70,7 +70,7 @@ namespace Alfateam.Website.API.Models.DTO.Shop
             {
                 if (localization.UseLocalizationImages && localization.Images.Any())
                 {
-                    dto.Images = localization.Images;
+                    dto.Images = new ShopProductImageDTO().CreateDTOs(localization.Images).Cast<ShopProductImageDTO>().ToList();
                 }
             }
 

@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Alfateam.AdminPanelGeneral.API.Controllers.Blogs
 {
     [BlogsAccessFilter]
+    [Route("Blogs/[controller]")]
     public class BlogCategoriesController : AbsBlogController
     {
         public BlogCategoriesController(ControllerParams @params) : base(@params)
@@ -47,7 +48,7 @@ namespace Alfateam.AdminPanelGeneral.API.Controllers.Blogs
         {
             return (BlogCategoryDTO)DBService.TryCreateEntity(AdmininstrationDb.BlogCategories, model, callback: (entity) =>
             {
-                entity.BlogId = (int)this.BlogId;
+                entity.BlogLanguageZoneId = (int)this.BlogLanguageZoneId;
             },
             afterSuccessCallback: (entity) =>
             {
@@ -87,7 +88,7 @@ namespace Alfateam.AdminPanelGeneral.API.Controllers.Blogs
         #region Private methods
         private IEnumerable<BlogCategory> GetAvailableCategories()
         {
-            return AdmininstrationDb.BlogCategories.Where(o => !o.IsDeleted && o.BlogId == this.BlogId);
+            return AdmininstrationDb.BlogCategories.Where(o => !o.IsDeleted && o.BlogLanguageZoneId == this.BlogLanguageZoneId);
         }
 
         #endregion

@@ -13,11 +13,22 @@ namespace Alfateam.ID.Models.Security
         public User User { get; set; }
         public int UserId { get; set; }
 
+
+
         public string SessID { get; set; } = Guid.NewGuid().ToString();
         public DateTime ExpiresAt { get; set; } = DateTime.UtcNow.AddHours(12);
         public string RefreshToken { get; set; } = Guid.NewGuid().ToString();
         public bool IsDeactivated { get; set; }
         public bool IsRefreshTokenUsed { get; set; }
+
+
+
+
+        public string IP { get; set; }
+        public string UserAgent { get; set; }
+        public string Fingerprint { get; set; }
+
+
 
 
         [JsonIgnore]

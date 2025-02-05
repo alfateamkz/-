@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Alfateam.CertificationCenter.Models;
 using Alfateam.CertificationCenter.API.Filters;
-using Alfateam.CertificationCenter.API.Jobs;
 using Alfateam.CertificationCenter.API.Services;
 using Alfateam.DB.Services;
+using Alfateam.DB.Services.Jobs;
 
 namespace Alfateam.CertificationCenter
 {
@@ -89,7 +89,7 @@ namespace Alfateam.CertificationCenter
             app.MapControllers();
 
 
-            UnusedUploadedFilesJob.Start();
+            UnusedUploadedFilesJob.Start<CertCenterDbContext>();
             app.Run();
         }
     }

@@ -2,7 +2,7 @@
 using Alfateam.DB.ServicesDBs;
 using Alfateam.DB;
 using Alfateam.Gateways.Abstractions;
-using Alfateam.TicketSystem.API.Services;
+using Alfateam.DB.Services;
 
 namespace Alfateam.TicketSystem.API.Models
 {

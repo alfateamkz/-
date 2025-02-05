@@ -16,5 +16,6 @@ namespace Alfateam.Messenger.Models.Chats
 
         public Peer Receiver { get; set; }
         public int ReceiverId { get; set; }
+
     }
 }

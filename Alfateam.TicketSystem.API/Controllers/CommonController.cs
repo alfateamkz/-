@@ -16,6 +16,8 @@ using Alfateam.TicketSystem.Models.General.Notifications;
 using Alfateam.TicketSystem.Models.DTO.Abstractions;
 using Alfateam.TicketSystem.API.Models.Filters;
 using Alfateam.Core.Exceptions;
+using Alfateam.SharedModels.DTO;
+using Alfateam.SharedModels;
 
 namespace Alfateam.TicketSystem.API.Controllers
 {
@@ -108,7 +110,7 @@ namespace Alfateam.TicketSystem.API.Controllers
 
 
         [HttpPost, Route("UploadFile")]
-        public async Task<UploadedFileDTO> UploadFile([FromQuery]FileType fileType, /*[FromForm(Name ="file")]*/IFormFile file)
+        public async Task<UploadedFileDTO> UploadFile([FromQuery]FileType fileType, IFormFile file)
         {
             var uploadedFile = new UploadedFile
             {

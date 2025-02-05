@@ -16,7 +16,8 @@ namespace Alfateam.Messenger.API.Models
                                 IMailGateway mailGateway,
                                 ISMSGateway smsGateway,
 
-                                ChatMiscService chatMisc)
+                                ChatMiscService chatMisc,
+                                AlfateamMessengerService alfateamMessengerService)
         {
             DB = db;
             IDDB = iddb;
@@ -28,6 +29,7 @@ namespace Alfateam.Messenger.API.Models
             SMSGateway = smsGateway;
 
             ChatMiscService = chatMisc;
+            AlfateamMessengerService = alfateamMessengerService;
         }
 
 
@@ -45,5 +47,6 @@ namespace Alfateam.Messenger.API.Models
 
 
         public ChatMiscService ChatMiscService  { get; set; }
+        public AlfateamMessengerService AlfateamMessengerService { get; set; }
     }
 }

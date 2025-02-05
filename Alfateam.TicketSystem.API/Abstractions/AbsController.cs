@@ -8,7 +8,7 @@ using Alfateam.TicketSystem.API.Models;
 using Microsoft.EntityFrameworkCore;
 using Alfateam.ID.Models.Security;
 using Alfateam.TicketSystem.API.Filters;
-using Alfateam.TicketSystem.API.Services;
+using Alfateam.DB.Services;
 
 namespace Alfateam.TicketSystem.API.Abstractions
 {

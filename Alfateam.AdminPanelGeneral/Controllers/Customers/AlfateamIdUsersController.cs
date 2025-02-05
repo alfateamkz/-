@@ -10,6 +10,7 @@ using System.Collections.Generic;
 
 namespace Alfateam.AdminPanelGeneral.API.Controllers.Customers
 {
+    [Route("Customers/[controller]")]
     public class AlfateamIdUsersController : AbsController
     {
         public AlfateamIdUsersController(ControllerParams @params) : base(@params)

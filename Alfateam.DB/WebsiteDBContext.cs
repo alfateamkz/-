@@ -54,6 +54,7 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
+using Alfateam2._0.Models.Forms;
 
 namespace Alfateam.DB
 {
@@ -89,6 +90,7 @@ namespace Alfateam.DB
         public DbSet<ContentItem> ContentItems { get; set; }
         public DbSet<ProductModifierItem> ProductModifierItems { get; set; }
         public DbSet<Promocode> Promocodes { get; set; }
+        public DbSet<SentFromWebsiteForm> SentFromWebsiteForms { get; set; }
 
         #endregion
 
@@ -426,15 +428,20 @@ namespace Alfateam.DB
             modelBuilder.Entity<TextContentItem>();
             modelBuilder.Entity<VideoContentItem>();
 
+            //Abstract ProductModifierItem
+            modelBuilder.Entity<ProductModifierItem>().HasDiscriminator(b => b.Discriminator);
+            modelBuilder.Entity<ColorModifierItem>();
+            modelBuilder.Entity<SimpleModifierItem>();
+
             //Abstract Promocode
             modelBuilder.Entity<Promocode>().HasDiscriminator(b => b.Discriminator);
             modelBuilder.Entity<PricePromocode>();
             modelBuilder.Entity<PercentPromocode>();
 
-            //Abstract ProductModifierItem
-            modelBuilder.Entity<ProductModifierItem>().HasDiscriminator(b => b.Discriminator);
-            modelBuilder.Entity<ColorModifierItem>();
-            modelBuilder.Entity<SimpleModifierItem>();
+            //Abstract SentFromWebsiteForm
+            modelBuilder.Entity<SentFromWebsiteForm>().HasDiscriminator(b => b.Discriminator);
+            modelBuilder.Entity<ContactMeForm>();
+            modelBuilder.Entity<JoinEventForm>();
 
 
             modelBuilder.Entity<Country>().HasMany(o => o.Languages).WithMany(o => o.CountryManyToManyRefs);

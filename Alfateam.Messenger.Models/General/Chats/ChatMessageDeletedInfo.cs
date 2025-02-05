@@ -12,11 +12,11 @@ namespace Alfateam.Messenger.Models.General.Chats
     public class ChatMessageDeletedInfo : AbsModel
     {
         public Peer PeerBy { get; set; }
-        public int DeletedById { get; set; }
+        public int PeerById { get; set; }
 
 
 
-        public DateTime MessageDeletedAt { get; set; }
+        public DateTime MessageDeletedAt { get; set; } = DateTime.UtcNow;
         public bool MessageDeletedForAll { get; set; }
     }
 }

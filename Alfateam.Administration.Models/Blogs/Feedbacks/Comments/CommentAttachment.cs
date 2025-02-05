@@ -1,5 +1,6 @@
 ﻿using Alfateam.Administration.Models.Enums;
 using Alfateam.Core;
+using Alfateam.SharedModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,8 @@ namespace Alfateam.Administration.Models.Blogs.Feedbacks.Comments
     public class CommentAttachment : AbsModel
     {
         public CommentAttachmentType Type { get; set; }
-        public string URL { get; set; }
+
+        public UploadedFile File { get; set; }
+        public string FileId { get; set; }
     }
 }

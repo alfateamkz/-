@@ -8,6 +8,7 @@ using Alfateam.Administration.Models.General.Security;
 using Alfateam.ID.Models.Security;
 using Microsoft.EntityFrameworkCore;
 using Alfateam.AdminPanelGeneral.API.Filters;
+using Alfateam.DB.Services;
 
 namespace Alfateam.AdminPanelGeneral.API.Abstractions
 {
@@ -30,6 +31,7 @@ namespace Alfateam.AdminPanelGeneral.API.Abstractions
 
         public readonly AbsDBService DBService;
         public readonly AbsFilesService FilesService;
+        public readonly UploadedFilesService UploadedFilesService;
         public readonly IWebHostEnvironment AppEnvironment;
         public readonly IMailGateway MailGateway;
         public readonly ISMSGateway SMSGateway;
@@ -49,6 +51,7 @@ namespace Alfateam.AdminPanelGeneral.API.Abstractions
 
             this.DBService = @params.DBService;
             this.FilesService = @params.FilesService;
+            this.UploadedFilesService = @params.UploadedFilesService;
             this.AppEnvironment = @params.AppEnvironment;
             this.MailGateway = @params.MailGateway;
             this.SMSGateway = @params.SMSGateway;

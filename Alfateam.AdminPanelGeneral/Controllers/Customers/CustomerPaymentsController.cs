@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Alfateam.AdminPanelGeneral.API.Controllers.Customers
 {
+    [Route("Customers/[controller]")]
     public class CustomerPaymentsController : AbsController
     {
         public CustomerPaymentsController(ControllerParams @params) : base(@params)

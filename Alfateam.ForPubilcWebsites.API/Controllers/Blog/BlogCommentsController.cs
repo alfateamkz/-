@@ -13,6 +13,8 @@ using Alfateam.Administration.Models.DTO.Blogs.Feedbacks.Comments;
 using Alfateam.Administration.Models.Blogs.Feedbacks.Comments;
 using Alfateam.ForPubilcWebsites.API.Filters;
 using System.Collections.Generic;
+using Alfateam.Administration.Models.DTO.Blogs;
+using Alfateam.Administration.Models.Abstractions;
 
 namespace Alfateam.ForPubilcWebsites.API.Controllers.Blog
 {
@@ -43,7 +45,98 @@ namespace Alfateam.ForPubilcWebsites.API.Controllers.Blog
         }
 
 
-        //TODO: create and update comment
+
+
+
+
+
+
+
+
+
+
+
+
+
+        [HttpPost, Route("CreateComment")]
+        public async Task<CommentDTO> CreateComment(int postId, CommentDTO model)
+        {
+            var post = DBService.TryGetOne(GetAvailablePosts(), postId);
+            if(post.CommentsStatus != BlogCommentsStatus.CanComment)
+            {
+                throw new Exception403("Под этим постом нельзя оставлять комментарии");
+            }
+
+            return (CommentDTO)DBService.TryCreateEntity(AdmininstrationDb.Comments, model, callback: (entity) =>
+            {
+                foreach (var attachment in entity.Attachments)
+                {
+                    UploadedFilesService.ThrowIfFileNotAvailable(attachment.FileId);
+                }
+            },
+            afterSuccessCallback: (entity) =>
+            {
+                foreach (var attachment in entity.Attachments)
+                {
+                    UploadedFilesService.TryBindFileWithEntity(attachment.FileId);
+                }
+            });
+        }
+
+        [HttpPut, Route("UpdateComment")]
+        public async Task<CommentDTO> UpdateComment(int postId, CommentDTO model)
+        {
+            var post = DBService.TryGetOne(GetAvailablePosts(), postId);
+            var oldComment = DBService.TryGetOne(post.CommentsCounter.Comments, model.Id);
+            var newComment = model.CreateDBModelFromDTO();
+
+            var deletedAttacments = new List<CommentAttachment>();
+            var sameAttacments = new List<CommentAttachment>();
+            var newAttacments = new List<CommentAttachment>();
+
+            foreach (var attachment in oldComment.Attachments)
+            {
+                if (!newComment.Attachments.Any(o => o.Id == attachment.Id))
+                {
+                    deletedAttacments.Add(attachment);
+                }
+                else
+                {
+                    sameAttacments.Add(attachment);
+                }
+            }
+
+            foreach (var attachment in newComment.Attachments)
+            {
+                if (!oldComment.Attachments.Any(o => o.Id == attachment.Id))
+                {
+                    newAttacments.Add(attachment);
+                }
+            }
+
+            if (!model.IsValid())
+            {
+                throw new Exception400("Проверьте корректность заполения полей");
+            }
+
+
+            foreach (var block in sameAttacments)
+            {
+                var newPostBlock = newAttacments.FirstOrDefault(o => o.Id == block.Id);
+                UploadedFilesService.TryBindFileWithEntityIfChanged(block.FileId, newPostBlock.FileId);
+            }
+            foreach (var block in newAttacments)
+            {
+                UploadedFilesService.TryBindFileWithEntity(block.FileId);
+            }
+            foreach (var block in deletedAttacments)
+            {
+                UploadedFilesService.TryUnbindFile(block.FileId);
+            }
+
+            DBService.UpdateEntity(AdmininstrationDb.Comments, newComment);
+            return (CommentDTO)new CommentDTO().CreateDTO(newComment);
+        }
 
 
         [HttpDelete, Route("DeleteComment")]
@@ -147,7 +240,7 @@ namespace Alfateam.ForPubilcWebsites.API.Controllers.Blog
                                               .Include(o => o.CommentsCounter).ThenInclude(o => o.Comments).ThenInclude(o => o.Subcomments).ThenInclude(o => o.Attachments)
                                               .Include(o => o.CommentsCounter).ThenInclude(o => o.Comments).ThenInclude(o => o.ReactionCounters).ThenInclude(o => o.Reaction)
                                               .Include(o => o.CommentsCounter).ThenInclude(o => o.Comments).ThenInclude(o => o.ReactionCounters).ThenInclude(o => o.SetReactions).ThenInclude(o => o.Reaction)
-                                              .Where(o => !o.IsDeleted && o.BlogId == this.BlogId);
+                                              .Where(o => !o.IsDeleted && o.BlogLanguageZoneId == this.BlogLanguageZoneId);
         }
 
         private IEnumerable<Comment> GetPostAllLevelComments(BlogPost post)

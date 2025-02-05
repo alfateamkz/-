@@ -137,6 +137,12 @@ namespace Alfateam.Core.Services
             return await this.UploadFileAsync(file);
         }
 
+
+
+
+
+
+ 
         public string TryUploadFile(string formFileName, FileType fileType)
         {
             var file = Request.Form.Files.FirstOrDefault(o => o.Name == formFileName);
@@ -173,6 +179,11 @@ namespace Alfateam.Core.Services
             return await PrivateUploadFileAsync(attachment);
         }
 
+
+
+
+
+
         public string UploadFile(int index = 0)
         {
             var attachment = Request.Form.Files.Skip(index).FirstOrDefault();
@@ -186,6 +197,28 @@ namespace Alfateam.Core.Services
         {
             var attachment = Request.Form.Files.FirstOrDefault(o => o.Name == formFileName);
             return PrivateUploadFile(attachment);
+        }
+
+        public string UploadFile(byte[] bytes, string extensionWithPeriod)
+        {
+            var folderPath = AppEnvironment.ContentRootPath + "/uploads/";
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            var filePath = "/uploads/" + Guid.NewGuid().ToString();
+
+            if (bytes != null && bytes.Length > 0)
+            {
+                string path = filePath + extensionWithPeriod;
+                using (var fileStream = new FileStream(AppEnvironment.ContentRootPath + path, FileMode.Create))
+                {
+                    fileStream.Write(bytes);
+                }
+                return path;
+            }
+            return "";
         }
 
         #endregion

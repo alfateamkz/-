@@ -9,5 +9,6 @@ namespace Alfateam.AdminPanelGeneral.API.Abstractions
         }
 
         public int? BlogId => ParseIntValueFromHeader("BlogId");
+        public int? BlogLanguageZoneId => ParseIntValueFromHeader("BlogLanguageZoneId");
     }
 }

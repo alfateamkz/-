@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Alfateam.AdminPanelGeneral.API.Controllers.CertCenter.Owner
 {
+    [Route("CertCenter/Owner/[controller]")]
     public class CertCenterDocumentTypesController : AbsCertCenterController
     {
         public CertCenterDocumentTypesController(ControllerParams @params) : base(@params)

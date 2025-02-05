@@ -236,7 +236,7 @@ namespace Alfateam.TicketSystem.API.Hubs
             {
                 foreach (var attachment in textTicketMessage.Attachments)
                 {
-                    UploadedFilesService.TryBindFileWithEntity(attachment.FileId, UploadedFileRelatedEntity.MessageAttachment, attachment.Id);
+                    UploadedFilesService.TryBindFileWithEntity(attachment.FileId);
                 }
             }
         }

@@ -10,6 +10,7 @@ using Alfateam.CertificationCenter.Models.RequestSuccessDocs;
 using Alfateam.CertificationCenter.Models.Verification;
 using Alfateam.EDM.Models.Abstractions.ApprovalRoutes;
 using Alfateam.EDM.Models.ApprovalRoutes.AfterDocSigning;
+using Alfateam.SharedModels;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

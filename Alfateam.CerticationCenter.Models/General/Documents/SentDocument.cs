@@ -1,4 +1,5 @@
 ﻿using Alfateam.Core;
+using Alfateam.SharedModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;

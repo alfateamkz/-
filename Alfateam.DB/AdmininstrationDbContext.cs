@@ -1,4 +1,5 @@
-﻿using Alfateam.Administration.Models.Abstractions;
+﻿using Alfateam.Administration.Models;
+using Alfateam.Administration.Models.Abstractions;
 using Alfateam.Administration.Models.Blogs;
 using Alfateam.Administration.Models.Blogs.Blocks;
 using Alfateam.Administration.Models.Blogs.Feedbacks.Comments;
@@ -7,11 +8,14 @@ using Alfateam.Administration.Models.Blogs.Feedbacks.Watches;
 using Alfateam.Administration.Models.General;
 using Alfateam.Administration.Models.General.RolePowers;
 using Alfateam.Administration.Models.General.Security;
+using Alfateam.Administration.Models.SEO;
 using Alfateam.Administration.Models.StaticTextsConstructor;
 using Alfateam.Administration.Models.Stats;
 using Alfateam.CertificationCenter.Models.Abstraction;
 using Alfateam.CertificationCenter.Models.Cancellation;
 using Alfateam.CertificationCenter.Models.IssueRequests;
+using Alfateam.DB.Helpers;
+using Alfateam.SharedModels;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -67,6 +71,7 @@ namespace Alfateam.DB
 
         public DbSet<Blog> Blogs { get; set; }
         public DbSet<BlogCategory> BlogCategories { get; set; }
+        public DbSet<BlogLanguageZone> BlogLanguageZones { get; set; }
         public DbSet<BlogPost> BlogPosts { get; set; }
 
         #endregion
@@ -78,15 +83,23 @@ namespace Alfateam.DB
 
         #endregion
 
+        public DbSet<Country> Countries { get; set; }
+        public DbSet<Language> Languages { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserRoleModel> UserRoleModels { get; set; }
 
         #endregion
 
+        #region SEO
+        public DbSet<Metatags> Metatags { get; set; }
+
+        #endregion
+
         #region StaticTextsConstructor
         public DbSet<StaticTextsModel> StaticTextsModels { get; set; }
-        public DbSet<TextCategory> TextCategories { get; set; }
+        public DbSet<TextsSet> TextsSets { get; set; }
+        public DbSet<TextsSetLanguageZone> TextsSetLanguageZones { get; set; }
 
         #endregion
 
@@ -95,7 +108,22 @@ namespace Alfateam.DB
 
         #endregion
 
+        public DbSet<UploadedFile> UploadedFiles { get; set; }
 
+
+
+
+
+
+
+
+
+
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseMySql(ConnectionStrings.BuildConnectionString("admin_panel_general"), new MySqlServerVersion(new Version(8, 0, 11)));
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //Abstract AbsField

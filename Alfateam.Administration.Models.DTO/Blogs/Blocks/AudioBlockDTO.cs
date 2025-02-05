@@ -2,8 +2,7 @@
 
 namespace Alfateam.Administration.Models.DTO.Blogs.Blocks
 {
-    public class AudioBlockDTO : BlogPostBlockDTO
+    public class AudioBlockDTO : BlogPostBlockWithFileDTO
     {
-        public string URL { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Alfateam.CertificationCenter.Abstractions;
+using Alfateam.CertificationCenter.API.Abstractions;
 using Alfateam.Core.Results.StatusCodes;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -23,7 +24,7 @@ namespace Alfateam.CertificationCenter.API.Filters
 
         public void OnActionExecuting(ActionExecutingContext context)
         {
-            var controller = context.Controller as AbsController;
+            var controller = context.Controller as AbsAuthorizedController;
 
             var session = controller.AlfateamSession;
             if (session == null)

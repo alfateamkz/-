@@ -139,7 +139,7 @@ namespace Alfateam.TicketSystem.API.Controllers.Tickets
             {
                 foreach (var attachment in textTicketMessage2.Attachments)
                 {
-                    UploadedFilesService.TryBindFileWithEntity(attachment.FileId, UploadedFileRelatedEntity.MessageAttachment, attachment.Id);
+                    UploadedFilesService.TryBindFileWithEntity(attachment.FileId);
                 }
             }
 

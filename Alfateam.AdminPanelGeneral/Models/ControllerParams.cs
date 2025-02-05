@@ -1,5 +1,6 @@
 ﻿using Alfateam.Core.Services;
 using Alfateam.DB;
+using Alfateam.DB.Services;
 using Alfateam.DB.ServicesDBs;
 using Alfateam.Gateways.Abstractions;
 
@@ -19,6 +20,7 @@ namespace Alfateam.AdminPanelGeneral.API.Models
 
                                AbsDBService dBService,
                                AbsFilesService filesService,
+                               UploadedFilesService uploadedFilesService,
                                IWebHostEnvironment appEnv,
                                IMailGateway mailGateway,
                                ISMSGateway smsGateway)
@@ -35,6 +37,7 @@ namespace Alfateam.AdminPanelGeneral.API.Models
 
             DBService = dBService;
             FilesService = filesService;
+            UploadedFilesService = uploadedFilesService;
             AppEnvironment = appEnv;
             MailGateway = mailGateway;
             SMSGateway = smsGateway;
@@ -59,6 +62,7 @@ namespace Alfateam.AdminPanelGeneral.API.Models
 
         public AbsDBService DBService { get; set; }
         public AbsFilesService FilesService { get; set; }
+        public UploadedFilesService UploadedFilesService { get; set; }
         public IWebHostEnvironment AppEnvironment { get; set; }
         public IMailGateway MailGateway { get; set; }
         public ISMSGateway SMSGateway { get; set; }

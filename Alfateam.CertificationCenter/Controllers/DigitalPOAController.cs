@@ -93,9 +93,9 @@ namespace Alfateam.CertificationCenter.Controllers
 
                 foreach (var image in issueRequest.PersonForDocument.Images)
                 {
-                    UploadedFilesService.BindFileWithEntity(image.Id, UploadedFileRelatedEntity.SentDocument, issueRequest.PersonForDocument.Id);
+                    UploadedFilesService.TryBindFileWithEntity(image.Id);
                 }
-                UploadedFilesService.BindFileWithEntity(issueRequest.PersonForBiometricIdentification.VideoId, UploadedFileRelatedEntity.SentBiometricIdentification, issueRequest.PersonForBiometricIdentification.Id);
+                UploadedFilesService.TryBindFileWithEntity(issueRequest.PersonForBiometricIdentification.VideoId);
             });
         }
 

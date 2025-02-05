@@ -12,5 +12,12 @@ namespace Alfateam.Messenger.Models.Peers
     {
         public ExtMessengerUser User { get; set; }
         public int UserId { get; set; }
+
+
+
+        public override string GetPeerUserId()
+        {
+            return UserId.ToString();
+        }
     }
 }

@@ -5,6 +5,8 @@ using Alfateam.CertificationCenter.Models.DTO;
 using Alfateam.CertificationCenter.Models.DTO.General.Biometric;
 using Alfateam.CertificationCenter.Models.General.Biometric;
 using Alfateam.Core.Enums;
+using Alfateam.SharedModels;
+using Alfateam.SharedModels.DTO;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Alfateam.CertificationCenter.API.Controllers

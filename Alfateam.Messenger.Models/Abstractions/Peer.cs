@@ -33,5 +33,14 @@ namespace Alfateam.Messenger.Models.Abstractions
         /// Автоматическое поле
         /// </summary>
         public int? AlfateamGroupChatMemberId { get; set; }
+
+
+
+
+
+        public virtual string GetPeerUserId()
+        {
+            throw new Exception("Абстрактная сущность");
+        }
     }
 }

@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 
 namespace Alfateam.Administration.Models.Blogs.Blocks
 {
-    public class ImageBlock : BlogPostBlock
+    public class ImageBlock : BlogPostBlockWithFile
     {
-        public string URL { get; set; }
     }
 }

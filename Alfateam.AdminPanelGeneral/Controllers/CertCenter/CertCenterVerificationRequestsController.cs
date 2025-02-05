@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Alfateam.AdminPanelGeneral.API.Controllers.CertCenter
 {
+    [Route("CertCenter/[controller]")]
     public class CertCenterVerificationRequestsController : AbsCertCenterController
     {
         public CertCenterVerificationRequestsController(ControllerParams @params) : base(@params)

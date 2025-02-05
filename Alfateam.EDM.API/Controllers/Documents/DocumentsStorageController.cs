@@ -55,7 +55,7 @@ namespace Alfateam.EDM.API.Controllers.Documents
             },
             afterSuccessCallback: (entity) =>
             {
-                UploadedFilesService.BindFileWithEntity(entity.FileId, UploadedFileRelatedEntity.DocumentStorageFile, entity.Id);
+                UploadedFilesService.TryBindFileWithEntity(entity.FileId);
             });
         }
 
@@ -72,7 +72,7 @@ namespace Alfateam.EDM.API.Controllers.Documents
             },
             afterSuccessCallback: (entity) =>
             {
-                UploadedFilesService.BindFileWithEntityIfChanged(oldFileName, entity.FileId, UploadedFileRelatedEntity.DocumentTemplate, entity.Id);
+                UploadedFilesService.TryBindFileWithEntityIfChanged(oldFileName, entity.FileId);
             });
         }
 
@@ -82,7 +82,7 @@ namespace Alfateam.EDM.API.Controllers.Documents
             var group = DBService.TryGetOne(GetAvailableDocuments(), id);
 
             DBService.TryDeleteEntity(DB.DocumentStorageFiles, group);
-            UploadedFilesService.UnbindFile(group.File);
+            UploadedFilesService.TryUnbindFile(group.File);
         }
 
         #endregion

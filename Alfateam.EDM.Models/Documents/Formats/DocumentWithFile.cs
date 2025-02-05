@@ -11,6 +11,7 @@ using Alfateam.Core;
 using Alfateam.EDM.Models.Documents.Meta;
 using Alfateam.EDM.Models.Enums;
 using Alfateam.EDM.Models.Documents.Meta.Fields;
+using Alfateam.SharedModels;
 
 namespace Alfateam.EDM.Models.Documents.Types
 {

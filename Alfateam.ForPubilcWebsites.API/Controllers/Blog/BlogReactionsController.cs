@@ -118,7 +118,7 @@ namespace Alfateam.ForPubilcWebsites.API.Controllers.Blog
         {
             return AdmininstrationDb.BlogPosts.Include(o => o.ReactionCounters).ThenInclude(o => o.Reaction)
                                               .Include(o => o.ReactionCounters).ThenInclude(o => o.SetReactions).ThenInclude(o => o.Reaction)
-                                              .Where(o => !o.IsDeleted && o.BlogId == this.BlogId);
+                                              .Where(o => !o.IsDeleted && o.BlogLanguageZoneId == this.BlogLanguageZoneId);
         }
 
         #endregion

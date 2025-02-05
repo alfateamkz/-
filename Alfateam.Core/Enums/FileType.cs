@@ -9,5 +9,8 @@
         Document = 2,
         Audio = 3,
         Video = 4,
+
+
+        Any = 999
     }
 }

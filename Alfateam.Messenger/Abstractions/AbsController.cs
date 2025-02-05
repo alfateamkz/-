@@ -20,6 +20,7 @@ namespace Alfateam.Messenger.API.Abstractions
     {
         public readonly MessengerDbContext DB;
         public readonly IDDbContext IDDB;
+
         public readonly AbsDBService DBService;
         public readonly AbsFilesService FilesService;
         public readonly IWebHostEnvironment AppEnvironment;
@@ -28,10 +29,12 @@ namespace Alfateam.Messenger.API.Abstractions
 
 
         public readonly ChatMiscService ChatMiscService;
+        public readonly AlfateamMessengerService AlfateamMessengerService;
         public AbsController(ControllerParams @params)
         {
             this.DB = @params.DB;
             this.IDDB = @params.IDDB;
+
             this.DBService = @params.DBService;
             this.FilesService = @params.FilesService;
             this.AppEnvironment = @params.AppEnvironment;
@@ -39,7 +42,11 @@ namespace Alfateam.Messenger.API.Abstractions
             this.SMSGateway = @params.SMSGateway;
 
             this.ChatMiscService = @params.ChatMiscService;
+            this.AlfateamMessengerService = @params.AlfateamMessengerService;
         }
+
+
+        #region Alfateam ID User
 
         public string AlfateamSessionID => Request.Headers["AlfateamSessionID"];
         public virtual Session? AlfateamSession => IDDB.Sessions.Include(o => o.User)
@@ -57,9 +64,9 @@ namespace Alfateam.Messenger.API.Abstractions
                                                       && !o.IsDeleted);
                 return user;
             }
-        } 
+        }
 
-
+        #endregion
 
 
 

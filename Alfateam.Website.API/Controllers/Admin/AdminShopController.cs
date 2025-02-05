@@ -44,6 +44,7 @@ using Alfateam.Website.API.Models.Filters.Admin.AdminSearch;
 using Alfateam.Core;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Alfateam2._0.Models.Promocodes;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Alfateam.Website.API.Controllers.Admin
 {
@@ -166,7 +167,7 @@ namespace Alfateam.Website.API.Controllers.Admin
         [HttpPost, Route("AddProductPhoto")]
         [ShopSectionAccess(5)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
-        public async Task AddProductPhoto(int productId)
+        public async Task<ShopProductImage> AddProductPhoto(int productId)
         {
             var product = GetAvailableShopProducts().FirstOrDefault(o => o.Id == productId  && !o.IsDeleted);
             if(product == null)
@@ -174,14 +175,16 @@ namespace Alfateam.Website.API.Controllers.Admin
                 throw new Exception404("Сущность по данному id не найдена");
             }
 
-            HandleProductAddPhoto(product);
+            var image = HandleProductAddPhoto(product);
             DbService.UpdateEntity(DB.ShopProducts, product);
+
+            return image;
         }
 
         [HttpPost, Route("AddProductLocalizationPhoto")]
         [ShopSectionAccess(5)]
         [SwaggerOperation(description: "Нужно загрузить изображение через форму с именем mainImg")]
-        public async Task AddProductLocalizationPhoto(int localizationId)
+        public async Task<ShopProductImage> AddProductLocalizationPhoto(int localizationId)
         {
             var localization = DB.ShopProductLocalizations.FirstOrDefault(o => o.Id == localizationId && !o.IsDeleted);
             var product = GetAvailableShopProducts().FirstOrDefault(o => o.Id == localization?.ShopProductId && !o.IsDeleted);
@@ -190,8 +193,10 @@ namespace Alfateam.Website.API.Controllers.Admin
                 throw new Exception404("Сущность по данному id не найдена");
             }
 
-            HandleProductLocalizationAddPhoto(localization);
+            var image = HandleProductLocalizationAddPhoto(localization);
             DbService.UpdateEntity(DB.ShopProductLocalizations, localization);
+
+            return image;
         }
 
 
@@ -217,11 +222,12 @@ namespace Alfateam.Website.API.Controllers.Admin
         [ShopSectionAccess(5)]
         public async Task DeleteProductLocalizationPhoto(int localizationId, int photoId)
         {
-            var localization = DB.ShopProductLocalizations.FirstOrDefault(o => o.Id == localizationId && !o.IsDeleted);
+            var localization = DB.ShopProductLocalizations.Include(o => o.Images)
+                                                          .FirstOrDefault(o => o.Id == localizationId && !o.IsDeleted);
             var photo = localization?.Images?.FirstOrDefault(o => o.Id == photoId);
             var product = GetAvailableShopProducts().FirstOrDefault(o => o.Id == localization?.ShopProductId && !o.IsDeleted);
 
-            if (localization == null || product == null || localization == null)
+            if (localization == null || product == null || photo == null)
             {
                 throw new Exception404("Сущность по данному id не найдена");
             }
@@ -257,6 +263,14 @@ namespace Alfateam.Website.API.Controllers.Admin
         #endregion
 
         #region Модификаторы
+
+        [HttpGet, Route("GetProductModifiers")]
+        [ShopSectionAccess(1)]
+        public async Task<IEnumerable<ProductModifierDTO>> GetProductModifiers(int productId)
+        {
+            var product = DbService.TryGetOne(GetAvailableShopProducts(), productId);
+            return DbService.GetMany<ProductModifier, ProductModifierDTO>(product.Modifiers);
+        }
 
         [HttpGet, Route("GetProductModifier")]
         [ShopSectionAccess(1)]
@@ -931,23 +945,23 @@ namespace Alfateam.Website.API.Controllers.Admin
 
 
 
-        private void HandleProductAddPhoto(ShopProduct entity)
+        private ShopProductImage HandleProductAddPhoto(ShopProduct entity)
         {
-            const string formFilename = "mainImg";
-
-            entity.Images.Add(new ShopProductImage
+            var image = new ShopProductImage
             {
-                ImgPath = FilesService.TryUploadFile(formFilename, FileType.Image),
-            });
+                ImgPath = FilesService.TryUploadFile("mainImg", FileType.Image),
+            };
+            entity.Images.Add(image);
+            return image;
         }
-        private void HandleProductLocalizationAddPhoto(ShopProductLocalization entity)
+        private ShopProductImage HandleProductLocalizationAddPhoto(ShopProductLocalization entity)
         {
-            const string formFilename = "mainImg";
-
-            entity.Images.Add(new ShopProductImage
+            var image = new ShopProductImage
             {
-                ImgPath = FilesService.TryUploadFile(formFilename, FileType.Image),
-            });
+                ImgPath = FilesService.TryUploadFile("mainImg", FileType.Image),
+            };
+            entity.Images.Add(image);
+            return image;
         }
 
 
@@ -956,28 +970,34 @@ namespace Alfateam.Website.API.Controllers.Admin
         #region Private get included methods
 
 
-        private IEnumerable<ShopProduct> GetProductsList()
-        {
-            return DB.ShopProducts.IncludeAvailability()
-                                  .IncludePricing()
-                                  .Include(o => o.Localizations).ThenInclude(o => o.LanguageEntity)
-                                  .Include(o => o.MainImage)
-                                  .Include(o => o.MainLanguage)
-                                  .Where(o => !o.IsDeleted);
-        }
         private IEnumerable<ShopProduct> GetProductsFullIncludedList()
         {
-            return DB.ShopProducts.IncludeAvailability()
-                                  .Include(o => o.Category).ThenInclude(o => o.Localizations)
-                                  .Include(o => o.MainImage)
-                                  .Include(o => o.Images)
-                                  .IncludePricing()
-                                  .Include(o => o.Modifiers).ThenInclude(o => o.Localizations)
-                                  .Include(o => o.Modifiers).ThenInclude(o => o.Options).ThenInclude(o => o.Localizations)
-                                  .Include(o => o.Modifiers).ThenInclude(o => o.Options).ThenInclude(o => o.Pricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
-                                  .Include(o => o.Modifiers).ThenInclude(o => o.Options).ThenInclude(o => o.Pricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
-                                  .Include(o => o.Localizations)
-                                  .Where(o => !o.IsDeleted);
+            var products = DB.ShopProducts.IncludeAvailability()
+                                          .Include(o => o.Category).ThenInclude(o => o.Localizations)
+                                          .Include(o => o.MainImage)
+                                          .Include(o => o.Images)
+                                          .IncludePricing()
+                                          .Include(o => o.Modifiers).ThenInclude(o => o.Localizations)
+                                          .Include(o => o.Modifiers).ThenInclude(o => o.Options).ThenInclude(o => o.Localizations)
+                                          .Include(o => o.Modifiers).ThenInclude(o => o.Options).ThenInclude(o => o.Pricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Costs).ThenInclude(o => o.Currency)
+                                          .Include(o => o.Modifiers).ThenInclude(o => o.Options).ThenInclude(o => o.Pricing).ThenInclude(o => o.Costs).ThenInclude(o => o.Country)
+                                          .Include(o => o.Localizations).ThenInclude(o => o.MainImage)
+                                          .Include(o => o.Localizations).ThenInclude(o => o.Images)
+                                          .Where(o => !o.IsDeleted);
+
+            foreach(var product in products)
+            {
+                product.Images = product.Images.Where(o => !o.IsDeleted).ToList();
+                product.Modifiers = product.Modifiers.Where(o => !o.IsDeleted).ToList();
+                product.Localizations = product.Localizations.Where(o => !o.IsDeleted).ToList();
+
+                foreach (var modifier in product.Modifiers)
+                {
+                    modifier.Options = modifier.Options.Where(o => !o.IsDeleted).ToList();
+                }
+            }
+
+            return products;
         }
 
 

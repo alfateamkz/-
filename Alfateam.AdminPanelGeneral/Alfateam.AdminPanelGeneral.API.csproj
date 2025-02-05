@@ -15,14 +15,15 @@
   <ItemGroup>
     <ProjectReference Include="..\Alfateam.Administration.Models.DTO\Alfateam.Administration.Models.DTO.csproj" />
     <ProjectReference Include="..\Alfateam.CertificationCenter.Models.DTO\Alfateam.CertificationCenter.Models.DTO.csproj" />
+    <ProjectReference Include="..\Alfateam.DB.Services\Alfateam.DB.Services.csproj" />
     <ProjectReference Include="..\Alfateam.DB\Alfateam.DB.csproj" />
+    <ProjectReference Include="..\Alfateam.EDM.API.Models.DTO\Alfateam.EDM.API.Models.DTO.csproj" />
     <ProjectReference Include="..\Alfateam.Gateways\Alfateam.Gateways.csproj" />
     <ProjectReference Include="..\Alfateam.ID.Models.DTO\Alfateam.ID.Models.DTO.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\Products\Sales\" />
-    <Folder Include="Controllers\Products\Telephony\" />
+    <ProjectReference Include="..\Alfateam.Marketing.API.Models.DTO\Alfateam.Marketing.API.Models.DTO.csproj" />
+    <ProjectReference Include="..\Alfateam.Messenger.Models.DTO\Alfateam.Messenger.Models.DTO.csproj" />
+    <ProjectReference Include="..\Alfateam.Sales.API.Models.DTO\Alfateam.Sales.API.Models.DTO.csproj" />
+    <ProjectReference Include="..\Alfateam.Telephony.API.Models.DTO\Alfateam.Telephony.API.Models.DTO.csproj" />
   </ItemGroup>
 
 </Project>

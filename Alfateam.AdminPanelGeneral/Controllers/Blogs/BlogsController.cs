@@ -5,9 +5,12 @@ using Alfateam.Administration.Models.DTO.Blogs;
 using Alfateam.AdminPanelGeneral.API.Models.Filters.Blogs;
 using Alfateam.Core;
 using Microsoft.AspNetCore.Mvc;
+using Alfateam.AdminPanelGeneral.API.Filters;
 
 namespace Alfateam.AdminPanelGeneral.API.Controllers.Blogs
 {
+    [Route("Blogs/[controller]")]
+    [BlogsAccessFilter]
     public class BlogsController : AbsBlogController
     {
         public BlogsController(ControllerParams @params) : base(@params)

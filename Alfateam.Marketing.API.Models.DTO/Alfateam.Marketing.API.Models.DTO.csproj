@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="ExternalInteractions\" />
+    <Folder Include="General\CompanySettings\" />
+    <Folder Include="Integrations\SMM\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Alfateam.Core\Alfateam.Core.csproj" />
+    <ProjectReference Include="..\Alfateam.ID.Models.DTO\Alfateam.ID.Models.DTO.csproj" />
+    <ProjectReference Include="..\Alfateam.ID.Models\Alfateam.ID.Models.csproj" />
+    <ProjectReference Include="..\Alfateam.Marketing.Models\Alfateam.Marketing.Models.csproj" />
+    <ProjectReference Include="..\Alfateam.SharedModels.DTO\Alfateam.SharedModels.DTO.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Alfateam.AdminPanelGeneral.API.Controllers.CertCenter.Owner
 {
+    [Route("CertCenter/Owner/[controller]")]
     public class CertCenterBiometricActionsController : AbsCertCenterController
     {
         public CertCenterBiometricActionsController(ControllerParams @params) : base(@params)

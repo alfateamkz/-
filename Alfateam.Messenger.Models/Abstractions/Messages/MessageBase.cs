@@ -41,5 +41,14 @@ namespace Alfateam.Messenger.Models.Abstractions.Messages
         public DateTime SentAt { get; set; } = DateTime.UtcNow;
         public DateTime? ReadAt { get; set; }
         public ChatMessageDeletedInfo? DeletedInfo { get; set; }
+
+
+
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int ChatBaseId { get; set; }
     }
 }

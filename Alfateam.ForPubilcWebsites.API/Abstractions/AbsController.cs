@@ -1,5 +1,6 @@
 ﻿using Alfateam.Core.Services;
 using Alfateam.DB;
+using Alfateam.DB.Services;
 using Alfateam.ForPubilcWebsites.API.Models;
 using Alfateam.Gateways.Abstractions;
 using Alfateam.ID.Models.Security;
@@ -17,6 +18,7 @@ namespace Alfateam.ForPubilcWebsites.API.Abstractions
 
         public readonly AbsDBService DBService;
         public readonly AbsFilesService FilesService;
+        public readonly UploadedFilesService UploadedFilesService;
         public readonly IWebHostEnvironment AppEnvironment;
         public readonly IMailGateway MailGateway;
         public readonly ISMSGateway SMSGateway;
@@ -29,6 +31,7 @@ namespace Alfateam.ForPubilcWebsites.API.Abstractions
 
             this.DBService = @params.DBService;
             this.FilesService = @params.FilesService;
+            this.UploadedFilesService = @params.UploadedFilesService;
             this.AppEnvironment = @params.AppEnvironment;
             this.MailGateway = @params.MailGateway;
             this.SMSGateway = @params.SMSGateway;

@@ -22,9 +22,7 @@ namespace Alfateam.Administration.Models.Blogs
 
 
 
-
         public List<Reaction> PossibleReactions { get; set; } = new List<Reaction>();
-        public List<BlogCategory> Categories { get; set; } = new List<BlogCategory>();
-        public List<BlogPost> Posts { get; set; } = new List<BlogPost>();
+        public List<BlogLanguageZone> BlogLanguageZones { get; set; } = new List<BlogLanguageZone>();
     }
 }

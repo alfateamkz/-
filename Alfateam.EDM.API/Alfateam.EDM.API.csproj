@@ -22,7 +22,9 @@
     <ProjectReference Include="..\Alfateam.Core\Alfateam.Core.csproj" />
     <ProjectReference Include="..\Alfateam.DB.Services\Alfateam.DB.Services.csproj" />
     <ProjectReference Include="..\Alfateam.DB\Alfateam.DB.csproj" />
+    <ProjectReference Include="..\Alfateam.EDM.API.Models.DTO\Alfateam.EDM.API.Models.DTO.csproj" />
     <ProjectReference Include="..\Alfateam.Gateways\Alfateam.Gateways.csproj" />
+    <ProjectReference Include="..\Alfateam.ID.Models\Alfateam.ID.Models.csproj" />
   </ItemGroup>
 
   <ItemGroup>

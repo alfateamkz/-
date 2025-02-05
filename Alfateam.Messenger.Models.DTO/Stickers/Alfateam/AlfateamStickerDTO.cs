@@ -1,4 +1,5 @@
-﻿using Alfateam.Messenger.Models.DTO.Abstractions;
+﻿using Alfateam.Core.Attributes.DTO;
+using Alfateam.Messenger.Models.DTO.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,10 @@ namespace Alfateam.Messenger.Models.DTO.Stickers.Alfateam
 
 
 
+        [HiddenFromClient]
+        public int? AlfateamStickersSetId { get; set; }
+
+        [ForClientOnly]
         public int StickersSetId { get; set; }
     }
 }

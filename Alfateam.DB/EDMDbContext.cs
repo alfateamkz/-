@@ -27,6 +27,7 @@ using Alfateam.EDM.Models.Integrations.API;
 using Alfateam.ID.Models.Abstractions;
 using Alfateam.ID.Models.Payments.Ways;
 using Alfateam.ID.Models.Security.Verifications;
+using Alfateam.SharedModels;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -120,6 +121,7 @@ namespace Alfateam.DB
         public DbSet<Business> Businesses { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<EmailNotificationSettings> EmailNotificationSettings { get; set; }
+        public DbSet<PowerOfAttorneyVerificationInfo> PowerOfAttorneyVerificationInfo { get; set; }
         public DbSet<SubscriptionInfo> SubscriptionInfos { get; set; }
         public DbSet<TrustedUserIPAddress> TrustedUserIPAddresses { get; set; }
         public DbSet<User> Users { get; set; }
@@ -333,7 +335,6 @@ namespace Alfateam.DB
         {
             optionsBuilder.UseMySql(ConnectionStrings.EDM, new MySqlServerVersion(new Version(8, 0, 11)));
         }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 

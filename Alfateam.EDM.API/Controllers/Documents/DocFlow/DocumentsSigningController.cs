@@ -195,7 +195,7 @@ namespace Alfateam.EDM.API.Controllers.Documents.DocFlow
                 var signature = (entity as DocumentSuccessfullySignedResult).Signature;
                 if(signature is ScanSignature scanSignature)
                 {
-                    UploadedFilesService.BindFileWithEntity(scanSignature.FileId, Alfateam.EDM.Models.Enums.UploadedFileRelatedEntity.ScanSignature, scanSignature.Id);
+                    UploadedFilesService.TryBindFileWithEntity(scanSignature.FileId);
                 }   
             });
         }

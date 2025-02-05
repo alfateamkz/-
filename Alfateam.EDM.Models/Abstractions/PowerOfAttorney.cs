@@ -1,5 +1,6 @@
 ﻿using Alfateam.Core;
 using Alfateam.EDM.Models.Documents.DocumentSigning.ApproveStrategies;
+using Alfateam.EDM.Models.General;
 using Alfateam.EDM.Models.General.PowersOfAttorney;
 using JsonKnownTypes;
 using Newtonsoft.Json;
@@ -42,11 +43,7 @@ namespace Alfateam.EDM.Models.Abstractions
         /// Полномочия текстом
         /// </summary>
         public string TextOfPower { get; set; }
-
-        /// <summary>
-        /// Проверена ли доверенность администрацией сервиса
-        /// </summary>
-        public bool IsVerified { get; set; }
+        public PowerOfAttorneyVerificationInfo VerificationInfo { get; set; }
 
 
         /// <summary>

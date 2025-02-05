@@ -4,6 +4,6 @@ namespace Alfateam.AdminPanelGeneral.API.Models.Filters.StaticTextsConstructor
 {
     public class StaticTextsSearchFilter : SearchFilter
     {
-        public int CategoryId { get; set; }
+        public int? ParentTextId { get; set; }
     }
 }

@@ -179,6 +179,56 @@ namespace Alfateam.DB._Migrations.WebsiteDB
                     b.UseTphMappingStrategy();
                 });
 
+            modelBuilder.Entity("Alfateam2._0.Models.Abstractions.SentFromWebsiteForm", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("varchar(21)");
+
+                    b.Property<string>("Fingerprint")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("IP")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int?>("SentByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UserAgent")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SentByUserId");
+
+                    b.ToTable("SentFromWebsiteForms");
+
+                    b.HasDiscriminator().HasValue("SentFromWebsiteForm");
+
+                    b.UseTphMappingStrategy();
+                });
+
             modelBuilder.Entity("Alfateam2._0.Models.ComplianceDocument", b =>
                 {
                     b.Property<int>("Id")
@@ -8330,6 +8380,64 @@ namespace Alfateam.DB._Migrations.WebsiteDB
                     b.HasDiscriminator().HasValue("PricePromocode");
                 });
 
+            modelBuilder.Entity("Alfateam2._0.Models.Forms.ContactMeForm", b =>
+                {
+                    b.HasBaseType("Alfateam2._0.Models.Abstractions.SentFromWebsiteForm");
+
+                    b.Property<string>("Contact")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasDiscriminator().HasValue("ContactMeForm");
+                });
+
+            modelBuilder.Entity("Alfateam2._0.Models.Forms.JoinEventForm", b =>
+                {
+                    b.HasBaseType("Alfateam2._0.Models.Abstractions.SentFromWebsiteForm");
+
+                    b.Property<string>("Contact")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("EventId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasIndex("EventId");
+
+                    b.ToTable("SentFromWebsiteForms", t =>
+                        {
+                            t.Property("Contact")
+                                .HasColumnName("JoinEventForm_Contact");
+
+                            t.Property("Message")
+                                .HasColumnName("JoinEventForm_Message");
+
+                            t.Property("Name")
+                                .HasColumnName("JoinEventForm_Name");
+                        });
+
+                    b.HasDiscriminator().HasValue("JoinEventForm");
+                });
+
             modelBuilder.Entity("Alfateam2._0.Models.Abstractions.ContentItem", b =>
                 {
                     b.HasOne("Alfateam2._0.Models.ContentItems.Content", null)
@@ -8391,6 +8499,15 @@ namespace Alfateam.DB._Migrations.WebsiteDB
                     b.Navigation("PriceFrom");
 
                     b.Navigation("PriceTo");
+                });
+
+            modelBuilder.Entity("Alfateam2._0.Models.Abstractions.SentFromWebsiteForm", b =>
+                {
+                    b.HasOne("Alfateam2._0.Models.General.User", "SentByUser")
+                        .WithMany()
+                        .HasForeignKey("SentByUserId");
+
+                    b.Navigation("SentByUser");
                 });
 
             modelBuilder.Entity("Alfateam2._0.Models.ComplianceDocument", b =>
@@ -11301,6 +11418,17 @@ namespace Alfateam.DB._Migrations.WebsiteDB
                         .IsRequired();
 
                     b.Navigation("Discount");
+                });
+
+            modelBuilder.Entity("Alfateam2._0.Models.Forms.JoinEventForm", b =>
+                {
+                    b.HasOne("Alfateam2._0.Models.Events.Event", "Event")
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Event");
                 });
 
             modelBuilder.Entity("Alfateam2._0.Models.Abstractions.ProductModifierItem", b =>

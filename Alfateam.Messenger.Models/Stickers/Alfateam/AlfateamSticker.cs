@@ -16,6 +16,14 @@ namespace Alfateam.Messenger.Models.Stickers.Alfateam
 
 
 
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int? AlfateamStickersSetId { get; set; }
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
         public int? StickersSetId { get; set; }
     }
 }

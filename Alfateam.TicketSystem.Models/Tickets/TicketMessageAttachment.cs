@@ -1,4 +1,5 @@
 ﻿using Alfateam.Core;
+using Alfateam.SharedModels;
 using Alfateam.TicketSystem.Models.Enums;
 using System;
 using System.Collections.Generic;

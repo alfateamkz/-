@@ -9,7 +9,7 @@ namespace Alfateam.AdminPanelGeneral.API.Models.Filters.CertCenter
         public string? AlfateamId { get; set; }
 
 
-        public DateFilterModel? IssuedAtPeriod { get; set; }
+        public DateFilterModel? ValidFromPeriod { get; set; }
         public DateFilterModel? ValidBeforePeriod { get; set; }
         public DateFilterModel? RevokedAtPeriod { get; set; }
     }

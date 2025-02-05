@@ -1,5 +1,6 @@
 ﻿using Alfateam.Core;
 using Alfateam.EDM.Models.Abstractions;
+using Alfateam.SharedModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;

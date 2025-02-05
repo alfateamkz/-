@@ -10,6 +10,8 @@ using Microsoft.EntityFrameworkCore;
 using Alfateam.AdminPanelGeneral.API.Models;
 using Alfateam.AdminPanelGeneral.API.Filters;
 using Microsoft.Extensions.Options;
+using Alfateam.DB.Services;
+using Alfateam.DB.Services.Jobs;
 
 namespace Alfateam.AdminPanelGeneral
 {
@@ -119,6 +121,7 @@ namespace Alfateam.AdminPanelGeneral
 
             builder.Services.AddTransient<AbsDBService>(x => new AbsDBService(x.GetRequiredService<AdmininstrationDbContext>()));
             builder.Services.AddTransient<AbsFilesService>();
+            builder.Services.AddTransient<UploadedFilesService>();
             builder.Services.AddTransient<ControllerParams>();
 
 
@@ -138,6 +141,7 @@ namespace Alfateam.AdminPanelGeneral
 
             app.MapControllers();
 
+            UnusedUploadedFilesJob.Start<AdmininstrationDbContext>();
             app.Run();
         }
     }

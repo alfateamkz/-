@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Alfateam.AdminPanelGeneral.API.Controllers.Stats
 {
+    [Route("Stats/[controller]")]
     public class WebsiteVisitsStatsController : AbsController
     {
         public WebsiteVisitsStatsController(ControllerParams @params) : base(@params)

@@ -1,8 +1,8 @@
 ﻿using Alfateam.Core.Services;
 using Alfateam.DB;
+using Alfateam.DB.Services;
 using Alfateam.Gateways.Abstractions;
 using Alfateam.TicketSystem.API.Models;
-using Alfateam.TicketSystem.API.Services;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Alfateam.TicketSystem.API.Abstractions

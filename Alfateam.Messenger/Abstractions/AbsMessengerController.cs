@@ -24,6 +24,16 @@ namespace Alfateam.Messenger.API.Abstractions
 
 
 
+
+
+        public int? ExtMessengerUserId => ParseIntValueFromHeader("ExtMessengerUserId");
+        public string? ExtMessengerSecret => Request.Headers["ExtMessengerSecret"];
+
+
+
+
+
+
         protected void ThrowIfNull(object val, string message = "Сущность с данным id не найдена")
         {
             if(val == null)
@@ -32,55 +42,9 @@ namespace Alfateam.Messenger.API.Abstractions
             }
         }
 
-        protected IEnumerable<ChatBase> GetAvailableAlfateamChats()
-        {
-            var authorizedUserId = this.AuthorizedUser.Id;
-            var myPeers = DB.Peers.Cast<AlfateamMessengerPeer>().Where(o => o.Id == authorizedUserId);
-
-            List<ChatBase> chats = new List<ChatBase>();
-            AddPrivateChats(chats, myPeers);
-            AddGroupChats(chats, myPeers);
-
-            return chats;
-        }
-
-        protected void ThrowIfAlfateamChatNotExistOrAvailable(int chatId)
-        {
-            DBService.TryGetOne(GetAvailableAlfateamChats(), chatId);
-        }
+     
 
 
 
-        #region Private get alfateam messenger get chats methods
-
-        private void AddPrivateChats(List<ChatBase> chats, IQueryable<AlfateamMessengerPeer> myPeers)
-        {
-
-            var privateChatIds = myPeers.Where(o => o.PrivateChatId != null)
-                                        .Select(o => o.PrivateChatId)
-                                        .Distinct();
-            foreach (var chatId in privateChatIds)
-            {
-                var chat = DB.Chats.Cast<PrivateChat>()
-                                   .Include(o => o.Receiver)
-                                   .Include(o => o.CreatedBy)
-                                   .FirstOrDefault(o => o.Id == chatId);
-                chats.Add(chat);
-            }
-        }
-        private void AddGroupChats(List<ChatBase> chats, IQueryable<AlfateamMessengerPeer> myPeers)
-        {
-            var groupChatMemberIds = myPeers.Where(o => o.AlfateamGroupChatMemberId != null)
-                                            .Select(o => o.AlfateamGroupChatMemberId)
-                                            .Distinct();
-            foreach (int memberId in groupChatMemberIds)
-            {
-                int groupChatId = DB.GroupChatMembers.FirstOrDefault(o => o.Id == memberId).GroupChatId;
-                var chat = DB.Chats.Cast<GroupChat>().FirstOrDefault(o => o.Id == groupChatId);
-                chats.Add(chat);
-            }
-        }
-
-        #endregion
     }
 }

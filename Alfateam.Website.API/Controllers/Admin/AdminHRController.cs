@@ -93,7 +93,7 @@ namespace Alfateam.Website.API.Controllers.Admin
 
         [HttpPost, Route("CreateJobVacancy")]
         [HRSectionAccess(6)]
-        public async Task<JobVacancyDTO> CreateJobVacancy(JobVacancyDTO model)
+        public async Task<JobVacancyDTO> CreateJobVacancy([FromForm(Name = "model")]JobVacancyDTO model)
         {         
             return (JobVacancyDTO)DbService.TryCreateAvailabilityEntity(DB.JobVacancies, model, this.Session, (entity) =>
             {

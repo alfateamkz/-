@@ -97,15 +97,15 @@ namespace Alfateam.CertificationCenter.Controllers
 
                 foreach (var image in issueRequest.PersonalDocument.Images)
                 {
-                    UploadedFilesService.BindFileWithEntity(image.Id, UploadedFileRelatedEntity.SentDocument, issueRequest.PersonalDocument.Id);
+                    UploadedFilesService.TryBindFileWithEntity(image.Id);
                 }
-                UploadedFilesService.BindFileWithEntity(issueRequest.PersonalBiometricIdentification.VideoId, UploadedFileRelatedEntity.SentBiometricIdentification, issueRequest.PersonalBiometricIdentification.Id);
+                UploadedFilesService.TryBindFileWithEntity(issueRequest.PersonalBiometricIdentification.VideoId);
 
                 if (issueRequest.EDSFor == EDSFor.Business)
                 {
                     foreach (var image in issueRequest.CompanyDocument.Images)
                     {
-                        UploadedFilesService.BindFileWithEntity(image.Id, UploadedFileRelatedEntity.SentDocument, issueRequest.CompanyDocument.Id);
+                        UploadedFilesService.TryBindFileWithEntity(image.Id);
                     }
                 }
             });

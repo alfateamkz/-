@@ -21,6 +21,6 @@ namespace Alfateam.Administration.Models.Blogs
         /// <summary>
         /// Автоматическое поле
         /// </summary>
-        public int BlogId { get; set; }
+        public int BlogLanguageZoneId { get; set; }
     }
 }

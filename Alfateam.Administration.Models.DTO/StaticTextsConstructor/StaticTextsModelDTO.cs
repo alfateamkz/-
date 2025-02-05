@@ -8,19 +8,7 @@ namespace Alfateam.Administration.Models.DTO.StaticTextsConstructor
     public class StaticTextsModelDTO : DTOModelAbs<StaticTextsModel>
     {
         public string ClassName { get; set; }
-        public string LangCode { get; set; }
         public string Title { get; set; }
-
-
-
-        [ForClientOnly]
-        public TextCategoryDTO Category { get; set; }
-
-        [HiddenFromClient]
-        public int CategoryId { get; set; }
-
-
-
         public List<AbsFieldDTO> Fields { get; set; } = new List<AbsFieldDTO>();
     }
 }

@@ -22,5 +22,11 @@ namespace Alfateam.Messenger.Models.Abstractions
 
 
         public string? ExtMessageAttachmentId { get; set; }
+
+
+        /// <summary>
+        /// Автоматическое поле
+        /// </summary>
+        public int TextMessageId { get; set; }
     }
 }

@@ -12,9 +12,12 @@ using Alfateam.Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Alfateam.AdminPanelGeneral.API.Models.Filters.Blogs;
+using Alfateam.AdminPanelGeneral.API.Filters;
 
 namespace Alfateam.AdminPanelGeneral.API.Controllers.Blogs
 {
+    [Route("Blogs/[controller]")]
+    [BlogsAccessFilter]
     public class BlogPostFeedbacksController : AbsBlogController
     {
         public BlogPostFeedbacksController(ControllerParams @params) : base(@params)
@@ -118,6 +121,10 @@ namespace Alfateam.AdminPanelGeneral.API.Controllers.Blogs
 
 
 
+
+
+
+
         #region Private methods
         private IEnumerable<BlogPost> GetAvailablePosts()
         {
@@ -127,7 +134,7 @@ namespace Alfateam.AdminPanelGeneral.API.Controllers.Blogs
                                               .Include(o => o.ReactionCounters).ThenInclude(o => o.SetReactions)
                                               .Include(o => o.CommentsCounter).ThenInclude(o => o.Comments).ThenInclude(o => o.Attachments)
                                               .Include(o => o.WatchesCounter).ThenInclude(o => o.Watches)
-                                              .Where(o => !o.IsDeleted && o.BlogId == this.BlogId);
+                                              .Where(o => !o.IsDeleted && o.BlogLanguageZoneId == this.BlogLanguageZoneId);
         }
 
         #endregion

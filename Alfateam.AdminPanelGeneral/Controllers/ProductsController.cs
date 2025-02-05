@@ -84,6 +84,13 @@ namespace Alfateam.AdminPanelGeneral.API.Controllers
         #endregion
 
 
+
+
+
+
+
+
+
         #region Private methods
         private IEnumerable<Product> GetAvailableProducts()
         {

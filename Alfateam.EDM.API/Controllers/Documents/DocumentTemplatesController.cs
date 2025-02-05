@@ -15,6 +15,7 @@ using Alfateam.EDM.Models.Documents.Meta;
 using Alfateam.EDM.Models.Documents.Templates;
 using Alfateam.EDM.Models.Documents.Types;
 using Alfateam.EDM.Models.Enums;
+using Alfateam.SharedModels;
 using DocumentFormat.OpenXml.Wordprocessing;
 using iTextSharp.text.pdf;
 using Microsoft.AspNetCore.Mvc;
@@ -70,7 +71,7 @@ namespace Alfateam.EDM.API.Controllers.Documents
             }, 
             afterSuccessCallback: (entity) => 
             {
-                UploadedFilesService.BindFileWithEntity(entity.DocumentFileId, UploadedFileRelatedEntity.DocumentTemplate, entity.Id);
+                UploadedFilesService.TryBindFileWithEntity(entity.DocumentFileId);
             });
         }
 
@@ -87,7 +88,7 @@ namespace Alfateam.EDM.API.Controllers.Documents
             },
             afterSuccessCallback: (entity) =>
             {
-                UploadedFilesService.BindFileWithEntityIfChanged(oldFileName, entity.DocumentFileId, UploadedFileRelatedEntity.DocumentTemplate, entity.Id);
+                UploadedFilesService.TryBindFileWithEntityIfChanged(oldFileName, entity.DocumentFileId);
             });
         }
 
@@ -98,7 +99,7 @@ namespace Alfateam.EDM.API.Controllers.Documents
             var group = DBService.TryGetOne(GetAvailableDocumentTemplates(), id);
 
             DBService.TryDeleteEntity(DB.DocumentTemplates, group);
-            UploadedFilesService.UnbindFile(group.DocumentFile);
+            UploadedFilesService.TryUnbindFile(group.DocumentFile);
         }
 
         #endregion
@@ -153,7 +154,7 @@ namespace Alfateam.EDM.API.Controllers.Documents
                 }
             };
             DBService.CreateEntity(DB.Documents, newDocument);
-            UploadedFilesService.BindFileWithEntity(newDocument.File.Id, UploadedFileRelatedEntity.DocumentWithFile, newDocument.Id);
+            UploadedFilesService.TryBindFileWithEntity(newDocument.File.Id);
 
             return (DocumentWithFileDTO)new DocumentWithFileDTO().CreateDTO(newDocument);
         }

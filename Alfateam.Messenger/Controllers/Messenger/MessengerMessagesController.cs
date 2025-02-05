@@ -7,6 +7,8 @@ using static TdLib.TdApi;
 using Telegram.Bot.Types;
 using Alfateam.Messenger.Models.Abstractions;
 using Alfateam.Messenger.Models.Abstractions.Messages;
+using Alfateam.Messenger.Models.Messages.SystemMessages;
+using Alfateam.Messenger.Models.Messages.UserMessages;
 
 namespace Alfateam.Messenger.API.Controllers.Messenger
 {
@@ -27,13 +29,13 @@ namespace Alfateam.Messenger.API.Controllers.Messenger
             {
                 messages = await Messenger.Messages.GetMessages(chatId, offset, count);
             }
-            else if (false)
+            else if (!string.IsNullOrEmpty(ExtMessengerSecret))
             {
-
+                messages = AlfateamMessengerService.GetAvailableAlfateamExtMessengerChatMessages(Convert.ToInt32(chatId), (int)this.ExtMessengerUserId);
             }
             else
             {
-                messages = GetAvailableAlfateamChatMessages(Convert.ToInt32(chatId));
+                messages = AlfateamMessengerService.GetAvailableAlfateamChatMessages(Convert.ToInt32(chatId), this.AuthorizedUser.Id);
             }
 
             return new MessageBaseDTO().CreateDTOs(messages).Cast<MessageBaseDTO>();
@@ -47,13 +49,15 @@ namespace Alfateam.Messenger.API.Controllers.Messenger
             {
                 message = await Messenger.Messages.GetMessage(chatId, messageId);
             }
-            else if (false)
+            else if (!string.IsNullOrEmpty(ExtMessengerSecret))
             {
-
+                message = AlfateamMessengerService.GetAvailableAlfateamExtMessengerChatMessages(Convert.ToInt32(chatId), (int)this.ExtMessengerUserId)
+                                                  .FirstOrDefault(o => o.Id == Convert.ToInt32(messageId));
             }
             else
             {
-                message = GetAvailableAlfateamChatMessages(Convert.ToInt32(chatId)).FirstOrDefault(o => o.Id == Convert.ToInt32(messageId));
+                message = AlfateamMessengerService.GetAvailableAlfateamChatMessages(Convert.ToInt32(chatId), this.AuthorizedUser.Id)
+                                                  .FirstOrDefault(o => o.Id == Convert.ToInt32(messageId));
             }
 
             ThrowIfNull(message);
@@ -64,16 +68,5 @@ namespace Alfateam.Messenger.API.Controllers.Messenger
 
 
 
-        #region Private get alfateam messages methods
-
-        private IEnumerable<MessageBase> GetAvailableAlfateamChatMessages(int chatId)
-        {
-            ThrowIfAlfateamChatNotExistOrAvailable(chatId);
-
-            throw new();
-        }
-
-
-        #endregion
     }
 }

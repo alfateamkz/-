@@ -168,6 +168,7 @@ namespace Alfateam.Website.API.Controllers.Admin
             createdUser.Password = PasswordHelper.EncryptPassword(model.Password);
 
             createdUser.RoleModel = UserRoleModel.CreateDefault();
+            createdUser.RoleModel.Role = admin.RoleModel.Role;
             createdUser.RoleModel.IsAllCountriesAccess = admin.RoleModel.IsAllCountriesAccess;
             createdUser.RoleModel.AvailableCountries = admin.RoleModel.AvailableCountries;
             createdUser.RoleModel.ForbiddenCountries = admin.RoleModel.ForbiddenCountries;

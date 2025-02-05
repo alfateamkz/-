@@ -1,4 +1,5 @@
-﻿using Alfateam.Messenger.Models.Abstractions;
+﻿using Alfateam.Core.Attributes.DTO;
+using Alfateam.Messenger.Models.Abstractions;
 using Alfateam.Messenger.Models.DTO.Chats;
 using Alfateam.Website.API.Abstractions;
 using JsonKnownTypes;
@@ -21,7 +22,7 @@ namespace Alfateam.Messenger.Models.DTO.Abstractions
         public string Discriminator { get; set; }
 
 
-
+        [ForClientOnly]
         public string? ExtChatId { get; set; }
     }
 }

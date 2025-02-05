@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 
 namespace Alfateam.Messenger.Models.General.GroupChats
 {
+    //TODO: check GroupChatMemberPermissions in project
     public class GroupChatMemberPermissions : AbsModel
     {
-        public bool CanSendMessages { get; set; }
-        public bool CanSendFilesAndAttachments { get; set; }
-        public bool CanAddMembers { get; set; }
-        public bool CanKickMembers { get; set; }
-        public bool CanPinMessages { get; set; }
-        public bool CanEditChatInfo { get; set; }
+        public bool CanSendMessages { get; set; } = true;
+        public bool CanSendFilesAndAttachments { get; set; } = true;
+        public bool CanAddMembers { get; set; } = true;
+        public bool CanKickMembers { get; set; } = true;
+        public bool CanPinMessages { get; set; } = true;
+        public bool CanEditChatInfo { get; set; } = true;
     }
 }

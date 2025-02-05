@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Alfateam.Administration.Models.DTO\Alfateam.Administration.Models.DTO.csproj" />
+    <ProjectReference Include="..\Alfateam.DB.Services\Alfateam.DB.Services.csproj" />
     <ProjectReference Include="..\Alfateam.DB\Alfateam.DB.csproj" />
     <ProjectReference Include="..\Alfateam.Gateways\Alfateam.Gateways.csproj" />
   </ItemGroup>

@@ -1,5 +1,6 @@
 ﻿using Alfateam.CertificationCenter.Models.General.Biometric;
 using Alfateam.Core.Attributes.DTO;
+using Alfateam.SharedModels;
 using Alfateam.Website.API.Abstractions;
 using System;
 using System.Collections.Generic;

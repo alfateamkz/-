@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Alfateam.AdminPanelGeneral.API.Controllers.CertCenter
 {
+    [Route("CertCenter/[controller]")]
     public class CertCenterCertificatesController : AbsCertCenterController
     {
         public CertCenterCertificatesController(ControllerParams @params) : base(@params)
@@ -34,10 +35,10 @@ namespace Alfateam.AdminPanelGeneral.API.Controllers.CertCenter
                 {
                     condition &= entity.OwnerAlfateamID == filter.AlfateamId;
                 }
-                if(filter.IssuedAtPeriod != null)
+                if(filter.ValidFromPeriod != null)
                 {
-                    var period = filter.IssuedAtPeriod.GetPeriod();
-                    condition &= entity.IssuedAt >= period.From && entity.IssuedAt <= period.To;
+                    var period = filter.ValidFromPeriod.GetPeriod();
+                    condition &= entity.ValidFrom >= period.From && entity.ValidFrom <= period.To;
                 }
                 if (filter.ValidBeforePeriod != null)
                 {

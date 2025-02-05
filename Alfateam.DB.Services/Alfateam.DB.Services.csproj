@@ -10,6 +10,7 @@
     <ProjectReference Include="..\Alfateam.CertGenerators\Alfateam.CertGenerators.csproj" />
     <ProjectReference Include="..\Alfateam.DB\Alfateam.DB.csproj" />
     <ProjectReference Include="..\Alfateam.Gateways\Alfateam.Gateways.csproj" />
+    <ProjectReference Include="..\Alfateam.SharedModels\Alfateam.SharedModels.csproj" />
   </ItemGroup>
 
 </Project>

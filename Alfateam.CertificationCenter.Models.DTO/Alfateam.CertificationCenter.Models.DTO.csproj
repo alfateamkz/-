@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Alfateam.CerticationCenter.Models\Alfateam.CertificationCenter.Models.csproj" />
     <ProjectReference Include="..\Alfateam.Core\Alfateam.Core.csproj" />
+    <ProjectReference Include="..\Alfateam.SharedModels.DTO\Alfateam.SharedModels.DTO.csproj" />
   </ItemGroup>
 
 </Project>

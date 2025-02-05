@@ -1,4 +1,5 @@
 ﻿using Alfateam.Core.Attributes.DTO;
+using Alfateam.SharedModels.DTO;
 using Alfateam.TicketSystem.Models.Enums;
 using Alfateam.TicketSystem.Models.Tickets;
 using Alfateam.Website.API.Abstractions;

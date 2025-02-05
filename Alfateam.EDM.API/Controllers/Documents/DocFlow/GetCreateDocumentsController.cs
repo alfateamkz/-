@@ -108,7 +108,7 @@ namespace Alfateam.EDM.API.Controllers.Documents.DocFlow
             DBService.CreateEntity(DB.Documents, parcelEntity);
             foreach (var document in parcelEntity.Documents.Cast<DocumentWithFile>())
             {
-                UploadedFilesService.BindFileWithEntity(document.FileId, UploadedFileRelatedEntity.DocumentWithFile, document.Id);
+                UploadedFilesService.TryBindFileWithEntity(document.FileId);
             }
 
             return (DocumentsParcelDTO)new DocumentsParcelDTO().CreateDTO(parcelEntity);
@@ -171,7 +171,7 @@ namespace Alfateam.EDM.API.Controllers.Documents.DocFlow
                 {
                     if (entity is DocumentWithFile docWithFile)
                     {
-                        UploadedFilesService.BindFileWithEntity(docWithFile.FileId, UploadedFileRelatedEntity.DocumentWithFile, entity.Id);
+                        UploadedFilesService.TryBindFileWithEntity(docWithFile.FileId);
                     }
                 });
                 result.CreatedDocument = (DocumentDTO)createdDocDTO;

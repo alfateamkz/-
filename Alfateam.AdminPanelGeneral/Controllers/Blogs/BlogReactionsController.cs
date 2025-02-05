@@ -13,6 +13,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Alfateam.AdminPanelGeneral.API.Controllers.Blogs
 {
     [BlogsAccessFilter]
+    [Route("Blogs/[controller]")]
     public class BlogReactionsController : AbsBlogController
     {
         public BlogReactionsController(ControllerParams @params) : base(@params)

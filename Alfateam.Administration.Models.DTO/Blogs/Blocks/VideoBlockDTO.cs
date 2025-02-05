@@ -2,8 +2,7 @@
 
 namespace Alfateam.Administration.Models.DTO.Blogs.Blocks
 {
-    public class VideoBlockDTO : BlogPostBlockDTO
+    public class VideoBlockDTO : BlogPostBlockWithFileDTO
     {
-        public string URL { get; set; }
     }
 }

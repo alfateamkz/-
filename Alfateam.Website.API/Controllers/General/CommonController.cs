@@ -104,5 +104,18 @@ namespace Alfateam.Website.API.Controllers.General
         {
             return StaticFilesJob.GetWebsiteLocalizationWithIncludes(DB, (int)this.LanguageId);
         }
+
+
+
+
+        [HttpPost, Route("SendForm")]
+        public async Task SendForm(SentFromWebsiteFormDTO model)
+        {
+            DbService.TryCreateEntity(DB.SentFromWebsiteForms, model, (entity) =>
+            {
+                entity.SentByUserId = this.Session?.UserId;
+                entity.IP = HttpContext.Connection.RemoteIpAddress?.ToString();
+            });
+        }
     }
 }

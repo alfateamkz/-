@@ -2,7 +2,6 @@
 using Alfateam.DB;
 using Alfateam.Gateways.Abstractions;
 using Alfateam.Gateways;
-using Alfateam.TicketSystem.API.Jobs;
 using Microsoft.EntityFrameworkCore;
 using Alfateam.Core.Filters.Swagger;
 using Alfateam.Core.Services;
@@ -10,7 +9,8 @@ using Microsoft.OpenApi.Models;
 using Alfateam.TicketSystem.API.Models;
 using Alfateam.TicketSystem.API.Filters;
 using Alfateam.TicketSystem.API.Hubs;
-using Alfateam.TicketSystem.API.Services;
+using Alfateam.DB.Services;
+using Alfateam.DB.Services.Jobs;
 
 namespace Alfateam.TicketSystem.API
 {
@@ -89,7 +89,7 @@ namespace Alfateam.TicketSystem.API
 
             app.MapControllers();
 
-            UnusedUploadedFilesJob.Start();
+            UnusedUploadedFilesJob.Start<TicketSystemDbContext>();
 
             app.MapHub<TicketHub>("/ticketshub");  
 

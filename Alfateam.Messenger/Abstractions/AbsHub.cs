@@ -27,6 +27,7 @@ namespace Alfateam.Messenger.API.Abstractions
 
 
         public readonly ChatMiscService ChatMiscService;
+        public readonly AlfateamMessengerService AlfateamMessengerService;
         public AbsHub(ControllerParams @params)
         {
             this.DB = @params.DB;
@@ -39,17 +40,24 @@ namespace Alfateam.Messenger.API.Abstractions
             this.SMSGateway = @params.SMSGateway;
 
             this.ChatMiscService = @params.ChatMiscService;
+            this.AlfateamMessengerService = @params.AlfateamMessengerService;
         }
+
+        #region Omnichannel messenger headers and props
 
         public int? AccountId => ParseIntValueFromHeader("AccountId");
         public Account? Account => DB.Accounts.FirstOrDefault(o => o.Id == AccountId && !o.IsDeleted && o.CompanyWorkSpaceId == this.WorkspaceID);
         public AbsMessenger? Messenger => AccountsPool.GetOrCreateMessenger(Account);
+       
+        #endregion
 
+        #region Ext messenger headers and props
+        public int? ExtMessengerUserId => ParseIntValueFromHeader("ExtMessengerUserId");
+        public string? ExtMessengerSecret => Context.GetHttpContext().Request.Headers["ExtMessengerSecret"];
 
+        #endregion
 
-
-
-
+        #region Alfateam ID User headers and props
         public string AlfateamSessionID => Context.GetHttpContext().Request.Headers["AlfateamSessionID"];
         public virtual Session? AlfateamSession => IDDB.Sessions.Include(o => o.User)
                                                                 .FirstOrDefault(o => o.SessID == this.AlfateamSessionID);
@@ -68,7 +76,7 @@ namespace Alfateam.Messenger.API.Abstractions
             }
         }
 
-
+        #endregion
 
 
 
@@ -103,6 +111,13 @@ namespace Alfateam.Messenger.API.Abstractions
 
 
 
+        protected void ThrowIfNull(object val, string message = "Сущность с данным id не найдена")
+        {
+            if (val == null)
+            {
+                throw new Exception404(message);
+            }
+        }
         protected int? ParseIntValueFromHeader(string key)
         {
             int? id = null;

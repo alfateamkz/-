@@ -56,6 +56,7 @@ namespace Alfateam.Messenger
             builder.Services.AddTransient<AbsFilesService>();
 
             builder.Services.AddTransient<ChatMiscService>();
+            builder.Services.AddTransient<AlfateamMessengerService>();
 
             builder.Services.AddTransient<ControllerParams>();
 

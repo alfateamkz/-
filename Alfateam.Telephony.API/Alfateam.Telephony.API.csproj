@@ -16,13 +16,13 @@
   <ItemGroup>
     <Folder Include="Controllers\ATE\" />
     <Folder Include="Controllers\Calls\" />
-    <Folder Include="Models\DTO\ATE\" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Alfateam.Core\Alfateam.Core.csproj" />
     <ProjectReference Include="..\Alfateam.DB\Alfateam.DB.csproj" />
     <ProjectReference Include="..\Alfateam.Gateways\Alfateam.Gateways.csproj" />
+    <ProjectReference Include="..\Alfateam.Telephony.API.Models.DTO\Alfateam.Telephony.API.Models.DTO.csproj" />
   </ItemGroup>
 
 </Project>

@@ -15,6 +15,6 @@ namespace Alfateam.Website.API.Models.DTO.General
 
 
         public bool IsHidden { get; set; }
-        public int MainLanguageId { get; set; }
+        public int? MainLanguageId { get; set; }
     }
 }
